@@ -56,7 +56,8 @@ export async function uploadImageToCloudinary(
   formData.append('file', file)
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
   formData.append('folder', folder)
-  formData.append('transformation', 'w_400,h_400,c_fill,g_face,q_auto,f_auto')
+  // Note: transformation parameter is not allowed with unsigned upload preset
+  // Use transformCloudinaryUrl() helper function to transform URLs when displaying
 
   try {
     const response = await fetch(CLOUDINARY_UPLOAD_URL, {
@@ -65,17 +66,36 @@ export async function uploadImageToCloudinary(
     })
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Upload failed' }))
-      throw new Error(error.error || 'Lỗi khi tải ảnh lên Cloudinary')
+      let errorMessage = 'Lỗi khi tải ảnh lên Cloudinary'
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.error?.message || errorData.error || errorMessage
+      } catch {
+        // If JSON parsing fails, try to get text
+        try {
+          const errorText = await response.text()
+          if (errorText) {
+            errorMessage = errorText
+          }
+        } catch {
+          // If all else fails, use status text
+          errorMessage = response.statusText || errorMessage
+        }
+      }
+      throw new Error(errorMessage)
     }
 
     const result = await response.json()
 
+    if (!result.secure_url) {
+      throw new Error('Không nhận được URL ảnh từ Cloudinary')
+    }
+
     return {
       secure_url: result.secure_url,
       public_id: result.public_id,
-      width: result.width,
-      height: result.height,
+      width: result.width || 0,
+      height: result.height || 0,
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -108,4 +128,41 @@ export function extractPublicIdFromUrl(url: string): string | null {
   } catch {
     return null
   }
+}
+
+/**
+ * Apply transformation to Cloudinary URL for optimized display
+ * @param url Original Cloudinary URL
+ * @param transformation Transformation string (e.g., 'w_400,h_400,c_fill,g_face,q_auto,f_auto')
+ * @returns Transformed URL
+ */
+export function transformCloudinaryUrl(
+  url: string | null | undefined,
+  transformation: string = 'w_400,h_400,c_fill,g_face,q_auto,f_auto'
+): string | null | undefined {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url
+  }
+  
+  // Check if URL already has transformations
+  if (url.includes('/upload/') && url.includes('/v')) {
+    const parts = url.split('/upload/')
+    if (parts.length === 2) {
+      // Check if transformation already exists
+      const afterUpload = parts[1]
+      // If it starts with 'v', no transformation exists yet
+      if (afterUpload.startsWith('v')) {
+        // Insert transformation before version
+        return `${parts[0]}/upload/${transformation}/${afterUpload}`
+      } else {
+        // Transformation already exists, replace it
+        const versionMatch = afterUpload.match(/^(.+)\/(v\d+\/.+)$/)
+        if (versionMatch) {
+          return `${parts[0]}/upload/${transformation}/${versionMatch[2]}`
+        }
+      }
+    }
+  }
+  
+  return url
 }

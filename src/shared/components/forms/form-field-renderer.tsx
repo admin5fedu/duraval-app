@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UseFormReturn } from "react-hook-form"
 import { FormFieldConfig } from "./generic-form-view/"
 import { ComboboxFormField } from "./combobox-form-field"
+import { InlineImageUpload } from "@/components/ui/inline-image-upload"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 
@@ -45,7 +46,19 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                 {field.required && <span className="text-destructive">*</span>}
                             </FormLabel>
                             <FormControl>
-                                {field.type === "combobox" ? (
+                                {field.type === "image" ? (
+                                    <InlineImageUpload
+                                        value={formField.value}
+                                        onChange={(url) => {
+                                            if (field.disabled) return
+                                            formField.onChange(url)
+                                        }}
+                                        disabled={field.disabled}
+                                        folder={field.imageFolder}
+                                        displayName={field.displayName || field.label}
+                                        maxSize={field.imageMaxSize}
+                                    />
+                                ) : field.type === "combobox" ? (
                                     <ComboboxFormField
                                         value={String(formField.value || '')}
                                         onChange={(value) => {

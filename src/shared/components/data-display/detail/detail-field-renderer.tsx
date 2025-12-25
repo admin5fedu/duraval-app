@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import {
   getEmployeeStatusBadgeClass,
 } from "@/components/ui/status-badge"
+import { CompactAvatarUpload } from "@/components/ui/compact-avatar-upload"
 
 interface CopyableFieldProps {
   value: string
@@ -79,6 +80,19 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
 
   // Xử lý theo type
   switch (field.type) {
+    case "image": {
+      const imageUrl = valueStr && valueStr !== "null" && valueStr !== "undefined" ? valueStr : null
+      return (
+        <CompactAvatarUpload
+          value={imageUrl}
+          onChange={() => {}} // Read-only in detail view
+          disabled={true}
+          size="md"
+          displayName={field.displayName || field.label}
+        />
+      )
+    }
+
     case "status": {
       // Hiện đang dùng cho tình trạng nhân sự (tinh_trang)
       const className = getEmployeeStatusBadgeClass(valueStr)

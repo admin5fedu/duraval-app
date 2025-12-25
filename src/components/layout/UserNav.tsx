@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, Moon, Sun, LogOut } from 'lucide-react'
 import { useUserPreferencesStore } from '@/shared/stores/user-preferences-store'
 import { useAuthStore } from '@/shared/stores/auth-store'
+import { transformCloudinaryUrl } from '@/lib/cloudinary'
 import { Switch } from '@/components/ui/switch'
 
 export function UserNav() {
@@ -116,7 +117,9 @@ export function UserNav() {
   // Determine display name and title from employee data
   const displayName = employee?.ho_ten || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Người dùng'
   const displayTitle = employee?.chuc_vu || 'Nhân viên'
-  const avatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
+  const rawAvatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
+  // Transform URL for optimized avatar display
+  const avatarUrl = rawAvatarUrl ? transformCloudinaryUrl(rawAvatarUrl) : null
 
   return (
     <>

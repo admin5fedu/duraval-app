@@ -8,38 +8,19 @@ import type { UpdateNhanSuInput } from "@/features/he-thong/nhan-su/danh-sach-nh
 import { NhanSuAPI } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/services/nhan-su.api"
 import { useAuthStore } from "@/shared/stores/auth-store"
 import { toast } from "sonner"
-import { AvatarUpload } from "@/components/profile/AvatarUpload"
-
-// Custom Avatar Field Component
-function AvatarField({ value, onChange }: { value: string | null; onChange: (value: string | null) => void }) {
-  return (
-    <div className="flex justify-center py-4">
-      <AvatarUpload
-        value={value}
-        onChange={onChange}
-        size="lg"
-      />
-    </div>
-  )
-}
 
 const sections: FormSection[] = [
   {
-    title: "Ảnh Đại Diện",
+    title: "Thông Tin Cơ Bản",
     fields: [
       { 
         name: "avatar_url", 
         label: "Ảnh Đại Diện", 
-        type: "custom",
-        customComponent: AvatarField,
-        colSpan: 3,
-        description: "Tải lên ảnh đại diện của bạn (tối đa 10MB, định dạng: JPG, PNG, GIF, WebP)"
+        type: "image",
+        imageFolder: "avatars",
+        displayName: "User",
+        description: "Click vào avatar để tải ảnh lên (tối đa 10MB)"
       },
-    ]
-  },
-  {
-    title: "Thông Tin Cơ Bản",
-    fields: [
       { 
         name: "ho_ten", 
         label: "Họ và Tên", 
@@ -223,12 +204,26 @@ export default function HoSoFormView() {
     navigate("/ho-so")
   }
 
+  // Update sections with dynamic displayName for avatar
+  const sectionsWithDisplayName = sections.map(section => ({
+    ...section,
+    fields: section.fields.map(field => {
+      if (field.name === "avatar_url" && field.type === "image") {
+        return {
+          ...field,
+          displayName: employee.ho_ten || "User"
+        }
+      }
+      return field
+    })
+  }))
+
   return (
     <GenericFormView
       title={`Sửa Hồ Sơ: ${employee.ho_ten || ''}`}
       subtitle="Cập nhật thông tin cá nhân và ảnh đại diện của bạn."
       schema={nhanSuSchema.partial()}
-      sections={sections}
+      sections={sectionsWithDisplayName}
       onSubmit={handleSubmit}
       onSuccess={handleSuccess}
       onCancel={handleCancel}

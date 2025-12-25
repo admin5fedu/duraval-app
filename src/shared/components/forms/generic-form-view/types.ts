@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "textarea" | "custom"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "textarea" | "image" | "custom"
 
 /**
  * Form field configuration
@@ -19,6 +19,10 @@ export interface FormFieldConfig {
     required?: boolean
     disabled?: boolean
     customComponent?: React.ComponentType<{ value: any; onChange: (value: any) => void }>
+    // For image type
+    imageFolder?: string // Cloudinary folder
+    imageMaxSize?: number // Max size in MB
+    displayName?: string // For avatar fallback initials
 }
 
 /**

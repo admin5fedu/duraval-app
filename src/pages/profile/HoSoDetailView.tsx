@@ -9,6 +9,7 @@ import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { exportProfileToPDF } from './profile-pdf-export'
+import { transformCloudinaryUrl } from '@/lib/cloudinary'
 
 export default function HoSoDetailView() {
   const { user, loading, employee, employeeLoading } = useAuthStore()
@@ -35,13 +36,22 @@ export default function HoSoDetailView() {
   const displaySubtitle = employee?.ten_cap_bac 
     ? `${employee.ten_cap_bac}${employee.chuc_vu ? ` • ${employee.chuc_vu}` : ''}`
     : employee?.chuc_vu || 'Nhân viên'
-  const avatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
+  const rawAvatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
+  // Transform URL for optimized avatar display in header
+  const avatarUrl = rawAvatarUrl ? transformCloudinaryUrl(rawAvatarUrl) : null
 
   // Build sections based on available data
   const sections: DetailSection[] = [
     {
       title: 'Thông Tin Cơ Bản',
       fields: [
+        {
+          label: 'Ảnh Đại Diện',
+          key: 'avatar_url',
+          value: employee?.avatar_url || null,
+          type: 'image',
+          displayName: employee?.ho_ten || displayName,
+        },
         {
           label: 'Mã Nhân Viên',
           key: 'ma_nhan_vien',
