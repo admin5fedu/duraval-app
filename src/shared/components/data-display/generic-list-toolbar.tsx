@@ -494,9 +494,17 @@ function GenericListToolbarComponent<TData>({
                         <Button
                             variant="outline"
                             onClick={() => {
+                                // Clear table filters
                                 table.resetColumnFilters()
                                 table.setGlobalFilter("")
                                 setInputValue("")
+                                
+                                // ✅ Clear filters from store (session storage)
+                                if (module) {
+                                    const { clearModuleFilters, clearSearchQuery } = useFiltersStore.getState()
+                                    clearModuleFilters(module)
+                                    clearSearchQuery(module)
+                                }
                             }}
                             className={toolbarButtonOutlineClass("px-2.5 lg:px-3")}
                         >

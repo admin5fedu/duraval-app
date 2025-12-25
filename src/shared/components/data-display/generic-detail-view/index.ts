@@ -37,6 +37,10 @@ export {
     DetailEmptyState,
 } from "./sections"
 
+// Detail component exports
+export { DetailErrorState } from "../detail/detail-error-state"
+export { DetailViewSkeleton } from "../detail/detail-view-skeleton"
+
 // Utils exports (if needed for reuse)
 export { renderFieldValue } from "./utils"
 

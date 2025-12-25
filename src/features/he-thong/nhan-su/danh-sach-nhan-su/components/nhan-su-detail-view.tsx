@@ -9,6 +9,8 @@ import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { useNhanSuById } from "../hooks/use-nhan-su"
 import { DeleteNhanSuButton } from "./delete-nhan-su-button"
 import { nhanSuConfig } from "../config"
+import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
+import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
 
 interface NhanSuDetailViewProps {
   id: number
@@ -19,21 +21,37 @@ interface NhanSuDetailViewProps {
 
 export function NhanSuDetailView({ id, initialData, onEdit, onBack }: NhanSuDetailViewProps) {
   const navigate = useNavigate()
-  const { data: nhanSu, isLoading, isError } = useNhanSuById(id, initialData)
+  const query = useNhanSuById(id, initialData)
+  const viewState = useDetailViewStateFromQuery(query, initialData)
 
-  if (isError || !nhanSu) {
+  // ✅ Hiển thị loading state
+  if (viewState.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-destructive mb-4">Không tìm thấy nhân sự</p>
-        <Button onClick={() => {
-          if (onBack) {
-            onBack()
-          } else {
-            navigate(nhanSuConfig.routePath)
-          }
-        }}>Quay lại</Button>
-      </div>
+      <GenericDetailViewSimple
+        title=""
+        subtitle=""
+        sections={[]}
+        isLoading={true}
+      />
     )
+  }
+
+  // ✅ Hiển thị error state
+  if (viewState.isError) {
+    return (
+      <DetailErrorState
+        title="Không tìm thấy nhân sự"
+        message="Nhân sự với ID này không tồn tại hoặc đã bị xóa."
+        onBack={onBack}
+        backUrl={onBack ? undefined : nhanSuConfig.routePath}
+      />
+    )
+  }
+
+  // ✅ TypeScript safety: viewState.data đã được đảm bảo tồn tại
+  const nhanSu = viewState.data
+  if (!nhanSu) {
+    return null
   }
 
   const sections: DetailSection[] = [
@@ -107,7 +125,7 @@ export function NhanSuDetailView({ id, initialData, onEdit, onBack }: NhanSuDeta
       backUrl={onBack ? undefined : nhanSuConfig.routePath}
       onBack={onBack}
       actions={actions}
-      isLoading={isLoading && !initialData}
+      isLoading={query.isLoading && !initialData}
     />
   )
 }

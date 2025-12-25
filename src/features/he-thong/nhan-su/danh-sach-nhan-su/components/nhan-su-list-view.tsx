@@ -13,8 +13,7 @@ import { NhanSu } from "../schema"
 import { useNhanSu, useBatchDeleteNhanSu } from "../hooks"
 import { nhanSuColumns } from "./nhan-su-columns"
 import { nhanSuConfig } from "../config"
-import { useFiltersStore } from "@/shared/stores/filters-store"
-import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
+import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
 import { DataTableFacetedFilter } from "@/shared/components/data-display/data-table-faceted-filter"
 import { NhanSuImportDialog } from "./nhan-su-import-dialog"
 
@@ -37,46 +36,17 @@ export function NhanSuListView({
     const module = nhanSuConfig.moduleName
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
 
-    // Filters Store integration
+    // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
+    // Filters KHÔNG persist qua page reload (fresh start)
+    // Filters được maintain khi navigate trong cùng session
     const {
-        getModuleFilters,
-        setFilter,
-        getSearchQuery,
-        setSearchQuery,
-        getSortPreference,
-        setSortPreference,
-    } = useFiltersStore()
-
-    // Load saved filters, search, and sort on mount
-    const [initialFilters, setInitialFilters] = React.useState<ColumnFiltersState>([])
-    const [initialSearch, setInitialSearch] = React.useState<string>("")
-    const [initialSorting, setInitialSorting] = React.useState<SortingState>([
-        { id: "ma_nhan_vien", desc: true },
-    ])
-
-    React.useEffect(() => {
-        // Load saved filters
-        const savedFilters = getModuleFilters(module)
-        if (Object.keys(savedFilters).length > 0) {
-            const filtersArray: ColumnFiltersState = Object.entries(savedFilters).map(([key, value]) => ({
-                id: key,
-                value: value,
-            }))
-            setInitialFilters(filtersArray)
-        }
-
-        // Load saved search query
-        const savedSearch = getSearchQuery(module)
-        if (savedSearch) {
-            setInitialSearch(savedSearch)
-        }
-
-        // Load saved sort preference
-        const savedSort = getSortPreference(module)
-        if (savedSort) {
-            setInitialSorting([{ id: savedSort.column, desc: savedSort.direction === "desc" }])
-        }
-    }, [module, getModuleFilters, getSearchQuery, getSortPreference])
+        initialFilters,
+        initialSearch,
+        initialSorting,
+        handleFiltersChange,
+        handleSearchChange,
+        handleSortChange,
+    } = useListViewFilters(module, [{ id: "ma_nhan_vien", desc: true }])
 
     // Generate filter options from data
     const phongBanOptions = React.useMemo(() => {
@@ -217,23 +187,9 @@ export function NhanSuListView({
             initialSorting={initialSorting}
             initialFilters={initialFilters}
             initialSearch={initialSearch}
-            onFiltersChange={(filters) => {
-                // Save filters to store
-                filters.forEach((filter) => {
-                    setFilter(module, filter.id, filter.value)
-                })
-            }}
-            onSearchChange={(search) => {
-                // Save search query to store
-                setSearchQuery(module, search)
-            }}
-            onSortChange={(sorting) => {
-                // Save sort preference to store
-                if (sorting.length > 0) {
-                    const sort = sorting[0]
-                    setSortPreference(module, { column: sort.id, direction: sort.desc ? "desc" : "asc" })
-                }
-            }}
+            onFiltersChange={handleFiltersChange}
+            onSearchChange={handleSearchChange}
+            onSortChange={handleSortChange}
             onRowClick={(row) => {
                 if (onView) {
                     onView(row.ma_nhan_vien)

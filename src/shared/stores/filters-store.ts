@@ -1,10 +1,70 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+
+/**
+ * Session Storage implementation for Zustand persist
+ * Uses sessionStorage instead of localStorage - data is cleared when tab closes
+ * 
+ * ✅ Filters are NOT persisted across page reloads
+ * ✅ Filters are maintained during navigation in same session
+ * ✅ Fresh start on each page reload
+ */
+const RELOAD_FLAG_KEY = 'filters-reload-flag'
+
+// Initialize reload detection on first load
+if (typeof window !== 'undefined') {
+    const navigation = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const isReload = navigation?.type === 'reload' || 
+                     (window.performance as any).navigation?.type === 1
+    
+    if (isReload) {
+        // Clear filters on reload
+        window.sessionStorage.removeItem('filters-storage')
+    }
+    
+    // Set flag to track that we've initialized
+    if (!window.sessionStorage.getItem(RELOAD_FLAG_KEY)) {
+        window.sessionStorage.setItem(RELOAD_FLAG_KEY, 'true')
+    }
+}
+
+const sessionStorage = {
+    getItem: (name: string): string | null => {
+        if (typeof window === 'undefined') return null
+        
+        // For filters storage, check if this is a reload
+        if (name === 'filters-storage') {
+            const navigation = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+            const isReload = navigation?.type === 'reload' || 
+                           (window.performance as any).navigation?.type === 1
+            
+            // If reload, return null (fresh start)
+            if (isReload) {
+                return null
+            }
+        }
+        
+        return window.sessionStorage.getItem(name)
+    },
+    setItem: (name: string, value: string): void => {
+        if (typeof window === 'undefined') return
+        window.sessionStorage.setItem(name, value)
+    },
+    removeItem: (name: string): void => {
+        if (typeof window === 'undefined') return
+        window.sessionStorage.removeItem(name)
+    },
+}
 
 /**
  * Filters Store
  * Manages global filter state that can be shared across different views
- * Useful for maintaining filter state when navigating between pages
+ * 
+ * ✅ Uses sessionStorage - filters are cleared when tab closes
+ * ✅ Maintains filters when navigating between pages in same session
+ * ✅ Does NOT persist filters across page reloads (fresh start each time)
+ * 
+ * Note: Sort preferences can still be persisted separately if needed
  */
 interface FilterState {
     // Generic filters by module/page
@@ -154,8 +214,10 @@ export const useFiltersStore = create<FilterState>()(
         }),
         {
             name: 'filters-storage',
-            // Only persist filters, search queries, and sort preferences
-            // Don't persist temporary UI state
+            storage: createJSONStorage(() => sessionStorage),
+            // ✅ Session storage: filters cleared when tab closes
+            // ✅ Filters maintained during navigation in same session
+            // ✅ Fresh start on each page reload
         }
     )
 )
