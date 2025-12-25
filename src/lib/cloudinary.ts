@@ -14,7 +14,9 @@ if (!CLOUDINARY_UPLOAD_PRESET) {
   console.warn('VITE_CLOUDINARY_UPLOAD_PRESET is not set')
 }
 
-const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`
+const CLOUDINARY_UPLOAD_URL = CLOUDINARY_CLOUD_NAME 
+  ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`
+  : ''
 
 export interface CloudinaryUploadResult {
   secure_url: string

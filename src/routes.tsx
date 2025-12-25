@@ -11,7 +11,8 @@ const OrdersPage = lazy(() => import('@/pages/orders/OrdersPage'))
 const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'))
 const DocumentsPage = lazy(() => import('@/pages/documents/DocumentsPage'))
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'))
-const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'))
+const HoSoDetailView = lazy(() => import('@/pages/profile/HoSoDetailView'))
+const HoSoFormView = lazy(() => import('@/pages/profile/HoSoFormView'))
 const ChangePasswordPage = lazy(() => import('@/pages/profile/ChangePasswordPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
@@ -91,7 +92,13 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/ho-so',
-    element: ProfilePage,
+    element: HoSoDetailView,
+    protected: true,
+    layout: true,
+  },
+  {
+    path: '/ho-so/sua',
+    element: HoSoFormView,
     protected: true,
     layout: true,
   },

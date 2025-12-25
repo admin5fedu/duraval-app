@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -19,46 +19,67 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Loader2, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/shared/stores/auth-store'
 import { supabase } from '@/lib/supabase'
 import { AvatarUpload } from './AvatarUpload'
+import { NhanSu } from '@/features/he-thong/nhan-su/danh-sach-nhan-su/schema'
+import { NhanSuAPI } from '@/features/he-thong/nhan-su/danh-sach-nhan-su/services/nhan-su.api'
 
 // Schema validation
 const editProfileSchema = z.object({
-  displayName: z.string().min(1, 'Vui lòng nhập tên hiển thị'),
-  phone: z
+  ho_ten: z.string().min(1, 'Vui lòng nhập họ và tên'),
+  so_dien_thoai: z
     .string()
     .optional()
     .refine(
       (val) => !val || /^[0-9]{10,11}$/.test(val),
       'Số điện thoại không hợp lệ'
     ),
+  email_ca_nhan: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
+  ghi_chu: z.string().optional(),
 })
 
 type EditProfileFormValues = z.infer<typeof editProfileSchema>
 
 interface EditProfileFormProps {
+  employee?: NhanSu | null
   onSuccess?: () => void
   onCancel?: () => void
 }
 
-export function EditProfileForm({ onSuccess, onCancel }: EditProfileFormProps) {
+export function EditProfileForm({ employee, onSuccess, onCancel }: EditProfileFormProps) {
   const { user, refreshUser } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
-    user?.user_metadata?.avatar_url || null
+    employee?.avatar_url || user?.user_metadata?.avatar_url || null
   )
 
   const form = useForm<EditProfileFormValues>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
-      displayName: user?.user_metadata?.display_name || user?.email?.split('@')[0] || '',
-      phone: user?.phone || '',
+      ho_ten: employee?.ho_ten || user?.user_metadata?.display_name || user?.email?.split('@')[0] || '',
+      so_dien_thoai: employee?.so_dien_thoai || user?.phone || '',
+      email_ca_nhan: employee?.email_ca_nhan || '',
+      ghi_chu: employee?.ghi_chu || '',
     },
   })
+
+  // Update form when employee changes
+  useEffect(() => {
+    if (employee) {
+      form.reset({
+        ho_ten: employee.ho_ten || '',
+        so_dien_thoai: employee.so_dien_thoai || '',
+        email_ca_nhan: employee.email_ca_nhan || '',
+        ghi_chu: employee.ghi_chu || '',
+      })
+      setAvatarUrl(employee.avatar_url || null)
+    }
+  }, [employee, form])
 
   const onSubmit = async (data: EditProfileFormValues) => {
     if (!user) {
@@ -69,20 +90,34 @@ export function EditProfileForm({ onSuccess, onCancel }: EditProfileFormProps) {
     setIsLoading(true)
 
     try {
-      // Update user metadata
+      // If employee exists, update var_nhan_su
+      if (employee?.ma_nhan_vien) {
+        const updateData = {
+          ho_ten: data.ho_ten,
+          so_dien_thoai: data.so_dien_thoai || null,
+          email_ca_nhan: data.email_ca_nhan || null,
+          ghi_chu: data.ghi_chu || null,
+          avatar_url: avatarUrl,
+        }
+
+        await NhanSuAPI.update(employee.ma_nhan_vien, updateData)
+      }
+
+      // Also update user metadata for consistency
       const { error: updateError } = await supabase.auth.updateUser({
         data: {
-          display_name: data.displayName,
+          display_name: data.ho_ten,
           avatar_url: avatarUrl,
         },
-        phone: data.phone || undefined,
+        phone: data.so_dien_thoai || undefined,
       })
 
       if (updateError) {
-        throw updateError
+        console.warn('Warning updating user metadata:', updateError)
+        // Don't throw, as var_nhan_su update succeeded
       }
 
-      // Refresh user data
+      // Refresh both user and employee data
       await refreshUser()
 
       toast.success('Cập nhật thông tin thành công!')
@@ -123,46 +158,69 @@ export function EditProfileForm({ onSuccess, onCancel }: EditProfileFormProps) {
               />
             </div>
 
-            {/* Display Name */}
+            {/* Họ và Tên */}
             <FormField
               control={form.control}
-              name="displayName"
+              name="ho_ten"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tên hiển thị</FormLabel>
+                  <FormLabel>Họ và Tên *</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Nhập tên hiển thị"
+                      placeholder="Nhập họ và tên"
                       disabled={isLoading}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Tên này sẽ được hiển thị trong hồ sơ của bạn
+                    Họ và tên đầy đủ của bạn
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Email (read-only) */}
+            {/* Email Công Ty (read-only) */}
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email Công Ty</FormLabel>
               <FormControl>
-                <Input value={user?.email || ''} disabled />
+                <Input value={employee?.email_cong_ty || user?.email || ''} disabled />
               </FormControl>
               <FormDescription>
-                Email không thể thay đổi. Liên hệ quản trị viên nếu cần thay đổi.
+                Email công ty không thể thay đổi. Liên hệ quản trị viên nếu cần thay đổi.
               </FormDescription>
             </FormItem>
 
-            {/* Phone */}
+            {/* Email Cá Nhân */}
             <FormField
               control={form.control}
-              name="phone"
+              name="email_ca_nhan"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Số điện thoại</FormLabel>
+                  <FormLabel>Email Cá Nhân</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Nhập email cá nhân"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Email cá nhân để liên hệ (tùy chọn)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Số Điện Thoại */}
+            <FormField
+              control={form.control}
+              name="so_dien_thoai"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Số Điện Thoại</FormLabel>
                   <FormControl>
                     <Input
                       type="tel"
@@ -173,6 +231,29 @@ export function EditProfileForm({ onSuccess, onCancel }: EditProfileFormProps) {
                   </FormControl>
                   <FormDescription>
                     Số điện thoại để liên hệ (tùy chọn)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Ghi Chú */}
+            <FormField
+              control={form.control}
+              name="ghi_chu"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ghi Chú</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Nhập ghi chú (nếu có)"
+                      disabled={isLoading}
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Ghi chú cá nhân (tùy chọn)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

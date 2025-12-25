@@ -110,11 +110,13 @@ export function UserNav() {
     navigate('/login')
   }
 
-  // Determine display name and title
-  const displayName =
-    user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Người dùng'
-  const displayTitle = 'Admin' // Có thể lấy từ employee data sau
-  const avatarUrl = user?.user_metadata?.avatar_url
+  // Get employee data from auth store
+  const { employee } = useAuthStore()
+
+  // Determine display name and title from employee data
+  const displayName = employee?.ho_ten || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Người dùng'
+  const displayTitle = employee?.chuc_vu || 'Nhân viên'
+  const avatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
 
   return (
     <>

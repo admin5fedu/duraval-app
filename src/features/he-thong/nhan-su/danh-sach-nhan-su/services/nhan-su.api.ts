@@ -48,6 +48,34 @@ export class NhanSuAPI {
     }
 
     /**
+     * Get employee by email (email_cong_ty)
+     * Uses ilike for case-insensitive matching
+     */
+    static async getByEmail(email: string): Promise<NhanSu | null> {
+        const { data, error } = await supabase
+            .from(TABLE_NAME)
+            .select("*")
+            .ilike("email_cong_ty", email)
+            .single()
+
+        if (error) {
+            if (error.code === "PGRST116") {
+                // Not found
+                return null
+            }
+            // Handle rate limit errors gracefully
+            if (error.status === 429 || (error as any).code === 'over_request_rate_limit') {
+                console.warn('Rate limit reached when fetching employee by email')
+                return null
+            }
+            console.error("Lỗi khi tải thông tin nhân sự theo email:", error)
+            return null
+        }
+
+        return data as NhanSu
+    }
+
+    /**
      * Create new employee
      */
     static async create(input: CreateNhanSuInput): Promise<NhanSu> {
