@@ -66,11 +66,12 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
       return formatted
     }
     // Nếu format trả về string, wrap trong span
-    return <span className={cn("font-medium text-foreground", bodyTextClass())}>{formatted}</span>
+    return <span className={cn("text-base text-foreground", bodyTextClass())}>{formatted}</span>
   }
 
+  // ✅ Empty State Handling: Hiển thị "-" cho giá trị rỗng
   if (field.value === null || field.value === undefined || field.value === '') {
-    return <span className={cn("text-muted-foreground italic", bodyTextClass())}>Chưa có dữ liệu</span>
+    return <span className={cn("text-muted-foreground", bodyTextClass())}>-</span>
   }
 
   const value = field.value
@@ -100,7 +101,7 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
       return (
         <div className={cn("flex items-center", toolbarGapClass())}>
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className={cn("font-medium text-foreground", bodyTextClass())}>{formatDate(value)}</span>
+          <span className={cn("text-base text-foreground", bodyTextClass())}>{formatDate(value)}</span>
         </div>
       )
 
@@ -111,7 +112,7 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
           <CopyableField value={email} label="email">
             <a 
               href={`mailto:${email}`}
-              className={cn("flex items-center font-medium text-primary hover:underline", toolbarGapClass(), bodyTextClass())}
+              className={cn("flex items-center text-base text-primary hover:underline", toolbarGapClass(), bodyTextClass())}
             >
               <Mail className="h-4 w-4 shrink-0" />
               <span className="break-all">{email}</span>
@@ -119,7 +120,7 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
           </CopyableField>
         )
       }
-      return <span className={cn("font-medium text-foreground break-all", bodyTextClass())}>{email}</span>
+      return <span className={cn("text-base text-foreground break-all", bodyTextClass())}>{email}</span>
 
     case "phone":
       const phone = valueStr.trim()
@@ -128,7 +129,7 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
           <CopyableField value={phone} label="số điện thoại">
             <a 
               href={`tel:${phone.replace(/\s/g, '')}`}
-              className={cn("flex items-center font-medium text-primary hover:underline", toolbarGapClass(), bodyTextClass())}
+              className={cn("flex items-center text-base text-primary hover:underline", toolbarGapClass(), bodyTextClass())}
             >
               <Phone className="h-4 w-4 shrink-0" />
               <span>{phone}</span>
@@ -136,20 +137,20 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
           </CopyableField>
         )
       }
-      return <span className={cn("font-medium text-foreground", bodyTextClass())}>{phone}</span>
+      return <span className={cn("text-base text-foreground", bodyTextClass())}>{phone}</span>
 
     case "number":
       return (
         <CopyableField value={valueStr} label="số">
-          <span className={cn("font-medium text-foreground font-mono", bodyTextClass())}>{formatNumber(value)}</span>
+          <span className={cn("text-base text-foreground font-mono", bodyTextClass())}>{formatNumber(value)}</span>
         </CopyableField>
       )
 
     case "currency":
       if (typeof value === 'number' || !isNaN(parseFloat(valueStr))) {
-        return <span className={cn("font-medium text-foreground font-mono", bodyTextClass())}>{formatCurrency(value)}</span>
+        return <span className={cn("text-base text-foreground font-mono", bodyTextClass())}>{formatCurrency(value)}</span>
       }
-      return <span className={cn("font-medium text-foreground", bodyTextClass())}>{valueStr}</span>
+      return <span className={cn("text-base text-foreground", bodyTextClass())}>{valueStr}</span>
 
     case "url":
       try {
@@ -159,13 +160,13 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
             href={valueStr}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn("font-medium text-primary hover:underline break-all", bodyTextClass())}
+            className={cn("text-base text-primary hover:underline break-all", bodyTextClass())}
           >
             {valueStr}
           </a>
         )
       } catch {
-        return <span className={cn("font-medium text-foreground break-all", bodyTextClass())}>{valueStr}</span>
+        return <span className={cn("text-base text-foreground break-all", bodyTextClass())}>{valueStr}</span>
       }
 
     case "text":
@@ -175,14 +176,15 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
         return (
           <Link 
             to={field.link}
-            className={cn("flex items-center font-medium text-primary hover:underline group", "gap-1.5", bodyTextClass())}
+            className={cn("flex items-center text-base text-primary hover:underline group", "gap-1.5", bodyTextClass())}
           >
             <span>{valueStr}</span>
             <ExternalLink className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
         )
       }
-      return <span className={cn("font-medium text-foreground", bodyTextClass())}>{valueStr}</span>
+      // ✅ Cải thiện value styling: text-base cho dễ đọc hơn
+      return <span className={cn("text-base text-foreground", bodyTextClass())}>{valueStr}</span>
   }
 }
 

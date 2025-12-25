@@ -54,7 +54,7 @@ export function DetailSectionCard({ section }: { section: DetailSection }) {
       </div>
       <Card className="shadow-sm border bg-card hover:shadow-md transition-shadow duration-200 print:shadow-none print:border-2">
         <CardContent className={cn(cardPaddingClass(), "print:p-4")}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 sm:gap-x-8 gap-y-4 sm:gap-y-6 print:gap-x-4 print:gap-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 sm:gap-x-8 gap-y-5 sm:gap-y-6 print:gap-x-4 print:gap-y-3">
             {section.fields.map((field, fieldIndex) => (
               <div
                 key={`${field.key}-${fieldIndex}`}
@@ -62,7 +62,7 @@ export function DetailSectionCard({ section }: { section: DetailSection }) {
               >
                 <div className="flex flex-row items-start gap-2.5 group w-full md:flex-col md:gap-1.5">
                   <div className="w-28 shrink-0 md:w-full">
-                    <Label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider group-hover:text-primary/80 transition-colors">
+                    <Label className="text-sm font-medium text-foreground group-hover:text-primary/80 transition-colors">
                       {field.label}
                     </Label>
                   </div>
