@@ -58,7 +58,7 @@ export function ExportPreview<TData>({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[1200px] !w-[90vw] max-w-[90vw] max-h-[95vh] p-0 flex flex-col">
+      <DialogContent className="!max-w-[1200px] !w-[90vw] max-w-[90vw] !h-[calc(95vh-4rem)] !max-h-[calc(95vh-4rem)] md:!h-[95vh] md:!max-h-[95vh] p-0 !flex !flex-col overflow-hidden !translate-y-[-50%] !z-[70]">
         <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
           <DialogTitle>Xem trước dữ liệu xuất</DialogTitle>
           <DialogDescription>
@@ -67,8 +67,8 @@ export function ExportPreview<TData>({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden min-h-0">
-          <div className="px-6 py-4 flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="px-6 py-4 flex flex-col">
             {/* Preview Options */}
             <div className="flex items-center justify-between mb-4 pb-2 border-b flex-shrink-0">
               <div className="flex items-center gap-2">

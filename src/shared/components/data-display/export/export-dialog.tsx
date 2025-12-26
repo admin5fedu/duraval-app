@@ -445,7 +445,7 @@ export function ExportDialog<TData>({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="!max-w-[1200px] !w-[90vw] max-w-[90vw] max-h-[95vh] p-0 flex flex-col">
+            <DialogContent className="!max-w-[1200px] !w-[90vw] max-w-[90vw] !h-[calc(95vh-4rem)] !max-h-[calc(95vh-4rem)] md:!h-[95vh] md:!max-h-[95vh] p-0 !flex !flex-col overflow-hidden !translate-y-[-50%] !grid-cols-none !grid-rows-none !z-[60]">
                 <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
                     <DialogTitle>Xuất dữ liệu</DialogTitle>
                     <DialogDescription>
@@ -453,9 +453,8 @@ export function ExportDialog<TData>({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-hidden min-h-0">
-                    <ScrollArea className="h-full">
-                        <div className="px-6 py-4 space-y-6">
+                <div className="flex-1 overflow-y-auto min-h-0">
+                    <div className="px-6 py-4 space-y-6">
                             {/* Export Format and Mode - 2 columns grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Export Format */}
@@ -587,24 +586,15 @@ export function ExportDialog<TData>({
                         </div>
                     )}
                         </div>
-                    </ScrollArea>
                 </div>
 
-                <DialogFooter className="px-6 py-4 border-t flex-shrink-0">
+                <DialogFooter className="px-6 py-4 border-t flex-shrink-0 flex flex-row items-center justify-end gap-2">
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isExporting}
                     >
                         Hủy
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => setShowPreview(true)}
-                        disabled={isExporting || selectedColumns.size === 0}
-                    >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Xem trước
                     </Button>
                     <Button
                         onClick={handleExport}
@@ -621,6 +611,14 @@ export function ExportDialog<TData>({
                                 Xuất dữ liệu
                             </>
                         )}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowPreview(true)}
+                        disabled={isExporting || selectedColumns.size === 0}
+                    >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Xem trước
                     </Button>
                 </DialogFooter>
                 
