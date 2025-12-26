@@ -139,9 +139,9 @@ export function DesktopToolbar<TData>({
         </div>
       </div>
 
-      {/* Quick Filters Row */}
+      {/* Quick Filters Row - Chỉ hiển thị trên desktop */}
       {(filters.length > 0 || customFilters.length > 0) && (
-        <div className="flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 pb-1 -mx-1 px-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded">
+        <div className="hidden md:flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 pb-1 -mx-1 px-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded">
           {customFilters.map((filter, index) => {
             if (React.isValidElement(filter)) {
               const filterProps = filter.props as Record<string, any>

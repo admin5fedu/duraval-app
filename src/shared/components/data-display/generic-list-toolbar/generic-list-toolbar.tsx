@@ -114,6 +114,8 @@ function GenericListToolbarComponent<TData>({
           onExportClick: () => setExportDialogOpen(true)
         } : undefined}
         bulkActions={bulkActions}
+        filters={filters}
+        customFilters={customFilters}
       />
 
       {/* Desktop Layout */}

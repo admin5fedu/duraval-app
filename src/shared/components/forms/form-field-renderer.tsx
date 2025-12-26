@@ -18,6 +18,7 @@ import { ComboboxFormField } from "./combobox-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface FormFieldRendererProps {
     field: FormFieldConfig
@@ -26,24 +27,41 @@ interface FormFieldRendererProps {
 
 /**
  * Component để render các field types khác nhau trong form
+ * Mobile-optimized: Larger touch targets, better spacing, full width on mobile
  */
 export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
+    const isMobile = useIsMobile()
+    
     return (
         <FormField
             key={field.name}
             control={form.control}
             name={field.name}
             render={({ field: formField }) => {
-                const colSpanClass = field.colSpan 
-                    ? `col-span-1 md:col-span-${Math.min(field.colSpan, 2)} lg:col-span-${field.colSpan}` 
-                    : "col-span-1"
+                // Mobile: luôn full width, Desktop: theo colSpan
+                const colSpanClass = isMobile 
+                    ? "col-span-1" 
+                    : field.colSpan 
+                        ? `col-span-1 md:col-span-${Math.min(field.colSpan, 2)} lg:col-span-${field.colSpan}` 
+                        : "col-span-1"
                 
                 return (
                     <FormItem className={colSpanClass}>
-                        <div className={cn("flex flex-col w-full", SPACING.gap.sm)}>
-                            <FormLabel className="flex items-center justify-between gap-1">
+                        <div className={cn(
+                            "flex flex-col w-full",
+                            isMobile ? "gap-2" : SPACING.gap.sm
+                        )}>
+                            <FormLabel className={cn(
+                                "flex items-center justify-between gap-1",
+                                isMobile && "text-sm font-medium"
+                            )}>
                                 <span>{field.label}</span>
-                                {field.required && <span className="text-destructive">*</span>}
+                                {field.required && (
+                                    <span className={cn(
+                                        "text-destructive",
+                                        isMobile && "text-xs"
+                                    )}>*</span>
+                                )}
                             </FormLabel>
                             <FormControl>
                                 {field.type === "image" ? (
@@ -83,14 +101,21 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         value={formField.value && formField.value !== "" ? String(formField.value) : undefined}
                                         disabled={field.disabled}
                                     >
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger className={cn(
+                                            "w-full",
+                                            isMobile && "h-11 text-base" // Larger touch target
+                                        )}>
                                             <SelectValue placeholder={field.placeholder || "Chọn..."} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {(field.options || [])
                                                 .filter(option => option.value !== "")
                                                 .map((option) => (
-                                                    <SelectItem key={option.value} value={option.value}>
+                                                    <SelectItem 
+                                                        key={option.value} 
+                                                        value={option.value}
+                                                        className={isMobile ? "text-base py-3" : ""}
+                                                    >
                                                         {option.label}
                                                     </SelectItem>
                                                 ))}
@@ -101,8 +126,11 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         {...formField}
                                         value={formField.value || ''}
                                         placeholder={field.placeholder}
-                                        rows={4}
-                                        className="resize-none"
+                                        rows={isMobile ? 5 : 4}
+                                        className={cn(
+                                            "resize-none",
+                                            isMobile && "text-base"
+                                        )}
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
@@ -117,6 +145,9 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         value={formField.value || ''}
                                         placeholder={field.placeholder}
                                         disabled={field.disabled}
+                                        className={cn(
+                                            isMobile && "h-11 text-base" // Larger touch target
+                                        )}
                                         onChange={e => {
                                             if (field.disabled) return
                                             if (field.type === 'number') {
@@ -129,8 +160,16 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     />
                                 )}
                             </FormControl>
-                            {field.description && <FormDescription>{field.description}</FormDescription>}
-                            <FormMessage />
+                            {field.description && (
+                                <FormDescription className={cn(
+                                    isMobile && "text-xs"
+                                )}>
+                                    {field.description}
+                                </FormDescription>
+                            )}
+                            <FormMessage className={cn(
+                                isMobile && "text-xs"
+                            )} />
                         </div>
                     </FormItem>
                 )

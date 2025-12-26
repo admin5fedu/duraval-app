@@ -90,38 +90,31 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <Button variant="outline" size="sm" className="h-8 border-dashed shrink-0">
                     <PlusCircle className="mr-1.5 md:mr-2 h-3.5 w-3.5 md:h-4 md:w-4" />
                     <span className={responsiveTextClass()}>{title}</span>
+                    {/* Ẩn badges trên mobile - chỉ hiển thị trên desktop */}
                     {selectedValues?.size > 0 && (
-                        <>
+                        <div className="hidden md:flex items-center">
                             <Separator orientation="vertical" className="mx-1.5 md:mx-2 h-4" />
-                            <Badge
-                                variant="secondary"
-                                className={cn("rounded-sm px-1 md:hidden", smallTextClass(), BADGE_TYPOGRAPHY.default.fontWeight)}
-                            >
-                                {selectedValues.size}
-                            </Badge>
-                            <div className="hidden space-x-1 md:flex">
-                                {selectedValues.size > 2 ? (
-                                    <Badge
-                                        variant="secondary"
-                                        className={cn("rounded-sm px-1", smallTextClass(), BADGE_TYPOGRAPHY.default.fontWeight)}
-                                    >
-                                        {selectedValues.size} đã chọn
-                                    </Badge>
-                                ) : (
-                                    options
-                                        .filter((option) => selectedValues.has(option.value))
-                                        .map((option) => (
-                                            <Badge
-                                                variant="secondary"
-                                                key={option.value}
-                                                className={cn("rounded-sm px-1", smallTextClass(), BADGE_TYPOGRAPHY.default.fontWeight)}
-                                            >
-                                                {option.label}
-                                            </Badge>
-                                        ))
-                                )}
-                            </div>
-                        </>
+                            {selectedValues.size > 2 ? (
+                                <Badge
+                                    variant="secondary"
+                                    className={cn("rounded-sm px-1", smallTextClass(), BADGE_TYPOGRAPHY.default.fontWeight)}
+                                >
+                                    {selectedValues.size} đã chọn
+                                </Badge>
+                            ) : (
+                                options
+                                    .filter((option) => selectedValues.has(option.value))
+                                    .map((option) => (
+                                        <Badge
+                                            variant="secondary"
+                                            key={option.value}
+                                            className={cn("rounded-sm px-1", smallTextClass(), BADGE_TYPOGRAPHY.default.fontWeight)}
+                                        >
+                                            {option.label}
+                                        </Badge>
+                                    ))
+                            )}
+                        </div>
                     )}
                 </Button>
             </PopoverTrigger>

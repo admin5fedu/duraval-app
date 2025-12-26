@@ -7,7 +7,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Search } from "lucide-react"
+import { X, Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -51,6 +51,7 @@ export function SearchInput<TData>({
     searchInputRef,
     suggestionsContainerRef,
     recentSearches,
+    isLoading,
     handleClearSearch,
     handleSuggestionSelect,
     handleSearchKeyDown,
@@ -62,9 +63,21 @@ export function SearchInput<TData>({
   } = search
 
   const inputId = variant === "mobile" ? "table-search-input" : "table-search-input-desktop"
+  
+  // Tính toán padding-right dựa trên trạng thái:
+  // - Nếu có cả inputValue và loading: pr-16 (cho cả clear button ở right-8 và spinner ở right-1)
+  // - Nếu chỉ có inputValue (không loading): pr-8 (cho clear button)
+  // - Nếu chỉ có loading (không inputValue): pr-8 (cho spinner)
+  // - Mặc định: pr-3 (chỉ có search icon bên trái)
+  const rightPadding = inputValue && isLoading 
+    ? "pr-16"  // Cả clear button và spinner
+    : (inputValue || isLoading) 
+      ? "pr-8"  // Chỉ một trong hai
+      : "pr-3"  // Không có gì
+  
   const inputClassName = variant === "mobile" 
-    ? cn("h-8 flex-1 min-w-0 pl-8 pr-8 relative z-0", inputValue && "pr-8", className)
-    : cn("h-8 w-full pl-8 pr-8 relative z-0", inputValue && "pr-8", className)
+    ? cn("h-8 flex-1 min-w-0 pl-8", rightPadding, "relative z-0", className)
+    : cn("h-8 w-full pl-8", rightPadding, "relative z-0", className)
 
   return (
     <div className={cn("relative", variant === "desktop" && "w-[140px] lg:w-[180px] xl:w-[220px] flex-shrink", containerClassName)} ref={suggestionsContainerRef}>
@@ -84,11 +97,33 @@ export function SearchInput<TData>({
         onBlur={handleBlur}
         className={inputClassName}
       />
-      {inputValue && (
+      {/* Loading spinner - hiển thị khi đang debounce/searching */}
+      {isLoading && (
+        <div className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center pointer-events-none">
+          <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin" />
+        </div>
+      )}
+      
+      {/* Clear button - hiển thị khi có input value và không loading */}
+      {inputValue && !isLoading && (
         <Button
           variant="ghost"
           size="icon"
           className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-transparent"
+          onClick={handleClearSearch}
+          type="button"
+          title="Xóa tìm kiếm (Esc)"
+        >
+          <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+        </Button>
+      )}
+      
+      {/* Clear button khi có cả input và loading - đặt bên trái spinner */}
+      {inputValue && isLoading && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-transparent"
           onClick={handleClearSearch}
           type="button"
           title="Xóa tìm kiếm (Esc)"

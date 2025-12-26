@@ -2,6 +2,7 @@
 
 import React from "react"
 import { useLocation, Link } from "react-router-dom"
+import { Home, MoreHorizontal } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,31 +12,45 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import {
   shouldSkipSegmentInBreadcrumb,
   formatSegmentLabel,
 } from "@/lib/routing-config"
 import { useBreadcrumb } from "@/components/providers/BreadcrumbProvider"
 import { moduleRegistry } from "@/shared/config/module-registry"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 /**
  * Dynamic Breadcrumb Component
  * 
  * Tự động tạo breadcrumb từ URL pathname
  * Sử dụng routing-config để format labels và skip segments
+ * Mobile-friendly: chỉ hiển thị 2 items cuối, còn lại trong dropdown
  */
 export function DynamicBreadcrumb() {
   const location = useLocation()
   const pathname = location.pathname
   const segments = pathname.split('/').filter(Boolean)
   const { detailTitle } = useBreadcrumb()
+  const isMobile = useIsMobile()
   
   // Nếu là trang chủ
   if (segments.length === 0 || (segments.length === 1 && segments[0] === 'trang-chu')) {
     return (
       <Breadcrumb className="min-w-0 flex-1">
-        <BreadcrumbList className="flex-wrap">
+        <BreadcrumbList className="flex-wrap items-center gap-1">
           <BreadcrumbItem className="min-w-0">
-            <BreadcrumbPage className="truncate">Trang Chủ</BreadcrumbPage>
+            <BreadcrumbPage className="truncate flex items-center gap-1">
+              <Home className="h-3.5 w-3.5 shrink-0" />
+              <span className={cn(isMobile && "sr-only")}>Trang Chủ</span>
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -87,12 +102,90 @@ export function DynamicBreadcrumb() {
     }
   })
 
+  // Mobile: chỉ hiển thị 2 items cuối, còn lại trong dropdown
+  if (isMobile && breadcrumbItems.length > 2) {
+    const visibleItems = breadcrumbItems.slice(-2)
+    const hiddenItems = breadcrumbItems.slice(0, -2)
+    
+    return (
+      <Breadcrumb className="min-w-0 flex-1">
+        <BreadcrumbList className="flex-wrap items-center gap-1">
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/" className="truncate flex items-center gap-1 text-xs">
+                <Home className="h-3.5 w-3.5 shrink-0" />
+                <span className="sr-only">Trang Chủ</span>
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          
+          {hiddenItems.length > 0 && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 px-1.5 text-xs hover:bg-accent"
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                      <span className="sr-only">Xem thêm</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto">
+                    {hiddenItems.map((item, index) => (
+                      <DropdownMenuItem key={index} asChild>
+                        <BreadcrumbLink asChild>
+                          <Link to={item.href} className="w-full">
+                            {item.label}
+                          </Link>
+                        </BreadcrumbLink>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </BreadcrumbItem>
+            </>
+          )}
+          
+          {visibleItems.map((item, index) => {
+            const isLast = index === visibleItems.length - 1
+            return (
+              <React.Fragment key={index}>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem className="min-w-0">
+                  {isLast ? (
+                    <BreadcrumbPage className="truncate text-xs font-medium">
+                      {item.label}
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link to={item.href} className="truncate text-xs">
+                        {item.label}
+                      </Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
+            )
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
+    )
+  }
+
+  // Desktop: hiển thị đầy đủ
   return (
     <Breadcrumb className="min-w-0 flex-1">
-      <BreadcrumbList className="flex-wrap">
+      <BreadcrumbList className="flex-wrap items-center gap-1.5">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link to="/" className="truncate">Trang Chủ</Link>
+            <Link to="/" className="truncate flex items-center gap-1">
+              <Home className="h-3.5 w-3.5 shrink-0" />
+              <span>Trang Chủ</span>
+            </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         {breadcrumbItems.length > 0 && (
