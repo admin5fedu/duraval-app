@@ -218,7 +218,14 @@ export function GenericListView<TData, TValue>({
 
                 <GenericListMobileFooterSection
                     table={table}
+                    selectedRowCount={selectedRowCount}
                     totalRowCount={totalRowCount}
+                    pageInputRef={pageInputRef}
+                    pageInputValue={pageInputValue}
+                    setPageInputValue={setPageInputValue}
+                    handlePageInputBlur={handlePageInputBlur}
+                    handlePageInputFocus={handlePageInputFocus}
+                    handlePageInputKeyDown={handlePageInputKeyDown}
                 />
             </div>
         </div>

@@ -177,7 +177,14 @@ export interface GenericListMobileSectionProps<TData> {
  */
 export interface GenericListMobileFooterSectionProps {
     table: any
+    selectedRowCount: number
     totalRowCount: number
+    pageInputRef: React.RefObject<HTMLInputElement>
+    pageInputValue: string
+    setPageInputValue: (value: string) => void
+    handlePageInputBlur: () => void
+    handlePageInputFocus: () => void
+    handlePageInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 /**
