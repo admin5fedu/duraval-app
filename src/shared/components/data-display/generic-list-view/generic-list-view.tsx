@@ -61,6 +61,9 @@ export function GenericListView<TData, TValue>({
     enableVirtualization = false,
     virtualRowHeight = 50,
     exportOptions,
+    onEdit,
+    onDelete,
+    renderLeftActions,
 }: GenericListViewProps<TData, TValue>) {
     // 1. Manage table state (pagination, sorting, filtering, search)
     const {
@@ -179,6 +182,13 @@ export function GenericListView<TData, TValue>({
                     filteredRows={filteredRows}
                     renderMobileCard={renderMobileCard}
                     onRowClick={onRowClick}
+                    table={table}
+                    handleRowSelect={handleRowSelect}
+                    handleRowPointerDown={handleRowPointerDown}
+                    handleRowPointerUp={handleRowPointerUp}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    renderLeftActions={renderLeftActions}
                 />
 
                 <GenericListTableSection

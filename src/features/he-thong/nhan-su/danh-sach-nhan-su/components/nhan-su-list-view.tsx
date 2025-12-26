@@ -10,13 +10,23 @@ import { ZoomableAvatar } from "@/components/ui/zoomable-avatar"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { NhanSu } from "../schema"
-import { useNhanSu, useBatchDeleteNhanSu } from "../hooks"
+import { useNhanSu, useBatchDeleteNhanSu, useDeleteNhanSu } from "../hooks"
 import { nhanSuColumns } from "./nhan-su-columns"
 import { nhanSuConfig } from "../config"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
 import { DataTableFacetedFilter } from "@/shared/components/data-display/data-table-faceted-filter"
 import { NhanSuImportDialog } from "./nhan-su-import-dialog"
 import { useBatchUpsertNhanSu } from "../actions/nhan-su-excel-actions"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface NhanSuListViewProps {
     initialData?: NhanSu[]
@@ -34,9 +44,12 @@ export function NhanSuListView({
     const { data: nhanSuList, isLoading, isError, refetch } = useNhanSu(initialData)
     const navigate = useNavigate()
     const batchDeleteMutation = useBatchDeleteNhanSu()
+    const deleteMutation = useDeleteNhanSu()
     const batchImportMutation = useBatchUpsertNhanSu()
     const module = nhanSuConfig.moduleName
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+    const [rowToDelete, setRowToDelete] = React.useState<NhanSu | null>(null)
 
     // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
     // Filters KHÔNG persist qua page reload (fresh start)
@@ -254,6 +267,17 @@ export function NhanSuListView({
             }}
             onImport={() => setImportDialogOpen(true)}
             isImporting={batchImportMutation.isPending}
+            onEdit={(row) => {
+                if (onEdit) {
+                    onEdit(row.ma_nhan_vien)
+                } else {
+                    navigate(`${nhanSuConfig.routePath}/${row.ma_nhan_vien}/sua`)
+                }
+            }}
+            onDelete={(row) => {
+                setRowToDelete(row)
+                setDeleteDialogOpen(true)
+            }}
         />
 
             {/* Import Dialog */}
@@ -262,6 +286,38 @@ export function NhanSuListView({
                 onOpenChange={setImportDialogOpen}
                 mutation={batchImportMutation}
             />
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bạn có chắc chắn muốn xóa nhân sự <strong>{rowToDelete?.ho_ten}</strong>? Hành động này không thể hoàn tác.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteMutation.isPending}>Hủy</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={async () => {
+                                if (rowToDelete?.ma_nhan_vien) {
+                                    try {
+                                        await deleteMutation.mutateAsync(rowToDelete.ma_nhan_vien)
+                                        setDeleteDialogOpen(false)
+                                        setRowToDelete(null)
+                                    } catch (error) {
+                                        // Error is handled by mutation
+                                    }
+                                }
+                            }}
+                            disabled={deleteMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleteMutation.isPending ? "Đang xóa..." : "Xóa"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

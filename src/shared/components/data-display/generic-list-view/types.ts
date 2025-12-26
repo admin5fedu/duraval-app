@@ -49,6 +49,9 @@ export interface GenericListViewProps<TData, TValue> {
         columns?: ColumnDef<TData>[]
         totalCount?: number
     }
+    onEdit?: (row: TData) => void
+    onDelete?: (row: TData) => void
+    renderLeftActions?: (row: TData) => React.ReactNode
 }
 
 /**
@@ -160,6 +163,13 @@ export interface GenericListMobileSectionProps<TData> {
     filteredRows: any[]
     renderMobileCard?: (row: TData) => React.ReactNode
     onRowClick?: (row: TData) => void
+    table: any
+    handleRowSelect: (rowId: string, event: React.MouseEvent | React.PointerEvent) => void
+    handleRowPointerDown: (rowId: string, event: React.PointerEvent) => void
+    handleRowPointerUp: (rowId: string, event: React.PointerEvent) => void
+    onEdit?: (row: TData) => void
+    onDelete?: (row: TData) => void
+    renderLeftActions?: (row: TData) => React.ReactNode
 }
 
 /**
