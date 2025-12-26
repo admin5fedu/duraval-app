@@ -208,6 +208,164 @@ export const nhanSuColumns: ColumnDef<NhanSu>[] = [
         },
     },
     {
+        accessorKey: "gioi_tinh",
+        header: ({ column }) => <SortableHeader column={column} title="Giới tính" />,
+        size: 100,
+        minSize: 90,
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id))
+        },
+        meta: {
+            title: "Giới tính",
+            order: 8,
+            minWidth: 90,
+        },
+    },
+    {
+        accessorKey: "hon_nhan",
+        header: ({ column }) => <SortableHeader column={column} title="Hôn nhân" />,
+        size: 120,
+        minSize: 100,
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id))
+        },
+        meta: {
+            title: "Hôn nhân",
+            order: 9,
+            minWidth: 100,
+        },
+    },
+    {
+        accessorKey: "so_dien_thoai",
+        header: ({ column }) => <SortableHeader column={column} title="Số điện thoại" />,
+        size: 130,
+        minSize: 110,
+        meta: {
+            title: "Số điện thoại",
+            order: 10,
+            minWidth: 110,
+        },
+    },
+    {
+        accessorKey: "email_ca_nhan",
+        header: ({ column }) => <SortableHeader column={column} title="Email cá nhân" />,
+        size: 180,
+        minSize: 150,
+        meta: {
+            title: "Email cá nhân",
+            order: 11,
+            minWidth: 150,
+        },
+    },
+    {
+        accessorKey: "ngay_sinh",
+        header: ({ column }) => <SortableHeader column={column} title="Ngày sinh" />,
+        size: 120,
+        minSize: 100,
+        cell: ({ row }) => {
+            const date = row.getValue("ngay_sinh") as string | null | undefined
+            if (!date) return <span className="text-muted-foreground">-</span>
+            try {
+                return new Date(date).toLocaleDateString("vi-VN")
+            } catch {
+                return date
+            }
+        },
+        meta: {
+            title: "Ngày sinh",
+            order: 12,
+            minWidth: 100,
+        },
+    },
+    {
+        accessorKey: "ngay_thu_viec",
+        header: ({ column }) => <SortableHeader column={column} title="Ngày thử việc" />,
+        size: 130,
+        minSize: 110,
+        cell: ({ row }) => {
+            const date = row.getValue("ngay_thu_viec") as string | null | undefined
+            if (!date) return <span className="text-muted-foreground">-</span>
+            try {
+                return new Date(date).toLocaleDateString("vi-VN")
+            } catch {
+                return date
+            }
+        },
+        meta: {
+            title: "Ngày thử việc",
+            order: 13,
+            minWidth: 110,
+        },
+    },
+    {
+        accessorKey: "ngay_chinh_thuc",
+        header: ({ column }) => <SortableHeader column={column} title="Ngày chính thức" />,
+        size: 140,
+        minSize: 120,
+        cell: ({ row }) => {
+            const date = row.getValue("ngay_chinh_thuc") as string | null | undefined
+            if (!date) return <span className="text-muted-foreground">-</span>
+            try {
+                return new Date(date).toLocaleDateString("vi-VN")
+            } catch {
+                return date
+            }
+        },
+        meta: {
+            title: "Ngày chính thức",
+            order: 14,
+            minWidth: 120,
+        },
+    },
+    {
+        accessorKey: "ngay_nghi_viec",
+        header: ({ column }) => <SortableHeader column={column} title="Ngày nghỉ việc" />,
+        size: 130,
+        minSize: 110,
+        cell: ({ row }) => {
+            const date = row.getValue("ngay_nghi_viec") as string | null | undefined
+            if (!date) return <span className="text-muted-foreground">-</span>
+            try {
+                return new Date(date).toLocaleDateString("vi-VN")
+            } catch {
+                return date
+            }
+        },
+        meta: {
+            title: "Ngày nghỉ việc",
+            order: 15,
+            minWidth: 110,
+        },
+    },
+    {
+        accessorKey: "bo_phan",
+        header: ({ column }) => <SortableHeader column={column} title="Bộ phận" />,
+        size: 120,
+        minSize: 100,
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id))
+        },
+        meta: {
+            title: "Bộ phận",
+            order: 16,
+            minWidth: 100,
+        },
+    },
+    {
+        accessorKey: "nhom",
+        header: ({ column }) => <SortableHeader column={column} title="Nhóm" />,
+        size: 100,
+        minSize: 90,
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id))
+        },
+        meta: {
+            title: "Nhóm",
+            order: 17,
+            minWidth: 90,
+        },
+    },
+    {
         id: "actions",
         header: () => <div className="text-right pr-4">Thao tác</div>,
         cell: ({ row }) => {

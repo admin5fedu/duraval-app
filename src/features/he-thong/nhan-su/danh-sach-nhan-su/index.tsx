@@ -1,8 +1,12 @@
 /**
  * Danh Sách Nhân Sự Module
  * 
- * Module entry point - Orchestrator pattern
- * Sử dụng useModuleNavigation để quản lý routing và state
+ * @deprecated This orchestrator component is deprecated.
+ * Module now uses explicit routes in routes/ folder.
+ * See: src/features/he-thong/nhan-su/danh-sach-nhan-su/routes/
+ * 
+ * This file is kept for backward compatibility but should not be used.
+ * Use explicit route components instead.
  */
 
 "use client"
@@ -13,6 +17,9 @@ import { NhanSuDetailView } from "./components/nhan-su-detail-view"
 import { useModuleNavigation } from "@/shared/hooks/use-module-navigation"
 import { nhanSuConfig } from "./config"
 
+/**
+ * @deprecated Use explicit route components in routes/ folder instead
+ */
 export default function DanhSachNhanSuModule() {
   const {
     isNew,

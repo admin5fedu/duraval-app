@@ -1,8 +1,18 @@
 # Hướng Dẫn Sử Dụng Orchestrator Pattern cho Module
 
+> **⚠️ Deprecated**: Orchestrator Pattern với splat routes (`/*`) đã được deprecated.
+> 
+> **👉 Sử dụng [Explicit Routes Pattern](../EXPLICIT_ROUTES_GUIDE.md) thay thế** để:
+> - Loại bỏ React Router warnings
+> - Type-safe routing với useParams
+> - Sẵn sàng cho React Router v7
+> - Code rõ ràng và dễ maintain hơn
+
 ## Tổng Quan
 
 Orchestrator Pattern là cách tiếp cận để quản lý routing và state cho module bằng cách sử dụng một component điều phối (orchestrator) thay vì tạo các file page riêng cho mỗi route.
+
+**Lưu ý**: Pattern này vẫn hoạt động nhưng không được khuyến nghị cho module mới.
 
 ## Lợi Ích
 

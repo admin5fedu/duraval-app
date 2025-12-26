@@ -15,6 +15,7 @@ import {
   formatSegmentLabel,
 } from "@/lib/routing-config"
 import { useBreadcrumb } from "@/components/providers/BreadcrumbProvider"
+import { moduleRegistry } from "@/shared/config/module-registry"
 
 /**
  * Dynamic Breadcrumb Component
@@ -44,15 +45,21 @@ export function DynamicBreadcrumb() {
   const breadcrumbItems: Array<{ label: string; href: string }> = []
   let currentPath = ""
 
-  segments.forEach((segment) => {
+  segments.forEach((segment, index) => {
+    // Build current path for module lookup
+    const segmentPath = currentPath + `/${segment}`
+    
     // Bỏ qua các segment trong danh sách skip (như "nhan-su", "so-do", "thiet-lap")
-    if (shouldSkipSegmentInBreadcrumb(segment)) {
+    if (shouldSkipSegmentInBreadcrumb(segment, segmentPath)) {
       currentPath += `/${segment}` // Vẫn cộng vào path để giữ đúng URL
       return // Nhưng không thêm vào breadcrumb
     }
     
     const isNumericId = /^\d+$/.test(segment)
-    const label = formatSegmentLabel(segment)
+    // Try to get label from module config first
+    const moduleConfig = moduleRegistry.getByRoutePath(segmentPath)
+    const label = moduleConfig?.breadcrumb?.label 
+      || formatSegmentLabel(segment, segmentPath)
     
     // Nếu là ID số (detail page), sử dụng detailTitle từ context hoặc "Chi tiết"
     if (isNumericId) {

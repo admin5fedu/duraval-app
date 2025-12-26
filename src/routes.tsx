@@ -16,8 +16,15 @@ const HoSoFormView = lazy(() => import('@/pages/profile/HoSoFormView'))
 const ChangePasswordPage = lazy(() => import('@/pages/profile/ChangePasswordPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
-// Nhân sự module - sử dụng orchestrator pattern
-const DanhSachNhanSuModule = lazy(() => import('@/features/he-thong/nhan-su/danh-sach-nhan-su/index'))
+// Module imports
+// Note: Module routes can be auto-generated from module-registry.ts
+// For now, we keep manual imports for explicit control
+
+// Nhân sự module routes - explicit routes (no splat pattern)
+const NhanSuListRoute = lazy(() => import('@/features/he-thong/nhan-su/danh-sach-nhan-su/routes/nhan-su-list-route'))
+const NhanSuDetailRoute = lazy(() => import('@/features/he-thong/nhan-su/danh-sach-nhan-su/routes/nhan-su-detail-route'))
+const NhanSuFormRoute = lazy(() => import('@/features/he-thong/nhan-su/danh-sach-nhan-su/routes/nhan-su-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -121,12 +128,34 @@ export const routes: RouteConfig[] = [
     protected: true,
     layout: true,
   },
+  // Nhân sự module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
   {
-    path: '/he-thong/danh-sach-nhan-su/*',
-    element: DanhSachNhanSuModule,
+    path: '/he-thong/danh-sach-nhan-su/moi',
+    element: NhanSuFormRoute, // Direct to form route, no redirect needed
     protected: true,
     layout: true,
   },
+  {
+    path: '/he-thong/danh-sach-nhan-su/:id/sua',
+    element: NhanSuFormRoute,
+    protected: true,
+    layout: true,
+  },
+  {
+    path: '/he-thong/danh-sach-nhan-su/:id',
+    element: NhanSuDetailRoute,
+    protected: true,
+    layout: true,
+  },
+  {
+    path: '/he-thong/danh-sach-nhan-su',
+    element: NhanSuListRoute,
+    protected: true,
+    layout: true,
+  },
+  // Add more module routes here or use generateRoutesFromConfig()
   {
     path: '*',
     element: NotFoundPage,

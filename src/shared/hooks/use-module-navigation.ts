@@ -3,10 +3,22 @@
 import { useNavigate, useLocation } from "react-router-dom"
 import { useMemo, useCallback } from "react"
 
+/**
+ * @deprecated This hook is deprecated in favor of explicit route components.
+ * 
+ * With explicit routes pattern, navigation is handled directly in route components
+ * using useNavigate() and useParams() from react-router-dom.
+ * 
+ * See: .templates/EXPLICIT_ROUTES_GUIDE.md
+ */
+
 interface UseModuleNavigationOptions {
   basePath: string
 }
 
+/**
+ * @deprecated Use explicit route components instead
+ */
 export function useModuleNavigation({ basePath }: UseModuleNavigationOptions) {
   const navigate = useNavigate()
   const location = useLocation()

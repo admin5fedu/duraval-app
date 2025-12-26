@@ -12,7 +12,10 @@ export * from './dashboard/generic-chart-card'
 export * from './dialogs/generic-form-dialog'
 export * from './forms/combobox-form-field'
 export * from './data-display/data-table-faceted-filter'
-export * from './data-display/data-table-view-options'
+// Column visibility - refactored to modular structure
+export * from './data-display/column-visibility'
+// Legacy export for backward compatibility
+export { DataTableViewOptions } from './data-display/column-visibility'
 export * from './data-display/search-suggestions'
 export * from './data-display/selection/selection-toolbar'
 export * from './data-display/selection/bulk-actions-menu'

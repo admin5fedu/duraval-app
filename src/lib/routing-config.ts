@@ -5,6 +5,8 @@
  * Đảm bảo tất cả module tuân theo pattern flatten structure.
  */
 
+import { moduleRegistry } from "@/shared/config/module-registry"
+
 /**
  * Danh sách các segment cần bỏ qua trong breadcrumb
  * Các segment này là cấp trung gian (grouping level) không cần hiển thị trong breadcrumb
@@ -20,10 +22,10 @@ export const BREADCRUMB_SKIP_SEGMENTS: Set<string> = new Set([
 ])
 
 /**
- * Mapping các segment path sang label tiếng Việt cho breadcrumb
- * Được sử dụng trong DynamicBreadcrumb component
+ * Base PATH_LABELS mapping
+ * Auto-populated from module registry
  */
-export const PATH_LABELS: Record<string, string> = {
+const BASE_PATH_LABELS: Record<string, string> = {
   // Root
   "trang-chu": "Trang Chủ",
   
@@ -73,6 +75,46 @@ export const PATH_LABELS: Record<string, string> = {
 }
 
 /**
+ * Auto-populate PATH_LABELS from module registry
+ * Modules can override labels via breadcrumb config
+ */
+function populatePathLabelsFromModules(): Record<string, string> {
+  const moduleLabels: Record<string, string> = {}
+  
+  moduleRegistry.getAll().forEach(config => {
+    // Extract segment from routePath (last part)
+    const segments = config.routePath.split('/').filter(Boolean)
+    const lastSegment = segments[segments.length - 1]
+    
+    if (lastSegment) {
+      // Use breadcrumb label if available, otherwise use moduleTitle
+      moduleLabels[lastSegment] = config.breadcrumb?.label || config.moduleTitle
+    }
+    
+    // Also add parent path label if specified
+    if (config.breadcrumb?.parentLabel) {
+      const parentSegments = config.parentPath.split('/').filter(Boolean)
+      const parentSegment = parentSegments[parentSegments.length - 1]
+      if (parentSegment && !BASE_PATH_LABELS[parentSegment]) {
+        moduleLabels[parentSegment] = config.breadcrumb.parentLabel
+      }
+    }
+  })
+  
+  return moduleLabels
+}
+
+/**
+ * Mapping các segment path sang label tiếng Việt cho breadcrumb
+ * Được sử dụng trong DynamicBreadcrumb component
+ * Auto-populated from module registry
+ */
+export const PATH_LABELS: Record<string, string> = {
+  ...BASE_PATH_LABELS,
+  ...populatePathLabelsFromModules(),
+}
+
+/**
  * Routing Conventions
  * 
  * 1. FLATTEN STRUCTURE RULE:
@@ -97,19 +139,46 @@ export const PATH_LABELS: Record<string, string> = {
 
 /**
  * Helper function để check xem một segment có nên skip trong breadcrumb không
+ * Also checks module config for skip segments
  */
-export function shouldSkipSegmentInBreadcrumb(segment: string): boolean {
-  return BREADCRUMB_SKIP_SEGMENTS.has(segment)
+export function shouldSkipSegmentInBreadcrumb(segment: string, routePath?: string): boolean {
+  // Check base skip segments
+  if (BREADCRUMB_SKIP_SEGMENTS.has(segment)) {
+    return true
+  }
+  
+  // Check module-specific skip segments
+  if (routePath) {
+    const config = moduleRegistry.getByRoutePath(routePath)
+    if (config?.breadcrumb?.skipSegments?.includes(segment)) {
+      return true
+    }
+  }
+  
+  return false
 }
 
 /**
  * Helper function để format segment thành label
  * Sử dụng PATH_LABELS nếu có, nếu không thì format từ kebab-case
+ * Also checks module registry for dynamic labels
  */
-export function formatSegmentLabel(segment: string): string {
+export function formatSegmentLabel(segment: string, routePath?: string): string {
   // Nếu là số (ID), bỏ qua
   if (/^\d+$/.test(segment)) {
     return ""
+  }
+  
+  // Try to get from module registry first
+  if (routePath) {
+    const config = moduleRegistry.getByRoutePath(routePath)
+    if (config) {
+      const segments = routePath.split('/').filter(Boolean)
+      const lastSegment = segments[segments.length - 1]
+      if (segment === lastSegment && config.breadcrumb?.label) {
+        return config.breadcrumb.label
+      }
+    }
   }
   
   // Nếu có trong mapping, dùng label đó
