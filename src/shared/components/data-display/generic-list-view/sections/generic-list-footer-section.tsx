@@ -37,7 +37,7 @@ export function GenericListFooterSection({
     const { setDefaultPageSize } = useUserPreferencesStore()
 
     return (
-        <div className="hidden md:flex shrink-0 bg-background border-t py-2.5 px-3 md:px-4 flex-row items-center justify-between gap-2 md:gap-0 mt-0">
+        <div className="hidden md:flex shrink-0 bg-background py-2.5 px-3 md:px-4 flex-row items-center justify-between gap-2 md:gap-0">
             <div className="flex items-center gap-2 md:gap-6 text-xs md:text-sm text-muted-foreground min-w-0 shrink">
                 <span className="tabular-nums whitespace-nowrap shrink-0">
                     {selectedRowCount > 0 ? (

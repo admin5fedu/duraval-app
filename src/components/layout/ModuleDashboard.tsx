@@ -20,7 +20,7 @@ export interface DashboardGroup {
 }
 
 interface ModuleDashboardProps {
-  title: string
+  title?: string
   description?: string
   groups: DashboardGroup[]
 }
@@ -32,11 +32,6 @@ export const ModuleDashboard = memo(function ModuleDashboard({
 }: ModuleDashboardProps) {
   return (
     <div className="flex flex-col gap-8 p-6 animate-in fade-in zoom-in duration-150">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-primary">{title}</h1>
-        {description && <p className="text-muted-foreground text-lg">{description}</p>}
-      </div>
-
       <div className="flex flex-col gap-8">
         {groups.map((group) => (
           <div key={group.title} className="flex flex-col gap-4">

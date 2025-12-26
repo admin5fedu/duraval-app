@@ -14,6 +14,8 @@ import {
   getEmployeeStatusBadgeClass,
 } from "@/components/ui/status-badge"
 import { CompactAvatarUpload } from "@/components/ui/compact-avatar-upload"
+import { getEnumBadgeClass, hasEnumColorConfig } from "@/shared/utils/enum-color-registry"
+import { isEnumField, autoDetectAndRegisterEnum } from "@/shared/utils/enum-detection"
 
 interface CopyableFieldProps {
   value: string
@@ -94,8 +96,14 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
     }
 
     case "status": {
-      // Hiện đang dùng cho tình trạng nhân sự (tinh_trang)
-      const className = getEmployeeStatusBadgeClass(valueStr)
+      // Try enum registry first, fallback to legacy function
+      let className: string
+      if (hasEnumColorConfig(field.key)) {
+        className = getEnumBadgeClass(field.key, value)
+      } else {
+        // Legacy support for tinh_trang
+        className = getEmployeeStatusBadgeClass(valueStr)
+      }
       return (
         <Badge variant="outline" className={className}>
           {valueStr}
@@ -103,9 +111,22 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
       )
     }
 
-    case "badge": {
+    case "badge":
+    case "enum": {
+      // Auto-detect and register enum if not already registered
+      if (!hasEnumColorConfig(field.key)) {
+        autoDetectAndRegisterEnum({
+          fieldKey: field.key,
+          type: field.type,
+          value: field.value,
+          explicitEnumConfig: field.enumConfig,
+        })
+      }
+
+      // Get color class from registry
+      const className = getEnumBadgeClass(field.key, field.value)
       return (
-        <Badge variant="outline">
+        <Badge variant="outline" className={className}>
           {valueStr}
         </Badge>
       )

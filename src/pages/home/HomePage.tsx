@@ -83,13 +83,6 @@ const features = [
 export default function HomePage() {
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Tổng quan</h2>
-        <p className="text-muted-foreground">
-          Chào mừng trở lại, chọn một module để bắt đầu làm việc.
-        </p>
-      </div>
-
       <div className="grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
         {features.map((feature) => {
           const Icon = feature.icon

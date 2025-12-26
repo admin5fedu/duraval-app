@@ -1,4 +1,5 @@
 import * as React from "react"
+import { EnumColorConfig } from "@/shared/utils/enum-color-registry"
 
 /**
  * Detail field configuration
@@ -7,11 +8,12 @@ export interface DetailField {
     label: string
     key: string
     value: string | number | null | undefined
-    type?: "text" | "badge" | "date" | "status" | "email" | "phone" | "number" | "currency" | "url" | "image"
+    type?: "text" | "badge" | "date" | "status" | "email" | "phone" | "number" | "currency" | "url" | "image" | "enum"
     colSpan?: 1 | 2 | 3
     format?: (value: any) => string | React.ReactNode
     link?: string
     displayName?: string // For image type - avatar fallback initials
+    enumConfig?: EnumColorConfig // Optional explicit enum color config (overrides auto-detection)
 }
 
 /**

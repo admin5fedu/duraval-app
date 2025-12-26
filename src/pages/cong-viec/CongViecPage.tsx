@@ -117,7 +117,6 @@ export default function CongViecPage() {
   return (
     <ModuleDashboard
       title="Công việc"
-      description="Quản lý toàn diện công việc, tài liệu, đào tạo và đánh giá nhân sự."
       groups={groups}
     />
   )

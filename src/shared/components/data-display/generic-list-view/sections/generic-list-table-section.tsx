@@ -14,13 +14,16 @@ import { StickyTableHeaderCell } from "../../table/sticky-table-header-cell"
 import { StickyTableCell } from "../../table/sticky-table-cell"
 import { VirtualizedTableBody } from "../../table/virtualized-table-body"
 import { getStickyCellStyles } from "@/hooks/use-sticky-cell-styles"
+import { GenericListFooterSection } from "./generic-list-footer-section"
+import { useElementHeight } from "@/shared/hooks/use-element-height"
+import { LAYOUT_CONSTANTS } from "@/shared/constants"
 import type { GenericListTableSectionProps } from "../types"
 
 const DEFAULT_MAX_COLUMN_WIDTH = 360
 
 /**
  * Table section component for GenericListView
- * Renders the desktop table with sticky headers and virtualization support
+ * Renders the desktop table with sticky headers, scrollable body, and sticky footer
  */
 export function GenericListTableSection<TData, TValue>({
     table,
@@ -37,19 +40,52 @@ export function GenericListTableSection<TData, TValue>({
     rangeEndIndex,
     enableVirtualization,
     virtualRowHeight,
+    selectedRowCount,
+    totalRowCount,
+    pageInputRef,
+    pageInputValue,
+    setPageInputValue,
+    handlePageInputBlur,
+    handlePageInputFocus,
+    handlePageInputKeyDown,
 }: GenericListTableSectionProps<TData, TValue>) {
     const headerGroups = table.getHeaderGroups()
 
+    // ✅ Sử dụng custom hooks để đo chiều cao động của header và footer
+    const { ref: headerRef, height: headerHeight } = useElementHeight<HTMLDivElement>()
+    const { ref: footerRef, height: footerHeight } = useElementHeight<HTMLDivElement>()
+
+    // ✅ Tính toán max-height cho table body với error handling
+    const bodyMaxHeight = React.useMemo(() => {
+        const { ESTIMATED_HEADER_HEIGHT, ESTIMATED_FOOTER_HEIGHT, MIN_TABLE_HEIGHT } = LAYOUT_CONSTANTS
+        
+        // Fallback khi chưa đo được (initial render)
+        if (headerHeight === 0 && footerHeight === 0) {
+            const estimated = `calc(100% - ${ESTIMATED_HEADER_HEIGHT}px - ${ESTIMATED_FOOTER_HEIGHT}px)`
+            return `max(${estimated}, ${MIN_TABLE_HEIGHT}px)`
+        }
+        
+        // Tính toán chính xác khi đã có measurements
+        const calculated = `calc(100% - ${headerHeight}px - ${footerHeight}px)`
+        // ✅ Ensure minimum height để table vẫn usable trên màn hình nhỏ
+        return `max(${calculated}, ${MIN_TABLE_HEIGHT}px)`
+    }, [headerHeight, footerHeight])
+
     return (
         <div className="hidden md:flex rounded-md border flex-1 overflow-hidden flex-col w-full max-w-full min-w-0 isolate mt-2">
-            <div className="flex-1 overflow-auto w-full max-w-full min-w-0 relative">
+            {/* ✅ Table Header - Fixed với z-20 */}
+            <div 
+                ref={headerRef}
+                className="flex-shrink-0 border-b bg-background"
+                data-testid="list-view-table-header"
+            >
                 <Table containerClassName="w-full max-w-full min-w-0">
                     <TableHeader
                         className="sticky top-0 bg-background shadow-sm"
                         style={{
                             boxShadow:
                                 "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-                            zIndex: 120,
+                            zIndex: 20, // ✅ Giảm từ 120 xuống 20 (thấp hơn toolbar z-30)
                         }}
                     >
                         {headerGroups.map((headerGroup: any) => (
@@ -103,6 +139,22 @@ export function GenericListTableSection<TData, TValue>({
                             </TableRow>
                         ))}
                     </TableHeader>
+                </Table>
+            </div>
+
+            {/* ✅ Table Body - Scrollable với max-height được tính toán động */}
+            <div 
+                className="flex-1 overflow-y-auto overflow-x-auto w-full max-w-full min-w-0 relative"
+                style={{
+                    maxHeight: bodyMaxHeight,
+                    scrollBehavior: 'smooth', // ✅ Smooth scrolling
+                }}
+                role="region"
+                aria-label="Danh sách dữ liệu"
+                aria-live="polite"
+                data-testid="list-view-table-body"
+            >
+                <Table containerClassName="w-full max-w-full min-w-0">
                     {enableVirtualization && filteredRows.length > 100 ? (
                         <VirtualizedTableBody
                             table={table}
@@ -247,6 +299,25 @@ export function GenericListTableSection<TData, TValue>({
                         </TableBody>
                     )}
                 </Table>
+            </div>
+
+            {/* ✅ Table Footer - Fixed với z-20, sticky bottom */}
+            <div 
+                ref={footerRef}
+                className="flex-shrink-0 border-t bg-background sticky bottom-0 z-20"
+                data-testid="list-view-table-footer"
+            >
+                <GenericListFooterSection
+                    table={table}
+                    selectedRowCount={selectedRowCount}
+                    totalRowCount={totalRowCount}
+                    pageInputRef={pageInputRef}
+                    pageInputValue={pageInputValue}
+                    setPageInputValue={setPageInputValue}
+                    handlePageInputBlur={handlePageInputBlur}
+                    handlePageInputFocus={handlePageInputFocus}
+                    handlePageInputKeyDown={handlePageInputKeyDown}
+                />
             </div>
         </div>
     )

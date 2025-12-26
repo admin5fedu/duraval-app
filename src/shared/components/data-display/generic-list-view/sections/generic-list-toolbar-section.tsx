@@ -30,7 +30,7 @@ export function GenericListToolbarSection<TData>({
     exportOptions,
 }: GenericListToolbarSectionProps<TData>) {
     return (
-        <div className="shrink-0 sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:bg-transparent md:backdrop-blur-none">
+        <div className="shrink-0 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b shadow-sm">
             <GenericListToolbar
                 table={table}
                 filterColumn={filterColumn}

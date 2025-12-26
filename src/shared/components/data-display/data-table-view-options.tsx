@@ -25,24 +25,50 @@ interface DataTableViewOptionsProps<TData> {
     storageKey?: string // Optional key for localStorage
 }
 
-// Helper function to get display name for a column
+/**
+ * Helper function to get display name for a column
+ * Priority: meta.title > header (if string) > column.id (formatted)
+ */
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
-    // Try to get from meta.title if defined (preferred - Vietnamese with diacritics)
+    // 1. Try to get from meta.title if defined (preferred - Vietnamese with diacritics)
     const meta = column.columnDef.meta as { title?: string } | undefined
     if (meta?.title) {
         return meta.title
     }
 
-    // Try to get from columnDef.header if it's a string
+    // 2. Try to get from columnDef.header if it's a string
     const header = column.columnDef.header
     if (typeof header === "string") {
         return header
     }
 
-    // Fall back to column id (convert snake_case to readable format)
+    // 3. Try to extract text from React element header (if it contains text)
+    if (React.isValidElement(header)) {
+        // Try to find text in children
+        const extractText = (element: React.ReactElement | string | number | null | undefined): string => {
+            if (typeof element === 'string' || typeof element === 'number') {
+                return String(element)
+            }
+            if (React.isValidElement(element)) {
+                if (element.props?.title) {
+                    return String(element.props.title)
+                }
+                if (element.props?.children) {
+                    return extractText(element.props.children)
+                }
+            }
+            return ''
+        }
+        const extracted = extractText(header)
+        if (extracted) {
+            return extracted
+        }
+    }
+
+    // 4. Fall back to column id (convert snake_case to readable format)
     return column.id
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .split(/[_-]/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ')
 }
 
@@ -62,10 +88,16 @@ export function DataTableViewOptions<TData>({
     const defaultVisibilityRef = React.useRef<Record<string, boolean> | null>(null)
     
     // Initialize default visibility state immediately (before any effects)
+    // Store the initial visibility state of all hideable columns
     if (defaultVisibilityRef.current === null) {
         const defaultVisibility: Record<string, boolean> = {}
         table.getAllColumns().forEach(column => {
-            if (typeof column.accessorFn !== "undefined" && column.getCanHide()) {
+            const hasAccessor = column.accessorKey || column.accessorFn
+            const canHide = column.getCanHide()
+            const isSelectionColumn = column.id === 'select'
+            const hidingDisabled = column.columnDef.enableHiding === false
+            
+            if (hasAccessor && canHide && !isSelectionColumn && !hidingDisabled) {
                 defaultVisibility[column.id] = column.getIsVisible()
             }
         })
@@ -73,10 +105,15 @@ export function DataTableViewOptions<TData>({
     }
     
     // Reset to default visibility
-    const handleResetToDefault = () => {
+    const handleResetToDefault = React.useCallback(() => {
         if (defaultVisibilityRef.current) {
             table.getAllColumns().forEach(column => {
-                if (typeof column.accessorFn !== "undefined" && column.getCanHide()) {
+                const hasAccessor = column.accessorKey || column.accessorFn
+                const canHide = column.getCanHide()
+                const isSelectionColumn = column.id === 'select'
+                const hidingDisabled = column.columnDef.enableHiding === false
+                
+                if (hasAccessor && canHide && !isSelectionColumn && !hidingDisabled) {
                     const defaultVisible = defaultVisibilityRef.current![column.id] ?? true
                     column.toggleVisibility(defaultVisible)
                 }
@@ -90,18 +127,36 @@ export function DataTableViewOptions<TData>({
                 }
             }
         }
-    }
+    }, [table, storageKey])
     
-    // Get all hideable columns
+    /**
+     * Get all hideable columns
+     * A column is hideable if:
+     * 1. It has an accessor (accessorKey or accessorFn)
+     * 2. It's not explicitly disabled (enableHiding !== false)
+     * 3. It's not a selection column (id !== 'select')
+     * 4. It's not an actions column (typically has enableHiding: false)
+     */
     const hideableColumns = React.useMemo(() => {
         return table
             .getAllColumns()
-            .filter(
-                (column) =>
-                    typeof column.accessorFn !== "undefined" && column.getCanHide()
-            )
+            .filter((column) => {
+                // Must have accessor (either accessorKey or accessorFn)
+                const hasAccessor = column.accessorKey || column.accessorFn
+                
+                // Must be able to hide (getCanHide() checks enableHiding)
+                const canHide = column.getCanHide()
+                
+                // Exclude selection column
+                const isSelectionColumn = column.id === 'select'
+                
+                // Exclude columns with enableHiding explicitly set to false
+                const hidingDisabled = column.columnDef.enableHiding === false
+                
+                return hasAccessor && canHide && !isSelectionColumn && !hidingDisabled
+            })
             .sort((a, b) => {
-                // Sort by order first, then by display name
+                // Sort by order first (from meta.order), then by display name
                 const orderDiff = getColumnOrder(a) - getColumnOrder(b)
                 if (orderDiff !== 0) return orderDiff
                 return getColumnDisplayName(a).localeCompare(getColumnDisplayName(b), 'vi')
@@ -200,7 +255,7 @@ export function DataTableViewOptions<TData>({
                         className={cn("w-full justify-start h-8 px-2", smallTextClass())}
                     >
                         <RotateCcw className="mr-2 h-3.5 w-3.5" />
-                        Cài lại mặc định
+                        Mặc định
                     </Button>
                 </div>
 

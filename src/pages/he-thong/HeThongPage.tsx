@@ -88,7 +88,6 @@ export default function HeThongPage() {
   return (
     <ModuleDashboard
       title="Hệ thống"
-      description="Quản lý cấu hình, người dùng và thiết lập toàn bộ hệ thống."
       groups={groups}
     />
   )

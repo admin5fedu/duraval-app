@@ -188,6 +188,15 @@ export interface GenericListTableSectionProps<TData, TValue> {
     rangeEndIndex: number | null
     enableVirtualization?: boolean
     virtualRowHeight?: number
+    // Footer props (moved from GenericListFooterSection)
+    selectedRowCount: number
+    totalRowCount: number
+    pageInputRef: React.RefObject<HTMLInputElement>
+    pageInputValue: string
+    setPageInputValue: (value: string) => void
+    handlePageInputBlur: () => void
+    handlePageInputFocus: () => void
+    handlePageInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 /**

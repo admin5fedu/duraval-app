@@ -1,11 +1,17 @@
 import { Routes, Route } from 'react-router-dom'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { routes } from './routes'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { Layout } from './components/layout/Layout'
 import { PageLoading } from './shared/components/loading/PageLoading'
+import { initializeEnumSystem } from './shared/utils/initialize-enum-system'
 
 function App() {
+  // Initialize enum system once at app startup
+  useEffect(() => {
+    initializeEnumSystem()
+  }, [])
+
   return (
     <Routes>
       {routes.map((route) => {
