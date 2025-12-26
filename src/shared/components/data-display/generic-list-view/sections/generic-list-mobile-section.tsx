@@ -27,7 +27,10 @@ export function GenericListMobileSection<TData>({
     renderLeftActions,
 }: GenericListMobileSectionProps<TData>) {
     return (
-        <div className="md:hidden flex-1 min-h-0 w-full max-w-full min-w-0 overflow-y-auto">
+        <div 
+            className="md:hidden flex-1 min-h-0 w-full max-w-full min-w-0 overflow-y-auto"
+            data-testid="list-view-mobile-cards"
+        >
             {renderMobileCard ? (
                 <div className="space-y-2.5 pb-24 pt-2 px-1">
                     {filteredRows.map((row: any) => {

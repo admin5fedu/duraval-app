@@ -81,6 +81,35 @@ export function useGenericListTableState<TData, TValue>({
         pageSize: defaultPageSize,
     })
 
+    // Scroll to top khi pagination thay đổi (chuyển trang)
+    React.useEffect(() => {
+        // Tìm scroll containers:
+        // 1. Layout container (main scroll container trong Layout)
+        const layoutContainer = document.querySelector('.flex-1.overflow-y-auto') as HTMLElement
+        // 2. Table body (nếu table có scroll riêng - desktop)
+        const tableBody = document.querySelector('[data-testid="list-view-table-body"]') as HTMLElement
+        // 3. Mobile cardview container (mobile cardview có scroll riêng)
+        const mobileCardContainer = document.querySelector('[data-testid="list-view-mobile-cards"]') as HTMLElement
+
+        // Scroll Layout container (main page scroll) - luôn scroll khi chuyển trang
+        if (layoutContainer) {
+            layoutContainer.scrollTo({ top: 0, behavior: 'smooth' })
+        } else {
+            // Fallback: scroll window
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+
+        // Scroll table body nếu có (table có scroll riêng - desktop)
+        if (tableBody) {
+            tableBody.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+
+        // Scroll mobile cardview container nếu có (mobile cardview)
+        if (mobileCardContainer) {
+            mobileCardContainer.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+    }, [pagination.pageIndex]) // Scroll khi pageIndex thay đổi (chuyển trang)
+
     const table = useReactTable({
         data,
         columns,

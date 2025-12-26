@@ -3,12 +3,15 @@
  * 
  * Utility to automatically generate route configurations from module registry
  * Supports both explicit routes (preferred) and splat routes (legacy)
+ * 
+ * Tự động thêm scroll behavior cho tất cả routes
  */
 
 import { lazy } from "react"
 import { RouteConfig } from "@/routes"
 import { moduleRegistry } from "@/shared/config/module-registry"
 import { generateModuleRoutes } from "./generate-explicit-routes"
+import { getDefaultScrollBehavior } from "./route-scroll-behavior-helper"
 
 /**
  * Generate route configs from module registry
@@ -45,6 +48,7 @@ export function generateRoutesFromConfig(): RouteConfig[] {
         element: lazy(() => import(modulePath)),
         protected: true,
         layout: true,
+        scrollBehavior: getDefaultScrollBehavior(config.routePattern),
       })
     }
   })
@@ -111,6 +115,7 @@ export function getRouteConfigForModule(moduleName: string): RouteConfig[] | nul
       element: lazy(() => import(modulePath)),
       protected: true,
       layout: true,
+      scrollBehavior: getDefaultScrollBehavior(config.routePattern),
     }]
   }
   

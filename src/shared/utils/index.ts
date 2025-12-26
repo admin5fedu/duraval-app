@@ -19,3 +19,7 @@ export * from "./initialize-enum-system"
 // Other utilities
 export * from './dynamic-imports'
 
+// Scroll restoration utilities
+export { scrollManager } from './scroll-manager'
+export { getDefaultScrollBehavior, detectRouteTypeFromPath } from './route-scroll-behavior-helper'
+

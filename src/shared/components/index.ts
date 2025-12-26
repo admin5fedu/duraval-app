@@ -20,4 +20,5 @@ export * from './data-display/search-suggestions'
 export * from './data-display/selection/selection-toolbar'
 export * from './data-display/selection/bulk-actions-menu'
 export * from './placeholder-page'
+export { ScrollRestoration } from './scroll-restoration'
 

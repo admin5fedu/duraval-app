@@ -3,11 +3,17 @@
  * 
  * Utility to automatically generate explicit route configurations
  * (no splat pattern) from module registry
+ * 
+ * Tự động thêm scroll behavior cho các routes:
+ * - ListView: 'restore' - restore scroll position khi quay lại
+ * - DetailView: 'top' - luôn scroll to top
+ * - FormView: 'top' - luôn scroll to top
  */
 
 import { lazy } from "react"
 import { RouteConfig } from "@/routes"
 import { ModuleConfig } from "@/shared/types/module-config"
+import { getDefaultScrollBehavior, detectRouteTypeFromPath } from "./route-scroll-behavior-helper"
 
 /**
  * Generate explicit routes for a module
@@ -38,6 +44,7 @@ export function generateModuleRoutes(config: ModuleConfig): RouteConfig[] {
       element: lazy(() => import(`${routesPath}/form-route`)),
       protected: true,
       layout: true,
+      scrollBehavior: getDefaultScrollBehavior(`${routePath}/moi`, 'form'),
     },
     // 2. Edit form route
     {
@@ -45,6 +52,7 @@ export function generateModuleRoutes(config: ModuleConfig): RouteConfig[] {
       element: lazy(() => import(`${routesPath}/form-route`)),
       protected: true,
       layout: true,
+      scrollBehavior: getDefaultScrollBehavior(`${routePath}/:id/sua`, 'form'),
     },
     // 3. Detail view route
     {
@@ -52,6 +60,7 @@ export function generateModuleRoutes(config: ModuleConfig): RouteConfig[] {
       element: lazy(() => import(`${routesPath}/detail-route`)),
       protected: true,
       layout: true,
+      scrollBehavior: getDefaultScrollBehavior(`${routePath}/:id`, 'detail'),
     },
     // 4. List view route - must come last
     {
@@ -59,6 +68,7 @@ export function generateModuleRoutes(config: ModuleConfig): RouteConfig[] {
       element: lazy(() => import(`${routesPath}/list-route`)),
       protected: true,
       layout: true,
+      scrollBehavior: getDefaultScrollBehavior(routePath, 'list'),
     },
   ]
 

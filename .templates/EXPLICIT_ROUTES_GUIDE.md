@@ -137,27 +137,38 @@ export const routes: RouteConfig[] = [
     element: YourModuleFormRoute,
     protected: true,
     layout: true,
+    scrollBehavior: 'top', // FormView - luôn scroll to top
   },
   {
     path: '/your-category/your-module/:id/sua',
     element: YourModuleFormRoute,
     protected: true,
     layout: true,
+    scrollBehavior: 'top', // FormView - luôn scroll to top
   },
   {
     path: '/your-category/your-module/:id',
     element: YourModuleDetailRoute,
     protected: true,
     layout: true,
+    scrollBehavior: 'top', // DetailView - luôn scroll to top
   },
   {
     path: '/your-category/your-module',
     element: YourModuleListRoute,
     protected: true,
     layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại
   },
 ]
 ```
+
+**Lưu ý về Scroll Behavior:**
+- **ListView** (`scrollBehavior: 'restore'`): Restore scroll position khi quay lại từ DetailView/FormView
+- **DetailView** (`scrollBehavior: 'top'`): Luôn scroll to top khi vào
+- **FormView** (`scrollBehavior: 'top'`): Luôn scroll to top khi vào
+
+Nếu sử dụng `generateModuleRoutes()`, scroll behavior sẽ được tự động thêm.
 
 ## Migration từ Orchestrator Pattern
 
@@ -210,8 +221,17 @@ import { generateModuleRoutes } from "@/shared/utils/generate-explicit-routes"
 import { yourModuleConfig } from "./config"
 
 const routes = generateModuleRoutes(yourModuleConfig)
-// Returns array of 4 RouteConfig objects
+// Returns array of 4 RouteConfig objects với scroll behavior tự động:
+// - ListView: 'restore'
+// - DetailView: 'top'
+// - FormView: 'top'
 ```
+
+**Scroll Behavior tự động:**
+- Routes được generate tự động sẽ có scroll behavior phù hợp
+- ListView: `'restore'` - restore scroll position khi quay lại
+- DetailView: `'top'` - luôn scroll to top
+- FormView: `'top'` - luôn scroll to top
 
 ### Generate All Routes
 
