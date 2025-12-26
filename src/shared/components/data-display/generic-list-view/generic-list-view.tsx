@@ -33,6 +33,7 @@ export function GenericListView<TData, TValue>({
     filterColumn = "name",
     onExport,
     onImport,
+    isImporting = false,
     onRowClick,
     onRowHover,
     onDeleteSelected,
@@ -129,6 +130,7 @@ export function GenericListView<TData, TValue>({
                 filterColumn={filterColumn}
                 onExport={onExport}
                 onImport={onImport}
+                isImporting={isImporting}
                 onAdd={onAdd}
                 addHref={addHref}
                 onBack={onBack}

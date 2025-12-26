@@ -35,36 +35,8 @@ export function UserNav() {
   const navigate = useNavigate()
   const { theme, setTheme } = useUserPreferencesStore()
 
-  // Apply theme to document
-  useEffect(() => {
-    const root = document.documentElement
-
-    // Remove all theme classes
-    root.classList.remove('light', 'dark')
-
-    // Determine effective theme (if system, check media query)
-    let effectiveTheme = theme
-    if (theme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      effectiveTheme = prefersDark ? 'dark' : 'light'
-    }
-
-    root.classList.add(effectiveTheme)
-
-    // Listen for system theme changes if using system theme
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      const handleChange = (e: MediaQueryListEvent) => {
-        root.classList.remove('light', 'dark')
-        root.classList.add(e.matches ? 'dark' : 'light')
-      }
-
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
-    }
-  }, [theme])
-
-  // Determine if dark mode is active (for switch)
+  // Determine if dark mode is active (for switch UI only)
+  // Theme application is handled by useUserPreferencesSync hook in Layout
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === 'undefined') return false
     if (theme === 'dark') return true
@@ -173,6 +145,12 @@ export function UserNav() {
               className="cursor-pointer"
             >
               <span>Đổi mật khẩu</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => navigate('/settings')}
+              className="cursor-pointer"
+            >
+              <span>Cài đặt</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

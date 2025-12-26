@@ -6,8 +6,12 @@ import {
   SidebarInset,
   SidebarProvider,
 } from '@/components/ui/sidebar'
+import { useUserPreferencesSync } from '@/hooks/use-user-preferences-sync'
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  // Sync user preferences globally (theme, primary color, font family)
+  useUserPreferencesSync()
+
   return (
     <BreadcrumbProvider>
       <SidebarProvider defaultOpen={true}>

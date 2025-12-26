@@ -15,8 +15,14 @@ export const nhanSuSchema = z.object({
     gioi_tinh: z.string().optional().nullable(),
     hon_nhan: z.string().optional().nullable(),
     so_dien_thoai: z.string().optional().nullable(),
-    email_ca_nhan: z.string().email("Email không hợp lệ").optional().nullable(),
-    email_cong_ty: z.string().email("Email không hợp lệ"),
+  email_ca_nhan: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? null : val),
+    z.string().email("Email không hợp lệ").nullable().optional()
+  ),
+  email_cong_ty: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? null : val),
+    z.string().email("Email không hợp lệ").nullable().optional()
+  ),
     tg_tao: z.string().optional().nullable(),
     tg_cap_nhat: z.string().optional().nullable(),
     ngay_sinh: z.string().optional().nullable(),

@@ -14,6 +14,7 @@ export interface GenericListViewProps<TData, TValue> {
         filteredCount: number
     }) => void
     onImport?: () => void
+    isImporting?: boolean
     onRowClick?: (row: TData) => void
     onRowHover?: (row: TData) => void
     onDeleteSelected?: (selectedRows: TData[]) => Promise<void>
@@ -125,6 +126,7 @@ export interface GenericListToolbarSectionProps<TData> {
     filterColumn: string
     onExport?: GenericListViewProps<TData, any>["onExport"]
     onImport?: () => void
+    isImporting?: boolean
     onAdd?: () => void
     addHref?: string
     onBack?: () => void

@@ -13,6 +13,7 @@ export function GenericListToolbarSection<TData>({
     filterColumn,
     onExport,
     onImport,
+    isImporting = false,
     onAdd,
     addHref,
     onBack,
@@ -35,6 +36,7 @@ export function GenericListToolbarSection<TData>({
                 filterColumn={filterColumn}
                 onExport={onExport}
                 onImport={onImport}
+                isImporting={isImporting}
                 onAdd={onAdd}
                 addHref={addHref}
                 onBack={onBack}

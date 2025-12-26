@@ -76,7 +76,7 @@ export function EditProfileForm({ employee, onSuccess, onCancel }: EditProfileFo
         so_dien_thoai: employee.so_dien_thoai || '',
         email_ca_nhan: employee.email_ca_nhan || '',
         ghi_chu: employee.ghi_chu || '',
-      })
+  })
       setAvatarUrl(employee.avatar_url || null)
     }
   }, [employee, form])

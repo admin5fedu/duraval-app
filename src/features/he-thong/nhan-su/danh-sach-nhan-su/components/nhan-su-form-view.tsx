@@ -24,7 +24,7 @@ const sections: FormSection[] = [
   {
     title: "Công Việc & Chức Vụ",
     fields: [
-      { name: "email_cong_ty", label: "Email Công Ty", type: "email", required: true },
+      { name: "email_cong_ty", label: "Email Công Ty", type: "email", required: false },
       { name: "phong_ban", label: "Phòng Ban" },
       { name: "bo_phan", label: "Bộ Phận" },
       { name: "nhom", label: "Nhóm" },

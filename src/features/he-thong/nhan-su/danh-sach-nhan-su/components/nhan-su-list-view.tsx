@@ -16,6 +16,7 @@ import { nhanSuConfig } from "../config"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
 import { DataTableFacetedFilter } from "@/shared/components/data-display/data-table-faceted-filter"
 import { NhanSuImportDialog } from "./nhan-su-import-dialog"
+import { useBatchUpsertNhanSu } from "../actions/nhan-su-excel-actions"
 
 interface NhanSuListViewProps {
     initialData?: NhanSu[]
@@ -33,6 +34,7 @@ export function NhanSuListView({
     const { data: nhanSuList, isLoading, isError, refetch } = useNhanSu(initialData)
     const navigate = useNavigate()
     const batchDeleteMutation = useBatchDeleteNhanSu()
+    const batchImportMutation = useBatchUpsertNhanSu()
     const module = nhanSuConfig.moduleName
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
 
@@ -251,12 +253,14 @@ export function NhanSuListView({
                 getCellValue,
             }}
             onImport={() => setImportDialogOpen(true)}
+            isImporting={batchImportMutation.isPending}
         />
 
             {/* Import Dialog */}
             <NhanSuImportDialog
                 open={importDialogOpen}
                 onOpenChange={setImportDialogOpen}
+                mutation={batchImportMutation}
             />
         </>
     )

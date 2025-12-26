@@ -10,6 +10,14 @@ interface UserPreferences {
     theme: 'light' | 'dark' | 'system'
     setTheme: (theme: 'light' | 'dark' | 'system') => void
 
+    // Primary color preferences
+    primaryColor: string
+    setPrimaryColor: (color: string) => void
+
+    // Font preferences
+    fontFamily: string
+    setFontFamily: (font: string) => void
+
     // Language preferences
     language: 'vi' | 'en'
     setLanguage: (language: 'vi' | 'en') => void
@@ -43,6 +51,8 @@ interface UserPreferences {
 
 const defaultPreferences: Omit<UserPreferences, 
     | 'setTheme' 
+    | 'setPrimaryColor'
+    | 'setFontFamily'
     | 'setLanguage' 
     | 'setDefaultPageSize' 
     | 'setDefaultView' 
@@ -52,7 +62,9 @@ const defaultPreferences: Omit<UserPreferences,
     | 'setPushNotifications' 
     | 'setDashboardLayout'
 > = {
-    theme: 'system',
+    theme: 'light', // Default light
+    primaryColor: 'red', // Default red
+    fontFamily: 'inter', // Default Inter
     language: 'vi',
     defaultPageSize: 50,
     defaultView: 'list',
@@ -68,6 +80,8 @@ export const useUserPreferencesStore = create<UserPreferences>()(
         (set) => ({
             ...defaultPreferences,
             setTheme: (theme) => set({ theme }),
+            setPrimaryColor: (color) => set({ primaryColor: color }),
+            setFontFamily: (font) => set({ fontFamily: font }),
             setLanguage: (language) => set({ language }),
             setDefaultPageSize: (size) => set({ defaultPageSize: size }),
             setDefaultView: (view) => set({ defaultView: view }),

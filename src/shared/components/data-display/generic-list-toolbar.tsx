@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Table } from "@tanstack/react-table"
-import { X, Download, Plus, ChevronLeft, Search, Upload } from "lucide-react"
+import { X, Download, Plus, ChevronLeft, Search, Upload, Loader2 } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ interface GenericListToolbarProps<TData> {
         filteredCount: number
     }) => void
     onImport?: () => void
+    isImporting?: boolean
     onDeleteSelected?: () => void
     onAdd?: () => void
     addHref?: string
@@ -62,6 +63,7 @@ function GenericListToolbarComponent<TData>({
     placeholder = "Tìm kiếm...",
     onExport,
     onImport,
+    isImporting = false,
     onDeleteSelected,
     onAdd,
     addHref,
@@ -359,12 +361,22 @@ function GenericListToolbarComponent<TData>({
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className="h-8 shrink-0 hidden lg:flex" 
+                            className="h-8 shrink-0 hidden md:flex" 
                             onClick={onImport}
-                            title="Nhập dữ liệu"
+                            title="Nhập dữ liệu từ Excel"
+                            disabled={isImporting}
                         >
-                            <Upload className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
-                            <span className="hidden xl:inline">Nhập</span>
+                            {isImporting ? (
+                                <>
+                                    <Loader2 className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4 animate-spin" />
+                                    <span className="hidden lg:inline">Đang nhập...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Upload className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
+                                    <span className="hidden lg:inline">Nhập Excel</span>
+                                </>
+                            )}
                         </Button>
                     )}
                     {(onExport || exportOptions) && !hasSelection && (
@@ -552,12 +564,22 @@ function GenericListToolbarComponent<TData>({
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className="h-8 shrink-0 hidden lg:flex" 
+                            className="h-8 shrink-0 hidden md:flex" 
                             onClick={onImport}
-                            title="Nhập dữ liệu"
+                            title="Nhập dữ liệu từ Excel"
+                            disabled={isImporting}
                         >
-                            <Upload className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
-                            <span className="hidden xl:inline">Nhập</span>
+                            {isImporting ? (
+                                <>
+                                    <Loader2 className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4 animate-spin" />
+                                    <span className="hidden lg:inline">Đang nhập...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Upload className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
+                                    <span className="hidden lg:inline">Nhập Excel</span>
+                                </>
+                            )}
                         </Button>
                     )}
                     {(onExport || exportOptions) && !hasSelection && (
