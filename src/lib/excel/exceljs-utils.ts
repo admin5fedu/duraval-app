@@ -161,6 +161,7 @@ export function createWorkbook(sheetName: string = 'Sheet1'): ExcelJS.Workbook {
 
 /**
  * Add data to worksheet with formatting
+ * @deprecated Use addDataToWorksheetWithFormat from excel-formatter instead
  */
 export function addDataToWorksheet(
   worksheet: ExcelJS.Worksheet,
@@ -201,6 +202,77 @@ export function addDataToWorksheet(
     state: 'frozen',
     ySplit: 1
   }]
+}
+
+/**
+ * Add data to worksheet with professional formatting
+ */
+export async function addDataToWorksheetWithFormat(
+  worksheet: ExcelJS.Worksheet,
+  headers: string[],
+  rows: any[][],
+  options?: {
+    formatOptions?: import('@/shared/utils/excel-formatter').ExcelFormatOptions
+    columnFormats?: Record<string, { numberFormat?: string; dataType?: string }>
+    includeMetadata?: boolean
+    metadata?: {
+      moduleName?: string
+      exportDate?: string
+      exportedBy?: string
+      filters?: string[]
+      searchQuery?: string
+      recordCount?: number
+      totalCount?: number
+    }
+  }
+): Promise<void> {
+  // Import formatter dynamically to avoid circular dependencies
+  const { formatWorksheet, addMetadataToWorksheet, detectAndFormatColumn } = await import('@/shared/utils/excel-formatter')
+  
+  // Add headers
+  const headerRow = worksheet.addRow(headers)
+  
+  // Add data rows
+  rows.forEach(row => {
+    worksheet.addRow(row)
+  })
+  
+  // Detect and apply column formats
+  if (options?.columnFormats) {
+    worksheet.columns.forEach((column, index) => {
+      const columnKey = String.fromCharCode(65 + index) // A, B, C, ...
+      const format = options.columnFormats![columnKey]
+      
+      if (format) {
+        if (format.numberFormat) {
+          column.numFmt = format.numberFormat
+        }
+      }
+    })
+  } else {
+    // Auto-detect formats
+    const dateFormat = options?.metadata?.exportDate ? 
+      (options.formatOptions?.dateFormat || 'dd/mm/yyyy') : 'dd/mm/yyyy'
+    
+    worksheet.columns.forEach((column, index) => {
+      const columnData = rows.map(row => row[index])
+      const detected = detectAndFormatColumn(columnData, index, dateFormat)
+      
+      if (detected.numberFormat) {
+        column.numFmt = detected.numberFormat
+      }
+    })
+  }
+  
+  // Apply professional formatting
+  if (options?.formatOptions !== false) {
+    formatWorksheet(worksheet, options?.formatOptions)
+  }
+  
+  // Add metadata if requested
+  if (options?.includeMetadata && options?.metadata) {
+    addMetadataToWorksheet(worksheet, options.metadata)
+  }
 }
 
 /**

@@ -23,6 +23,10 @@ import { dialogContentSpacingClass, dialogPaddingClass, standardPaddingClass } f
 import { autoMapColumns, type ColumnMapping, validateMapping } from "@/shared/utils/excel-column-mapper"
 import { filterEmptyRows, cleanDataset } from "@/shared/utils/excel-data-cleaner"
 import { parseDate } from "@/shared/utils/excel-date-parser"
+import { 
+  loadImportPreferences, 
+  saveImportPreferences,
+} from "@/shared/utils/import-preferences-manager"
 
 interface ImportRow {
   rowNumber: number
@@ -342,6 +346,11 @@ export function ImportDialog<TData extends Record<string, any>>({
       }, 200)
 
       const result = await onImport(dataToImport)
+      
+      // Save preferences after successful import
+      if (result.success || result.inserted > 0 || result.updated > 0) {
+        handleSavePreferences()
+      }
 
       clearInterval(progressInterval)
       setImportProgress(100)
@@ -398,17 +407,40 @@ export function ImportDialog<TData extends Record<string, any>>({
   const validRows = parseResult?.rows.filter((r) => r.errors.length === 0) || []
   const invalidRows = parseResult?.rows.filter((r) => r.errors.length > 0) || []
 
+  // Load preferences when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      const savedPrefs = loadImportPreferences(moduleName)
+      if (savedPrefs) {
+        setOptions(savedPrefs.importOptions)
+        if (savedPrefs.columnMapping && Object.keys(savedPrefs.columnMapping).length > 0) {
+          setColumnMapping(savedPrefs.columnMapping)
+        }
+      }
+    }
+  }, [open, moduleName])
+
+  // Save preferences after successful import
+  const handleSavePreferences = React.useCallback(() => {
+    saveImportPreferences(moduleName, {
+      importOptions: options,
+      columnMapping: columnMapping,
+    })
+  }, [moduleName, options, columnMapping])
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="!max-w-[1200px] !w-[90vw] max-w-[90vw] max-h-[95vh] p-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
           <DialogTitle>Nhập Dữ Liệu Từ Excel</DialogTitle>
           <DialogDescription>
             Tải lên file Excel (.xlsx) để nhập hoặc cập nhật dữ liệu hàng loạt
           </DialogDescription>
         </DialogHeader>
 
-        <div className={cn(dialogContentSpacingClass(), "py-4")}>
+        <div className="flex-1 overflow-hidden min-h-0">
+          <ScrollArea className="h-full">
+            <div className={cn(dialogContentSpacingClass(), "px-6 py-4")}>
           {/* Download Template Section */}
           {!file && !parseResult && !isParsing && !importResult && templateColumns && templateColumns.length > 0 && (
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border mb-4">
@@ -738,9 +770,11 @@ export function ImportDialog<TData extends Record<string, any>>({
               <Progress value={importProgress} />
             </div>
           )}
+            </div>
+          </ScrollArea>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="px-6 py-4 border-t flex-shrink-0">
           <Button variant="outline" onClick={handleClose} disabled={isImporting}>
             {importResult ? "Đóng" : "Hủy"}
           </Button>

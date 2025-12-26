@@ -328,12 +328,9 @@ function GenericListToolbarComponent<TData>({
                             />
                         )}
                     </div>
-                    <div className="shrink-0">
-                        <DataTableViewOptions table={table} />
-                    </div>
                 </div>
 
-                {/* Hàng 2: Import, Export, Thêm mới */}
+                {/* Hàng 2: Column Options, Import, Export, Thêm mới */}
                 <div className="flex items-center justify-end gap-2 w-full max-w-full min-w-0">
                     {/* ⚡ Professional: Selection toolbar */}
                     <SelectionToolbar
@@ -357,24 +354,28 @@ function GenericListToolbarComponent<TData>({
                         } : undefined)}
                         showCount={false}
                     />
+                    {/* Column Options - Icon only, bên trái nút Import */}
+                    <div className="shrink-0">
+                        <DataTableViewOptions table={table} />
+                    </div>
                     {onImport && !hasSelection && (
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className="h-8 shrink-0 hidden md:flex" 
+                            className="h-8 shrink-0" 
                             onClick={onImport}
                             title="Nhập dữ liệu từ Excel"
                             disabled={isImporting}
                         >
                             {isImporting ? (
                                 <>
-                                    <Loader2 className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4 animate-spin" />
-                                    <span className="hidden lg:inline">Đang nhập...</span>
+                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                    <span>Đang nhập...</span>
                                 </>
                             ) : (
                                 <>
-                                    <Upload className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
-                                    <span className="hidden lg:inline">Nhập Excel</span>
+                                    <Upload className="mr-1.5 h-3.5 w-3.5" />
+                                    <span>Nhập</span>
                                 </>
                             )}
                         </Button>
@@ -529,11 +530,6 @@ function GenericListToolbarComponent<TData>({
                             )}
                         </Button>
                     )}
-
-                    {/* View Options - columns toggle */}
-                    <div className="shrink-0">
-                        <DataTableViewOptions table={table} />
-                    </div>
                 </div>
 
                 <div className={toolbarContainerClass("shrink-0 min-w-0")}>
@@ -560,24 +556,28 @@ function GenericListToolbarComponent<TData>({
                         showCount={false} // Count is shown in footer
                     />
 
+                    {/* Column Options - Icon only, bên trái nút Import */}
+                    <div className="shrink-0">
+                        <DataTableViewOptions table={table} />
+                    </div>
                     {onImport && !hasSelection && (
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className="h-8 shrink-0 hidden md:flex" 
+                            className="h-8 shrink-0" 
                             onClick={onImport}
                             title="Nhập dữ liệu từ Excel"
                             disabled={isImporting}
                         >
                             {isImporting ? (
                                 <>
-                                    <Loader2 className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4 animate-spin" />
-                                    <span className="hidden lg:inline">Đang nhập...</span>
+                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                    <span>Đang nhập...</span>
                                 </>
                             ) : (
                                 <>
-                                    <Upload className="mr-1.5 lg:mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
-                                    <span className="hidden lg:inline">Nhập Excel</span>
+                                    <Upload className="mr-1.5 h-3.5 w-3.5" />
+                                    <span>Nhập</span>
                                 </>
                             )}
                         </Button>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Download, Loader2, FileSpreadsheet, FileText } from "lucide-react"
+import { Download, Loader2, FileSpreadsheet, FileText, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -25,10 +25,33 @@ import {
     type ColumnFiltersState,
 } from "@tanstack/react-table"
 import { toast } from "sonner"
-import { createWorkbook, addDataToWorksheet, downloadWorkbook, generateFilename } from "@/lib/excel/exceljs-utils"
+import { createWorkbook, addDataToWorksheetWithFormat, downloadWorkbook, generateFilename } from "@/lib/excel/exceljs-utils"
 import { exportToPDF } from "@/lib/pdf/pdf-utils"
 import { cn } from "@/lib/utils"
 import { bodyTextClass } from "@/shared/utils/text-styles"
+import { ExportPreview } from "./export-preview"
+import { ColumnOrderSelector } from "./column-order-selector"
+import { ExportTemplateSelector } from "./export-template-selector"
+import type { ExcelFormatOptions } from "@/shared/utils/excel-formatter"
+import { getColumnDisplayName } from "@/shared/utils/column-name-mapper"
+import { 
+  loadExportPreferences, 
+  saveExportPreferences,
+  type ExportPreferences 
+} from "@/shared/utils/export-preferences-manager"
+import {
+  getExportTemplates,
+  saveExportTemplate,
+  loadExportTemplate,
+  deleteExportTemplate,
+  type ExportTemplate
+} from "@/shared/utils/export-template-manager"
+
+export interface ExportOptions {
+  includeMetadata?: boolean
+  professionalFormatting?: boolean
+  dateFormat?: 'dd/mm/yyyy' | 'mm/dd/yyyy' | 'yyyy-mm-dd'
+}
 
 interface ExportDialogProps<TData> {
     open: boolean
@@ -42,6 +65,8 @@ interface ExportDialogProps<TData> {
     moduleName?: string
     getColumnTitle?: (columnId: string, columnDef: ColumnDef<TData> | undefined) => string
     getCellValue?: (row: TData, columnId: string, columnDef: ColumnDef<TData> | undefined) => any
+    exportOptions?: ExportOptions
+    onExportOptionsChange?: (options: ExportOptions) => void
 }
 
 type ExportMode = 'all' | 'filtered' | 'selected'
@@ -59,12 +84,21 @@ export function ExportDialog<TData>({
     moduleName = 'export',
     getColumnTitle,
     getCellValue,
+    exportOptions = {
+        includeMetadata: true,
+        professionalFormatting: true,
+        dateFormat: 'dd/mm/yyyy',
+    },
+    onExportOptionsChange,
 }: ExportDialogProps<TData>) {
     const [mode, setMode] = React.useState<ExportMode>('filtered')
     const [format, setFormat] = React.useState<ExportFormat>('excel')
     const [selectedColumns, setSelectedColumns] = React.useState<Set<string>>(new Set())
+    const [columnOrder, setColumnOrder] = React.useState<Map<string, number>>(new Map())
     const [isExporting, setIsExporting] = React.useState(false)
     const [progress, setProgress] = React.useState(0)
+    const [showPreview, setShowPreview] = React.useState(false)
+    const [options, setOptions] = React.useState<ExportOptions>(exportOptions)
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(currentFilters)
     const [globalFilter, setGlobalFilter] = React.useState(currentSearch)
 
@@ -91,41 +125,129 @@ export function ExportDialog<TData>({
         enableRowSelection: true,
     })
 
-    // Initialize selected columns with visible columns
+    // Initialize selected columns with visible columns or saved preferences
     React.useEffect(() => {
         if (open) {
+            // Try to load saved preferences
+            const savedPrefs = loadExportPreferences(moduleName)
+            
+            if (savedPrefs) {
+                // Use saved preferences
+                setSelectedColumns(new Set(savedPrefs.selectedColumns))
+                setColumnOrder(new Map(Object.entries(savedPrefs.columnOrder)))
+                setOptions(savedPrefs.exportOptions)
+                setMode(savedPrefs.defaultMode || 'filtered')
+                setFormat(savedPrefs.defaultFormat || 'excel')
+            } else {
+                // Initialize with visible columns
             const visibleColumns = table.getVisibleLeafColumns()
                 .map(col => col.id)
                 .filter((id): id is string => Boolean(id))
                 .filter(id => id !== 'actions' && id !== 'select') as string[]
             setSelectedColumns(new Set(visibleColumns))
+                
+                // Initialize column order
+                const orderMap = new Map<string, number>()
+                visibleColumns.forEach((id, index) => {
+                    orderMap.set(id, index)
+                })
+                setColumnOrder(orderMap)
+            }
         }
-    }, [open, table])
+    }, [open, table, moduleName])
+    
+    // Sync options when prop changes
+    React.useEffect(() => {
+        if (open) {
+            setOptions(exportOptions)
+        }
+    }, [open, exportOptions])
 
-    // Get available columns (excluding select and actions)
+    // Get available columns (excluding select and actions) with order
     const availableColumns = React.useMemo(() => {
-        return columns
+        // Step 1: Get columns from table (defined columns)
+        const definedColumns = new Map<string, { id: string; title: string; order: number }>()
+        
+        // Use getVisibleLeafColumns() which is more reliable
+        table.getVisibleLeafColumns()
             .filter(col => {
                 const colId = col.id
                 return colId && colId !== 'select' && colId !== 'actions'
             })
-            .map(col => {
+            .forEach(col => {
                 const colId = col.id!
-                const meta = col.meta as any
+                const meta = col.columnDef.meta as any
                 const title = getColumnTitle
-                    ? getColumnTitle(colId, col)
+                    ? getColumnTitle(colId, col.columnDef)
                     : meta?.title || colId
                         .split('_')
                         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                         .join(' ')
-                return {
-                    id: colId,
-                    title,
-                    order: meta?.order || 999
+                const customOrder = columnOrder.get(colId)
+                const order = customOrder !== undefined ? customOrder : (meta?.order ?? 999)
+                definedColumns.set(colId, { id: colId, title, order })
+            })
+        
+        // Step 2: Auto-detect additional columns from data (fields that exist in data but not in columns)
+        const dataColumns = new Map<string, { id: string; title: string; order: number }>()
+        
+        if (data.length > 0) {
+            // Get all keys from first data row
+            const firstRow = data[0] as any
+            const allKeys = Object.keys(firstRow).filter(key => 
+                key !== 'select' && 
+                key !== 'actions' && 
+                !definedColumns.has(key) &&
+                // Exclude internal/private fields
+                !key.startsWith('_') &&
+                key !== 'id' // Exclude generic id if it's not the primary key
+            )
+            
+            allKeys.forEach((key, index) => {
+                // Only add if not already defined
+                if (!definedColumns.has(key)) {
+                    // Use column name mapper to get Vietnamese name with diacritics
+                    const title = getColumnDisplayName(key)
+                    const customOrder = columnOrder.get(key)
+                    const order = customOrder !== undefined ? customOrder : (1000 + index) // Start from 1000 for auto-detected columns
+                    dataColumns.set(key, { id: key, title, order })
                 }
             })
+        }
+        
+        // Step 3: Combine defined columns and auto-detected columns
+        const allColumns = Array.from(definedColumns.values())
+            .concat(Array.from(dataColumns.values()))
             .sort((a, b) => a.order - b.order)
-    }, [columns, getColumnTitle])
+        
+        return allColumns
+    }, [columns, getColumnTitle, columnOrder, table, data])
+    
+    // Handle column reorder
+    const handleColumnReorder = React.useCallback((columnId: string, direction: 'up' | 'down') => {
+        setColumnOrder(prev => {
+            const newOrder = new Map(prev)
+            const currentOrder = newOrder.get(columnId) ?? 999
+            
+            // Find adjacent column
+            const sortedCols = [...availableColumns].sort((a, b) => a.order - b.order)
+            const currentIndex = sortedCols.findIndex(col => col.id === columnId)
+            
+            if (direction === 'up' && currentIndex > 0) {
+                const prevCol = sortedCols[currentIndex - 1]
+                const prevOrder = newOrder.get(prevCol.id) ?? 999
+                newOrder.set(columnId, prevOrder)
+                newOrder.set(prevCol.id, currentOrder)
+            } else if (direction === 'down' && currentIndex < sortedCols.length - 1) {
+                const nextCol = sortedCols[currentIndex + 1]
+                const nextOrder = newOrder.get(nextCol.id) ?? 999
+                newOrder.set(columnId, nextOrder)
+                newOrder.set(nextCol.id, currentOrder)
+            }
+            
+            return newOrder
+        })
+    }, [availableColumns])
 
     // Calculate row count based on mode
     const rowCount = React.useMemo(() => {
@@ -185,10 +307,12 @@ export function ExportDialog<TData>({
                 return colId && selectedColumns.has(colId) && colId !== 'actions' && colId !== 'select'
             })
 
-            // Sort columns by order
+            // Sort columns by custom order
             exportColumns.sort((a, b) => {
-                const aOrder = (a.meta as any)?.order || 999
-                const bOrder = (b.meta as any)?.order || 999
+                const aId = a.id!
+                const bId = b.id!
+                const aOrder = columnOrder.get(aId) ?? (a.meta as any)?.order ?? 999
+                const bOrder = columnOrder.get(bId) ?? (b.meta as any)?.order ?? 999
                 return aOrder - bOrder
             })
 
@@ -245,15 +369,52 @@ export function ExportDialog<TData>({
             }
 
             if (format === 'excel') {
-                // Export to Excel
+                // Export to Excel with professional formatting
                 const workbook = createWorkbook(moduleName)
                 const worksheet = workbook.getWorksheet(1)
                 if (!worksheet) {
                     throw new Error('Không thể tạo worksheet')
                 }
-                addDataToWorksheet(worksheet, headers, rows)
+                
+                // Prepare format options
+                const formatOptions: ExcelFormatOptions | undefined = options.professionalFormatting 
+                    ? undefined // Use default formatting
+                    : false // Disable formatting
+                
+                // Add data with formatting
+                await addDataToWorksheetWithFormat(worksheet, headers, rows, {
+                    formatOptions,
+                    includeMetadata: options.includeMetadata,
+                    metadata: options.includeMetadata ? {
+                        moduleName,
+                        exportDate: new Date().toLocaleString('vi-VN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        }),
+                        filters: currentFilters.length > 0 
+                            ? currentFilters.map(f => `${f.id}: ${JSON.stringify(f.value)}`)
+                            : undefined,
+                        searchQuery: currentSearch || undefined,
+                        recordCount: rows.length,
+                        totalCount,
+                    } : undefined,
+                })
+                
                 const filename = generateFilename(`${moduleName}_export`)
                 await downloadWorkbook(workbook, filename)
+                
+                // Save preferences after successful export
+                saveExportPreferences(moduleName, {
+                    selectedColumns: Array.from(selectedColumns),
+                    columnOrder: Object.fromEntries(columnOrder),
+                    exportOptions: options,
+                    defaultMode: mode,
+                    defaultFormat: format,
+                })
+                
                 toast.success(`Đã xuất ${rows.length} dòng ra file Excel`)
             } else {
                 // Export to PDF
@@ -284,15 +445,19 @@ export function ExportDialog<TData>({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
+            <DialogContent className="!max-w-[1200px] !w-[90vw] max-w-[90vw] max-h-[95vh] p-0 flex flex-col">
+                <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
                     <DialogTitle>Xuất dữ liệu</DialogTitle>
                     <DialogDescription>
                         Chọn định dạng và dữ liệu cần xuất
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6 py-4">
+                <div className="flex-1 overflow-hidden min-h-0">
+                    <ScrollArea className="h-full">
+                        <div className="px-6 py-4 space-y-6">
+                            {/* Export Format and Mode - 2 columns grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Export Format */}
                     <div className="space-y-3">
                         <Label>Định dạng</Label>
@@ -313,8 +478,6 @@ export function ExportDialog<TData>({
                             </div>
                         </RadioGroup>
                     </div>
-
-                    <Separator />
 
                     {/* Export Mode */}
                     <div className="space-y-3">
@@ -341,58 +504,76 @@ export function ExportDialog<TData>({
                                 </div>
                             )}
                         </RadioGroup>
+                                </div>
                     </div>
 
                     <Separator />
 
-                    {/* Column Selection */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <Label>Cột xuất ({selectedColumns.size}/{availableColumns.length})</Label>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 text-xs"
-                                    onClick={handleSelectAllColumns}
-                                >
-                                    Chọn tất cả
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 text-xs"
-                                    onClick={handleDeselectAllColumns}
-                                >
-                                    Bỏ chọn
-                                </Button>
+                            {/* Column Selection with Ordering - Wider */}
+                            <div className="w-full space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label>Cột xuất</Label>
+                                    <ExportTemplateSelector
+                                        moduleName={moduleName}
+                                        selectedColumns={selectedColumns}
+                                        columnOrder={columnOrder}
+                                        exportOptions={options}
+                                        defaultMode={mode}
+                                        defaultFormat={format}
+                                        onLoadTemplate={(config) => {
+                                            setSelectedColumns(new Set(config.selectedColumns))
+                                            setColumnOrder(new Map(Object.entries(config.columnOrder)))
+                                            setOptions(config.exportOptions)
+                                            if (config.defaultMode) setMode(config.defaultMode)
+                                            if (config.defaultFormat) setFormat(config.defaultFormat)
+                                        }}
+                                    />
+                                </div>
+                                <ColumnOrderSelector
+                                    columns={availableColumns}
+                                    selectedColumns={selectedColumns}
+                                    onColumnToggle={handleColumnToggle}
+                                    onColumnReorder={handleColumnReorder}
+                                    onSelectAll={handleSelectAllColumns}
+                                    onDeselectAll={handleDeselectAllColumns}
+                                />
                             </div>
+
+                            <Separator />
+
+                            {/* Export Options */}
+                            <div className="space-y-3">
+                                <Label>Tùy chọn xuất</Label>
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="export-formatting"
+                                            checked={options.professionalFormatting ?? true}
+                                            onCheckedChange={(checked) => {
+                                                const newOptions = { ...options, professionalFormatting: checked as boolean }
+                                                setOptions(newOptions)
+                                                onExportOptionsChange?.(newOptions)
+                                            }}
+                                        />
+                                        <Label htmlFor="export-formatting" className="cursor-pointer">
+                                            Áp dụng định dạng chuyên nghiệp (màu header, border, font)
+                                        </Label>
                         </div>
-                        <ScrollArea className="h-[200px] rounded-md border p-3">
-                            <div className="space-y-2">
-                                {availableColumns.map((column) => {
-                                    const isSelected = selectedColumns.has(column.id)
-                                    return (
-                                        <div
-                                            key={column.id}
-                                            className="flex items-center space-x-2"
-                                        >
+                                    <div className="flex items-center space-x-2">
                                             <Checkbox
-                                                id={`export-column-${column.id}`}
-                                                checked={isSelected}
-                                                onCheckedChange={() => handleColumnToggle(column.id)}
-                                            />
-                                            <Label
-                                                htmlFor={`export-column-${column.id}`}
-                                                className={cn(bodyTextClass(), "cursor-pointer flex-1")}
-                                            >
-                                                {column.title}
+                                            id="export-metadata"
+                                            checked={options.includeMetadata ?? true}
+                                            onCheckedChange={(checked) => {
+                                                const newOptions = { ...options, includeMetadata: checked as boolean }
+                                                setOptions(newOptions)
+                                                onExportOptionsChange?.(newOptions)
+                                            }}
+                                        />
+                                        <Label htmlFor="export-metadata" className="cursor-pointer">
+                                            Bao gồm thông tin xuất (filters, search, ngày xuất)
                                             </Label>
                                         </div>
-                                    )
-                                })}
-                            </div>
-                        </ScrollArea>
+                                </div>
                     </div>
 
                     {/* Progress */}
@@ -405,15 +586,25 @@ export function ExportDialog<TData>({
                             <Progress value={progress} />
                         </div>
                     )}
+                        </div>
+                    </ScrollArea>
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="px-6 py-4 border-t flex-shrink-0">
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isExporting}
                     >
                         Hủy
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowPreview(true)}
+                        disabled={isExporting || selectedColumns.size === 0}
+                    >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Xem trước
                     </Button>
                     <Button
                         onClick={handleExport}
@@ -432,6 +623,31 @@ export function ExportDialog<TData>({
                         )}
                     </Button>
                 </DialogFooter>
+                
+                {/* Export Preview Dialog */}
+                {showPreview && (() => {
+                    // Prepare export columns based on selected columns and order
+                    const exportColumns = availableColumns
+                        .filter(col => selectedColumns.has(col.id))
+                        .sort((a, b) => a.order - b.order)
+                    
+                    const previewHeaders = exportColumns.map(col => col.title)
+                    const previewColumnIds = exportColumns.map(col => col.id)
+                    
+                    return (
+                        <ExportPreview
+                            open={showPreview}
+                            onOpenChange={setShowPreview}
+                            data={getExportData()}
+                            headers={previewHeaders}
+                            columnIds={previewColumnIds}
+                            getCellValue={getCellValue}
+                            moduleName={moduleName}
+                            rowCount={rowCount}
+                            onExport={handleExport}
+                        />
+                    )
+                })()}
             </DialogContent>
         </Dialog>
     )
