@@ -290,6 +290,14 @@ export function DateTimeCalendarPopover({ children }: DateTimeCalendarPopoverPro
     })
   }, [])
 
+  // Reset về tháng hiện tại mỗi khi mở popover
+  useEffect(() => {
+    if (open) {
+      const today = new Date()
+      setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1))
+    }
+  }, [open])
+
   const handleSelectDate = (date: Date) => {
     setSelectedDate(date)
     // Không đóng popover, chỉ highlight
