@@ -8,7 +8,7 @@
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { EnumColorConfig, registerEnumColors } from "./enum-color-registry"
-import { EnumCellRenderer, shouldUseEnumRenderer } from "./enum-cell-renderer"
+import { EnumCellRenderer } from "./enum-cell-renderer"
 import { autoDetectAndRegisterEnum } from "./enum-detection"
 
 /**
@@ -58,7 +58,6 @@ export function createEnumColumn<TData>(
     filterFn,
     meta,
     enableSorting = true,
-    enableFiltering = true,
   } = options
 
   // Auto-register enum if explicit config provided
@@ -80,7 +79,6 @@ export function createEnumColumn<TData>(
     size: size || 150,
     minSize: minSize || 120,
     enableSorting,
-    enableFiltering,
     filterFn: filterFn || ((row, id, value) => {
       return value.includes(row.getValue(id))
     }),
@@ -112,4 +110,3 @@ export function createEnumColumns<TData>(
 ): ColumnDef<TData>[] {
   return columns.map(col => createEnumColumn(col))
 }
-
