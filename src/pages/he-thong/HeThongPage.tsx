@@ -52,8 +52,8 @@ export default function HeThongPage() {
           description: "Quản lý hồ sơ và tài khoản nhân viên.",
         },
         {
-          title: "Thông tin người thân",
-          href: "/he-thong/thong-tin-nguoi-than",
+          title: "Người thân",
+          href: "/he-thong/nguoi-than",
           icon: UserRound,
           description: "Quản lý dữ liệu người thân và liên hệ khẩn cấp.",
         },

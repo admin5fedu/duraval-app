@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UseFormReturn } from "react-hook-form"
 import { FormFieldConfig } from "./generic-form-view/"
 import { ComboboxFormField } from "./combobox-form-field"
+import { ToggleButtonFormField } from "./toggle-button-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
@@ -52,7 +53,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                             isMobile ? "gap-2" : SPACING.gap.sm
                         )}>
                             <FormLabel className={cn(
-                                "flex items-center justify-between gap-1",
+                                "flex items-center gap-1",
                                 isMobile && "text-sm font-medium"
                             )}>
                                 <span>{field.label}</span>
@@ -86,6 +87,16 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         options={field.options || []}
                                         placeholder={field.placeholder || "Chọn..."}
                                         searchPlaceholder={field.description || "Tìm kiếm..."}
+                                        disabled={field.disabled}
+                                    />
+                                ) : field.type === "toggle" ? (
+                                    <ToggleButtonFormField
+                                        value={String(formField.value || '')}
+                                        onChange={(value) => {
+                                            if (field.disabled) return
+                                            formField.onChange(value)
+                                        }}
+                                        options={field.options || []}
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "select" ? (

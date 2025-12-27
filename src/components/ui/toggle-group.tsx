@@ -40,7 +40,7 @@ export function ToggleGroup({ type = "single", value, onValueChange, children, c
 
   return (
     <ToggleGroupContext.Provider value={{ value, onValueChange: handleValueChange, type }}>
-      <div className={cn("inline-flex items-center justify-center rounded-md bg-muted p-1", className)}>
+      <div className={cn("inline-flex items-center justify-center rounded-md gap-2", className)}>
         {children}
       </div>
     </ToggleGroupContext.Provider>

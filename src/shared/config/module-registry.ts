@@ -7,6 +7,7 @@
 
 import { ModuleConfig } from "@/shared/types/module-config"
 import { nhanSuConfig } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/config"
+import { nguoiThanConfig } from "@/features/he-thong/nhan-su/nguoi-than/config"
 
 /**
  * Registry class for managing module configurations
@@ -92,6 +93,7 @@ export const moduleRegistry = new ModuleRegistry()
 
 // Register all modules
 moduleRegistry.register(nhanSuConfig)
+moduleRegistry.register(nguoiThanConfig)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {

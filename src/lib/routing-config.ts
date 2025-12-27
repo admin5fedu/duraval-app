@@ -41,7 +41,7 @@ const BASE_PATH_LABELS: Record<string, string> = {
   
   // He-thong sub-modules (flattened)
   "danh-sach-nhan-su": "Danh Sách Nhân Sự",
-  "thong-tin-nguoi-than": "Thông Tin Người Thân",
+  "nguoi-than": "Người thân",
   "phong-ban": "Phòng Ban",
   "cap-bac": "Cấp Bậc",
   "chuc-vu": "Chức Vụ",

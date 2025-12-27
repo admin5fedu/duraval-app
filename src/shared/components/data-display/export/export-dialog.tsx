@@ -91,6 +91,17 @@ export function ExportDialog<TData>({
     },
     onExportOptionsChange,
 }: ExportDialogProps<TData>) {
+    // Defensive check: Ensure columns is an array
+    const safeColumns = React.useMemo(() => {
+        if (!columns) return []
+        if (Array.isArray(columns)) return columns
+        // If columns is a function, call it with empty map (fallback)
+        if (typeof columns === 'function') {
+            console.warn('ExportDialog: columns prop is a function, expected array. Using empty array as fallback.')
+            return []
+        }
+        return []
+    }, [columns])
     const [mode, setMode] = React.useState<ExportMode>('filtered')
     const [format, setFormat] = React.useState<ExportFormat>('excel')
     const [selectedColumns, setSelectedColumns] = React.useState<Set<string>>(new Set())
@@ -113,7 +124,7 @@ export function ExportDialog<TData>({
     // Create table instance for calculations
     const table = useReactTable({
         data,
-        columns,
+        columns: safeColumns,
         state: {
             columnFilters,
             globalFilter,
@@ -221,7 +232,7 @@ export function ExportDialog<TData>({
             .sort((a, b) => a.order - b.order)
         
         return allColumns
-    }, [columns, getColumnTitle, columnOrder, table, data])
+    }, [safeColumns, getColumnTitle, columnOrder, table, data])
     
     // Handle column reorder
     const handleColumnReorder = React.useCallback((columnId: string, direction: 'up' | 'down') => {
@@ -302,7 +313,7 @@ export function ExportDialog<TData>({
 
         try {
             const exportData = getExportData()
-            const exportColumns = columns.filter(col => {
+            const exportColumns = safeColumns.filter(col => {
                 const colId = col.id
                 return colId && selectedColumns.has(colId) && colId !== 'actions' && colId !== 'select'
             })

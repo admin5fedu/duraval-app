@@ -141,6 +141,7 @@ export function GenericFormDialog<T extends z.ZodType<any, any>>({
                                     successMessage={successMessage}
                                     errorMessage={errorMessage}
                                     hideHeader={true}
+                                    hideFooter={true}
                                 />
                             </div>
                         </div>

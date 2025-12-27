@@ -11,6 +11,7 @@ import { DeleteNhanSuButton } from "./delete-nhan-su-button"
 import { nhanSuConfig } from "../config"
 import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
+import { RelativesSection } from "./relatives-section"
 
 interface NhanSuDetailViewProps {
   id: number
@@ -117,16 +118,23 @@ export function NhanSuDetailView({ id, initialData, onEdit, onBack }: NhanSuDeta
   )
 
   return (
-    <GenericDetailViewSimple
-      title={nhanSu.ho_ten}
-      subtitle={nhanSu.chuc_vu || undefined}
-      avatarUrl={nhanSu.avatar_url}
-      sections={sections}
-      backUrl={onBack ? undefined : nhanSuConfig.routePath}
-      onBack={onBack}
-      actions={actions}
-      isLoading={query.isLoading && !initialData}
-    />
+    <>
+      <GenericDetailViewSimple
+        title={nhanSu.ho_ten}
+        subtitle={nhanSu.chuc_vu || undefined}
+        avatarUrl={nhanSu.avatar_url}
+        sections={sections}
+        backUrl={onBack ? undefined : nhanSuConfig.routePath}
+        onBack={onBack}
+        actions={actions}
+        isLoading={query.isLoading && !initialData}
+      />
+      
+      {/* Người Thân Section */}
+      <div className="mt-6">
+        <RelativesSection maNhanVien={nhanSu.ma_nhan_vien} />
+      </div>
+    </>
   )
 }
 

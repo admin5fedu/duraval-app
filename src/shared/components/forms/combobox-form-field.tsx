@@ -10,7 +10,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { FormControl } from "@/components/ui/form"
 
 interface ComboboxFormFieldProps {
     value: string
@@ -67,22 +66,21 @@ export function ComboboxFormField({
     return (
         <Popover open={open && !disabled} onOpenChange={(open) => !disabled && setOpen(open)}>
             <PopoverTrigger asChild>
-                <FormControl>
-                    <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        disabled={disabled}
-                        className={cn(
-                            "w-full justify-between font-normal",
-                            !value && "text-muted-foreground",
-                            className
-                        )}
-                    >
-                        {selectedOption ? selectedOption.label : placeholder}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                </FormControl>
+                <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    disabled={disabled}
+                    className={cn(
+                        "w-full justify-between font-normal",
+                        !value && "text-muted-foreground",
+                        className
+                    )}
+                >
+                    {selectedOption ? selectedOption.label : placeholder}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <div className="flex flex-col">

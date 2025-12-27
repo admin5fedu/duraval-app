@@ -46,6 +46,7 @@ export function GenericFormView<T extends z.ZodType<any, any>>({
     successMessage = "Lưu thành công",
     errorMessage = "Có lỗi xảy ra khi lưu dữ liệu",
     hideHeader = false,
+    hideFooter = false,
     children,
 }: GenericFormViewProps<T>) {
     // 1. Navigation handler
@@ -101,8 +102,8 @@ export function GenericFormView<T extends z.ZodType<any, any>>({
                     ))}
                 </div>
 
-                {/* Footer buttons when hideHeader is true */}
-                {hideHeader && (
+                {/* Footer buttons when hideHeader is true and hideFooter is false */}
+                {hideHeader && !hideFooter && (
                     <FormFooterSection
                         onCancel={handleCancel}
                         submitLabel={submitLabel}

@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "textarea" | "image" | "custom"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "toggle" | "textarea" | "image" | "custom"
 
 /**
  * Form field configuration
@@ -51,6 +51,7 @@ export interface GenericFormViewProps<T extends z.ZodType<any, any>> {
     successMessage?: string
     errorMessage?: string
     hideHeader?: boolean
+    hideFooter?: boolean // Ẩn footer khi dùng trong dialog (để tránh duplicate với DialogFooter)
     children?: React.ReactNode // Optional children (e.g., field watchers)
 }
 
