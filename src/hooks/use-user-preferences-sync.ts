@@ -23,12 +23,20 @@ const fontFamilies = [
   { value: 'poppins', label: 'Poppins', font: 'Poppins, sans-serif' },
 ]
 
+// Font size scale presets (scale factor for proportional scaling)
+const fontSizes = {
+  small: 0.875,   // 87.5% - Nhỏ
+  medium: 1.0,    // 100% - Trung bình (mặc định)
+  large: 1.125,   // 112.5% - Vừa
+  xlarge: 1.25,   // 125% - Lớn
+}
+
 /**
- * Hook to sync user preferences (theme, primary color, font family) globally
+ * Hook to sync user preferences (theme, primary color, font family, font size) globally
  * This hook automatically applies preferences to the document when store changes
  */
 export function useUserPreferencesSync() {
-  const { theme, primaryColor, fontFamily } = useUserPreferencesStore()
+  const { theme, primaryColor, fontFamily, fontSize } = useUserPreferencesStore()
 
   // Apply theme to document
   useEffect(() => {
@@ -89,8 +97,18 @@ export function useUserPreferencesSync() {
       document.body.style.fontFamily = fontPreset.font
     }
   }, [fontFamily])
+
+  // Apply font size scale
+  useEffect(() => {
+    const root = document.documentElement
+    const scale = fontSizes[fontSize]
+    if (scale !== undefined) {
+      // Set CSS variable for font size scale - CSS will automatically apply it
+      root.style.setProperty('--font-size-scale', String(scale))
+    }
+  }, [fontSize])
 }
 
 // Export presets for use in other components (e.g., SettingsPage)
-export { primaryColors, fontFamilies }
+export { primaryColors, fontFamilies, fontSizes }
 

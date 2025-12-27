@@ -18,6 +18,10 @@ interface UserPreferences {
     fontFamily: string
     setFontFamily: (font: string) => void
 
+    // Font size preferences
+    fontSize: 'small' | 'medium' | 'large' | 'xlarge'
+    setFontSize: (size: 'small' | 'medium' | 'large' | 'xlarge') => void
+
     // Language preferences
     language: 'vi' | 'en'
     setLanguage: (language: 'vi' | 'en') => void
@@ -53,6 +57,7 @@ const defaultPreferences: Omit<UserPreferences,
     | 'setTheme' 
     | 'setPrimaryColor'
     | 'setFontFamily'
+    | 'setFontSize'
     | 'setLanguage' 
     | 'setDefaultPageSize' 
     | 'setDefaultView' 
@@ -65,6 +70,7 @@ const defaultPreferences: Omit<UserPreferences,
     theme: 'light', // Default light
     primaryColor: 'red', // Default red
     fontFamily: 'inter', // Default Inter
+    fontSize: 'medium', // Default medium
     language: 'vi',
     defaultPageSize: 50,
     defaultView: 'list',
@@ -82,6 +88,7 @@ export const useUserPreferencesStore = create<UserPreferences>()(
             setTheme: (theme) => set({ theme }),
             setPrimaryColor: (color) => set({ primaryColor: color }),
             setFontFamily: (font) => set({ fontFamily: font }),
+            setFontSize: (size) => set({ fontSize: size }),
             setLanguage: (language) => set({ language }),
             setDefaultPageSize: (size) => set({ defaultPageSize: size }),
             setDefaultView: (view) => set({ defaultView: view }),

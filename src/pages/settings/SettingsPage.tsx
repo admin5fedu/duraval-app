@@ -2,30 +2,39 @@ import { useEffect, useMemo, useState } from 'react'
 import { GenericDetailViewSimple } from '@/shared/components/data-display/generic-detail-view-simple'
 import { DetailSection } from '@/shared/components/data-display/generic-detail-view/types'
 import { useUserPreferencesStore } from '@/shared/stores/user-preferences-store'
-import { Palette, Moon, Sun, Monitor, Type, Save, RotateCcw } from 'lucide-react'
+import { Palette, Moon, Sun, Monitor, Type, Text, Save, RotateCcw } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { primaryColors, fontFamilies } from '@/hooks/use-user-preferences-sync'
+import { primaryColors, fontFamilies, fontSizes } from '@/hooks/use-user-preferences-sync'
 
 // Default values
 const DEFAULT_THEME = 'light'
 const DEFAULT_PRIMARY_COLOR = 'red'
 const DEFAULT_FONT_FAMILY = 'inter'
+const DEFAULT_FONT_SIZE = 'medium'
 
 export default function SettingsPage() {
-  const { theme, setTheme, primaryColor, setPrimaryColor, fontFamily, setFontFamily } =
-    useUserPreferencesStore()
+  const { 
+    theme, setTheme, 
+    primaryColor, setPrimaryColor, 
+    fontFamily, setFontFamily,
+    fontSize, setFontSize
+  } = useUserPreferencesStore()
 
   // Temporary state for preview (not saved until user clicks Save)
   // Initialize from store values
   const [tempTheme, setTempTheme] = useState(() => theme)
   const [tempPrimaryColor, setTempPrimaryColor] = useState(() => primaryColor)
   const [tempFontFamily, setTempFontFamily] = useState(() => fontFamily)
+  const [tempFontSize, setTempFontSize] = useState(() => fontSize)
 
   // Check if there are changes
   const hasChanges =
-    tempTheme !== theme || tempPrimaryColor !== primaryColor || tempFontFamily !== fontFamily
+    tempTheme !== theme || 
+    tempPrimaryColor !== primaryColor || 
+    tempFontFamily !== fontFamily ||
+    tempFontSize !== fontSize
 
   // Apply preview theme to document (only for preview, not saved)
   useEffect(() => {
@@ -96,11 +105,24 @@ export default function SettingsPage() {
     }
   }, [tempFontFamily, hasChanges])
 
+  // Apply preview font size (only for preview, not saved)
+  useEffect(() => {
+    // Only apply preview if there are unsaved changes
+    if (!hasChanges) return
+
+    const root = document.documentElement
+    const scale = fontSizes[tempFontSize]
+    if (scale !== undefined) {
+      root.style.setProperty('--font-size-scale', String(scale))
+    }
+  }, [tempFontSize, hasChanges])
+
   // Handle save
   const handleSave = () => {
     setTheme(tempTheme)
     setPrimaryColor(tempPrimaryColor)
     setFontFamily(tempFontFamily)
+    setFontSize(tempFontSize)
     toast.success('Đã lưu cài đặt thành công!')
   }
 
@@ -109,6 +131,7 @@ export default function SettingsPage() {
     setTempTheme(DEFAULT_THEME)
     setTempPrimaryColor(DEFAULT_PRIMARY_COLOR)
     setTempFontFamily(DEFAULT_FONT_FAMILY)
+    setTempFontSize(DEFAULT_FONT_SIZE)
     toast.info('Đã khôi phục về mặc định')
   }
 
@@ -234,7 +257,55 @@ export default function SettingsPage() {
         },
       ],
     },
-  ], [tempTheme, tempPrimaryColor, tempFontFamily])
+    {
+      title: 'Cỡ chữ',
+      description: 'Chọn cỡ chữ cho toàn bộ ứng dụng',
+      icon: Text,
+      fields: [
+        {
+          key: 'fontSize',
+          label: 'Kích thước',
+          value: tempFontSize,
+          type: 'text',
+          format: () => (
+            <div className="space-y-4">
+              <ToggleGroup
+                type="single"
+                value={tempFontSize}
+                onValueChange={(value: 'small' | 'medium' | 'large' | 'xlarge') => {
+                  if (value) setTempFontSize(value)
+                }}
+                className="flex flex-wrap gap-2"
+              >
+                <ToggleGroupItem value="small" aria-label="Nhỏ">
+                  Nhỏ
+                </ToggleGroupItem>
+                <ToggleGroupItem value="medium" aria-label="Trung bình">
+                  Trung bình
+                </ToggleGroupItem>
+                <ToggleGroupItem value="large" aria-label="Vừa">
+                  Vừa
+                </ToggleGroupItem>
+                <ToggleGroupItem value="xlarge" aria-label="Lớn">
+                  Lớn
+                </ToggleGroupItem>
+              </ToggleGroup>
+              <div className="p-4 rounded-lg border bg-muted/50">
+                <p className="text-sm text-muted-foreground mb-2">Xem trước:</p>
+                <p className="text-lg">
+                  Cỡ chữ này sẽ được áp dụng cho toàn bộ ứng dụng
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Tất cả văn bản sẽ tự động điều chỉnh theo cỡ chữ bạn chọn
+                </p>
+              </div>
+            </div>
+          ),
+          colSpan: 3,
+        },
+      ],
+    },
+  ], [tempTheme, tempPrimaryColor, tempFontFamily, tempFontSize])
 
   // Actions buttons
   const actions = (
