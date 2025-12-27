@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet"
 import { useNotificationStore } from "@/shared/stores/notification-store"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { getNotificationIcon, getNotificationColorClass } from "@/shared/utils/notification-utils"
 
 /**
  * Mobile Footer Navigation Component
@@ -72,31 +73,6 @@ export function MobileFooterNav() {
     }
   }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'success':
-        return '✅'
-      case 'error':
-        return '❌'
-      case 'warning':
-        return '⚠️'
-      default:
-        return 'ℹ️'
-    }
-  }
-
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'success':
-        return 'border-l-primary'
-      case 'error':
-        return 'border-l-destructive'
-      case 'warning':
-        return 'border-l-[var(--warning)]'
-      default:
-        return 'border-l-secondary'
-    }
-  }
 
   // Don't render on desktop
   if (!isMobile) {
@@ -184,14 +160,14 @@ export function MobileFooterNav() {
                           className={cn(
                             'p-4 rounded-lg border cursor-pointer transition-colors hover:bg-accent',
                             !notification.read && 'bg-accent/50',
-                            getNotificationColor(notification.type),
+                            getNotificationColorClass(notification.type as any),
                             'border-l-4'
                           )}
                           onClick={() => handleNotificationClick(notification)}
                         >
                           <div className="flex items-start gap-3">
                             <span className="text-lg shrink-0">
-                              {getNotificationIcon(notification.type)}
+                              {getNotificationIcon(notification.type as any)}
                             </span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">

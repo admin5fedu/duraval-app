@@ -25,6 +25,8 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar'
+import { AppLogo } from '@/components/shared/AppLogo'
+import { APP_NAME, APP_VERSION } from '@/lib/app-config'
 
 interface NavItem {
   title: string
@@ -100,33 +102,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
   const pathname = location.pathname
 
-  // Prefetch routes on mount for faster navigation
-  React.useEffect(() => {
-    data.navMain.forEach((group) => {
-      group.items?.forEach((item) => {
-        // Prefetch route on mount
-        const link = document.createElement('link')
-        link.rel = 'prefetch'
-        link.href = item.url
-        document.head.appendChild(link)
-      })
-    })
-  }, [])
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <img
-              src="https://duraval.vn/wp-content/uploads/2024/08/logoduraval-png-khong-chu-e1724896799526-1024x370.png"
-              alt="Duraval Logo"
-              className="size-6 object-contain brightness-0 invert"
-            />
-          </div>
+          <AppLogo size="md" />
           <div className="flex flex-col gap-0.5 leading-none overflow-hidden">
-            <span className="font-semibold truncate">Duraval ERP</span>
-            <span className="text-xs text-muted-foreground truncate">v1.0.0</span>
+            <span className="font-semibold truncate">{APP_NAME}</span>
+            <span className="text-xs text-muted-foreground truncate">v{APP_VERSION}</span>
           </div>
         </div>
       </SidebarHeader>
@@ -154,13 +137,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <Link 
                             to={item.url} 
                             className="flex items-center"
-                            onMouseEnter={() => {
-                              // Prefetch on hover for faster navigation
-                              const link = document.createElement('link')
-                              link.rel = 'prefetch'
-                              link.href = item.url
-                              document.head.appendChild(link)
-                            }}
                           >
                             {Icon && <Icon className="size-4" />}
                             <span className="font-medium">{item.title}</span>
@@ -188,7 +164,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        {/* Footer content */}
+        <div className="px-2 py-2 border-t">
+          <div className="flex items-center justify-center">
+            <span className="text-xs text-muted-foreground">
+              Version {APP_VERSION}
+            </span>
+          </div>
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

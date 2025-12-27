@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import { useLocation, Link } from "react-router-dom"
-import { Home, MoreHorizontal } from "lucide-react"
+import { useLocation, Link, useNavigate } from "react-router-dom"
+import { Home, MoreHorizontal, ArrowLeft, List } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +26,7 @@ import { useBreadcrumb } from "@/components/providers/BreadcrumbProvider"
 import { moduleRegistry } from "@/shared/config/module-registry"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { getParentRouteFromBreadcrumb } from "@/lib/utils"
 
 /**
  * Dynamic Breadcrumb Component
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils"
  * Tự động tạo breadcrumb từ URL pathname
  * Sử dụng routing-config để format labels và skip segments
  * Mobile-friendly: chỉ hiển thị 2 items cuối, còn lại trong dropdown
+ * Professional: Thêm "Back to List" button cho detail pages
  */
 export function DynamicBreadcrumb() {
   const location = useLocation()
@@ -40,6 +42,12 @@ export function DynamicBreadcrumb() {
   const segments = pathname.split('/').filter(Boolean)
   const { detailTitle } = useBreadcrumb()
   const isMobile = useIsMobile()
+  const navigate = useNavigate()
+  
+  // Check if current page is a detail page (has numeric ID as last segment)
+  const lastSegment = segments[segments.length - 1]
+  const isDetailPage = /^\d+$/.test(lastSegment)
+  const listPath = isDetailPage ? getParentRouteFromBreadcrumb(pathname) : null
   
   // Nếu là trang chủ
   if (segments.length === 0 || (segments.length === 1 && segments[0] === 'trang-chu')) {
@@ -102,118 +110,155 @@ export function DynamicBreadcrumb() {
     }
   })
 
+  // Handle back to list
+  const handleBackToList = () => {
+    if (listPath) {
+      navigate(listPath)
+    }
+  }
+
   // Mobile: chỉ hiển thị 2 items cuối, còn lại trong dropdown
   if (isMobile && breadcrumbItems.length > 2) {
     const visibleItems = breadcrumbItems.slice(-2)
     const hiddenItems = breadcrumbItems.slice(0, -2)
     
     return (
-      <Breadcrumb className="min-w-0 flex-1">
-        <BreadcrumbList className="flex-wrap items-center gap-1">
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/" className="truncate flex items-center gap-1 text-xs">
-                <Home className="h-3.5 w-3.5 shrink-0" />
-                <span className="sr-only">Trang Chủ</span>
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          
-          {hiddenItems.length > 0 && (
-            <>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-6 px-1.5 text-xs hover:bg-accent"
-                    >
-                      <MoreHorizontal className="h-3.5 w-3.5" />
-                      <span className="sr-only">Xem thêm</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto">
-                    {hiddenItems.map((item, index) => (
-                      <DropdownMenuItem key={index} asChild>
-                        <BreadcrumbLink asChild>
-                          <Link to={item.href} className="w-full">
-                            {item.label}
-                          </Link>
-                        </BreadcrumbLink>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </BreadcrumbItem>
-            </>
-          )}
-          
-          {visibleItems.map((item, index) => {
-            const isLast = index === visibleItems.length - 1
-            return (
-              <React.Fragment key={index}>
+      <div className="min-w-0 flex-1 flex items-center gap-2">
+        <Breadcrumb className="min-w-0 flex-1">
+          <BreadcrumbList className="flex-wrap items-center gap-1">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/" className="truncate flex items-center gap-1 text-xs">
+                  <Home className="h-3.5 w-3.5 shrink-0" />
+                  <span className="sr-only">Trang Chủ</span>
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            
+            {hiddenItems.length > 0 && (
+              <>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem className="min-w-0">
-                  {isLast ? (
-                    <BreadcrumbPage className="truncate text-xs font-medium">
-                      {item.label}
-                    </BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link to={item.href} className="truncate text-xs">
-                        {item.label}
-                      </Link>
-                    </BreadcrumbLink>
-                  )}
+                <BreadcrumbItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 px-1.5 text-xs hover:bg-accent"
+                      >
+                        <MoreHorizontal className="h-3.5 w-3.5" />
+                        <span className="sr-only">Xem thêm</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto">
+                      {hiddenItems.map((item, index) => (
+                        <DropdownMenuItem key={index} asChild>
+                          <BreadcrumbLink asChild>
+                            <Link to={item.href} className="w-full">
+                              {item.label}
+                            </Link>
+                          </BreadcrumbLink>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </BreadcrumbItem>
-              </React.Fragment>
-            )
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
-    )
-  }
-
-  // Desktop: hiển thị đầy đủ
-  return (
-    <Breadcrumb className="min-w-0 flex-1">
-      <BreadcrumbList className="flex-wrap items-center gap-1.5">
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link to="/" className="truncate flex items-center gap-1">
-              <Home className="h-3.5 w-3.5 shrink-0" />
-              <span>Trang Chủ</span>
-            </Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        {breadcrumbItems.length > 0 && (
-          <>
-            <BreadcrumbSeparator />
-            {breadcrumbItems.map((item, index) => {
-              const isLast = index === breadcrumbItems.length - 1
+              </>
+            )}
+            
+            {visibleItems.map((item, index) => {
+              const isLast = index === visibleItems.length - 1
               return (
                 <React.Fragment key={index}>
+                  <BreadcrumbSeparator />
                   <BreadcrumbItem className="min-w-0">
                     {isLast ? (
-                      <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
+                      <BreadcrumbPage className="truncate text-xs font-medium">
+                        {item.label}
+                      </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
-                        <Link to={item.href} className="truncate">
+                        <Link to={item.href} className="truncate text-xs">
                           {item.label}
                         </Link>
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
-                  {!isLast && <BreadcrumbSeparator />}
                 </React.Fragment>
               )
             })}
-          </>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        {/* Back to List button for detail pages on mobile */}
+        {isDetailPage && listPath && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToList}
+            className="h-7 px-2 text-xs shrink-0"
+            title="Về danh sách"
+          >
+            <List className="h-3.5 w-3.5" />
+          </Button>
         )}
-      </BreadcrumbList>
-    </Breadcrumb>
+      </div>
+    )
+  }
+
+  // Desktop: hiển thị đầy đủ với Back to List button
+  return (
+    <div className="min-w-0 flex-1 flex items-center gap-2">
+      <Breadcrumb className="min-w-0 flex-1">
+        <BreadcrumbList className="flex-wrap items-center gap-1.5">
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/" className="truncate flex items-center gap-1">
+                <Home className="h-3.5 w-3.5 shrink-0" />
+                <span>Trang Chủ</span>
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {breadcrumbItems.length > 0 && (
+            <>
+              <BreadcrumbSeparator />
+              {breadcrumbItems.map((item, index) => {
+                const isLast = index === breadcrumbItems.length - 1
+                return (
+                  <React.Fragment key={index}>
+                    <BreadcrumbItem className="min-w-0">
+                      {isLast ? (
+                        <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link to={item.href} className="truncate">
+                            {item.label}
+                          </Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                    {!isLast && <BreadcrumbSeparator />}
+                  </React.Fragment>
+                )
+              })}
+            </>
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
+      
+      {/* Back to List button for detail pages on desktop */}
+      {isDetailPage && listPath && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleBackToList}
+          className="h-8 px-3 shrink-0 gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Về danh sách</span>
+          <List className="h-4 w-4 sm:hidden" />
+        </Button>
+      )}
+    </div>
   )
 }
-

@@ -15,6 +15,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useNotificationStore } from '@/shared/stores/notification-store'
 import { cn } from '@/lib/utils'
+import { getNotificationIcon, getNotificationColorClass } from '@/shared/utils/notification-utils'
 
 export function NotificationBell() {
   const navigate = useNavigate()
@@ -31,31 +32,6 @@ export function NotificationBell() {
     }
   }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'success':
-        return '✅'
-      case 'error':
-        return '❌'
-      case 'warning':
-        return '⚠️'
-      default:
-        return 'ℹ️'
-    }
-  }
-
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'success':
-        return 'border-l-primary'
-      case 'error':
-        return 'border-l-destructive'
-      case 'warning':
-        return 'border-l-[var(--warning)]'
-      default:
-        return 'border-l-secondary'
-    }
-  }
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -112,14 +88,14 @@ export function NotificationBell() {
                   className={cn(
                     'p-3 rounded-lg border cursor-pointer transition-colors hover:bg-accent',
                     !notification.read && 'bg-accent/50',
-                    getNotificationColor(notification.type),
+                    getNotificationColorClass(notification.type as any),
                     'border-l-4'
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-lg shrink-0">
-                      {getNotificationIcon(notification.type)}
+                      {getNotificationIcon(notification.type as any)}
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
