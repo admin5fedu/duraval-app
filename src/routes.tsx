@@ -55,6 +55,9 @@ const ChucVuListRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/rou
 const ChucVuDetailRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-detail-route'))
 const ChucVuFormRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-form-route'))
 
+// Phân quyền module routes
+const PhanQuyenListRoute = lazy(() => import('@/features/he-thong/thiet-lap/phan-quyen/routes/phan-quyen-list-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -398,6 +401,14 @@ export const routes: RouteConfig[] = [
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Phân quyền module routes
+  {
+    path: '/he-thong/phan-quyen',
+    element: PhanQuyenListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
   },
   // Add more module routes here or use generateRoutesFromConfig()
   {

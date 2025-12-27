@@ -11,5 +11,6 @@ export { chiNhanh, chiNhanh as chiNhanhQueryKeys } from "./chi-nhanh"
 export { phongBan, phongBan as phongBanQueryKeys } from "./phong-ban"
 export { capBac, capBac as capBacQueryKeys } from "./cap-bac"
 export { chucVu, chucVu as chucVuQueryKeys } from "./chuc-vu"
+export { phanQuyenQueryKeys } from "./phan-quyen"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 
