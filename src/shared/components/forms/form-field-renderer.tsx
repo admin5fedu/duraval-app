@@ -18,6 +18,7 @@ import { FormFieldConfig } from "./generic-form-view/"
 import { ComboboxFormField } from "./combobox-form-field"
 import { ToggleButtonFormField } from "./toggle-button-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
+import { PhongBanSelect } from "@/features/he-thong/so-do/phong-ban/components/phong-ban-select"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -179,6 +180,18 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                             isMobile && "text-base"
                                         )}
                                         disabled={field.disabled}
+                                    />
+                                ) : field.type === "phong-ban-select" ? (
+                                    <PhongBanSelect
+                                        value={formField.value ? Number(formField.value) : null}
+                                        onChange={(id) => {
+                                            if (field.disabled) return
+                                            formField.onChange(id)
+                                        }}
+                                        placeholder={field.placeholder || "Chọn phòng ban..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã phòng ban..."}
+                                        disabled={field.disabled}
+                                        excludeIds={field.excludeIds || []}
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
                                     <field.customComponent

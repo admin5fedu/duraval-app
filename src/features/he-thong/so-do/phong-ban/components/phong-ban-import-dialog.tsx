@@ -1,0 +1,258 @@
+"use client"
+
+import * as React from "react"
+import { ImportDialog, type ImportOptions } from "@/shared/components/data-display/import/import-dialog"
+import { useBatchUpsertPhongBan } from "../actions/phong-ban-excel-actions"
+import { PhongBan } from "../schema"
+import type { TemplateColumn } from "@/lib/excel/template-utils"
+import type { ColumnMapping } from "@/shared/utils/excel-column-mapper"
+import { shouldSkipValue } from "@/shared/utils/excel-data-cleaner"
+
+type UseBatchUpsertPhongBanReturn = ReturnType<typeof useBatchUpsertPhongBan>
+
+interface PhongBanImportDialogProps {
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    mutation?: UseBatchUpsertPhongBanReturn
+}
+
+// Column mappings for auto-mapping
+const columnMappings: ColumnMapping[] = [
+    {
+        dbField: "tt",
+        excelNames: [
+            "Số thứ tự", "Số Thứ Tự", "So thu tu", "So Thu Tu",
+            "STT", "stt", "TT", "tt", "Thứ tự", "Thu tu",
+            "Order", "order", "Index", "index", "No", "no"
+        ],
+        required: false,
+        type: "number",
+        description: "Số thứ tự (không bắt buộc)",
+    },
+    {
+        dbField: "ma_phong_ban",
+        excelNames: [
+            "Mã phòng ban", "Mã Phòng Ban", "Ma phong ban", "Ma Phong Ban",
+            "Mã_PB", "Mã_pb", "Ma_PB", "Ma_pb",
+            "Department Code", "DepartmentCode", "dept_code", "Code", "code"
+        ],
+        required: true,
+        type: "string",
+        description: "Mã phòng ban (bắt buộc)",
+    },
+    {
+        dbField: "ten_phong_ban",
+        excelNames: [
+            "Tên phòng ban", "Tên Phòng Ban", "Ten phong ban", "Ten Phong Ban",
+            "Tên_PB", "Tên_pb", "Ten_PB", "Ten_pb",
+            "Department Name", "DepartmentName", "dept_name", "Name", "name"
+        ],
+        required: true,
+        type: "string",
+        description: "Tên phòng ban (bắt buộc)",
+    },
+    {
+        dbField: "cap_do",
+        excelNames: [
+            "Cấp độ", "Cấp Độ", "Cap do", "Cap Do",
+            "Cấp_độ", "Cấp_Độ", "Cap_do", "Cap_Do",
+            "Level", "level", "Grade", "grade"
+        ],
+        required: true,
+        type: "string",
+        description: "Cấp độ (bắt buộc)",
+    },
+    {
+        dbField: "truc_thuoc_phong_ban",
+        excelNames: [
+            "Trực thuộc phòng ban", "Trực Thuộc Phòng Ban", "Truc thuoc phong ban", "Truc Thuoc Phong Ban",
+            "Trực_thuộc_PB", "Trực_Thuộc_PB", "Truc_thuoc_PB", "Truc_Thuoc_PB",
+            "Parent Department", "ParentDepartment", "parent_dept", "Parent", "parent"
+        ],
+        required: false,
+        type: "string",
+        description: "Trực thuộc phòng ban (không bắt buộc)",
+    },
+]
+
+// Template columns for Excel import
+const templateColumns: TemplateColumn[] = [
+    {
+        name: "tt",
+        label: "Số thứ tự",
+        type: "number",
+        required: false,
+        description: "Số thứ tự (không bắt buộc)",
+    },
+    {
+        name: "ma_phong_ban",
+        label: "Mã phòng ban",
+        type: "string",
+        required: true,
+        description: "Mã phòng ban (bắt buộc)",
+    },
+    {
+        name: "ten_phong_ban",
+        label: "Tên phòng ban",
+        type: "string",
+        required: true,
+        description: "Tên phòng ban (bắt buộc)",
+    },
+    {
+        name: "cap_do",
+        label: "Cấp độ",
+        type: "string",
+        required: true,
+        description: "Cấp độ (bắt buộc)",
+    },
+    {
+        name: "truc_thuoc_phong_ban",
+        label: "Trực thuộc phòng ban",
+        type: "string",
+        required: false,
+        description: "Trực thuộc phòng ban (không bắt buộc)",
+    },
+]
+
+// Validate a single row
+function validateRow(
+    row: Record<string, any>,
+    rowNumber: number
+): string[] {
+    const errors: string[] = []
+
+    // Required fields
+    if (!row.ma_phong_ban || String(row.ma_phong_ban).trim() === "") {
+        errors.push("Mã phòng ban là bắt buộc")
+    }
+
+    if (!row.ten_phong_ban || String(row.ten_phong_ban).trim() === "") {
+        errors.push("Tên phòng ban là bắt buộc")
+    }
+
+    if (!row.cap_do || String(row.cap_do).trim() === "") {
+        errors.push("Cấp độ là bắt buộc")
+    }
+
+    return errors
+}
+
+// Check for duplicates within the import data
+function checkDuplicates(
+    rows: Array<{ rowNumber: number; data: Record<string, any> }>
+): Map<string, number[]> {
+    const duplicates = new Map<string, number[]>()
+    const keyMap = new Map<string, number[]>()
+
+    rows.forEach((row, index) => {
+        const maPhongBan = row.data.ma_phong_ban
+
+        if (maPhongBan) {
+            const key = String(maPhongBan).trim()
+            if (!keyMap.has(key)) {
+                keyMap.set(key, [])
+            }
+            keyMap.get(key)!.push(index)
+        }
+    })
+
+    keyMap.forEach((indices, key) => {
+        if (indices.length > 1) {
+            duplicates.set(key, indices)
+        }
+    })
+
+    return duplicates
+}
+
+// Map Excel columns to database fields
+function mapExcelToDb(
+    rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>,
+    options: ImportOptions
+): Partial<PhongBan>[] {
+    return rows.map((row) => {
+        const mapped: Partial<PhongBan> = {}
+
+        // Map optional fields
+        if (!shouldSkipValue(row.data["tt"], options.skipEmptyCells)) {
+            mapped.tt = Number(row.data["tt"]) || null
+        }
+
+        // Map required fields
+        if (!shouldSkipValue(row.data["ma_phong_ban"], options.skipEmptyCells)) {
+            mapped.ma_phong_ban = String(row.data["ma_phong_ban"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ten_phong_ban"], options.skipEmptyCells)) {
+            mapped.ten_phong_ban = String(row.data["ten_phong_ban"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["cap_do"], options.skipEmptyCells)) {
+            mapped.cap_do = String(row.data["cap_do"]).trim()
+        }
+
+        // Map optional fields
+        if (!shouldSkipValue(row.data["truc_thuoc_phong_ban"], options.skipEmptyCells)) {
+            mapped.truc_thuoc_phong_ban = String(row.data["truc_thuoc_phong_ban"]).trim()
+        }
+
+        return mapped
+    })
+}
+
+export function PhongBanImportDialog({ open, onOpenChange, mutation }: PhongBanImportDialogProps) {
+    const defaultMutation = useBatchUpsertPhongBan()
+    const batchUpsertMutation = mutation || defaultMutation
+    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+        skipEmptyCells: true,
+        upsertMode: 'insert', // Only insert for phòng ban
+    })
+
+    const handleImport = async (rows: Partial<PhongBan>[]): Promise<{
+        success: boolean
+        inserted: number
+        updated: number
+        failed: number
+        errors?: Array<{ rowNumber: number; errors: string[] }>
+    }> => {
+        try {
+            const result = await batchUpsertMutation.mutateAsync(rows)
+            return {
+                success: result.errors.length === 0,
+                inserted: result.inserted,
+                updated: result.updated,
+                failed: result.errors.length,
+                errors: result.errors.map((err) => ({
+                    rowNumber: err.row + 1, // Convert 0-based to 1-based
+                    errors: [err.error],
+                })),
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    // Transform Excel data to database format
+    const transformData = (rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>): Partial<PhongBan>[] => {
+        return mapExcelToDb(rows, importOptions)
+    }
+
+    return (
+        <ImportDialog<Partial<PhongBan>>
+            open={open}
+            onOpenChange={onOpenChange}
+            onImport={handleImport}
+            validateRow={validateRow}
+            checkDuplicates={checkDuplicates}
+            transformData={transformData}
+            moduleName="phòng ban"
+            expectedHeaders={["ma_phong_ban", "ten_phong_ban", "cap_do"]}
+            templateColumns={templateColumns}
+            columnMappings={columnMappings}
+            enableAutoMapping={true}
+            importOptions={importOptions}
+            onOptionsChange={setImportOptions}
+        />
+    )
+}
+

@@ -40,6 +40,11 @@ const ChiNhanhListRoute = lazy(() => import('@/features/he-thong/thiet-lap/chi-n
 const ChiNhanhDetailRoute = lazy(() => import('@/features/he-thong/thiet-lap/chi-nhanh/routes/chi-nhanh-detail-route'))
 const ChiNhanhFormRoute = lazy(() => import('@/features/he-thong/thiet-lap/chi-nhanh/routes/chi-nhanh-form-route'))
 
+// Phòng ban module routes
+const PhongBanListRoute = lazy(() => import('@/features/he-thong/so-do/phong-ban/routes/phong-ban-list-route'))
+const PhongBanDetailRoute = lazy(() => import('@/features/he-thong/so-do/phong-ban/routes/phong-ban-detail-route'))
+const PhongBanFormRoute = lazy(() => import('@/features/he-thong/so-do/phong-ban/routes/phong-ban-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -287,6 +292,37 @@ export const routes: RouteConfig[] = [
   {
     path: '/he-thong/chi-nhanh',
     element: ChiNhanhListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Phòng ban module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/he-thong/phong-ban/moi',
+    element: PhongBanFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/phong-ban/:id/sua',
+    element: PhongBanFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/phong-ban/:id',
+    element: PhongBanDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/he-thong/phong-ban',
+    element: PhongBanListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
