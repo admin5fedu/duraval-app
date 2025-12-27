@@ -16,6 +16,7 @@ export * from './dialogs/confirm-dialog'
 export * from './forms/combobox-form-field'
 export * from './forms/employee-combobox-field'
 export * from './data-display/embedded-list-section'
+export * from './data-display/generic-table-section'
 export * from './data-display/data-table-faceted-filter'
 // Column visibility - refactored to modular structure
 export * from './data-display/column-visibility'

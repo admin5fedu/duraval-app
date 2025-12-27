@@ -144,7 +144,13 @@ export function GenericListView<TData, TValue>({
 
     // 5. Render all sections
     return (
-        <div className="flex flex-col w-full max-w-full min-w-0 h-full">
+        <div 
+            className="flex flex-col w-full max-w-full min-w-0"
+            style={{
+                minHeight: containerHeight,
+                height: containerHeight,
+            }}
+        >
             {/* ✅ Toolbar với ref để đo chiều cao */}
             <div ref={toolbarRef} data-testid="list-view-toolbar">
                 <GenericListToolbarSection

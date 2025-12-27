@@ -217,6 +217,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         {
             key: "ho_va_ten",
             header: "Họ và Tên",
+            sortable: true,
             render: (item) => (
                 <span className="font-medium">{item.ho_va_ten}</span>
             )
@@ -224,6 +225,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         {
             key: "moi_quan_he",
             header: "Mối Quan Hệ",
+            sortable: true,
             render: (item) => {
                 const colorClass = getEnumBadgeClass("moi_quan_he", item.moi_quan_he)
                 return (
@@ -236,6 +238,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         {
             key: "ngay_sinh",
             header: "Ngày Sinh",
+            sortable: true,
             render: (item) => (
                 item.ngay_sinh 
                     ? new Date(item.ngay_sinh).toLocaleDateString("vi-VN")
@@ -245,6 +248,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         {
             key: "so_dien_thoai",
             header: "Số Điện Thoại",
+            sortable: true,
             render: (item) => (
                 item.so_dien_thoai || <span className="text-muted-foreground">-</span>
             )

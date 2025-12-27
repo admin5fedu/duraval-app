@@ -32,7 +32,7 @@ export function GenericListMobileSection<TData>({
             data-testid="list-view-mobile-cards"
         >
             {renderMobileCard ? (
-                <div className="space-y-2.5 pb-24 pt-2 px-1">
+                <div className="space-y-2.5 pb-20 pt-2 px-1">
                     {filteredRows.map((row: any) => {
                         const rowData = row.original as TData
                         const isSelected = row.getIsSelected?.() ?? false
