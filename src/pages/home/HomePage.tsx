@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import {
   Briefcase,
   Users,
   Settings,
-  ArrowRight,
   PieChart,
   Megaphone,
   ShoppingCart,
@@ -12,11 +12,10 @@ import {
   Truck,
 } from 'lucide-react'
 
-// Extended feature list based on user request
+// Feature modules configuration
 const features = [
   {
     title: 'Công việc',
-    description: 'Quản lý công việc, dự án và tiến độ.',
     icon: Briefcase,
     href: '/cong-viec',
     color: 'text-blue-600',
@@ -24,7 +23,6 @@ const features = [
   },
   {
     title: 'Hành chính nhân sự',
-    description: 'Quản lý nhân sự, chấm công, tính lương.',
     icon: Users,
     href: '/hanh-chinh-nhan-su',
     color: 'text-green-600',
@@ -32,7 +30,6 @@ const features = [
   },
   {
     title: 'Kinh doanh',
-    description: 'Quản lý khách hàng, đơn hàng, doanh thu.',
     icon: PieChart,
     href: '/kinh-doanh',
     color: 'text-orange-600',
@@ -40,7 +37,6 @@ const features = [
   },
   {
     title: 'Marketing',
-    description: 'Chiến dịch, leads, chăm sóc khách hàng.',
     icon: Megaphone,
     href: '/marketing',
     color: 'text-pink-600',
@@ -48,7 +44,6 @@ const features = [
   },
   {
     title: 'Mua hàng',
-    description: 'Nhà cung cấp, đơn mua hàng, nhập kho.',
     icon: ShoppingCart,
     href: '/mua-hang',
     color: 'text-cyan-600',
@@ -56,7 +51,6 @@ const features = [
   },
   {
     title: 'Kế toán',
-    description: 'Thu chi, công nợ, báo cáo tài chính.',
     icon: Calculator,
     href: '/ke-toan',
     color: 'text-red-600',
@@ -64,7 +58,6 @@ const features = [
   },
   {
     title: 'Kho vận',
-    description: 'Quản lý kho, tồn kho, vận chuyển.',
     icon: Truck,
     href: '/kho-van',
     color: 'text-indigo-600',
@@ -72,7 +65,6 @@ const features = [
   },
   {
     title: 'Hệ thống',
-    description: 'Cấu hình, phân quyền, sơ đồ tổ chức.',
     icon: Settings,
     href: '/he-thong',
     color: 'text-gray-600',
@@ -82,8 +74,8 @@ const features = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-8">
-      <div className="grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {features.map((feature) => {
           const Icon = feature.icon
           return (
@@ -92,26 +84,57 @@ export default function HomePage() {
               to={feature.href}
               className="group relative"
             >
-              <Card className="h-full border border-border/60 bg-card transition-all duration-300 hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 overflow-hidden relative group">
+              <Card
+                className={cn(
+                  // Mobile: Square cards (aspect-square)
+                  'aspect-square',
+                  // Desktop: Allow natural height with min-height
+                  'md:aspect-auto md:min-h-[180px]',
+                  // Base styling
+                  'h-full border border-border/60 bg-card',
+                  'transition-all duration-300',
+                  'hover:shadow-lg hover:border-primary/50 hover:-translate-y-1',
+                  'overflow-hidden relative',
+                  // Active state indicator
+                  'group-active:scale-[0.98]'
+                )}
+              >
+                {/* Top border accent on hover */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <CardHeader className="flex flex-col items-center text-center pb-2 pt-6">
+                
+                <CardHeader className="flex flex-col items-center justify-center h-full p-4 sm:p-6">
+                  {/* Icon */}
                   <div
-                    className={`p-4 rounded-full ${feature.bgColor} bg-opacity-50 group-hover:bg-opacity-100 transition-all duration-300 mb-4 ring-1 ring-border/50`}
+                    className={cn(
+                      'p-3 sm:p-4 rounded-2xl',
+                      feature.bgColor,
+                      'bg-opacity-50 group-hover:bg-opacity-100',
+                      'transition-all duration-300',
+                      'ring-1 ring-border/50',
+                      'mb-3 sm:mb-4',
+                      // Responsive icon size
+                      'flex items-center justify-center'
+                    )}
                   >
-                    <Icon className={`h-8 w-8 ${feature.color}`} />
+                    <Icon className={cn('h-6 w-6 sm:h-8 sm:w-8', feature.color)} />
                   </div>
-                  <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                  
+                  {/* Title */}
+                  <CardTitle
+                    className={cn(
+                      'text-center font-semibold',
+                      'group-hover:text-primary',
+                      'transition-colors duration-300',
+                      // Same font size as submenu cards: text-lg
+                      'text-lg',
+                      'leading-tight',
+                      'line-clamp-2',
+                      'px-2'
+                    )}
+                  >
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-center flex flex-col items-center">
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-6 max-w-[90%]">
-                    {feature.description}
-                  </p>
-                  <div className="mt-auto flex items-center text-sm font-medium text-primary opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-primary/10 px-4 py-1.5 rounded-full">
-                    Truy cập <ArrowRight className="ml-2 h-4 w-4" />
-                  </div>
-                </CardContent>
               </Card>
             </Link>
           )

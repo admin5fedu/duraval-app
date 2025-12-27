@@ -57,7 +57,7 @@ export function DynamicBreadcrumb() {
           <BreadcrumbItem className="min-w-0">
             <BreadcrumbPage className="truncate flex items-center gap-1">
               <Home className="h-3.5 w-3.5 shrink-0" />
-              <span className={cn(isMobile && "sr-only")}>Trang Chủ</span>
+              <span>Trang Chủ</span>
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
