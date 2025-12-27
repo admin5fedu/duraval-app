@@ -18,6 +18,8 @@ export * from './forms/employee-combobox-field'
 export * from './data-display/embedded-list-section'
 export * from './data-display/generic-table-section'
 export * from './data-display/data-table-faceted-filter'
+export * from './data-display/table/employee-navigation-cell'
+export * from './data-display/table/sortable-header'
 // Column visibility - refactored to modular structure
 export * from './data-display/column-visibility'
 // Legacy export for backward compatibility

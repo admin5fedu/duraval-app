@@ -17,13 +17,30 @@ export function useCreateNguoiThan() {
             return await NguoiThanAPI.create(input)
         },
         onSuccess: (data) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nguoiThanQueryKeys.list() })
-            // Invalidate byMaNhanVien query
-            queryClient.invalidateQueries({ queryKey: nguoiThanQueryKeys.byMaNhanVien(data.ma_nhan_vien) })
-            // Set detail query data for instant navigation
-            queryClient.setQueryData(nguoiThanQueryKeys.detail(data.id!), data)
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            // Sử dụng exact: false để invalidate tất cả queries con
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nguoiThanQueryKeys.list(),
+                exact: true
+            })
+            // Set detail query data for instant navigation (nếu có id)
+            if (data.id) {
+                queryClient.setQueryData(nguoiThanQueryKeys.detail(data.id), data)
+            }
             toast.success("Thêm mới người thân thành công")
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            // (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi thêm mới người thân")
@@ -42,13 +59,26 @@ export function useUpdateNguoiThan() {
             return await NguoiThanAPI.update(id, data)
         },
         onSuccess: (data, variables) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nguoiThanQueryKeys.list() })
-            // Invalidate byMaNhanVien query
-            queryClient.invalidateQueries({ queryKey: nguoiThanQueryKeys.byMaNhanVien(data.ma_nhan_vien) })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nguoiThanQueryKeys.list(),
+                exact: true
+            })
             // Update detail query
             queryClient.setQueryData(nguoiThanQueryKeys.detail(variables.id), data)
             toast.success("Cập nhật thông tin người thân thành công")
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi cập nhật thông tin người thân")
@@ -67,13 +97,26 @@ export function useDeleteNguoiThan() {
             return await NguoiThanAPI.delete(id)
         },
         onSuccess: (_, id) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nguoiThanQueryKeys.list() })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nguoiThanQueryKeys.list(),
+                exact: true
+            })
             // Remove detail query
             queryClient.removeQueries({ queryKey: nguoiThanQueryKeys.detail(id) })
-            // We don't know ma_nhan_vien here, so invalidate all byMaNhanVien queries
-            queryClient.invalidateQueries({ queryKey: ["nguoi-than", "byMaNhanVien"] })
             toast.success("Xóa người thân thành công")
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi xóa người thân")
@@ -92,15 +135,28 @@ export function useBatchDeleteNguoiThan() {
             return await NguoiThanAPI.batchDelete(ids)
         },
         onSuccess: (_, ids) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nguoiThanQueryKeys.list() })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nguoiThanQueryKeys.list(),
+                exact: true
+            })
             // Remove detail queries
             ids.forEach((id) => {
                 queryClient.removeQueries({ queryKey: nguoiThanQueryKeys.detail(id) })
             })
-            // Invalidate all byMaNhanVien queries
-            queryClient.invalidateQueries({ queryKey: ["nguoi-than", "byMaNhanVien"] })
             toast.success(`Đã xóa ${ids.length} người thân thành công`)
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nguoiThanQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi xóa người thân")

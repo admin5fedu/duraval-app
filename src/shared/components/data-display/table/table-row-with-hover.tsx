@@ -40,10 +40,15 @@ export const TableRowWithHover = React.memo(function TableRowWithHover({
     void showRangeHighlight
     void isHovered
     
-    // Handle row click, but prevent it if clicking on checkbox
+    // Handle row click, but prevent it if clicking on checkbox or action buttons
     const handleRowClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
-        // Check if the click target is a checkbox or inside a checkbox container
         const target = e.target as HTMLElement
+        
+        // ✅ QUAN TRỌNG: Kiểm tra button với data-slot="action-button" TRƯỚC TIÊN và return ngay
+        // Điều này ngăn chặn event bubbling ngay từ đầu
+        if (target.closest('[data-slot="action-button"]') !== null) {
+            return // Không trigger row click
+        }
         
         // Find the clicked cell
         const clickedCell = target.closest('td')
@@ -58,13 +63,19 @@ export const TableRowWithHover = React.memo(function TableRowWithHover({
             // Check if clicking anywhere in the first cell (checkbox column)
             (clickedCell && clickedCell.parentElement?.children[0] === clickedCell)
         
+        // Check if clicking on links (a tags) - links should not trigger row click
+        const isLinkClick = 
+            target.closest('a') !== null ||
+            target.tagName === 'A'
+        
         // ⚡ Professional: If in selection mode, handle selection instead of navigation
         if (isSelectionMode && onRowSelect) {
             onRowSelect(rowId, e)
             return
         }
         
-        if (!isCheckboxClick && onRowClick) {
+        // Don't trigger row click if clicking on checkboxes or links
+        if (!isCheckboxClick && !isLinkClick && onRowClick) {
             onRowClick()
         }
     }
@@ -76,6 +87,13 @@ export const TableRowWithHover = React.memo(function TableRowWithHover({
             data-state={isSelected ? "selected" : undefined}
             data-selection-mode={isSelectionMode ? "true" : undefined}
             onClick={handleRowClick}
+            onMouseDown={(e) => {
+                // Prevent row click if clicking on links or action buttons at capture phase
+                const target = e.target as HTMLElement
+                if (target.closest('a') !== null || target.closest('[data-slot="action-button"]') !== null) {
+                    e.stopPropagation()
+                }
+            }}
             onPointerDown={onRowPointerDown ? (e) => {
                 // Don't trigger long press if clicking on checkbox
                 const target = e.target as HTMLElement

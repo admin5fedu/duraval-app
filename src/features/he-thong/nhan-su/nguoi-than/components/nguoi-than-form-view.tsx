@@ -8,6 +8,7 @@ import { useCreateNguoiThan, useUpdateNguoiThan } from "../hooks/use-nguoi-than-
 import { useNguoiThanById } from "../hooks/use-nguoi-than"
 import { nguoiThanConfig } from "../config"
 import { useMemo } from "react"
+import { z } from "zod"
 import { EmployeeComboboxField } from "@/shared/components/forms/employee-combobox-field"
 
 const getSections = (): FormSection[] => [
@@ -60,22 +61,72 @@ export function NguoiThanFormView({ id, onComplete, onCancel }: NguoiThanFormVie
   const createMutation = useCreateNguoiThan()
   const updateMutation = useUpdateNguoiThan()
   
-  // If id is provided, fetch existing data for edit mode
-  const { data: existingData, isLoading } = useNguoiThanById(id || 0, undefined)
+  // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
+  // để đảm bảo thứ tự hooks nhất quán giữa các lần render
   
-  const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
-  const isEditMode = !!id
-
   // Create sections - EmployeeComboboxField tự động load và sort employees
   const sections = useMemo(() => {
     return getSections()
   }, [])
+  
+  // If id is provided, fetch existing data for edit mode
+  // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
+  const { data: existingData, isLoading } = useNguoiThanById(id ?? 0, undefined)
+
+  // ✅ QUAN TRỌNG: Tạo schema cho form chấp nhận string cho ma_nhan_vien
+  // vì EmployeeComboboxField trả về string, sau đó transform trong handleSubmit
+  // Phải được tạo TRƯỚC early return
+  const formSchema = useMemo(() => {
+    return nguoiThanSchema
+      .omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true })
+      .extend({
+        ma_nhan_vien: z.union([
+          z.number({ required_error: "Mã nhân viên là bắt buộc" }),
+          z.string().min(1, "Mã nhân viên là bắt buộc")
+        ])
+      })
+  }, [])
+
+  // Prepare default values - convert ma_nhan_vien to string for select
+  // Phải được tạo TRƯỚC early return
+  const defaultValues = useMemo(() => {
+    if (id && existingData) {
+      return {
+        ...existingData,
+        ma_nhan_vien: String(existingData.ma_nhan_vien)
+      }
+    }
+    return undefined
+  }, [id, existingData])
+
+  // ✅ QUAN TRỌNG: Early return PHẢI ở sau tất cả hooks
+  if (id && isLoading) {
+    return <div>Đang tải...</div>
+  }
+
+  // Computed values (không phải hooks, có thể đặt sau early return)
+  const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
+  const isEditMode = !!id
+  const cancelUrl = returnTo === 'list' 
+    ? nguoiThanConfig.routePath
+    : (id ? `${nguoiThanConfig.routePath}/${id}` : nguoiThanConfig.routePath)
 
   const handleSubmit = async (data: any) => {
     // Convert ma_nhan_vien from string to number
+    // ✅ QUAN TRỌNG: EmployeeComboboxField trả về string, cần convert sang number
+    const maNhanVien = data.ma_nhan_vien
+    if (!maNhanVien || maNhanVien === '') {
+      throw new Error("Mã nhân viên là bắt buộc")
+    }
+    
+    const maNhanVienNumber = Number(maNhanVien)
+    if (isNaN(maNhanVienNumber) || maNhanVienNumber <= 0) {
+      throw new Error("Mã nhân viên phải là số nguyên dương")
+    }
+    
     const submitData = {
       ...data,
-      ma_nhan_vien: Number(data.ma_nhan_vien)
+      ma_nhan_vien: maNhanVienNumber
     }
     
     if (isEditMode && id) {
@@ -105,37 +156,15 @@ export function NguoiThanFormView({ id, onComplete, onCancel }: NguoiThanFormVie
       onCancel()
     } else {
       // Fallback to default navigation
-      const cancelUrl = returnTo === 'list' 
-        ? nguoiThanConfig.routePath
-        : (id ? `${nguoiThanConfig.routePath}/${id}` : nguoiThanConfig.routePath)
       navigate(cancelUrl)
     }
   }
-
-  const cancelUrl = returnTo === 'list' 
-    ? nguoiThanConfig.routePath
-    : (id ? `${nguoiThanConfig.routePath}/${id}` : nguoiThanConfig.routePath)
-
-  if (isEditMode && isLoading) {
-    return <div>Đang tải...</div>
-  }
-
-  // Prepare default values - convert ma_nhan_vien to string for select
-  const defaultValues = useMemo(() => {
-    if (isEditMode && existingData) {
-      return {
-        ...existingData,
-        ma_nhan_vien: String(existingData.ma_nhan_vien)
-      }
-    }
-    return undefined
-  }, [isEditMode, existingData])
 
   return (
     <GenericFormView
       title={isEditMode ? `Sửa Người Thân: ${existingData?.ho_va_ten || ''}` : "Thêm Mới Người Thân"}
       subtitle={isEditMode ? "Cập nhật thông tin người thân." : "Thêm người thân mới vào hệ thống."}
-      schema={nguoiThanSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true })}
+      schema={formSchema}
       sections={sections}
       onSubmit={handleSubmit}
       onSuccess={handleSuccess}

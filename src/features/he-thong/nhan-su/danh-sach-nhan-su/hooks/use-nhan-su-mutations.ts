@@ -17,11 +17,26 @@ export function useCreateNhanSu() {
             return await NhanSuAPI.create(input)
         },
         onSuccess: (data) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nhanSuQueryKeys.list() })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nhanSuQueryKeys.list(),
+                exact: true
+            })
             // Set detail query data for instant navigation
             queryClient.setQueryData(nhanSuQueryKeys.detail(data.ma_nhan_vien), data)
             toast.success("Thêm mới nhân viên thành công")
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi thêm mới nhân viên")
@@ -40,11 +55,26 @@ export function useUpdateNhanSu() {
             return await NhanSuAPI.update(id, data)
         },
         onSuccess: (data, variables) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nhanSuQueryKeys.list() })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nhanSuQueryKeys.list(),
+                exact: true
+            })
             // Update detail query
             queryClient.setQueryData(nhanSuQueryKeys.detail(variables.id), data)
             toast.success("Cập nhật thông tin nhân viên thành công")
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi cập nhật thông tin nhân viên")
@@ -63,11 +93,26 @@ export function useDeleteNhanSu() {
             return await NhanSuAPI.delete(id)
         },
         onSuccess: (_, id) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nhanSuQueryKeys.list() })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nhanSuQueryKeys.list(),
+                exact: true
+            })
             // Remove detail query
             queryClient.removeQueries({ queryKey: nhanSuQueryKeys.detail(id) })
             toast.success("Xóa nhân viên thành công")
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi xóa nhân viên")
@@ -86,13 +131,28 @@ export function useBatchDeleteNhanSu() {
             return await NhanSuAPI.batchDelete(ids)
         },
         onSuccess: (_, ids) => {
-            // Invalidate list query
-            queryClient.invalidateQueries({ queryKey: nhanSuQueryKeys.list() })
+            // ✅ QUAN TRỌNG: Invalidate và refetch tất cả queries (theo pattern app-tham-khao)
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false // Invalidate tất cả queries con
+            })
+            // Force refetch list query ngay lập tức
+            queryClient.refetchQueries({ 
+                queryKey: nhanSuQueryKeys.list(),
+                exact: true
+            })
             // Remove detail queries
             ids.forEach((id) => {
                 queryClient.removeQueries({ queryKey: nhanSuQueryKeys.detail(id) })
             })
             toast.success(`Đã xóa ${ids.length} nhân viên thành công`)
+        },
+        onSettled: () => {
+            // ✅ QUAN TRỌNG: Đảm bảo queries được sync sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ 
+                queryKey: nhanSuQueryKeys.all(),
+                exact: false
+            })
         },
         onError: (error: Error) => {
             toast.error(error.message || "Có lỗi xảy ra khi xóa nhân viên")

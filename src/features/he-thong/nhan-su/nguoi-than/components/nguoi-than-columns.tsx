@@ -4,12 +4,13 @@ import { type ColumnDef } from "@tanstack/react-table"
 import { useNavigate } from "react-router-dom"
 import { NguoiThan } from "../schema"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ArrowUp, ArrowDown, Edit } from "lucide-react"
+import { Edit } from "lucide-react"
 import { DeleteNguoiThanButton } from "./delete-nguoi-than-button"
 import { nguoiThanConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { Badge } from "@/components/ui/badge"
 import { getEnumBadgeClass } from "@/shared/utils/enum-color-registry"
+import { EmployeeNavigationCell, SortableHeader } from "@/shared/components"
 
 // Name cell component with navigation
 function NameCell({ name, id }: { name: string; id: number }) {
@@ -50,37 +51,6 @@ function ActionsCell({ id, name }: { id: number; name: string }) {
     )
 }
 
-// Helper function to render sortable header
-function SortableHeader({
-    column,
-    title,
-}: {
-    column: {
-        getIsSorted: () => false | "asc" | "desc"
-        toggleSorting: (desc?: boolean) => void
-    }
-    title: string
-}) {
-    const sorted = column.getIsSorted()
-
-    return (
-        <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-8 px-2 hover:bg-muted/50 -ml-2"
-        >
-            <span>{title}</span>
-            {sorted === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-            ) : sorted === "desc" ? (
-                <ArrowDown className="ml-2 h-4 w-4" />
-            ) : (
-                <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-            )}
-        </Button>
-    )
-}
-
 export const nguoiThanColumns = (employeeMap?: Map<number, { ma_nhan_vien: number; ho_ten: string }>): ColumnDef<NguoiThan>[] => [
     // ⚡ Professional: Use generic select column utility
     createSelectColumn<NguoiThan>(),
@@ -103,18 +73,15 @@ export const nguoiThanColumns = (employeeMap?: Map<number, { ma_nhan_vien: numbe
         header: ({ column }) => <SortableHeader column={column} title="Nhân viên" />,
         cell: ({ row }) => {
             const maNhanVien = row.getValue("ma_nhan_vien") as number
-            const navigate = useNavigate()
             const employee = employeeMap?.get(maNhanVien)
             const displayText = employee 
                 ? `${employee.ma_nhan_vien} - ${employee.ho_ten}`
                 : String(maNhanVien)
             return (
-                <button
-                    onClick={() => navigate(`/he-thong/danh-sach-nhan-su/${maNhanVien}`)}
-                    className="font-medium hover:underline text-blue-600 text-left"
-                >
-                    {displayText}
-                </button>
+                <EmployeeNavigationCell
+                    maNhanVien={maNhanVien}
+                    displayText={displayText}
+                />
             )
         },
         size: 250,

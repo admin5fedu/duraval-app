@@ -4,13 +4,14 @@ import { type ColumnDef } from "@tanstack/react-table"
 import { useNavigate } from "react-router-dom"
 import { NhanSu } from "../schema"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ArrowUp, ArrowDown, Edit } from "lucide-react"
+import { Edit } from "lucide-react"
 import { ZoomableAvatar } from "@/components/ui/zoomable-avatar"
 import { Badge } from "@/components/ui/badge"
 import { getEmployeeStatusBadgeClass } from "@/components/ui/status-badge"
 import { DeleteNhanSuButton } from "./delete-nhan-su-button"
 import { nhanSuConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
+import { SortableHeader } from "@/shared/components"
 
 // Name cell component with navigation
 function NameCell({ name, avatar, maNhanVien }: { name: string; avatar?: string | null; maNhanVien: number }) {
@@ -59,36 +60,8 @@ function ActionsCell({ maNhanVien, name }: { maNhanVien: number; name: string })
     )
 }
 
-// Helper function to render sortable header
-function SortableHeader({
-    column,
-    title,
-}: {
-    column: {
-        getIsSorted: () => false | "asc" | "desc"
-        toggleSorting: (desc?: boolean) => void
-    }
-    title: string
-}) {
-    const sorted = column.getIsSorted()
-
-    return (
-        <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-8 px-2 hover:bg-muted/50 -ml-2"
-        >
-            <span>{title}</span>
-            {sorted === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-            ) : sorted === "desc" ? (
-                <ArrowDown className="ml-2 h-4 w-4" />
-            ) : (
-                <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-            )}
-        </Button>
-    )
-}
+// Import SortableHeader from shared components
+import { SortableHeader } from "@/shared/components"
 
 export const nhanSuColumns: ColumnDef<NhanSu>[] = [
     // ⚡ Professional: Use generic select column utility

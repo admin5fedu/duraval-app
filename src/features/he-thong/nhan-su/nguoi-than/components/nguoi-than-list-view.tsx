@@ -14,6 +14,8 @@ import { nguoiThanColumns } from "./nguoi-than-columns"
 import { nguoiThanConfig } from "../config"
 import { useNhanSu } from "../../danh-sach-nhan-su/hooks/use-nhan-su"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
+import { useBatchUpsertNguoiThan } from "../actions/nguoi-than-excel-actions"
+import { NguoiThanImportDialog } from "./nguoi-than-import-dialog"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -43,9 +45,11 @@ export function NguoiThanListView({
     const navigate = useNavigate()
     const batchDeleteMutation = useBatchDeleteNguoiThan()
     const deleteMutation = useDeleteNguoiThan()
+    const batchImportMutation = useBatchUpsertNguoiThan()
     const module = nguoiThanConfig.moduleName
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
     const [rowToDelete, setRowToDelete] = React.useState<NguoiThan | null>(null)
+    const [importDialogOpen, setImportDialogOpen] = React.useState(false)
 
     // Create employee map for quick lookup
     const employeeMap = React.useMemo(() => {
@@ -227,6 +231,8 @@ export function NguoiThanListView({
                 getColumnTitle,
                 getCellValue,
             }}
+            onImport={() => setImportDialogOpen(true)}
+            isImporting={batchImportMutation.isPending}
             onEdit={(row) => {
                 if (onEdit) {
                     onEdit(row.id!)
@@ -271,6 +277,13 @@ export function NguoiThanListView({
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Import Dialog */}
+            <NguoiThanImportDialog
+                open={importDialogOpen}
+                onOpenChange={setImportDialogOpen}
+                mutation={batchImportMutation}
+            />
         </>
     )
 }
