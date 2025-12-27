@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { uploadImageToCloudinary, transformCloudinaryUrl } from "@/lib/cloudinary"
 import { ImageZoomViewer } from "./image-zoom-viewer"
+import { useFormField } from "@/components/ui/form"
 
 interface InlineImageUploadProps {
   value?: string | null
@@ -35,6 +36,19 @@ export function InlineImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
+  
+  // Get id from FormControl context if available
+  let formItemId: string | undefined
+  try {
+    const formField = useFormField()
+    formItemId = formField.formItemId
+  } catch {
+    // Not in FormControl context, generate a unique id
+    formItemId = React.useId()
+  }
+  
+  const fileInputId = `${formItemId}-file-input`
+  const cameraInputId = `${formItemId}-camera-input`
 
   const initials = displayName
     .split(" ")
@@ -198,6 +212,8 @@ export function InlineImageUpload({
           <div className="flex items-center gap-2 mb-1.5">
             <input
               ref={fileInputRef}
+              id={fileInputId}
+              name={`${formItemId}-file`}
               type="file"
               accept="image/*"
               onChange={handleFileSelect}
@@ -206,6 +222,8 @@ export function InlineImageUpload({
             />
             <input
               ref={cameraInputRef}
+              id={cameraInputId}
+              name={`${formItemId}-camera`}
               type="file"
               accept="image/*"
               capture="environment"

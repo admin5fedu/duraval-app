@@ -4,6 +4,7 @@ import * as React from "react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { getEnumBadgeClass } from "@/shared/utils/enum-color-registry"
+import { useFormField } from "@/components/ui/form"
 
 interface ToggleButtonFormFieldProps {
   value: string
@@ -20,6 +21,16 @@ export function ToggleButtonFormField({
   disabled = false,
   className,
 }: ToggleButtonFormFieldProps) {
+  // Get id from FormControl context if available
+  let formItemId: string | undefined
+  try {
+    const formField = useFormField()
+    formItemId = formField.formItemId
+  } catch {
+    // Not in FormControl context, generate a unique id
+    formItemId = React.useId()
+  }
+  
   return (
     <ToggleGroup
       type="single"
@@ -29,6 +40,8 @@ export function ToggleButtonFormField({
           onChange(newValue || "")
         }
       }}
+      id={formItemId}
+      role="radiogroup"
       className={cn("w-full flex-wrap justify-start gap-2 bg-transparent", className)}
     >
       {options.map((option) => {

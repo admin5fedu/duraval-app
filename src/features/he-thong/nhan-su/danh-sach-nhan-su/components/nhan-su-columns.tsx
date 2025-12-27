@@ -60,9 +60,6 @@ function ActionsCell({ maNhanVien, name }: { maNhanVien: number; name: string })
     )
 }
 
-// Import SortableHeader from shared components
-import { SortableHeader } from "@/shared/components"
-
 export const nhanSuColumns: ColumnDef<NhanSu>[] = [
     // ⚡ Professional: Use generic select column utility
     createSelectColumn<NhanSu>(),

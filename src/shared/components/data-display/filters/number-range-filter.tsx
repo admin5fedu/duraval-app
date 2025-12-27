@@ -119,6 +119,7 @@ export function NumberRangeFilter<TData, TValue>({
                             </Label>
                             <Input
                                 id="min-value"
+                                name="min-value"
                                 type="number"
                                 placeholder="Min"
                                 value={range.min ?? ''}
@@ -135,6 +136,7 @@ export function NumberRangeFilter<TData, TValue>({
                             </Label>
                             <Input
                                 id="max-value"
+                                name="max-value"
                                 type="number"
                                 placeholder="Max"
                                 value={range.max ?? ''}

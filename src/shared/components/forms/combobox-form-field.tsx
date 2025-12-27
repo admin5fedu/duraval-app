@@ -10,6 +10,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { useFormField } from "@/components/ui/form"
 
 interface ComboboxFormFieldProps {
     value: string
@@ -34,6 +35,18 @@ export function ComboboxFormField({
 }: ComboboxFormFieldProps) {
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
+    
+    // Get id from FormControl context if available
+    let formItemId: string | undefined
+    try {
+        const formField = useFormField()
+        formItemId = formField.formItemId
+    } catch {
+        // Not in FormControl context, generate a unique id
+        formItemId = React.useId()
+    }
+    
+    const searchInputId = React.useId()
 
     const selectedOption = options.find((option) => option.value === value)
 
@@ -71,6 +84,7 @@ export function ComboboxFormField({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
+                    id={formItemId}
                     disabled={disabled}
                     className={cn(
                         "w-full justify-between font-normal",
@@ -88,6 +102,9 @@ export function ComboboxFormField({
                     <div className="flex items-center border-b px-3">
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                         <Input
+                            id={searchInputId}
+                            name={`${formItemId}-search`}
+                            type="search"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}

@@ -94,6 +94,8 @@ export function GenericListMobileFooterSection({
                     <div className="flex items-center gap-1 px-1.5 min-w-0">
                         <Input
                             ref={pageInputRef}
+                            id="table-page-number-input-mobile"
+                            name="table-page-number-mobile"
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"

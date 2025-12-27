@@ -8,6 +8,7 @@ import {
     FormControl,
     FormDescription,
     FormMessage,
+    useFormField,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -24,6 +25,58 @@ import { useIsMobile } from "@/hooks/use-mobile"
 interface FormFieldRendererProps {
     field: FormFieldConfig
     form: UseFormReturn<any>
+}
+
+/**
+ * Wrapper component for Select to ensure it receives id and name from FormControl
+ */
+function SelectWrapper({
+    value,
+    onValueChange,
+    disabled,
+    placeholder,
+    options,
+    isMobile,
+}: {
+    value?: string
+    onValueChange: (value: string) => void
+    disabled?: boolean
+    placeholder?: string
+    options: Array<{ label: string; value: string }>
+    isMobile: boolean
+}) {
+    const { formItemId } = useFormField()
+    
+    return (
+        <Select 
+            onValueChange={onValueChange}
+            value={value}
+            disabled={disabled}
+        >
+            <SelectTrigger 
+                id={formItemId}
+                className={cn(
+                    "w-full",
+                    isMobile && "h-11 text-base" // Larger touch target
+                )}
+            >
+                <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+                {options
+                    .filter(option => option.value !== "")
+                    .map((option) => (
+                        <SelectItem 
+                            key={option.value} 
+                            value={option.value}
+                            className={isMobile ? "text-base py-3" : ""}
+                        >
+                            {option.label}
+                        </SelectItem>
+                    ))}
+            </SelectContent>
+        </Select>
+    )
 }
 
 /**
@@ -100,7 +153,8 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "select" ? (
-                                    <Select 
+                                    <SelectWrapper
+                                        value={formField.value && formField.value !== "" ? String(formField.value) : undefined}
                                         onValueChange={(value) => {
                                             if (field.disabled) return
                                             if (value === "" || value === "__empty__") {
@@ -108,30 +162,12 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                             } else {
                                                 formField.onChange(value)
                                             }
-                                        }} 
-                                        value={formField.value && formField.value !== "" ? String(formField.value) : undefined}
+                                        }}
                                         disabled={field.disabled}
-                                    >
-                                        <SelectTrigger className={cn(
-                                            "w-full",
-                                            isMobile && "h-11 text-base" // Larger touch target
-                                        )}>
-                                            <SelectValue placeholder={field.placeholder || "Chọn..."} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {(field.options || [])
-                                                .filter(option => option.value !== "")
-                                                .map((option) => (
-                                                    <SelectItem 
-                                                        key={option.value} 
-                                                        value={option.value}
-                                                        className={isMobile ? "text-base py-3" : ""}
-                                                    >
-                                                        {option.label}
-                                                    </SelectItem>
-                                                ))}
-                                        </SelectContent>
-                                    </Select>
+                                        placeholder={field.placeholder || "Chọn..."}
+                                        options={field.options || []}
+                                        isMobile={isMobile}
+                                    />
                                 ) : field.type === "textarea" ? (
                                     <Textarea
                                         {...formField}
