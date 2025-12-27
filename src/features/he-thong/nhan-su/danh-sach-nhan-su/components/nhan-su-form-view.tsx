@@ -7,13 +7,24 @@ import type { UpdateNhanSuInput } from "../types"
 import { useCreateNhanSu, useUpdateNhanSu } from "../hooks/use-nhan-su-mutations"
 import { useNhanSuById } from "../hooks/use-nhan-su"
 import { nhanSuConfig } from "../config"
+import { useMemo } from "react"
 
-const sections: FormSection[] = [
+const getSections = (displayName?: string): FormSection[] => [
   {
     title: "Thông Tin Cơ Bản",
     fields: [
       { name: "ma_nhan_vien", label: "Mã Nhân Viên", type: "number", required: true },
       { name: "ho_ten", label: "Họ và Tên", required: true },
+      { 
+        name: "avatar_url", 
+        label: "Ảnh Đại Diện", 
+        type: "image", 
+        imageFolder: "nhan-su/avatars",
+        imageMaxSize: 10,
+        colSpan: 2,
+        displayName: displayName || "Nhân viên",
+        description: "Tải lên ảnh đại diện cho nhân viên. Hỗ trợ JPG, PNG, GIF, WebP, tối đa 10MB."
+      },
       { name: "gioi_tinh", label: "Giới Tính", type: "select", options: [{ label: "Nam", value: "Nam" }, { label: "Nữ", value: "Nữ" }, { label: "Khác", value: "Khác" }] },
       { name: "ngay_sinh", label: "Ngày Sinh", type: "date" },
       { name: "hon_nhan", label: "Hôn Nhân", type: "select", options: [{ label: "Độc thân", value: "Độc thân" }, { label: "Đã kết hôn", value: "Đã kết hôn" }, { label: "Ly dị", value: "Ly dị" }] },
@@ -77,6 +88,11 @@ export function NhanSuFormView({ id, onComplete, onCancel }: NhanSuFormViewProps
   
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
+
+  // Create sections with dynamic displayName for avatar
+  const sections = useMemo(() => {
+    return getSections(existingData?.ho_ten)
+  }, [existingData?.ho_ten])
 
   const handleSubmit = async (data: any) => {
     if (isEditMode && id) {

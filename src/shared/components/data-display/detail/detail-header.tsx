@@ -3,14 +3,8 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { ZoomableAvatar } from "@/components/ui/zoomable-avatar"
-import { ArrowLeft, MoreVertical } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { pageTitleClass, responsiveTextClass } from "@/shared/utils/text-styles"
 import { toolbarGapClass } from "@/shared/utils/toolbar-styles"
 import { cn } from "@/lib/utils"
@@ -26,7 +20,7 @@ interface DetailHeaderProps {
 
 /**
  * Component để render header của detail view
- * Mobile-optimized: Actions được gom vào dropdown menu trên mobile
+ * Mobile-optimized: Actions hiển thị trực tiếp trên mobile để dễ truy cập
  */
 export function DetailHeader({
   title,
@@ -117,43 +111,9 @@ export function DetailHeader({
           "justify-end",
           "w-full md:w-auto",
           "print:hidden",
-          toolbarGapClass()
+          isMobile ? "gap-2" : toolbarGapClass()
         )}>
-          {isMobile && actions ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <MoreVertical className="h-5 w-5" />
-                  <span className="sr-only">Tùy chọn</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {React.Children.map(actions, (child, index) => {
-                  if (React.isValidElement(child)) {
-                    // Extract onClick and children from button
-                    const buttonProps = child.props
-                    return (
-                      <DropdownMenuItem
-                        key={index}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          // Trigger click on the original button
-                          if (buttonProps?.onClick) {
-                            buttonProps.onClick(e)
-                          }
-                        }}
-                      >
-                        {buttonProps?.children || `Action ${index + 1}`}
-                      </DropdownMenuItem>
-                    )
-                  }
-                  return null
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            actions
-          )}
+          {actions}
         </div>
       </div>
     </TooltipProvider>

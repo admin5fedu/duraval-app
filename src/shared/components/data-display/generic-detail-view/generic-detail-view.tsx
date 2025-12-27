@@ -10,6 +10,8 @@ import { DetailSections } from "./sections/detail-sections"
 import { DetailDeleteDialog } from "./sections/detail-delete-dialog"
 import { DetailLoadingState } from "./sections/detail-loading-state"
 import { DetailEmptyState } from "./sections/detail-empty-state"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 /**
  * GenericDetailView Component
@@ -54,6 +56,8 @@ export function GenericDetailView<T extends Record<string, any>>({
         handleDelete,
     } = useGenericDetailState(data, id, config)
 
+    const isMobile = useIsMobile()
+
     // 2. Render actions (moved from hook to component to avoid JSX in .ts file)
     const renderActions = React.useCallback(() => {
         if (config.renderActions) {
@@ -64,8 +68,14 @@ export function GenericDetailView<T extends Record<string, any>>({
 
         if (config.editPath) {
             actions.push(
-                <Button key="edit" variant="outline" size="sm" onClick={handleEdit}>
-                    <Edit className="mr-2 h-4 w-4" /> Sửa
+                <Button 
+                    key="edit" 
+                    variant="outline" 
+                    size={isMobile ? "default" : "sm"} 
+                    onClick={handleEdit}
+                    className={cn(isMobile && "h-10 text-base")}
+                >
+                    <Edit className={cn("mr-2", isMobile ? "h-4 w-4" : "h-4 w-4")} /> Sửa
                 </Button>
             )
         }
@@ -75,16 +85,17 @@ export function GenericDetailView<T extends Record<string, any>>({
                 <Button
                     key="delete"
                     variant="destructive"
-                    size="sm"
+                    size={isMobile ? "default" : "sm"}
                     onClick={() => setDeleteConfirmOpen(true)}
+                    className={cn(isMobile && "h-10 text-base")}
                 >
-                    <Trash2 className="mr-2 h-4 w-4" /> Xóa
+                    <Trash2 className={cn("mr-2", isMobile ? "h-4 w-4" : "h-4 w-4")} /> Xóa
                 </Button>
             )
         }
 
         return actions.length > 0 ? <div className="flex items-center gap-2">{actions}</div> : null
-    }, [config.renderActions, config.editPath, config.onDelete, data, id, handleEdit, setDeleteConfirmOpen])
+    }, [config.renderActions, config.editPath, config.onDelete, data, id, handleEdit, setDeleteConfirmOpen, isMobile])
 
     // 3. Render loading state
     if (isLoading) {

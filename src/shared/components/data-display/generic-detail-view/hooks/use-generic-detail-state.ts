@@ -71,7 +71,9 @@ export function useGenericDetailState<T extends Record<string, any>>(
     const handleEdit = React.useCallback(() => {
         if (config.editPath) {
             const editPath = config.editPath.replace("{id}", String(id))
-            navigate(editPath)
+            // Thêm query param returnTo=detail để form biết quay về detail khi hủy
+            const separator = editPath.includes("?") ? "&" : "?"
+            navigate(`${editPath}${separator}returnTo=detail`)
         }
     }, [navigate, config.editPath, id])
 
