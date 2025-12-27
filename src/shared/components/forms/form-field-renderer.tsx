@@ -18,7 +18,8 @@ import { FormFieldConfig } from "./generic-form-view/"
 import { ComboboxFormField } from "./combobox-form-field"
 import { ToggleButtonFormField } from "./toggle-button-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
-import { PhongBanSelect } from "@/features/he-thong/so-do/phong-ban/components/phong-ban-select"
+import { PhongBanSelect } from "@/components/ui/phong-ban-select"
+import { CapBacSelectFormField } from "@/components/ui/cap-bac-select-form-field"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -190,6 +191,14 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         }}
                                         placeholder={field.placeholder || "Chọn phòng ban..."}
                                         searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã phòng ban..."}
+                                        disabled={field.disabled}
+                                        excludeIds={field.excludeIds || []}
+                                    />
+                                ) : field.type === "cap-bac-select" ? (
+                                    <CapBacSelectFormField
+                                        field={formField}
+                                        placeholder={field.placeholder || "Chọn cấp bậc..."}
+                                        description={field.description || "Tìm kiếm theo tên hoặc mã cấp bậc..."}
                                         disabled={field.disabled}
                                         excludeIds={field.excludeIds || []}
                                     />

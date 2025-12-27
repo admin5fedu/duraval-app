@@ -45,6 +45,16 @@ const PhongBanListRoute = lazy(() => import('@/features/he-thong/so-do/phong-ban
 const PhongBanDetailRoute = lazy(() => import('@/features/he-thong/so-do/phong-ban/routes/phong-ban-detail-route'))
 const PhongBanFormRoute = lazy(() => import('@/features/he-thong/so-do/phong-ban/routes/phong-ban-form-route'))
 
+// Cấp bậc module routes
+const CapBacListRoute = lazy(() => import('@/features/he-thong/so-do/cap-bac/routes/cap-bac-list-route'))
+const CapBacDetailRoute = lazy(() => import('@/features/he-thong/so-do/cap-bac/routes/cap-bac-detail-route'))
+const CapBacFormRoute = lazy(() => import('@/features/he-thong/so-do/cap-bac/routes/cap-bac-form-route'))
+
+// Chức vụ module routes
+const ChucVuListRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-list-route'))
+const ChucVuDetailRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-detail-route'))
+const ChucVuFormRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -323,6 +333,68 @@ export const routes: RouteConfig[] = [
   {
     path: '/he-thong/phong-ban',
     element: PhongBanListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Cấp bậc module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/he-thong/cap-bac/moi',
+    element: CapBacFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/cap-bac/:id/sua',
+    element: CapBacFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/cap-bac/:id',
+    element: CapBacDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/he-thong/cap-bac',
+    element: CapBacListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Chức vụ module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/he-thong/chuc-vu/moi',
+    element: ChucVuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/chuc-vu/:id/sua',
+    element: ChucVuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/chuc-vu/:id',
+    element: ChucVuDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/he-thong/chuc-vu',
+    element: ChucVuListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

@@ -9,5 +9,7 @@ export { nguoiThan, nguoiThan as nguoiThanQueryKeys } from "./nguoi-than"
 export { thongTinCongTy, thongTinCongTy as thongTinCongTyQueryKeys } from "./thong-tin-cong-ty"
 export { chiNhanh, chiNhanh as chiNhanhQueryKeys } from "./chi-nhanh"
 export { phongBan, phongBan as phongBanQueryKeys } from "./phong-ban"
+export { capBac, capBac as capBacQueryKeys } from "./cap-bac"
+export { chucVu, chucVu as chucVuQueryKeys } from "./chuc-vu"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

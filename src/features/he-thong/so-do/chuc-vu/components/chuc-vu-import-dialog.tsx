@@ -1,0 +1,418 @@
+"use client"
+
+import * as React from "react"
+import { ImportDialog, type ImportOptions } from "@/shared/components/data-display/import/import-dialog"
+import { useBatchUpsertChucVu } from "../actions/chuc-vu-excel-actions"
+import { ChucVu } from "../schema"
+import type { TemplateColumn } from "@/lib/excel/template-utils"
+import type { ColumnMapping } from "@/shared/utils/excel-column-mapper"
+import { shouldSkipValue } from "@/shared/utils/excel-data-cleaner"
+
+type UseBatchUpsertChucVuReturn = ReturnType<typeof useBatchUpsertChucVu>
+
+interface ChucVuImportDialogProps {
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    mutation?: UseBatchUpsertChucVuReturn
+}
+
+// Column mappings for auto-mapping
+const columnMappings: ColumnMapping[] = [
+    {
+        dbField: "ma_chuc_vu",
+        excelNames: [
+            "Mã chức vụ", "Mã Chức Vụ", "Ma chuc vu", "Ma Chuc Vu",
+            "Mã_CV", "Mã_cv", "Ma_CV", "Ma_cv",
+            "Position Code", "PositionCode", "position_code", "Code", "code"
+        ],
+        required: true,
+        type: "string",
+        description: "Mã chức vụ (bắt buộc)",
+    },
+    {
+        dbField: "ten_chuc_vu",
+        excelNames: [
+            "Tên chức vụ", "Tên Chức Vụ", "Ten chuc vu", "Ten Chuc Vu",
+            "Tên_CV", "Tên_cv", "Ten_CV", "Ten_cv",
+            "Position Name", "PositionName", "position_name", "Name", "name"
+        ],
+        required: true,
+        type: "string",
+        description: "Tên chức vụ (bắt buộc)",
+    },
+    {
+        dbField: "ma_cap_bac",
+        excelNames: [
+            "Mã cấp bậc", "Mã Cấp Bậc", "Ma cap bac", "Ma Cap Bac",
+            "Level Code", "level_code", "Ma_CB", "Ma_cb"
+        ],
+        required: true,
+        type: "string",
+        description: "Mã cấp bậc (bắt buộc)",
+    },
+    {
+        dbField: "ten_cap_bac",
+        excelNames: [
+            "Tên cấp bậc", "Tên Cấp Bậc", "Ten cap bac", "Ten Cap Bac",
+            "Level Name", "level_name", "Ten_CB", "Ten_cb"
+        ],
+        required: false,
+        type: "string",
+        description: "Tên cấp bậc (không bắt buộc)",
+    },
+    {
+        dbField: "ma_phong_ban",
+        excelNames: [
+            "Mã phòng ban", "Mã Phòng Ban", "Ma phong ban", "Ma Phong Ban",
+            "Department Code", "dept_code", "Ma_PB", "Ma_pb"
+        ],
+        required: true,
+        type: "string",
+        description: "Mã phòng ban (bắt buộc)",
+    },
+    {
+        dbField: "ma_nhom",
+        excelNames: ["Mã nhóm", "Mã Nhóm", "Ma nhom", "Ma Nhom", "Group Code", "group_code"],
+        required: false,
+        type: "string",
+        description: "Mã nhóm (không bắt buộc)",
+    },
+    {
+        dbField: "ma_bo_phan",
+        excelNames: ["Mã bộ phận", "Mã Bộ Phận", "Ma bo phan", "Ma Bo Phan", "Division Code", "division_code"],
+        required: false,
+        type: "string",
+        description: "Mã bộ phận (không bắt buộc)",
+    },
+    {
+        dbField: "ma_phong",
+        excelNames: ["Mã phòng", "Mã Phòng", "Ma phong", "Ma Phong", "Room Code", "room_code"],
+        required: false,
+        type: "string",
+        description: "Mã phòng (không bắt buộc)",
+    },
+    {
+        dbField: "ngach_luong",
+        excelNames: ["Ngạch lương", "Ngạch Lương", "Ngach luong", "Ngach Luong", "Salary Grade", "salary_grade"],
+        required: false,
+        type: "string",
+        description: "Ngạch lương (không bắt buộc)",
+    },
+    {
+        dbField: "muc_dong_bao_hiem",
+        excelNames: ["Mức đóng bảo hiểm", "Mức Đóng Bảo Hiểm", "Muc dong bao hiem", "Muc Dong Bao Hiem", "Insurance Rate", "insurance_rate"],
+        required: false,
+        type: "number",
+        description: "Mức đóng bảo hiểm (không bắt buộc)",
+    },
+    {
+        dbField: "so_ngay_nghi_thu_7",
+        excelNames: ["Số ngày nghỉ thứ 7", "Số Ngày Nghỉ Thứ 7", "So ngay nghi thu 7", "Saturday Leave", "saturday_leave"],
+        required: false,
+        type: "string",
+        description: "Số ngày nghỉ thứ 7 (không bắt buộc)",
+    },
+    {
+        dbField: "nhom_thuong",
+        excelNames: ["Nhóm thưởng", "Nhóm Thưởng", "Nhom thuong", "Nhom Thuong", "Bonus Group", "bonus_group"],
+        required: false,
+        type: "string",
+        description: "Nhóm thưởng (không bắt buộc)",
+    },
+    {
+        dbField: "diem_thuong",
+        excelNames: ["Điểm thưởng", "Điểm Thưởng", "Diem thuong", "Diem Thuong", "Bonus Points", "bonus_points"],
+        required: false,
+        type: "number",
+        description: "Điểm thưởng (không bắt buộc)",
+    },
+]
+
+// Template columns for Excel import
+const templateColumns: TemplateColumn[] = [
+    {
+        name: "ma_chuc_vu",
+        label: "Mã chức vụ",
+        type: "string",
+        required: true,
+        description: "Mã chức vụ (bắt buộc)",
+    },
+    {
+        name: "ten_chuc_vu",
+        label: "Tên chức vụ",
+        type: "string",
+        required: true,
+        description: "Tên chức vụ (bắt buộc)",
+    },
+    {
+        name: "ma_cap_bac",
+        label: "Mã cấp bậc",
+        type: "string",
+        required: true,
+        description: "Mã cấp bậc (bắt buộc)",
+    },
+    {
+        name: "ten_cap_bac",
+        label: "Tên cấp bậc",
+        type: "string",
+        required: false,
+        description: "Tên cấp bậc (không bắt buộc)",
+    },
+    {
+        name: "ma_phong_ban",
+        label: "Mã phòng ban",
+        type: "string",
+        required: true,
+        description: "Mã phòng ban (bắt buộc)",
+    },
+    {
+        name: "ma_nhom",
+        label: "Mã nhóm",
+        type: "string",
+        required: false,
+        description: "Mã nhóm (không bắt buộc)",
+    },
+    {
+        name: "ma_bo_phan",
+        label: "Mã bộ phận",
+        type: "string",
+        required: false,
+        description: "Mã bộ phận (không bắt buộc)",
+    },
+    {
+        name: "ma_phong",
+        label: "Mã phòng",
+        type: "string",
+        required: false,
+        description: "Mã phòng (không bắt buộc)",
+    },
+    {
+        name: "ngach_luong",
+        label: "Ngạch lương",
+        type: "string",
+        required: false,
+        description: "Ngạch lương (không bắt buộc)",
+    },
+    {
+        name: "muc_dong_bao_hiem",
+        label: "Mức đóng bảo hiểm",
+        type: "number",
+        required: false,
+        description: "Mức đóng bảo hiểm (không bắt buộc)",
+    },
+    {
+        name: "so_ngay_nghi_thu_7",
+        label: "Số ngày nghỉ thứ 7",
+        type: "string",
+        required: false,
+        description: "Số ngày nghỉ thứ 7 (không bắt buộc)",
+    },
+    {
+        name: "nhom_thuong",
+        label: "Nhóm thưởng",
+        type: "string",
+        required: false,
+        description: "Nhóm thưởng (không bắt buộc)",
+    },
+    {
+        name: "diem_thuong",
+        label: "Điểm thưởng",
+        type: "number",
+        required: false,
+        description: "Điểm thưởng (không bắt buộc)",
+    },
+]
+
+// Validate a single row
+function validateRow(
+    row: Record<string, any>,
+    rowNumber: number
+): string[] {
+    const errors: string[] = []
+
+    // Required fields
+    if (!row.ma_chuc_vu || String(row.ma_chuc_vu).trim() === "") {
+        errors.push("Mã chức vụ là bắt buộc")
+    }
+
+    if (!row.ten_chuc_vu || String(row.ten_chuc_vu).trim() === "") {
+        errors.push("Tên chức vụ là bắt buộc")
+    }
+
+    if (!row.ma_cap_bac || String(row.ma_cap_bac).trim() === "") {
+        errors.push("Mã cấp bậc là bắt buộc")
+    }
+
+    if (!row.ma_phong_ban || String(row.ma_phong_ban).trim() === "") {
+        errors.push("Mã phòng ban là bắt buộc")
+    }
+
+    return errors
+}
+
+// Check for duplicates within the import data
+function checkDuplicates(
+    rows: Array<{ rowNumber: number; data: Record<string, any> }>
+): Map<string, number[]> {
+    const duplicates = new Map<string, number[]>()
+    const keyMap = new Map<string, number[]>()
+
+    rows.forEach((row, index) => {
+        const maChucVu = row.data.ma_chuc_vu
+
+        if (maChucVu) {
+            const key = String(maChucVu).trim()
+            if (!keyMap.has(key)) {
+                keyMap.set(key, [])
+            }
+            keyMap.get(key)!.push(index)
+        }
+    })
+
+    keyMap.forEach((indices, key) => {
+        if (indices.length > 1) {
+            duplicates.set(key, indices)
+        }
+    })
+
+    return duplicates
+}
+
+// Map Excel columns to database fields
+function mapExcelToDb(
+    rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>,
+    options: ImportOptions
+): Partial<ChucVu>[] {
+    return rows.map((row) => {
+        const mapped: Partial<ChucVu> = {}
+
+        // Map required fields
+        if (!shouldSkipValue(row.data["ma_chuc_vu"], options.skipEmptyCells)) {
+            mapped.ma_chuc_vu = String(row.data["ma_chuc_vu"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ten_chuc_vu"], options.skipEmptyCells)) {
+            mapped.ten_chuc_vu = String(row.data["ten_chuc_vu"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ma_cap_bac"], options.skipEmptyCells)) {
+            mapped.ma_cap_bac = String(row.data["ma_cap_bac"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ten_cap_bac"], options.skipEmptyCells)) {
+            mapped.ten_cap_bac = String(row.data["ten_cap_bac"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ma_phong_ban"], options.skipEmptyCells)) {
+            mapped.ma_phong_ban = String(row.data["ma_phong_ban"]).trim()
+        }
+
+        // Map optional fields
+        if (!shouldSkipValue(row.data["ma_nhom"], options.skipEmptyCells)) {
+            mapped.ma_nhom = String(row.data["ma_nhom"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ma_bo_phan"], options.skipEmptyCells)) {
+            mapped.ma_bo_phan = String(row.data["ma_bo_phan"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ma_phong"], options.skipEmptyCells)) {
+            mapped.ma_phong = String(row.data["ma_phong"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["ngach_luong"], options.skipEmptyCells)) {
+            mapped.ngach_luong = String(row.data["ngach_luong"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["muc_dong_bao_hiem"], options.skipEmptyCells)) {
+            mapped.muc_dong_bao_hiem = Number(row.data["muc_dong_bao_hiem"])
+        }
+
+        if (!shouldSkipValue(row.data["so_ngay_nghi_thu_7"], options.skipEmptyCells)) {
+            mapped.so_ngay_nghi_thu_7 = String(row.data["so_ngay_nghi_thu_7"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["nhom_thuong"], options.skipEmptyCells)) {
+            mapped.nhom_thuong = String(row.data["nhom_thuong"]).trim()
+        }
+
+        if (!shouldSkipValue(row.data["diem_thuong"], options.skipEmptyCells)) {
+            mapped.diem_thuong = Number(row.data["diem_thuong"])
+        }
+
+        return mapped
+    })
+}
+
+export function ChucVuImportDialog({ open, onOpenChange, mutation }: ChucVuImportDialogProps) {
+    const defaultMutation = useBatchUpsertChucVu()
+    const batchUpsertMutation = mutation || defaultMutation
+    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+        skipEmptyCells: true,
+        upsertMode: 'upsert', // Upsert mode: update if exists, insert if not
+    })
+
+    const handleImport = async (rows: Partial<ChucVu>[]): Promise<{
+        success: boolean
+        inserted: number
+        updated: number
+        failed: number
+        errors?: Array<{ rowNumber: number; errors: string[] }>
+    }> => {
+        try {
+            // Convert rows to ExcelRow format for mutation
+            const excelRows = rows.map((row) => ({
+                ma_chuc_vu: row.ma_chuc_vu,
+                ten_chuc_vu: row.ten_chuc_vu,
+                ma_cap_bac: row.ma_cap_bac,
+                ten_cap_bac: row.ten_cap_bac,
+                ma_phong_ban: row.ma_phong_ban,
+                ma_nhom: row.ma_nhom,
+                ma_bo_phan: row.ma_bo_phan,
+                ma_phong: row.ma_phong,
+                ngach_luong: row.ngach_luong,
+                muc_dong_bao_hiem: row.muc_dong_bao_hiem,
+                so_ngay_nghi_thu_7: row.so_ngay_nghi_thu_7,
+                nhom_thuong: row.nhom_thuong,
+                diem_thuong: row.diem_thuong,
+            }))
+            const result = await batchUpsertMutation.mutateAsync(excelRows)
+            return {
+                success: result.errors.length === 0,
+                inserted: result.inserted,
+                updated: result.updated,
+                failed: result.errors.length,
+                errors: result.errors.map((err) => ({
+                    rowNumber: err.row,
+                    errors: [err.error],
+                })),
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    // Transform Excel data to database format
+    const transformData = (rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>): Partial<ChucVu>[] => {
+        return mapExcelToDb(rows, importOptions)
+    }
+
+    return (
+        <ImportDialog<Partial<ChucVu>>
+            open={open}
+            onOpenChange={onOpenChange}
+            onImport={handleImport}
+            validateRow={validateRow}
+            checkDuplicates={checkDuplicates}
+            transformData={transformData}
+            moduleName="chức vụ"
+            expectedHeaders={["ma_chuc_vu", "ten_chuc_vu", "ma_cap_bac", "ma_phong_ban"]}
+            templateColumns={templateColumns}
+            columnMappings={columnMappings}
+            enableAutoMapping={true}
+            importOptions={importOptions}
+            onOptionsChange={setImportOptions}
+        />
+    )
+}
+
