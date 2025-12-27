@@ -29,6 +29,17 @@ export function ZoomableAvatar({
   children,
   ...props
 }: ZoomableAvatarProps) {
+  const [imageError, setImageError] = React.useState(false)
+  const [imageLoaded, setImageLoaded] = React.useState(false)
+
+  // Reset state when src changes
+  React.useEffect(() => {
+    if (src) {
+      setImageError(false)
+      setImageLoaded(false)
+    }
+  }, [src])
+
   // Nếu không có src hoặc zoomable = false, render Avatar bình thường
   if (!src || !zoomable) {
     return (
@@ -42,15 +53,27 @@ export function ZoomableAvatar({
 
   return (
     <Avatar className={cn("cursor-pointer", className)} {...props}>
-      <Zoom>
-        <img
-          src={src}
-          alt={alt}
-          className="aspect-square h-full w-full object-cover"
-          style={{ display: "block" }}
-        />
-      </Zoom>
-      {fallback && <AvatarFallback>{fallback}</AvatarFallback>}
+      {!imageError && (
+        <Zoom>
+          <img
+            src={src}
+            alt={alt}
+            className={cn(
+              "aspect-square h-full w-full object-cover transition-opacity duration-200",
+              imageLoaded ? "opacity-100" : "opacity-0"
+            )}
+            style={{ display: "block" }}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true)
+              setImageLoaded(true)
+            }}
+          />
+        </Zoom>
+      )}
+      {fallback && (!imageLoaded || imageError) && (
+        <AvatarFallback>{fallback}</AvatarFallback>
+      )}
       {children}
     </Avatar>
   )
