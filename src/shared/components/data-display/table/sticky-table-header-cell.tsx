@@ -29,6 +29,8 @@ export function StickyTableHeaderCell({
     const headerStyle: React.CSSProperties = React.useMemo(() => ({
         minWidth: `${minWidth}px`,
         width: `${width}px`,
+        maxWidth: `${width}px`,
+        boxSizing: 'border-box',
         backgroundColor: 'hsl(var(--background))',
         ...(isStickyLeft ? {
             left: stickyLeftOffset ?? 0,

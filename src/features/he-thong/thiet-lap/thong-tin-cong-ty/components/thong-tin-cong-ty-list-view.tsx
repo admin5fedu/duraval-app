@@ -8,14 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
-import { NguoiThan } from "../schema"
-import { useNguoiThan, useBatchDeleteNguoiThan, useDeleteNguoiThan } from "../hooks"
-import { nguoiThanColumns } from "./nguoi-than-columns"
-import { nguoiThanConfig } from "../config"
-import { useNhanSu } from "../../danh-sach-nhan-su/hooks/use-nhan-su"
+import { ThongTinCongTy } from "../schema"
+import { useThongTinCongTy, useBatchDeleteThongTinCongTy, useDeleteThongTinCongTy } from "../hooks"
+import { thongTinCongTyColumns } from "./thong-tin-cong-ty-columns"
+import { thongTinCongTyConfig } from "../config"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
-import { useBatchUpsertNguoiThan } from "../actions/nguoi-than-excel-actions"
-import { NguoiThanImportDialog } from "./nguoi-than-import-dialog"
+import { useBatchUpsertThongTinCongTy } from "../actions/thong-tin-cong-ty-excel-actions"
+import { ThongTinCongTyImportDialog } from "./thong-tin-cong-ty-import-dialog"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -27,52 +26,33 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface NguoiThanListViewProps {
-    initialData?: NguoiThan[]
+interface ThongTinCongTyListViewProps {
+    initialData?: ThongTinCongTy[]
     onEdit?: (id: number) => void
     onAddNew?: () => void
     onView?: (id: number) => void
 }
 
-export function NguoiThanListView({ 
+export function ThongTinCongTyListView({ 
     initialData,
     onEdit,
     onAddNew,
     onView,
-}: NguoiThanListViewProps = {}) {
-    const { data: nguoiThanList, isLoading, isError, refetch } = useNguoiThan(initialData)
-    const { data: employees } = useNhanSu() // Load employees to map names
+}: ThongTinCongTyListViewProps = {}) {
+    const { data: thongTinCongTyList, isLoading, isError, refetch } = useThongTinCongTy(initialData)
     const navigate = useNavigate()
-    const batchDeleteMutation = useBatchDeleteNguoiThan()
-    const deleteMutation = useDeleteNguoiThan()
-    const batchImportMutation = useBatchUpsertNguoiThan()
-    const module = nguoiThanConfig.moduleName
+    const batchDeleteMutation = useBatchDeleteThongTinCongTy()
+    const deleteMutation = useDeleteThongTinCongTy()
+    const batchImportMutation = useBatchUpsertThongTinCongTy()
+    const module = thongTinCongTyConfig.moduleName
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
-    const [rowToDelete, setRowToDelete] = React.useState<NguoiThan | null>(null)
+    const [rowToDelete, setRowToDelete] = React.useState<ThongTinCongTy | null>(null)
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
 
-    // Create employee map for quick lookup
-    const employeeMap = React.useMemo(() => {
-        const map = new Map<number, { ma_nhan_vien: number; ho_ten: string }>()
-        employees?.forEach(emp => {
-            map.set(emp.ma_nhan_vien, { ma_nhan_vien: emp.ma_nhan_vien, ho_ten: emp.ho_ten })
-        })
-        return map
-    }, [employees])
-
-    // ✅ Thêm trường ảo ten_nhan_vien vào data để hỗ trợ tìm kiếm theo tên nhân viên
-    const enrichedData = React.useMemo(() => {
-        if (!nguoiThanList) return []
-        return nguoiThanList.map(item => ({
-            ...item,
-            ten_nhan_vien: employeeMap.get(item.ma_nhan_vien)?.ho_ten || "",
-        }))
-    }, [nguoiThanList, employeeMap])
-
-    // Create columns with employee map
-    const columnsWithEmployeeMap = React.useMemo(() => {
-        return nguoiThanColumns(employeeMap)
-    }, [employeeMap])
+    // Create columns
+    const columns = React.useMemo(() => {
+        return thongTinCongTyColumns()
+    }, [])
 
     // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
     const {
@@ -85,15 +65,15 @@ export function NguoiThanListView({
     } = useListViewFilters(module, [{ id: "tg_tao", desc: true }])
 
     // Generate filter options from data
-    const moiQuanHeOptions = React.useMemo(() => {
-        const unique = Array.from(
-            new Set(nguoiThanList?.map((e) => e.moi_quan_he).filter((d): d is string => !!d) || [])
-        )
-        return unique.map((d) => ({ label: d, value: d }))
-    }, [nguoiThanList])
+    const apDungOptions = React.useMemo(() => {
+        return [
+            { label: "Có", value: "true" },
+            { label: "Không", value: "false" },
+        ]
+    }, [])
 
     // Mobile card renderer
-    const renderMobileCard = React.useCallback((row: NguoiThan) => {
+    const renderMobileCard = React.useCallback((row: ThongTinCongTy) => {
         return (
             <div className="flex flex-col gap-3 w-full">
                 {/* Thông tin chính */}
@@ -101,22 +81,14 @@ export function NguoiThanListView({
                     <div className="flex-1 min-w-0 flex items-start gap-2">
                         <div className="flex-1 min-w-0">
                             <span className="font-semibold text-base text-foreground leading-tight truncate block">
-                                {row.ho_va_ten}
+                                {row.ten_cong_ty}
                             </span>
-                            {row.moi_quan_he && (
+                            {row.ap_dung !== null && (
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    <Badge variant="secondary" className="shrink-0 text-[11px] px-2 py-0">
-                                        {row.moi_quan_he}
+                                    <Badge variant={row.ap_dung ? "default" : "secondary"} className="shrink-0 text-[11px] px-2 py-0">
+                                        {row.ap_dung ? "Áp dụng" : "Không áp dụng"}
                                     </Badge>
                                 </div>
-                            )}
-                        </div>
-                        {/* Góc phải: Ngày sinh */}
-                        <div className="flex flex-col items-end gap-0.5 shrink-0">
-                            {row.ngay_sinh && (
-                                <span className="text-[11px] text-muted-foreground">
-                                    {format(new Date(row.ngay_sinh), "dd/MM/yyyy", { locale: vi })}
-                                </span>
                             )}
                         </div>
                     </div>
@@ -124,10 +96,13 @@ export function NguoiThanListView({
 
                 {/* Thông tin phụ */}
                 <div className="space-y-1 text-xs text-muted-foreground">
-                    {row.ma_nhan_vien && (
+                    {row.ma_cong_ty && (
                         <p className="leading-snug">
-                            Mã NV: <span className="font-medium text-foreground">{row.ma_nhan_vien}</span>
+                            Mã: <span className="font-medium text-foreground">{row.ma_cong_ty}</span>
                         </p>
+                    )}
+                    {row.email && (
+                        <p className="leading-snug">Email: {row.email}</p>
                     )}
                     {row.so_dien_thoai && (
                         <p className="leading-snug">SĐT: {row.so_dien_thoai}</p>
@@ -139,35 +114,25 @@ export function NguoiThanListView({
 
     // Export utilities
     const getColumnTitle = React.useCallback((columnId: string) => {
-        const column = columnsWithEmployeeMap.find((col) => {
+        const column = columns.find((col) => {
             const id = (col as any).id
             const accessorKey = (col as any).accessorKey
             return id === columnId || accessorKey === columnId
         })
         return (column?.meta as any)?.title || columnId
-    }, [columnsWithEmployeeMap])
+    }, [columns])
 
-    const getCellValue = React.useCallback((row: NguoiThan, columnId: string) => {
-        if (columnId === "ngay_sinh") {
-            const value = (row as any)[columnId]
-            if (!value) return ""
-            return format(new Date(value), "dd/MM/yyyy", { locale: vi })
-        }
-        if (columnId === "tg_tao") {
+    const getCellValue = React.useCallback((row: ThongTinCongTy, columnId: string) => {
+        if (columnId === "tg_tao" || columnId === "tg_cap_nhat") {
             const value = (row as any)[columnId]
             if (!value) return ""
             return format(new Date(value), "dd/MM/yyyy HH:mm", { locale: vi })
         }
-        if (columnId === "ma_nhan_vien") {
-            const maNhanVien = row.ma_nhan_vien
-            const employee = employeeMap.get(maNhanVien)
-            if (employee) {
-                return `${employee.ma_nhan_vien} - ${employee.ho_ten}`
-            }
-            return String(maNhanVien)
+        if (columnId === "ap_dung") {
+            return (row as any)[columnId] ? "Có" : "Không"
         }
         return (row as any)[columnId] ?? ""
-    }, [employeeMap])
+    }, [])
 
     if (isLoading) {
         return (
@@ -181,7 +146,7 @@ export function NguoiThanListView({
     if (isError) {
         return (
             <div className="flex flex-col items-center justify-center py-16">
-                <p className="text-destructive mb-4">Lỗi khi tải danh sách người thân</p>
+                <p className="text-destructive mb-4">Lỗi khi tải danh sách thông tin công ty</p>
                 <Button onClick={() => refetch()}>Thử lại</Button>
             </div>
         )
@@ -190,9 +155,9 @@ export function NguoiThanListView({
     return (
         <>
         <GenericListView
-            columns={columnsWithEmployeeMap}
-            data={enrichedData}
-            filterColumn="ho_va_ten"
+            columns={columns}
+            data={thongTinCongTyList || []}
+            filterColumn="ma_cong_ty"
             initialSorting={initialSorting}
             initialFilters={initialFilters}
             initialSearch={initialSearch}
@@ -203,19 +168,19 @@ export function NguoiThanListView({
                 if (onView) {
                     onView(row.id!)
                 } else {
-                    navigate(`${nguoiThanConfig.routePath}/${row.id}`)
+                    navigate(`${thongTinCongTyConfig.routePath}/${row.id}`)
                 }
             }}
             onAdd={() => {
                 if (onAddNew) {
                     onAddNew()
                 } else {
-                    navigate(`${nguoiThanConfig.routePath}/moi`)
+                    navigate(`${thongTinCongTyConfig.routePath}/moi`)
                 }
             }}
-            addHref={`${nguoiThanConfig.routePath}/moi`}
+            addHref={`${thongTinCongTyConfig.routePath}/moi`}
             onBack={() => {
-                navigate(nguoiThanConfig.parentPath)
+                navigate(thongTinCongTyConfig.parentPath)
             }}
             onDeleteSelected={async (selectedRows) => {
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
@@ -223,24 +188,24 @@ export function NguoiThanListView({
             }}
             filters={[
                 {
-                    columnId: "moi_quan_he",
-                    title: "Mối quan hệ",
-                    options: moiQuanHeOptions,
+                    columnId: "ap_dung",
+                    title: "Áp dụng",
+                    options: apDungOptions,
                 },
             ]}
-            searchFields={nguoiThanConfig.searchFields as (keyof NguoiThan)[]}
+            searchFields={thongTinCongTyConfig.searchFields as (keyof ThongTinCongTy)[]}
             module={module}
             enableSuggestions={true}
             enableRangeSelection={true}
             enableLongPress={true}
             persistSelection={false}
             renderMobileCard={renderMobileCard}
-            enableVirtualization={enrichedData.length > 100}
+            enableVirtualization={(thongTinCongTyList?.length || 0) > 100}
             virtualRowHeight={60}
             exportOptions={{
-                columns: columnsWithEmployeeMap,
-                totalCount: enrichedData.length,
-                moduleName: nguoiThanConfig.moduleTitle,
+                columns: columns,
+                totalCount: thongTinCongTyList?.length || 0,
+                moduleName: thongTinCongTyConfig.moduleTitle,
                 getColumnTitle,
                 getCellValue,
             }}
@@ -250,7 +215,7 @@ export function NguoiThanListView({
                 if (onEdit) {
                     onEdit(row.id!)
                 } else {
-                    navigate(`${nguoiThanConfig.routePath}/${row.id}/sua`)
+                    navigate(`${thongTinCongTyConfig.routePath}/${row.id}/sua`)
                 }
             }}
             onDelete={(row) => {
@@ -265,7 +230,7 @@ export function NguoiThanListView({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa người thân <strong>{rowToDelete?.ho_va_ten}</strong>? Hành động này không thể hoàn tác.
+                            Bạn có chắc chắn muốn xóa thông tin công ty <strong>{rowToDelete?.ten_cong_ty}</strong>? Hành động này không thể hoàn tác.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -292,7 +257,7 @@ export function NguoiThanListView({
             </AlertDialog>
 
             {/* Import Dialog */}
-            <NguoiThanImportDialog
+            <ThongTinCongTyImportDialog
                 open={importDialogOpen}
                 onOpenChange={setImportDialogOpen}
                 mutation={batchImportMutation}

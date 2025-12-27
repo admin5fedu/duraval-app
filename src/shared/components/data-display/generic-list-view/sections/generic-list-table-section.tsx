@@ -54,79 +54,122 @@ export function GenericListTableSection<TData, TValue>({
     const { ref: headerRef } = useElementHeight<HTMLDivElement>()
     const { ref: footerRef } = useElementHeight<HTMLDivElement>()
 
+    // ✅ Ref để đồng bộ scroll giữa header và body
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+    const headerScrollRef = React.useRef<HTMLDivElement>(null)
+    const bodyScrollRef = React.useRef<HTMLDivElement>(null)
+
+    // ✅ Đồng bộ scroll ngang giữa header và body
+    React.useEffect(() => {
+        const headerElement = headerScrollRef.current
+        const bodyElement = bodyScrollRef.current
+
+        if (!headerElement || !bodyElement) return
+
+        const handleBodyScroll = () => {
+            if (headerElement.scrollLeft !== bodyElement.scrollLeft) {
+                headerElement.scrollLeft = bodyElement.scrollLeft
+            }
+        }
+
+        const handleHeaderScroll = () => {
+            if (bodyElement.scrollLeft !== headerElement.scrollLeft) {
+                bodyElement.scrollLeft = headerElement.scrollLeft
+            }
+        }
+
+        bodyElement.addEventListener('scroll', handleBodyScroll, { passive: true })
+        headerElement.addEventListener('scroll', handleHeaderScroll, { passive: true })
+
+        return () => {
+            bodyElement.removeEventListener('scroll', handleBodyScroll)
+            headerElement.removeEventListener('scroll', handleHeaderScroll)
+        }
+    }, [])
+
     return (
         <div className="hidden md:flex rounded-md border flex-1 overflow-hidden flex-col w-full max-w-full min-w-0 isolate mt-2 min-h-0">
-            {/* ✅ Table Header - Fixed với z-20 */}
+            {/* ✅ Table Header - Scrollable ngang để đồng bộ với body */}
             <div 
                 ref={headerRef}
                 className="flex-shrink-0 border-b bg-background"
                 data-testid="list-view-table-header"
             >
-                <Table containerClassName="w-full max-w-full min-w-0">
-                    <TableHeader
-                        className="sticky top-0 bg-background shadow-sm"
-                        style={{
-                            boxShadow:
-                                "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-                            zIndex: 20, // ✅ Giảm từ 120 xuống 20 (thấp hơn toolbar z-30)
-                        }}
-                    >
-                        {headerGroups.map((headerGroup: any) => (
-                            <TableRow
-                                key={headerGroup.id}
-                                className="hover:bg-transparent"
-                            >
-                                {headerGroup.headers.map((header: any) => {
-                                    const meta = header.column
-                                        .columnDef.meta as
-                                        | {
-                                              stickyLeft?: boolean
-                                              stickyLeftOffset?: number
-                                              stickyRight?: boolean
-                                              minWidth?: number
-                                              maxWidth?: number
-                                          }
-                                        | undefined
+                <div 
+                    ref={headerScrollRef} 
+                    className="overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden"
+                    style={{ 
+                        scrollbarWidth: 'none', // Firefox
+                        msOverflowStyle: 'none', // IE/Edge
+                    }}
+                >
+                    <Table containerClassName="w-full max-w-full min-w-0" style={{ minWidth: 'max-content' }}>
+                        <TableHeader
+                            className="sticky top-0 bg-background shadow-sm"
+                            style={{
+                                boxShadow:
+                                    "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+                                zIndex: 20, // ✅ Giảm từ 120 xuống 20 (thấp hơn toolbar z-30)
+                            }}
+                        >
+                            {headerGroups.map((headerGroup: any) => (
+                                <TableRow
+                                    key={headerGroup.id}
+                                    className="hover:bg-transparent"
+                                >
+                                    {headerGroup.headers.map((header: any) => {
+                                        const meta = header.column
+                                            .columnDef.meta as
+                                            | {
+                                                  stickyLeft?: boolean
+                                                  stickyLeftOffset?: number
+                                                  stickyRight?: boolean
+                                                  minWidth?: number
+                                                  maxWidth?: number
+                                              }
+                                            | undefined
 
-                                    const isStickyLeft = meta?.stickyLeft
-                                    const isStickyRight = meta?.stickyRight
+                                        const isStickyLeft = meta?.stickyLeft
+                                        const isStickyRight = meta?.stickyRight
 
-                                    const rawWidth = header.getSize()
-                                    const maxWidth =
-                                        meta?.maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH
-                                    const minWidth = Math.min(
-                                        meta?.minWidth || rawWidth,
-                                        maxWidth
-                                    )
-                                    const width = Math.min(rawWidth, maxWidth)
+                                        const rawWidth = header.getSize()
+                                        const maxWidth =
+                                            meta?.maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH
+                                        const minWidth = Math.min(
+                                            meta?.minWidth || rawWidth,
+                                            maxWidth
+                                        )
+                                        const width = Math.min(rawWidth, maxWidth)
 
-                                    return (
-                                        <StickyTableHeaderCell
-                                            key={header.id}
-                                            colSpan={header.colSpan}
-                                            isStickyLeft={isStickyLeft}
-                                            isStickyRight={isStickyRight}
-                                            stickyLeftOffset={meta?.stickyLeftOffset}
-                                            minWidth={minWidth}
-                                            width={width}
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                      header.column.columnDef.header,
-                                                      header.getContext()
-                                                  )}
-                                        </StickyTableHeaderCell>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                </Table>
+                                        return (
+                                            <StickyTableHeaderCell
+                                                key={header.id}
+                                                colSpan={header.colSpan}
+                                                isStickyLeft={isStickyLeft}
+                                                isStickyRight={isStickyRight}
+                                                stickyLeftOffset={meta?.stickyLeftOffset}
+                                                minWidth={minWidth}
+                                                width={width}
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column.columnDef.header,
+                                                          header.getContext()
+                                                      )}
+                                            </StickyTableHeaderCell>
+                                        )
+                                    })}
+                                </TableRow>
+                            ))}
+                        </TableHeader>
+                    </Table>
+                </div>
             </div>
 
             {/* ✅ Table Body - Scrollable với flex-1 để tự động mở rộng và đẩy footer xuống */}
             <div 
+                ref={bodyScrollRef}
                 className="flex-1 min-h-0 overflow-y-auto overflow-x-auto w-full max-w-full min-w-0 relative"
                 style={{
                     scrollBehavior: 'smooth', // ✅ Smooth scrolling
@@ -136,7 +179,7 @@ export function GenericListTableSection<TData, TValue>({
                 aria-live="polite"
                 data-testid="list-view-table-body"
             >
-                <Table containerClassName="w-full max-w-full min-w-0">
+                <Table containerClassName="w-full max-w-full min-w-0" style={{ minWidth: 'max-content' }}>
                     {enableVirtualization && filteredRows.length > 100 ? (
                         <VirtualizedTableBody
                             table={table}

@@ -39,7 +39,7 @@ export const nguoiThanConfig: ModuleConfig = {
       ],
     },
   ],
-  searchFields: ["ho_va_ten", "so_dien_thoai", "ghi_chu"],
+  searchFields: ["ho_va_ten", "so_dien_thoai", "ghi_chu", "ten_nhan_vien"],
   defaultSorting: [{ id: "tg_tao", desc: true }],
 }
 

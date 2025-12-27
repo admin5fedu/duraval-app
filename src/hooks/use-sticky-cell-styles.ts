@@ -21,6 +21,8 @@ export function getStickyCellStyles(
     const cellStyle: React.CSSProperties = {
         minWidth: `${minWidth}px`,
         width: `${width}px`,
+        maxWidth: `${width}px`,
+        boxSizing: 'border-box',
         // ✅ KHÔNG đặt backgroundColor ở đây - để overlay xử lý
         // ✅ Z-index cho non-sticky để đảm bảo chúng nằm dưới sticky
         position: 'relative',

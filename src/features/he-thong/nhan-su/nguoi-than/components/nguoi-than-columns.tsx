@@ -51,9 +51,9 @@ function ActionsCell({ id, name }: { id: number; name: string }) {
     )
 }
 
-export const nguoiThanColumns = (employeeMap?: Map<number, { ma_nhan_vien: number; ho_ten: string }>): ColumnDef<NguoiThan>[] => [
+export const nguoiThanColumns = (employeeMap?: Map<number, { ma_nhan_vien: number; ho_ten: string }>): ColumnDef<NguoiThan & { ten_nhan_vien?: string }>[] => [
     // ⚡ Professional: Use generic select column utility
-    createSelectColumn<NguoiThan>(),
+    createSelectColumn<NguoiThan & { ten_nhan_vien?: string }>(),
     {
         accessorKey: "id",
         header: ({ column }) => <SortableHeader column={column} title="ID" />,
@@ -185,6 +185,17 @@ export const nguoiThanColumns = (employeeMap?: Map<number, { ma_nhan_vien: numbe
             title: "Thời gian tạo",
             order: 7,
             minWidth: 140,
+        },
+    },
+    {
+        // ✅ Cột ẩn để hỗ trợ tìm kiếm theo tên nhân viên
+        accessorKey: "ten_nhan_vien",
+        header: () => null,
+        cell: () => null,
+        enableHiding: false,
+        enableSorting: false,
+        meta: {
+            hidden: true, // Ẩn cột này, chỉ dùng để tìm kiếm
         },
     },
     {
