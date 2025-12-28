@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useChucVu } from "@/features/he-thong/so-do/chuc-vu/hooks"
+import { usePhongBan } from "@/features/he-thong/so-do/phong-ban/hooks"
 import { usePhanQuyen, useBatchUpsertPhanQuyen } from "../hooks"
 import { MODULES, getModulesByGroup } from "../modules-config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,9 +19,17 @@ import {
   ChevronDown,
   ChevronRight,
   BriefcaseBusiness,
-  RotateCcw
+  RotateCcw,
+  Filter
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const QUYEN_LABELS: Array<{ key: keyof Quyen; label: string }> = [
   { key: "xem", label: "Xem" },
@@ -32,6 +41,7 @@ const QUYEN_LABELS: Array<{ key: keyof Quyen; label: string }> = [
 
 export function PhanQuyenMatrixView() {
   const { data: chucVuList, isLoading: isLoadingChucVu } = useChucVu()
+  const { data: phongBanList } = usePhongBan()
   const { data: phanQuyenList, isLoading: isLoadingPhanQuyen } = usePhanQuyen()
   const batchUpsertMutation = useBatchUpsertPhanQuyen()
 
@@ -41,6 +51,7 @@ export function PhanQuyenMatrixView() {
     new Set(Object.keys(getModulesByGroup()))
   )
   const [hasChanges, setHasChanges] = React.useState(false)
+  const [selectedPhongFilter, setSelectedPhongFilter] = React.useState<string>("all")
 
   // Group modules by group
   const modulesByGroup = React.useMemo(() => {
@@ -243,7 +254,34 @@ export function PhanQuyenMatrixView() {
   }, [])
 
   const selectedModule = MODULES.find(m => m.id === selectedModuleId)
-  const allChucVuIds = chucVuList?.map(cv => cv.id).filter((id): id is number => id !== undefined) || []
+  
+  // Generate filter options for phòng ban
+  const phongBanFilterOptions = React.useMemo(() => {
+    if (!chucVuList || !phongBanList) return []
+    
+    // Get unique ma_phong from chucVuList
+    const uniquePhongs = Array.from(new Set(
+      chucVuList.map(cv => cv.ma_phong).filter((phong): phong is string => !!phong)
+    ))
+    
+    return uniquePhongs.map(maPhong => {
+      // Find phong ban with matching ma_phong_ban
+      const phongBan = phongBanList.find(pb => pb.ma_phong_ban === maPhong)
+      return {
+        value: maPhong,
+        label: phongBan ? `${maPhong} - ${phongBan.ten_phong_ban}` : maPhong
+      }
+    }).sort((a, b) => a.label.localeCompare(b.label))
+  }, [chucVuList, phongBanList])
+
+  // Filter chucVuList by selected phong
+  const filteredChucVuList = React.useMemo(() => {
+    if (!chucVuList || selectedPhongFilter === "all") return chucVuList
+    
+    return chucVuList.filter(cv => cv.ma_phong === selectedPhongFilter)
+  }, [chucVuList, selectedPhongFilter])
+
+  const allChucVuIds = filteredChucVuList?.map(cv => cv.id).filter((id): id is number => id !== undefined) || []
 
   if (isLoadingChucVu || isLoadingPhanQuyen) {
     return (
@@ -267,50 +305,6 @@ export function PhanQuyenMatrixView() {
 
   return (
     <div className="space-y-4">
-      {/* Header with save button */}
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold">Phân Quyền</h2>
-          <p className="text-sm text-muted-foreground">
-            Quản lý quyền truy cập cho từng module và chức vụ
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          {hasChanges && (
-            <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
-              <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-              <span className="hidden sm:inline">Có thay đổi chưa lưu</span>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleReset}
-              disabled={!hasChanges || batchUpsertMutation.isPending}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Đặt lại
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || batchUpsertMutation.isPending}
-            >
-              {batchUpsertMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang lưu...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Lưu thay đổi
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
         {/* Left Column: Module List with Search */}
@@ -386,16 +380,60 @@ export function PhanQuyenMatrixView() {
         {/* Right Column: Permission Matrix */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">
-                  {selectedModule ? selectedModule.name.toUpperCase() : "Chọn module"}
-                </CardTitle>
-                {selectedModule && (
-                  <CardDescription className="mt-1">
-                    {selectedModule.description}
-                  </CardDescription>
+                <CardTitle className="text-lg font-semibold">PHÒNG BAN</CardTitle>
+                <CardDescription className="mt-1 text-sm">
+                  Quản lý cơ cấu phòng ban và đơn vị trực thuộc
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-4">
+                {hasChanges && (
+                  <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                    <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="hidden sm:inline">Có thay đổi chưa lưu</span>
+                  </div>
                 )}
+                <Select value={selectedPhongFilter} onValueChange={setSelectedPhongFilter}>
+                  <SelectTrigger className="w-[250px]">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Lọc theo phòng" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả phòng</SelectItem>
+                    {phongBanFilterOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleReset}
+                    disabled={!hasChanges || batchUpsertMutation.isPending}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Đặt lại
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={!hasChanges || batchUpsertMutation.isPending}
+                  >
+                    {batchUpsertMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Đang lưu...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Lưu thay đổi
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -406,9 +444,9 @@ export function PhanQuyenMatrixView() {
                   <table className="w-full border-collapse">
                     <thead className="sticky top-0 z-20 bg-background border-b">
                       <tr>
-                        <th className="sticky left-0 top-0 z-30 bg-background border-r p-3 text-center font-semibold min-w-[60px]">
+                        <th className="sticky left-0 top-0 z-30 bg-background border-r p-3 text-center font-semibold text-sm min-w-[60px]">
                         </th>
-                        <th className="sticky left-[60px] top-0 z-30 bg-background border-r p-3 text-left font-semibold min-w-[250px]">
+                        <th className="sticky left-[60px] top-0 z-30 bg-background border-r p-3 text-left font-semibold text-sm min-w-[250px]">
                           Chức vụ
                         </th>
                         {selectedModule && QUYEN_LABELS.map(({ key, label }) => {
@@ -421,10 +459,10 @@ export function PhanQuyenMatrixView() {
                           return (
                             <th
                               key={key}
-                              className="p-3 text-center font-semibold min-w-[120px] border-r last:border-r-0"
+                              className="p-3 text-center font-semibold text-sm min-w-[120px] border-r last:border-r-0"
                             >
                               <div className="flex flex-col items-center gap-2">
-                                <span>{label}</span>
+                                <span className="text-sm">{label}</span>
                                 <Checkbox
                                   checked={allChecked}
                                   onCheckedChange={(checked) => {
@@ -440,7 +478,7 @@ export function PhanQuyenMatrixView() {
                       </tr>
                     </thead>
                     <tbody>
-                      {chucVuList.map((chucVu) => {
+                      {filteredChucVuList.map((chucVu) => {
                         if (!chucVu.id) return null
                         const quyen = getPermission(chucVu.id, selectedModule.id)
                         
@@ -467,12 +505,7 @@ export function PhanQuyenMatrixView() {
                               <td className="sticky left-[60px] z-10 bg-background border-r p-3">
                                 <div className="flex items-center gap-2">
                                   <BriefcaseBusiness className="h-4 w-4 text-muted-foreground shrink-0" />
-                                  <div>
-                                    <div className="font-medium">{chucVu.ten_chuc_vu}</div>
-                                    {chucVu.ma_chuc_vu && (
-                                      <div className="text-xs text-muted-foreground">{chucVu.ma_chuc_vu}</div>
-                                    )}
-                                  </div>
+                                  <div className="font-medium text-sm">{chucVu.ten_chuc_vu}</div>
                                 </div>
                               </td>
                             {QUYEN_LABELS.map(({ key, label }) => {
@@ -480,7 +513,7 @@ export function PhanQuyenMatrixView() {
                               return (
                                 <td
                                   key={key}
-                                  className="p-3 text-center border-r last:border-r-0"
+                                  className="p-3 text-center text-sm border-r last:border-r-0"
                                 >
                                   <div className="flex justify-center">
                                     <Checkbox
