@@ -4,6 +4,7 @@ import * as React from "react"
 import { useChucVu } from "@/features/he-thong/so-do/chuc-vu/hooks"
 import { usePhongBan } from "@/features/he-thong/so-do/phong-ban/hooks"
 import { usePhanQuyen, useBatchUpsertPhanQuyen } from "../hooks"
+import type { ChucVu } from "@/features/he-thong/so-do/chuc-vu/schema"
 import { MODULES, getModulesByGroup } from "../modules-config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -38,6 +39,18 @@ const QUYEN_LABELS: Array<{ key: keyof Quyen; label: string }> = [
   { key: "xoa", label: "Xóa" },
   { key: "quan_tri", label: "Quản trị" },
 ]
+
+interface PhongBanGroup {
+  phongBanId: number | null
+  tenPhongBan: string
+  chucVus: ChucVu[]
+}
+
+interface PhongGroup {
+  maPhong: string | null
+  tenPhong: string
+  phongBanGroups: PhongBanGroup[]
+}
 
 export function PhanQuyenMatrixView() {
   const { data: chucVuList, isLoading: isLoadingChucVu } = useChucVu()
@@ -281,6 +294,126 @@ export function PhanQuyenMatrixView() {
     return chucVuList.filter(cv => cv.ma_phong === selectedPhongFilter)
   }, [chucVuList, selectedPhongFilter])
 
+  // Group chức vụ theo Phòng -> Phòng ban
+  const chucVusGroupedByPhong = React.useMemo(() => {
+    if (!filteredChucVuList || !phongBanList) return []
+    
+    // Map: ma_phong -> Map<phong_ban_id, ChucVu[]>
+    const groups = new Map<string | null, Map<number | null, ChucVu[]>>()
+
+    filteredChucVuList.forEach(cv => {
+      const maPhong = cv.ma_phong || null
+      const phongBanId = cv.phong_ban_id ?? null
+
+      if (!groups.has(maPhong)) {
+        groups.set(maPhong, new Map())
+      }
+
+      const phongBanMap = groups.get(maPhong)!
+      if (!phongBanMap.has(phongBanId)) {
+        phongBanMap.set(phongBanId, [])
+      }
+      phongBanMap.get(phongBanId)!.push(cv)
+    })
+    
+    // Convert to array và lấy tên phòng / phòng ban
+    const result: PhongGroup[] = []
+    groups.forEach((phongBanMap, maPhong) => {
+      // Tên nhóm cấp 1 (ma_phong)
+      let tenPhong = "Không xác định phòng"
+      if (maPhong) {
+        const phongBanTheoMa = phongBanList.find(pb => pb.ma_phong_ban === maPhong)
+        tenPhong = phongBanTheoMa ? `${maPhong} - ${phongBanTheoMa.ten_phong_ban}` : maPhong
+      }
+
+      const phongBanGroups: PhongBanGroup[] = []
+
+      phongBanMap.forEach((chucVusInPhongBan, phongBanId) => {
+        let tenPhongBan = "Không có phòng ban"
+
+        if (phongBanId != null) {
+          const pb = phongBanList.find(p => p.id === phongBanId)
+          tenPhongBan = pb ? `${pb.ma_phong_ban} - ${pb.ten_phong_ban}` : `Phòng ban #${phongBanId}`
+        } else if (maPhong) {
+          const pb = phongBanList.find(p => p.ma_phong_ban === maPhong)
+          tenPhongBan = pb ? `${pb.ma_phong_ban} - ${pb.ten_phong_ban}` : maPhong
+        }
+
+        phongBanGroups.push({
+          phongBanId,
+          tenPhongBan,
+          chucVus: chucVusInPhongBan,
+        })
+      })
+
+      // Sort phong ban trong mỗi nhóm
+      phongBanGroups.sort((a, b) => {
+        if (a.phongBanId === null && b.phongBanId !== null) return -1
+        if (a.phongBanId !== null && b.phongBanId === null) return 1
+        return a.tenPhongBan.localeCompare(b.tenPhongBan)
+      })
+
+      result.push({
+        maPhong,
+        tenPhong,
+        phongBanGroups
+      })
+    })
+
+    // Sort phòng
+    result.sort((a, b) => {
+      if (a.maPhong === null && b.maPhong !== null) return -1
+      if (a.maPhong !== null && b.maPhong === null) return 1
+      return a.tenPhong.localeCompare(b.tenPhong)
+    })
+
+    return result
+  }, [filteredChucVuList, phongBanList])
+
+  // Toggle all permissions for all chức vụ in a phòng ban
+  const handleTogglePhongBanPermissions = React.useCallback((
+    phongBanId: number | null,
+    maPhong: string | null,
+    moduleId: string,
+    quyenKey: keyof Quyen,
+    shouldSelect: boolean
+  ) => {
+    if (!filteredChucVuList) return
+    
+    const chucVusInPhongBan = filteredChucVuList.filter(cv => {
+      if (phongBanId !== null) {
+        return cv.phong_ban_id === phongBanId
+      }
+      return cv.phong_ban_id === null && cv.ma_phong === maPhong
+    })
+    
+    batchTogglePermission(
+      chucVusInPhongBan.map(cv => cv.id).filter((id): id is number => id !== undefined),
+      moduleId,
+      quyenKey,
+      shouldSelect
+    )
+  }, [filteredChucVuList, batchTogglePermission])
+
+  // Toggle all permissions for all chức vụ in a phòng
+  const handleTogglePhongPermissions = React.useCallback((
+    maPhong: string | null,
+    moduleId: string,
+    quyenKey: keyof Quyen,
+    shouldSelect: boolean
+  ) => {
+    if (!filteredChucVuList) return
+    
+    const chucVusInPhong = filteredChucVuList.filter(cv => cv.ma_phong === maPhong)
+    
+    batchTogglePermission(
+      chucVusInPhong.map(cv => cv.id).filter((id): id is number => id !== undefined),
+      moduleId,
+      quyenKey,
+      shouldSelect
+    )
+  }, [filteredChucVuList, batchTogglePermission])
+
   const allChucVuIds = filteredChucVuList?.map(cv => cv.id).filter((id): id is number => id !== undefined) || []
 
   if (isLoadingChucVu || isLoadingPhanQuyen) {
@@ -478,57 +611,157 @@ export function PhanQuyenMatrixView() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredChucVuList.map((chucVu) => {
-                        if (!chucVu.id) return null
-                        const quyen = getPermission(chucVu.id, selectedModule.id)
-                        
-                          // Check if all permissions are selected for this chức vụ
-                          const allPermissionsSelected = QUYEN_LABELS.every(({ key }) => quyen[key])
-                          
-                          return (
-                            <tr
-                              key={chucVu.id}
-                              className="border-b hover:bg-muted/50 transition-colors"
-                            >
-                              <td className="sticky left-0 z-10 bg-background border-r p-3">
-                                <div className="flex justify-center">
-                                  <Checkbox
-                                    checked={allPermissionsSelected}
-                                    onCheckedChange={(checked) =>
-                                      handleToggleAllPermissions(chucVu.id!, selectedModule.id, !!checked)
-                                    }
-                                    disabled={batchUpsertMutation.isPending}
-                                    className="h-4 w-4 border-primary"
-                                  />
-                                </div>
-                              </td>
-                              <td className="sticky left-[60px] z-10 bg-background border-r p-3">
+                      {chucVusGroupedByPhong.map((phongGroup, phongIndex) => {
+                        return (
+                          <React.Fragment key={phongGroup.maPhong ?? `phong-${phongIndex}`}>
+                            {/* Phòng Header Row */}
+                            <tr className="bg-muted/50 border-b border-t-2 border-primary/20">
+                              <td className="sticky left-0 z-10 bg-muted/50 border-r p-3" colSpan={2}>
                                 <div className="flex items-center gap-2">
-                                  <BriefcaseBusiness className="h-4 w-4 text-muted-foreground shrink-0" />
-                                  <div className="font-medium text-sm">{chucVu.ten_chuc_vu}</div>
+                                  <span className="font-semibold text-sm text-foreground">{phongGroup.tenPhong}</span>
                                 </div>
                               </td>
-                            {QUYEN_LABELS.map(({ key, label }) => {
-                              const hasPerm = quyen[key]
+                              {QUYEN_LABELS.map(({ key }) => {
+                                // Get all chức vụ IDs in this phòng
+                                const allChucVuIdsInPhong = phongGroup.phongBanGroups
+                                  .flatMap(pb => pb.chucVus)
+                                  .map(cv => cv.id)
+                                  .filter((id): id is number => id !== undefined)
+                                
+                                // Check if all chức vụ in phòng have this permission
+                                const allChecked = allChucVuIdsInPhong.length > 0 && allChucVuIdsInPhong.every(chucVuId => {
+                                  const quyen = getPermission(chucVuId, selectedModule.id)
+                                  return quyen[key]
+                                })
+                                
+                                return (
+                                  <td
+                                    key={key}
+                                    className="bg-muted/50 p-3 text-center text-sm border-r last:border-r-0"
+                                  >
+                                    <div className="flex justify-center">
+                                      <Checkbox
+                                        checked={allChecked}
+                                        onCheckedChange={(checked) =>
+                                          handleTogglePhongPermissions(phongGroup.maPhong, selectedModule.id, key, !!checked)
+                                        }
+                                        disabled={batchUpsertMutation.isPending}
+                                        className="h-4 w-4 border-primary"
+                                      />
+                                    </div>
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                            
+                            {/* Phòng ban groups and chức vụ rows */}
+                            {phongGroup.phongBanGroups.map((phongBanGroup, pbIndex) => {
+                              const chucVuIdsInPhongBan = phongBanGroup.chucVus
+                                .map(cv => cv.id)
+                                .filter((id): id is number => id !== undefined)
+                              
+                              // Only show phòng ban header if there are multiple phòng bans in the phòng
+                              const showPhongBanHeader = phongGroup.phongBanGroups.length > 1
+                              
                               return (
-                                <td
-                                  key={key}
-                                  className="p-3 text-center text-sm border-r last:border-r-0"
-                                >
-                                  <div className="flex justify-center">
-                                    <Checkbox
-                                      checked={hasPerm}
-                                      onCheckedChange={(checked) =>
-                                        handlePermissionChange(chucVu.id!, selectedModule.id, key, !!checked)
-                                      }
-                                      disabled={batchUpsertMutation.isPending}
-                                      className="h-4 w-4 border-primary"
-                                    />
-                                  </div>
-                                </td>
+                                <React.Fragment key={phongBanGroup.phongBanId ?? `pb-${pbIndex}`}>
+                                  {showPhongBanHeader && (
+                                    <tr className="bg-muted/30 border-b">
+                                      <td className="sticky left-0 z-10 bg-muted/30 border-r p-2 pl-6" colSpan={2}>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium text-xs text-muted-foreground">{phongBanGroup.tenPhongBan}</span>
+                                        </div>
+                                      </td>
+                                      {QUYEN_LABELS.map(({ key }) => {
+                                        const allChecked = chucVuIdsInPhongBan.length > 0 && chucVuIdsInPhongBan.every(chucVuId => {
+                                          const quyen = getPermission(chucVuId, selectedModule.id)
+                                          return quyen[key]
+                                        })
+                                        
+                                        return (
+                                          <td
+                                            key={key}
+                                            className="bg-muted/30 p-2 text-center text-sm border-r last:border-r-0"
+                                          >
+                                            <div className="flex justify-center">
+                                              <Checkbox
+                                                checked={allChecked}
+                                                onCheckedChange={(checked) =>
+                                                  handleTogglePhongBanPermissions(
+                                                    phongBanGroup.phongBanId,
+                                                    phongGroup.maPhong,
+                                                    selectedModule.id,
+                                                    key,
+                                                    !!checked
+                                                  )
+                                                }
+                                                disabled={batchUpsertMutation.isPending}
+                                                className="h-4 w-4 border-primary"
+                                              />
+                                            </div>
+                                          </td>
+                                        )
+                                      })}
+                                    </tr>
+                                  )}
+                                  
+                                  {/* Chức vụ rows */}
+                                  {phongBanGroup.chucVus.map((chucVu) => {
+                                    if (!chucVu.id) return null
+                                    const quyen = getPermission(chucVu.id, selectedModule.id)
+                                    
+                                    const allPermissionsSelected = QUYEN_LABELS.every(({ key }) => quyen[key])
+                                    
+                                    return (
+                                      <tr
+                                        key={chucVu.id}
+                                        className="border-b hover:bg-muted/50 transition-colors"
+                                      >
+                                        <td className="sticky left-0 z-10 bg-background border-r p-3">
+                                          <div className="flex justify-center">
+                                            <Checkbox
+                                              checked={allPermissionsSelected}
+                                              onCheckedChange={(checked) =>
+                                                handleToggleAllPermissions(chucVu.id!, selectedModule.id, !!checked)
+                                              }
+                                              disabled={batchUpsertMutation.isPending}
+                                              className="h-4 w-4 border-primary"
+                                            />
+                                          </div>
+                                        </td>
+                                        <td className="sticky left-[60px] z-10 bg-background border-r p-3">
+                                          <div className="flex items-center gap-2">
+                                            <BriefcaseBusiness className="h-4 w-4 text-muted-foreground shrink-0" />
+                                            <div className="font-medium text-sm">{chucVu.ten_chuc_vu}</div>
+                                          </div>
+                                        </td>
+                                        {QUYEN_LABELS.map(({ key, label }) => {
+                                          const hasPerm = quyen[key]
+                                          return (
+                                            <td
+                                              key={key}
+                                              className="p-3 text-center text-sm border-r last:border-r-0"
+                                            >
+                                              <div className="flex justify-center">
+                                                <Checkbox
+                                                  checked={hasPerm}
+                                                  onCheckedChange={(checked) =>
+                                                    handlePermissionChange(chucVu.id!, selectedModule.id, key, !!checked)
+                                                  }
+                                                  disabled={batchUpsertMutation.isPending}
+                                                  className="h-4 w-4 border-primary"
+                                                />
+                                              </div>
+                                            </td>
+                                          )
+                                        })}
+                                      </tr>
+                                    )
+                                  })}
+                                </React.Fragment>
                               )
                             })}
-                          </tr>
+                          </React.Fragment>
                         )
                       })}
                     </tbody>
