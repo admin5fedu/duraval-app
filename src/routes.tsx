@@ -81,9 +81,49 @@ const CauTraLoiListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-
 const CauTraLoiDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-detail-route'))
 const CauTraLoiFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-form-route'))
 
+// Hành chính nhân sự - Công lương module routes
+const PhieuHanhChinhListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-list-route'))
+const PhieuHanhChinhDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-detail-route'))
+const PhieuHanhChinhFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-form-route'))
+
+const NhomPhieuHanhChinhListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/nhom-phieu-hanh-chinh/routes/nhom-phieu-hanh-chinh-list-route'))
+const NhomPhieuHanhChinhDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/nhom-phieu-hanh-chinh/routes/nhom-phieu-hanh-chinh-detail-route'))
+const NhomPhieuHanhChinhFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/nhom-phieu-hanh-chinh/routes/nhom-phieu-hanh-chinh-form-route'))
+
+const BangCongListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/bang-cong/routes/bang-cong-list-route'))
+const BangCongDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/bang-cong/routes/bang-cong-detail-route'))
+const BangCongFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/bang-cong/routes/bang-cong-form-route'))
+
+const BangLuongListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/bang-luong/routes/bang-luong-list-route'))
+const BangLuongDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/bang-luong/routes/bang-luong-detail-route'))
+const BangLuongFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/bang-luong/routes/bang-luong-form-route'))
+
+// Hành chính nhân sự - OLE module routes
+const ChamOleListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/cham-ole/routes/cham-ole-list-route'))
+const ChamOleDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/cham-ole/routes/cham-ole-detail-route'))
+const ChamOleFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/cham-ole/routes/cham-ole-form-route'))
+
+const DiemCongTruListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/diem-cong-tru/routes/diem-cong-tru-list-route'))
+const DiemCongTruDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/diem-cong-tru/routes/diem-cong-tru-detail-route'))
+const DiemCongTruFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/diem-cong-tru/routes/diem-cong-tru-form-route'))
+
+const NhomDiemCongTruListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/routes/nhom-diem-cong-tru-list-route'))
+const NhomDiemCongTruDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/routes/nhom-diem-cong-tru-detail-route'))
+const NhomDiemCongTruFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/routes/nhom-diem-cong-tru-form-route'))
+
+// Hành chính nhân sự - Tuyển dụng module routes
+const DeXuatTuyenDungListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/de-xuat-tuyen-dung/routes/de-xuat-tuyen-dung-list-route'))
+const DeXuatTuyenDungDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/de-xuat-tuyen-dung/routes/de-xuat-tuyen-dung-detail-route'))
+const DeXuatTuyenDungFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/de-xuat-tuyen-dung/routes/de-xuat-tuyen-dung-form-route'))
+
+const UngVienListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/ung-vien/routes/ung-vien-list-route'))
+const UngVienDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/ung-vien/routes/ung-vien-detail-route'))
+const UngVienFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/ung-vien/routes/ung-vien-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
+const HanhChinhNhanSuPage = lazy(() => import('@/pages/hanh-chinh-nhan-su/HanhChinhNhanSuPage'))
 
 import type { ScrollBehavior } from './shared/types/scroll-behavior'
 
@@ -204,6 +244,13 @@ export const routes: RouteConfig[] = [
   {
     path: '/he-thong',
     element: HeThongPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'auto',
+  },
+  {
+    path: '/hanh-chinh-nhan-su',
+    element: HanhChinhNhanSuPage,
     protected: true,
     layout: true,
     scrollBehavior: 'auto',
@@ -564,6 +611,270 @@ export const routes: RouteConfig[] = [
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Hành chính nhân sự - Công lương module routes
+  // Phiếu hành chính
+  {
+    path: '/hanh-chinh-nhan-su/phieu-hanh-chinh/moi',
+    element: PhieuHanhChinhFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/phieu-hanh-chinh/:id/sua',
+    element: PhieuHanhChinhFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/phieu-hanh-chinh/:id',
+    element: PhieuHanhChinhDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/phieu-hanh-chinh',
+    element: PhieuHanhChinhListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Nhóm phiếu hành chính
+  {
+    path: '/hanh-chinh-nhan-su/nhom-phieu-hanh-chinh/moi',
+    element: NhomPhieuHanhChinhFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-phieu-hanh-chinh/:id/sua',
+    element: NhomPhieuHanhChinhFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-phieu-hanh-chinh/:id',
+    element: NhomPhieuHanhChinhDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-phieu-hanh-chinh',
+    element: NhomPhieuHanhChinhListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Bảng công
+  {
+    path: '/hanh-chinh-nhan-su/bang-cong/moi',
+    element: BangCongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/bang-cong/:id/sua',
+    element: BangCongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/bang-cong/:id',
+    element: BangCongDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/bang-cong',
+    element: BangCongListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Bảng lương
+  {
+    path: '/hanh-chinh-nhan-su/bang-luong/moi',
+    element: BangLuongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/bang-luong/:id/sua',
+    element: BangLuongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/bang-luong/:id',
+    element: BangLuongDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/bang-luong',
+    element: BangLuongListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Hành chính nhân sự - OLE module routes
+  // Chấm OLE
+  {
+    path: '/hanh-chinh-nhan-su/cham-ole/moi',
+    element: ChamOleFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/cham-ole/:id/sua',
+    element: ChamOleFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/cham-ole/:id',
+    element: ChamOleDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/cham-ole',
+    element: ChamOleListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Điểm cộng trừ
+  {
+    path: '/hanh-chinh-nhan-su/diem-cong-tru/moi',
+    element: DiemCongTruFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/diem-cong-tru/:id/sua',
+    element: DiemCongTruFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/diem-cong-tru/:id',
+    element: DiemCongTruDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/diem-cong-tru',
+    element: DiemCongTruListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Nhóm điểm cộng trừ
+  {
+    path: '/hanh-chinh-nhan-su/nhom-diem-cong-tru/moi',
+    element: NhomDiemCongTruFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-diem-cong-tru/:id/sua',
+    element: NhomDiemCongTruFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-diem-cong-tru/:id',
+    element: NhomDiemCongTruDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-diem-cong-tru',
+    element: NhomDiemCongTruListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Hành chính nhân sự - Tuyển dụng module routes
+  // Đề xuất tuyển dụng
+  {
+    path: '/hanh-chinh-nhan-su/de-xuat-tuyen-dung/moi',
+    element: DeXuatTuyenDungFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/de-xuat-tuyen-dung/:id/sua',
+    element: DeXuatTuyenDungFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/de-xuat-tuyen-dung/:id',
+    element: DeXuatTuyenDungDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/de-xuat-tuyen-dung',
+    element: DeXuatTuyenDungListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Ứng viên
+  {
+    path: '/hanh-chinh-nhan-su/ung-vien/moi',
+    element: UngVienFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/ung-vien/:id/sua',
+    element: UngVienFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/ung-vien/:id',
+    element: UngVienDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/ung-vien',
+    element: UngVienListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
   },
   // Add more module routes here or use generateRoutesFromConfig()
   {

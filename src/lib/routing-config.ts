@@ -20,6 +20,9 @@ export const BREADCRUMB_SKIP_SEGMENTS: Set<string> = new Set([
   "so-do",        // Sơ đồ - cấp trung gian, có thể flatten sau
   "thiet-lap",    // Thiết lập - cấp trung gian, có thể flatten sau
   "cau-hoi-hang-ngay", // Câu hỏi hàng ngày - cấp trung gian, đã flatten
+  "cong-luong",   // Công lương - cấp trung gian trong hành chính nhân sự
+  "ole",          // OLE - cấp trung gian trong hành chính nhân sự
+  "tuyen-dung",   // Tuyển dụng - cấp trung gian trong hành chính nhân sự
 ])
 
 /**
@@ -68,11 +71,20 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "cau-tra-loi": "Câu Trả Lời",
   
   // Hanh-chinh-nhan-su sub-modules
-  "tuyen-dung": "Tuyển Dụng",
   "cong-luong": "Công Lương",
+  "phieu-hanh-chinh": "Phiếu Hành Chính",
+  "nhom-phieu-hanh-chinh": "Nhóm Phiếu Hành Chính",
+  "bang-cong": "Bảng Công",
+  "bang-luong": "Bảng Lương",
+  "cham-ole": "Chấm OLE",
+  "diem-cong-tru": "Điểm Cộng Trừ",
+  "nhom-diem-cong-tru": "Nhóm Điểm Cộng Trừ",
+  "de-xuat-tuyen-dung": "Đề Xuất Tuyển Dụng",
+  "ung-vien": "Ứng Viên",
   
   // Form actions
   "them-moi": "Thêm Mới",
+  "moi": "Thêm Mới",
   "sua": "Sửa",
   "doi-mat-khau": "Đổi Mật Khẩu",
 }

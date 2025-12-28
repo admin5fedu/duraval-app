@@ -146,10 +146,11 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     />
                                 ) : field.type === "toggle" ? (
                                     <ToggleButtonFormField
-                                        value={String(formField.value || '')}
+                                        value={formField.value ? String(formField.value) : ""}
                                         onChange={(value) => {
                                             if (field.disabled) return
-                                            formField.onChange(value)
+                                            // Toggle returns "Có" or "Không" - use directly, empty string becomes null
+                                            formField.onChange(value === "" ? null : value)
                                         }}
                                         options={field.options || []}
                                         disabled={field.disabled}
@@ -219,6 +220,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         value={formField.value || ''}
                                         placeholder={field.placeholder}
                                         disabled={field.disabled}
+                                        min={field.type === "number" && field.name === "so_luong_cho_phep_thang" ? 0 : undefined}
                                         className={cn(
                                             isMobile && "h-11 text-base" // Larger touch target
                                         )}
@@ -226,9 +228,22 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                             if (field.disabled) return
                                             if (field.type === 'number') {
                                                 const numValue = e.target.valueAsNumber
-                                                formField.onChange(isNaN(numValue) ? null : numValue)
+                                                // Prevent negative values for so_luong_cho_phep_thang
+                                                if (field.name === "so_luong_cho_phep_thang" && numValue < 0) {
+                                                    formField.onChange(0)
+                                                } else {
+                                                    formField.onChange(isNaN(numValue) ? null : numValue)
+                                                }
                                             } else {
                                                 formField.onChange(e.target.value)
+                                            }
+                                        }}
+                                        onBlur={e => {
+                                            if (field.type === 'number' && field.name === "so_luong_cho_phep_thang") {
+                                                const numValue = e.target.valueAsNumber
+                                                if (isNaN(numValue) || numValue < 0) {
+                                                    formField.onChange(0)
+                                                }
                                             }
                                         }}
                                     />

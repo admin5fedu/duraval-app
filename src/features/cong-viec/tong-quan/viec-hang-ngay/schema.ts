@@ -7,7 +7,7 @@ export const viecHangNgaySchema = z.object({
     id: z.number().optional(),
     // Coerce string to number for form compatibility (combobox returns string)
     ma_nhan_vien: z.coerce.number().int().positive("Mã nhân viên phải là số dương"),
-    ngay_bao_cao: z.string().or(z.date()),
+    ngay_bao_cao: z.string().min(1, "Ngày báo cáo là bắt buộc").or(z.date({ required_error: "Ngày báo cáo là bắt buộc" })),
     chi_tiet_cong_viec: z.any().default([]), // JSONB field
     tg_tao: z.string().optional().nullable(),
     tg_cap_nhat: z.string().optional().nullable(),

@@ -4,7 +4,7 @@ import { z } from "zod"
  * Schema matching 'var_nhan_su' table in Supabase
  */
 export const nhanSuSchema = z.object({
-    ma_nhan_vien: z.number(),
+    ma_nhan_vien: z.number({ required_error: "Mã nhân viên là bắt buộc", invalid_type_error: "Mã nhân viên phải là số" }),
     ho_ten: z.string().min(1, "Họ và tên là bắt buộc"),
     avatar_url: z.string().optional().nullable(),
     tinh_trang: z.string().default("Thử việc"),

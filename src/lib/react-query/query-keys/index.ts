@@ -17,5 +17,6 @@ export { viecHangNgay, viecHangNgay as viecHangNgayQueryKeys } from "./viec-hang
 export { danhMucCauHoi, danhMucCauHoi as danhMucCauHoiQueryKeys } from "./danh-muc-cau-hoi"
 export { lichDang, lichDang as lichDangQueryKeys } from "./lich-dang"
 export { cauTraLoiQueryKeys } from "./cau-tra-loi"
+export { nhomPhieuHanhChinh, nhomPhieuHanhChinh as nhomPhieuHanhChinhQueryKeys } from "./nhom-phieu-hanh-chinh"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 
