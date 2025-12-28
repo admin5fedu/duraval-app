@@ -13,6 +13,7 @@ import { useNguoiThan, useBatchDeleteNguoiThan, useDeleteNguoiThan } from "../ho
 import { nguoiThanColumns } from "./nguoi-than-columns"
 import { nguoiThanConfig } from "../config"
 import { useNhanSu } from "../../danh-sach-nhan-su/hooks/use-nhan-su"
+import type { NhanSu } from "../../danh-sach-nhan-su/schema"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
 import { useBatchUpsertNguoiThan } from "../actions/nguoi-than-excel-actions"
 import { NguoiThanImportDialog } from "./nguoi-than-import-dialog"
@@ -39,7 +40,7 @@ export function NguoiThanListView({
     onEdit,
     onAddNew,
     onView,
-}: NguoiThanListViewProps = {}) {
+}: NguoiThanListViewProps = {} as NguoiThanListViewProps) {
     const { data: nguoiThanList, isLoading, isError, refetch } = useNguoiThan(initialData)
     const { data: employees } = useNhanSu() // Load employees to map names
     const navigate = useNavigate()
@@ -54,7 +55,7 @@ export function NguoiThanListView({
     // Create employee map for quick lookup
     const employeeMap = React.useMemo(() => {
         const map = new Map<number, { ma_nhan_vien: number; ho_ten: string }>()
-        employees?.forEach(emp => {
+        employees?.forEach((emp: NhanSu) => {
             map.set(emp.ma_nhan_vien, { ma_nhan_vien: emp.ma_nhan_vien, ho_ten: emp.ho_ten })
         })
         return map
@@ -63,7 +64,7 @@ export function NguoiThanListView({
     // ✅ Thêm trường ảo ten_nhan_vien vào data để hỗ trợ tìm kiếm theo tên nhân viên
     const enrichedData = React.useMemo(() => {
         if (!nguoiThanList) return []
-        return nguoiThanList.map(item => ({
+        return nguoiThanList.map((item: NguoiThan) => ({
             ...item,
             ten_nhan_vien: employeeMap.get(item.ma_nhan_vien)?.ho_ten || "",
         }))
@@ -87,9 +88,9 @@ export function NguoiThanListView({
     // Generate filter options from data
     const moiQuanHeOptions = React.useMemo(() => {
         const unique = Array.from(
-            new Set(nguoiThanList?.map((e) => e.moi_quan_he).filter((d): d is string => !!d) || [])
-        )
-        return unique.map((d) => ({ label: d, value: d }))
+            new Set(nguoiThanList?.map((e: NguoiThan) => e.moi_quan_he).filter((d: string | null | undefined): d is string => !!d) || [])
+        ) as string[]
+        return unique.map((d: string) => ({ label: d, value: d }))
     }, [nguoiThanList])
 
     // Mobile card renderer

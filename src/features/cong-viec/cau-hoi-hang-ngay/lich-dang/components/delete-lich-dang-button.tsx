@@ -49,7 +49,8 @@ export function DeleteLichDangButton({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 hover:text-red-600 shrink-0"
+                        className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <span className="sr-only">Xóa</span>
                         <Trash2 className="h-4 w-4" />

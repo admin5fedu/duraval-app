@@ -76,6 +76,11 @@ const LichDangListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-n
 const LichDangDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/routes/lich-dang-detail-route'))
 const LichDangFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/routes/lich-dang-form-route'))
 
+// Câu trả lời module routes
+const CauTraLoiListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-list-route'))
+const CauTraLoiDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-detail-route'))
+const CauTraLoiFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -525,6 +530,37 @@ export const routes: RouteConfig[] = [
   {
     path: '/cong-viec/lich-dang',
     element: LichDangListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Câu trả lời module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "them-moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/cau-tra-loi/them-moi',
+    element: CauTraLoiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/cau-tra-loi/:id/sua',
+    element: CauTraLoiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/cau-tra-loi/:id',
+    element: CauTraLoiDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/cau-tra-loi',
+    element: CauTraLoiListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

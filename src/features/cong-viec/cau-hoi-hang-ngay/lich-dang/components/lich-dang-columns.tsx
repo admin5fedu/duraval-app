@@ -113,13 +113,33 @@ export function createColumns(
         }
     },
     {
+        accessorKey: "gio_dang",
+        header: ({ column }) => <SortableHeader column={column} title="Giờ Đăng" />,
+        size: 100,
+        minSize: 80,
+        meta: {
+            title: "Giờ đăng",
+            order: 2,
+            stickyLeft: true,
+            stickyLeftOffset: 190,
+            minWidth: 80
+        },
+        cell: ({ row }) => {
+            const gioDang = row.getValue("gio_dang") as string | null
+            if (!gioDang) return <div className="min-w-[80px]">-</div>
+            // Chỉ lấy hh:mm, bỏ phần :ss nếu có
+            const formattedTime = gioDang.length > 5 ? gioDang.substring(0, 5) : gioDang
+            return <div className="min-w-[80px]">{formattedTime}</div>
+        }
+    },
+    {
         accessorKey: "nhom_cau_hoi_ten",
         header: ({ column }) => <SortableHeader column={column} title="Nhóm Câu Hỏi" />,
         size: 200,
         minSize: 150,
         meta: {
             title: "Nhóm câu hỏi",
-            order: 2,
+            order: 3,
             minWidth: 150
         },
         filterFn: (row, id, value) => {
@@ -140,7 +160,7 @@ export function createColumns(
         minSize: 200,
         meta: {
             title: "Câu hỏi",
-            order: 3,
+            order: 4,
             minWidth: 200
         },
         cell: ({ row }) => {
@@ -165,7 +185,7 @@ export function createColumns(
         minSize: 100,
         meta: {
             title: "Đáp án đúng",
-            order: 4,
+            order: 5,
             minWidth: 100
         },
         cell: ({ row }) => {
@@ -185,7 +205,7 @@ export function createColumns(
         minSize: 200,
         meta: {
             title: "Chức vụ áp dụng",
-            order: 5,
+            order: 6,
             minWidth: 200
         },
         filterFn: (row, id, value) => {
@@ -230,18 +250,26 @@ export function createColumns(
         minSize: 150,
         meta: {
             title: "Người tạo",
-            order: 6,
+            order: 7,
             minWidth: 150
         },
         filterFn: (row, id, value) => {
-            const cellValue = row.getValue(id) as string | null
+            const nguoiTaoTen = row.getValue(id) as string | null
+            const nguoiTaoId = row.original.nguoi_tao_id
             if (!value || !Array.isArray(value) || value.length === 0) return true
-            if (!cellValue) return false
+            if (!nguoiTaoId) return false
+            // Format cell value to match filter options: "id - ten"
+            const cellValue = nguoiTaoTen ? `${nguoiTaoId} - ${nguoiTaoTen}` : String(nguoiTaoId)
             return value.includes(cellValue)
         },
         cell: ({ row }) => {
-            const nguoiTao = row.getValue("nguoi_tao_ten") as string | null
-            return <div className="min-w-[150px]">{nguoiTao || "-"}</div>
+            const nguoiTaoTen = row.getValue("nguoi_tao_ten") as string | null
+            const nguoiTaoId = row.original.nguoi_tao_id
+            if (!nguoiTaoId) return <div className="min-w-[150px]">-</div>
+            const displayText = nguoiTaoTen 
+                ? `${nguoiTaoId} - ${nguoiTaoTen}`
+                : String(nguoiTaoId)
+            return <div className="min-w-[150px]">{displayText}</div>
         }
     },
     {

@@ -351,7 +351,7 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
         ma_phong: maPhong,
         ma_nhom: maNhom,
       }
-      await updateMutation.mutateAsync({ id, data: submitData })
+      await updateMutation.mutateAsync({ id, input: submitData })
     } else {
       const submitData: CreateViecHangNgayInput = {
         ma_nhan_vien: maNhanVien,

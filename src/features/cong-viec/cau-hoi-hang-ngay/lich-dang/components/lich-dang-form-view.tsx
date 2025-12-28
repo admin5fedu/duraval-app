@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { CloudinaryImageUpload } from "./cloudinary-image-upload"
 import { DapAnDungSelector } from "./dap-an-dung-selector"
 import { ChucVuMultiSelect } from "@/components/ui/chuc-vu-multi-select"
+import { Input } from "@/components/ui/input"
 import { LichDangAPI } from "../services/lich-dang.api"
 import { useReferenceQuery } from "@/lib/react-query/hooks"
 import { useAuthStore } from "@/shared/stores/auth-store"
@@ -132,6 +133,44 @@ export function LichDangFormView({ id, onComplete, onCancel }: LichDangFormViewP
                         required: true
                     },
                     { 
+                        name: "gio_dang", 
+                        label: "Giờ Đăng", 
+                        type: "custom",
+                        required: true,
+                        customComponent: ({ value, onChange, disabled, placeholder }: any) => {
+                            const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                let inputValue = e.target.value.replace(/\D/g, '') // Remove non-digits
+                                
+                                // Limit to 4 digits (HHmm)
+                                if (inputValue.length > 4) {
+                                    inputValue = inputValue.slice(0, 4)
+                                }
+                                
+                                // Format as HH:mm
+                                let formatted = inputValue
+                                if (inputValue.length > 2) {
+                                    formatted = inputValue.slice(0, 2) + ':' + inputValue.slice(2, 4)
+                                } else if (inputValue.length > 0) {
+                                    formatted = inputValue
+                                }
+                                
+                                onChange(formatted)
+                            }
+                            
+                            return (
+                                <Input
+                                    type="text"
+                                    value={value || ''}
+                                    onChange={handleChange}
+                                    placeholder={placeholder || "10:00"}
+                                    disabled={disabled}
+                                    maxLength={5}
+                                    pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                />
+                            )
+                        }
+                    },
+                    { 
                         name: "nhom_cau_hoi", 
                         label: "Nhóm Câu Hỏi", 
                         type: "select",
@@ -238,6 +277,7 @@ export function LichDangFormView({ id, onComplete, onCancel }: LichDangFormViewP
         if (isEditMode && existingData) {
             return {
                 ngay_dang: existingData.ngay_dang || '',
+                gio_dang: existingData.gio_dang || '10:00',
                 nhom_cau_hoi: existingData.nhom_cau_hoi?.toString() || '',
                 cau_hoi: existingData.cau_hoi || '',
                 hinh_anh: existingData.hinh_anh || null,
@@ -253,7 +293,8 @@ export function LichDangFormView({ id, onComplete, onCancel }: LichDangFormViewP
         // Default values for new record
         const today = new Date().toISOString().split('T')[0] // Format: YYYY-MM-DD
         return {
-            ngay_dang: today
+            ngay_dang: today,
+            gio_dang: '10:00'
         }
     }, [isEditMode, existingData])
 

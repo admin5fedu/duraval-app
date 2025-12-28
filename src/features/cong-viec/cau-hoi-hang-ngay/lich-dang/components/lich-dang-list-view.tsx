@@ -3,20 +3,30 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { GenericListView } from "@/shared/components"
+import { useDataTable } from "@/shared/hooks/use-data-table"
 import { LichDang } from "../schema"
-import { useLichDang, useBatchDeleteLichDang } from "../hooks"
+import { useBatchDeleteLichDang, useDeleteLichDang } from "../hooks"
 import { createColumns } from "./lich-dang-columns"
 import { lichDangConfig } from "../config"
-import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
-import { DeleteLichDangButton } from "./delete-lich-dang-button"
 import { PreviewDialog } from "./preview-dialog"
 import { LichDangImportDialog } from "./lich-dang-import-dialog"
 import { LichDangAPI } from "../services/lich-dang.api"
-import { useReferenceQuery } from "@/lib/react-query/hooks"
+import { lichDangQueryKeys } from "@/lib/react-query/query-keys"
+import { useReferenceQuery } from "@/lib/react-query"
 import { useMemo, useState, useCallback } from "react"
 import { useBatchUpsertLichDang } from "../actions/lich-dang-excel-actions"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface LichDangListViewProps {
     initialData?: LichDang[]
@@ -33,14 +43,16 @@ export function LichDangListView({
     onAddNew,
     onView,
 }: LichDangListViewProps = {}) {
-    const { data: lichDangList, isLoading, isError, refetch } = useLichDang(initialData)
     const navigate = useNavigate()
     const batchDeleteMutation = useBatchDeleteLichDang()
+    const deleteMutation = useDeleteLichDang()
     const batchImportMutation = useBatchUpsertLichDang()
     const module = lichDangConfig.moduleName
     const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
     const [previewData, setPreviewData] = useState<LichDang | null>(null)
     const [importDialogOpen, setImportDialogOpen] = useState(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [rowToDelete, setRowToDelete] = useState<LichDang | null>(null)
     
     // ⚡ Performance: Sử dụng initial data từ server component để tránh client-side fetch
     const { data: danhSachChucVu = initialDanhSachChucVu || [] } = useReferenceQuery({
@@ -89,6 +101,12 @@ export function LichDangListView({
                 return value
             }
         }
+        if (columnId === "gio_dang") {
+            const value = (row as any)[columnId]
+            if (!value) return ""
+            // Chỉ lấy hh:mm, bỏ phần :ss nếu có
+            return value.length > 5 ? value.substring(0, 5) : value
+        }
         if (columnId === "tg_tao" || columnId === "tg_cap_nhat") {
             const value = (row as any)[columnId]
             if (!value) return ""
@@ -105,22 +123,69 @@ export function LichDangListView({
             }
             return "Tất cả"
         }
+        if (columnId === "nguoi_tao_ten") {
+            const nguoiTaoTen = (row as any)[columnId]
+            const nguoiTaoId = row.nguoi_tao_id
+            if (!nguoiTaoId) return ""
+            return nguoiTaoTen ? `${nguoiTaoId} - ${nguoiTaoTen}` : String(nguoiTaoId)
+        }
         return (row as any)[columnId] ?? ""
     }, [chucVuMap])
-    
-    // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
-    const {
-        initialFilters,
-        initialSearch,
-        initialSorting,
-        handleFiltersChange,
-        handleSearchChange,
-        handleSortChange,
-    } = useListViewFilters(module, [{ id: "ngay_dang", desc: true }])
+
+    // ✅ Use useDataTable hook to get all props for GenericListView
+    const dataTableProps = useDataTable<LichDang>({
+        queryKeys: lichDangQueryKeys,
+        queryFn: LichDangAPI.getAll,
+        initialData: initialData,
+        module: module,
+        columns: columns,
+        defaultSorting: [{ id: "ngay_dang", desc: true }],
+        filterColumn: "cau_hoi",
+        searchFields: lichDangConfig.searchFields as (keyof LichDang)[],
+        onRowClick: (row) => {
+            if (onView) {
+                onView(row.id!)
+            } else {
+                navigate(`${lichDangConfig.routePath}/${row.id}`)
+            }
+        },
+        onEdit: (row) => {
+            if (onEdit) {
+                onEdit(row.id!)
+            } else {
+                navigate(`${lichDangConfig.routePath}/${row.id}/sua?returnTo=list`)
+            }
+        },
+        onDelete: (row) => {
+            setRowToDelete(row)
+            setDeleteDialogOpen(true)
+        },
+        onAdd: () => {
+            if (onAddNew) {
+                onAddNew()
+            } else {
+                navigate(`${lichDangConfig.routePath}/moi`)
+            }
+        },
+        onBack: () => {
+            navigate(lichDangConfig.parentPath)
+        },
+        onDeleteSelected: async (selectedRows) => {
+            const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
+            await batchDeleteMutation.mutateAsync(ids)
+        },
+        onImport: () => setImportDialogOpen(true),
+        isImporting: batchImportMutation.isPending,
+        enableSuggestions: true,
+        enableRangeSelection: true,
+        enableLongPress: true,
+        persistSelection: false,
+    })
 
     // Generate filter options from data
     const filterOptions = React.useMemo(() => {
-        if (!lichDangList || lichDangList.length === 0) {
+        const data = dataTableProps.data || []
+        if (!data || data.length === 0) {
             return {
                 nhomCauHoi: [],
                 ngayDang: [],
@@ -131,7 +196,7 @@ export function LichDangListView({
 
         // Nhóm câu hỏi options
         const nhomCauHoiSet = new Set<string>()
-        lichDangList.forEach(item => {
+        data.forEach(item => {
             if (item.nhom_cau_hoi_ten) {
                 nhomCauHoiSet.add(item.nhom_cau_hoi_ten)
             }
@@ -142,7 +207,7 @@ export function LichDangListView({
 
         // Ngày đăng options
         const ngayDangSet = new Set<string>()
-        lichDangList.forEach(item => {
+        data.forEach(item => {
             if (item.ngay_dang) {
                 const date = new Date(item.ngay_dang)
                 const dateStr = date.toLocaleDateString("vi-VN", {
@@ -157,15 +222,18 @@ export function LichDangListView({
             .map(value => ({ label: value, value }))
             .sort((a, b) => b.label.localeCompare(a.label)) // Sort descending
 
-        // Người tạo options
-        const nguoiTaoSet = new Set<string>()
-        lichDangList.forEach(item => {
-            if (item.nguoi_tao_ten) {
-                nguoiTaoSet.add(item.nguoi_tao_ten)
+        // Người tạo options - Format: "id - ten"
+        const nguoiTaoMap = new Map<number, string>()
+        data.forEach(item => {
+            if (item.nguoi_tao_id && item.nguoi_tao_ten) {
+                nguoiTaoMap.set(item.nguoi_tao_id, item.nguoi_tao_ten)
             }
         })
-        const nguoiTaoOptions = Array.from(nguoiTaoSet)
-            .map(value => ({ label: value, value }))
+        const nguoiTaoOptions = Array.from(nguoiTaoMap.entries())
+            .map(([id, ten]) => ({
+                label: `${id} - ${ten}`,
+                value: `${id} - ${ten}` // Value để match với display text
+            }))
             .sort((a, b) => a.label.localeCompare(b.label))
 
         // Chức vụ options (from danhSachChucVu)
@@ -180,7 +248,7 @@ export function LichDangListView({
             nguoiTao: nguoiTaoOptions,
             chucVu: chucVuOptions,
         }
-    }, [lichDangList, danhSachChucVu])
+    }, [dataTableProps.data, danhSachChucVu])
 
     // Build filters array
     const filters = React.useMemo(() => {
@@ -208,99 +276,22 @@ export function LichDangListView({
         ]
     }, [filterOptions])
 
-    // Handle batch delete
-    const handleBatchDelete = React.useCallback(async (ids: number[]) => {
-        try {
-            await batchDeleteMutation.mutateAsync(ids)
-        } catch (error) {
-            // Error is handled by mutation
-        }
-    }, [batchDeleteMutation])
-
-    // Handle edit
-    const handleEdit = React.useCallback((id: number) => {
-        if (onEdit) {
-            onEdit(id)
-        } else {
-            navigate(`${lichDangConfig.routePath}/${id}/sua?returnTo=list`)
-        }
-    }, [navigate, onEdit])
-
-    // Handle add new
-    const handleAddNew = React.useCallback(() => {
-        if (onAddNew) {
-            onAddNew()
-        } else {
-            navigate(`${lichDangConfig.routePath}/moi`)
-        }
-    }, [navigate, onAddNew])
-
-    // Handle view
-    const handleView = React.useCallback((id: number) => {
-        if (onView) {
-            onView(id)
-        } else {
-            navigate(`${lichDangConfig.routePath}/${id}`)
-        }
-    }, [navigate, onView])
+    // Update exportOptions with correct totalCount (use dataTableProps.data)
+    const exportOptionsWithCount = React.useMemo(() => ({
+        columns: columns,
+        totalCount: dataTableProps.data?.length || 0,
+        moduleName: lichDangConfig.moduleTitle,
+        getColumnTitle,
+        getCellValue,
+    }), [columns, dataTableProps.data, getColumnTitle, getCellValue])
 
     return (
         <>
             <GenericListView
-                columns={columns}
-                data={lichDangList || []}
-                filterColumn="cau_hoi"
-                initialSorting={initialSorting}
-                initialFilters={initialFilters}
-                initialSearch={initialSearch}
-                onFiltersChange={handleFiltersChange}
-                onSearchChange={handleSearchChange}
-                onSortChange={handleSortChange}
-                onRowClick={(row) => {
-                    if (onView) {
-                        onView(row.id!)
-                    } else {
-                        navigate(`${lichDangConfig.routePath}/${row.id}`)
-                    }
-                }}
-                onAdd={() => {
-                    if (onAddNew) {
-                        onAddNew()
-                    } else {
-                        navigate(`${lichDangConfig.routePath}/moi`)
-                    }
-                }}
-                addHref={`${lichDangConfig.routePath}/moi`}
-                onBack={() => {
-                    navigate(lichDangConfig.parentPath)
-                }}
-                onDeleteSelected={async (selectedRows) => {
-                    const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
-                    await batchDeleteMutation.mutateAsync(ids)
-                }}
-                searchFields={lichDangConfig.searchFields as (keyof LichDang)[]}
-                module={module}
-                enableSuggestions={true}
-                enableRangeSelection={true}
-                enableLongPress={true}
-                persistSelection={false}
+                {...dataTableProps}
                 filters={filters}
-                onEdit={(row) => {
-                    if (onEdit) {
-                        onEdit(row.id!)
-                    } else {
-                        navigate(`${lichDangConfig.routePath}/${row.id}/sua?returnTo=list`)
-                    }
-                }}
-                onImport={() => setImportDialogOpen(true)}
-                isImporting={batchImportMutation.isPending}
-                exportOptions={{
-                    columns: columns,
-                    totalCount: lichDangList?.length || 0,
-                    moduleName: lichDangConfig.moduleTitle,
-                    getColumnTitle,
-                    getCellValue,
-                }}
+                addHref={`${lichDangConfig.routePath}/moi`}
+                exportOptions={exportOptionsWithCount}
             />
             
             <PreviewDialog
@@ -308,6 +299,38 @@ export function LichDangListView({
                 onOpenChange={setPreviewDialogOpen}
                 data={previewData}
             />
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bạn có chắc chắn muốn xóa lịch đăng <strong>{rowToDelete?.cau_hoi}</strong>? Hành động này không thể hoàn tác.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteMutation.isPending}>Hủy</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={async () => {
+                                if (rowToDelete?.id) {
+                                    try {
+                                        await deleteMutation.mutateAsync(rowToDelete.id)
+                                        setDeleteDialogOpen(false)
+                                        setRowToDelete(null)
+                                    } catch (error) {
+                                        // Error is handled by mutation
+                                    }
+                                }
+                            }}
+                            disabled={deleteMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleteMutation.isPending ? "Đang xóa..." : "Xóa"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {/* Import Dialog */}
             <LichDangImportDialog

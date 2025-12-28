@@ -18,6 +18,7 @@ export class LichDangAPI {
             .select(`
                 id,
                 ngay_dang,
+                gio_dang,
                 nhom_cau_hoi,
                 cau_hoi,
                 dap_an_1,
@@ -189,6 +190,7 @@ export class LichDangAPI {
     static async create(input: CreateLichDangInput): Promise<LichDang> {
         const insertData: any = {
             ngay_dang: input.ngay_dang,
+            gio_dang: input.gio_dang,
             nhom_cau_hoi: input.nhom_cau_hoi,
             cau_hoi: input.cau_hoi,
             hinh_anh: input.hinh_anh || null,
@@ -221,6 +223,7 @@ export class LichDangAPI {
     static async update(id: number, input: UpdateLichDangInput): Promise<LichDang> {
         const updateData: any = {}
         if (input.ngay_dang !== undefined) updateData.ngay_dang = input.ngay_dang
+        if (input.gio_dang !== undefined) updateData.gio_dang = input.gio_dang
         if (input.nhom_cau_hoi !== undefined) updateData.nhom_cau_hoi = input.nhom_cau_hoi
         if (input.cau_hoi !== undefined) updateData.cau_hoi = input.cau_hoi
         if (input.hinh_anh !== undefined) updateData.hinh_anh = input.hinh_anh

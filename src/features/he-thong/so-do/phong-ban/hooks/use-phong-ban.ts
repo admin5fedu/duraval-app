@@ -1,6 +1,6 @@
 "use client"
 
-import { useListQuery, useDetailQuery } from "@/lib/react-query/hooks"
+import { createUseListQuery, createUseDetailQuery } from "@/lib/react-query"
 import { phongBanQueryKeys } from "@/lib/react-query/query-keys"
 import { PhongBanAPI } from "../services/phong-ban.api"
 import type { PhongBan } from "../schema"
@@ -9,28 +9,16 @@ import type { PhongBan } from "../schema"
  * Hook to fetch list of phòng ban
  * ⚡ Performance: Uses useListQuery with automatic cache strategy
  */
-export function usePhongBan(initialData?: PhongBan[]) {
-    return useListQuery({
-        queryKey: phongBanQueryKeys.list(),
-        queryFn: async () => {
-            return await PhongBanAPI.getAll()
-        },
-        initialData: initialData,
-    })
-}
+export const usePhongBan = createUseListQuery<PhongBan>({
+    queryKeys: phongBanQueryKeys,
+    api: { getAll: PhongBanAPI.getAll },
+})
 
 /**
  * Hook to fetch single phòng ban by ID
  * ⚡ Performance: Uses cached data for instant navigation
  */
-export function usePhongBanById(id: number, initialData?: PhongBan) {
-    return useDetailQuery({
-        queryKey: phongBanQueryKeys.detail(id),
-        queryFn: async () => {
-            return await PhongBanAPI.getById(id)
-        },
-        initialData: initialData,
-        enabled: !!id,
-    })
-}
-
+export const usePhongBanById = createUseDetailQuery<PhongBan>({
+    queryKeys: phongBanQueryKeys,
+    api: { getById: PhongBanAPI.getById },
+})

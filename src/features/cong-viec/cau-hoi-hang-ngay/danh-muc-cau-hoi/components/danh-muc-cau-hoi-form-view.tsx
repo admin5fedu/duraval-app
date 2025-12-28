@@ -79,7 +79,7 @@ export function DanhMucCauHoiFormView({ id, onComplete, onCancel }: DanhMucCauHo
         ten_nhom: data.ten_nhom,
         mo_ta: data.mo_ta || null,
       }
-      await updateMutation.mutateAsync({ id, data: updateData })
+      await updateMutation.mutateAsync({ id, input: updateData })
     } else {
       // Create mode
       const createData: CreateDanhMucCauHoiInput = {

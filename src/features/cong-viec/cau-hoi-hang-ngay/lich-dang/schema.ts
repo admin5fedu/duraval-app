@@ -4,6 +4,7 @@ import { z } from "zod"
 export const lichDangSchema = z.object({
   id: z.number().optional(),
   ngay_dang: z.string().min(1, "Ngày đăng là bắt buộc"), // date - required
+  gio_dang: z.string().min(1, "Giờ đăng là bắt buộc").regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Giờ đăng phải có định dạng HH:mm"), // time - required (HH:mm format)
   nhom_cau_hoi: z.preprocess(
     (val) => {
       if (val === null || val === undefined || val === "") return undefined

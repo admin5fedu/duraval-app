@@ -116,6 +116,13 @@ export function LichDangDetailView({
           value: formatDate(lichDang.ngay_dang)
         },
         { 
+          label: "Giờ Đăng", 
+          key: "gio_dang", 
+          value: lichDang.gio_dang 
+            ? (lichDang.gio_dang.length > 5 ? lichDang.gio_dang.substring(0, 5) : lichDang.gio_dang)
+            : "-"
+        },
+        { 
           label: "Nhóm Câu Hỏi", 
           key: "nhom_cau_hoi_ten", 
           value: lichDang.nhom_cau_hoi_ten || "-"
