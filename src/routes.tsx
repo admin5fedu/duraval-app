@@ -58,8 +58,8 @@ const ChucVuFormRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/rou
 // Phân quyền module routes
 const PhanQuyenListRoute = lazy(() => import('@/features/he-thong/thiet-lap/phan-quyen/routes/phan-quyen-list-route'))
 
-// Kế hoạch 168 module routes
-const KeHoach168ListRoute = lazy(() => import('@/features/cong-viec/tong-quan/ke-hoach-168/routes/ke-hoach-168-list-route'))
+// Kế hoạch 168 module routes - Dashboard
+const KeHoach168DashboardRoute = lazy(() => import('@/features/cong-viec/tong-quan/ke-hoach-168/routes/ke-hoach-168-dashboard-route'))
 
 // Việc hàng ngày module routes
 const ViecHangNgayListRoute = lazy(() => import('@/features/cong-viec/tong-quan/viec-hang-ngay/routes/viec-hang-ngay-list-route'))
@@ -421,10 +421,10 @@ export const routes: RouteConfig[] = [
   // Kế hoạch 168 module routes
   {
     path: '/cong-viec/ke-hoach-168',
-    element: KeHoach168ListRoute,
+    element: KeHoach168DashboardRoute,
     protected: true,
     layout: true,
-    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+    scrollBehavior: 'top', // Dashboard - always scroll to top
   },
   // Việc hàng ngày module routes - explicit routes (no splat pattern)
   // Order matters: more specific routes must come before generic ones

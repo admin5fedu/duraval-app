@@ -1,3 +1,5 @@
+export { default as KeHoach168DashboardRoute } from "./ke-hoach-168-dashboard-route"
+// Legacy export (may be removed later)
 export { default as KeHoach168ListRoute } from "./ke-hoach-168-list-route"
 // TODO: Add detail and form routes when needed
 // export { default as KeHoach168DetailRoute } from "./ke-hoach-168-detail-route"

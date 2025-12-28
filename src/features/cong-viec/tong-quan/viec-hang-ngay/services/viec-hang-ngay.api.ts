@@ -72,6 +72,41 @@ export class ViecHangNgayAPI {
     }
 
     /**
+     * Get việc hàng ngày by date and employee
+     */
+    static async getByDateAndEmployee(ma_nhan_vien: number, ngay_bao_cao: string): Promise<ViecHangNgay | null> {
+        const { data, error } = await supabase
+            .from(TABLE_NAME)
+            .select("*")
+            .eq("ma_nhan_vien", ma_nhan_vien)
+            .eq("ngay_bao_cao", ngay_bao_cao)
+            .single()
+
+        if (error) {
+            if (error.code === "PGRST116") {
+                // Not found - return null (not an error)
+                return null
+            }
+            console.error("Lỗi khi tải việc hàng ngày:", error)
+            throw new Error(error.message)
+        }
+
+        // Normalize IDs
+        if (data) {
+            return {
+                ...data,
+                id: typeof data.id === 'string' ? parseInt(data.id, 10) : data.id,
+                ma_nhan_vien: typeof data.ma_nhan_vien === 'string' ? parseInt(data.ma_nhan_vien, 10) : data.ma_nhan_vien,
+                phong_ban_id: data.phong_ban_id && typeof data.phong_ban_id === 'string'
+                    ? parseInt(data.phong_ban_id, 10)
+                    : data.phong_ban_id,
+            } as ViecHangNgay
+        }
+
+        return null
+    }
+
+    /**
      * Check if a report already exists for the given employee and date
      */
     static async checkDuplicateReport(ma_nhan_vien: number, ngay_bao_cao: string, excludeId?: number): Promise<{ exists: boolean; data: ViecHangNgay | null }> {
