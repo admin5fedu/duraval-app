@@ -66,6 +66,16 @@ const ViecHangNgayListRoute = lazy(() => import('@/features/cong-viec/tong-quan/
 const ViecHangNgayDetailRoute = lazy(() => import('@/features/cong-viec/tong-quan/viec-hang-ngay/routes/viec-hang-ngay-detail-route'))
 const ViecHangNgayFormRoute = lazy(() => import('@/features/cong-viec/tong-quan/viec-hang-ngay/routes/viec-hang-ngay-form-route'))
 
+// Danh mục câu hỏi module routes
+const DanhMucCauHoiListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/danh-muc-cau-hoi/routes/danh-muc-cau-hoi-list-route'))
+const DanhMucCauHoiDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/danh-muc-cau-hoi/routes/danh-muc-cau-hoi-detail-route'))
+const DanhMucCauHoiFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/danh-muc-cau-hoi/routes/danh-muc-cau-hoi-form-route'))
+
+// Lịch đăng module routes
+const LichDangListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/routes/lich-dang-list-route'))
+const LichDangDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/routes/lich-dang-detail-route'))
+const LichDangFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/routes/lich-dang-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -453,6 +463,68 @@ export const routes: RouteConfig[] = [
   {
     path: '/cong-viec/viec-hang-ngay',
     element: ViecHangNgayListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Danh mục câu hỏi module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/danh-muc-cau-hoi/moi',
+    element: DanhMucCauHoiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/danh-muc-cau-hoi/:id/sua',
+    element: DanhMucCauHoiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/danh-muc-cau-hoi/:id',
+    element: DanhMucCauHoiDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/danh-muc-cau-hoi',
+    element: DanhMucCauHoiListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Lịch đăng module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/lich-dang/moi',
+    element: LichDangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/lich-dang/:id/sua',
+    element: LichDangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/lich-dang/:id',
+    element: LichDangDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/lich-dang',
+    element: LichDangListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

@@ -19,6 +19,7 @@ export const BREADCRUMB_SKIP_SEGMENTS: Set<string> = new Set([
   "nhan-su",      // Nhân sự - cấp trung gian, đã flatten
   "so-do",        // Sơ đồ - cấp trung gian, có thể flatten sau
   "thiet-lap",    // Thiết lập - cấp trung gian, có thể flatten sau
+  "cau-hoi-hang-ngay", // Câu hỏi hàng ngày - cấp trung gian, đã flatten
 ])
 
 /**
@@ -60,7 +61,9 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "ky-thi": "Kỳ Thi",
   "bai-thi": "Bài Thi",
   "cau-hoi-hang-ngay": "Câu Hỏi Hàng Ngày",
-  "danh-muc-cau-hoi-hang-ngay": "Danh Mục Câu Hỏi Hàng Ngày",
+  "danh-muc-cau-hoi": "Danh Mục Câu Hỏi",
+  "lich-dang": "Lịch Đăng",
+  "danh-muc-cau-hoi-hang-ngay": "Danh Mục Câu Hỏi Hàng Ngày", // Legacy, có thể xóa nếu không dùng
   "lich-dang": "Lịch Đăng",
   "cau-tra-loi": "Câu Trả Lời",
   

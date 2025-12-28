@@ -402,7 +402,7 @@ export function ViecHangNgayListView({
                 if (onEdit) {
                     onEdit(row.id!)
                 } else {
-                    navigate(`${viecHangNgayConfig.routePath}/${row.id}/sua`)
+                    navigate(`${viecHangNgayConfig.routePath}/${row.id}/sua?returnTo=list`)
                 }
             }}
             onDelete={(row) => {

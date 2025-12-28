@@ -1,53 +1,40 @@
 "use client"
 
 import * as React from "react"
-import { useFormContext } from "react-hook-form"
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { usePhongBan } from "@/features/he-thong/so-do/phong-ban/hooks/use-phong-ban"
 
 interface PhongBanDisplayFieldProps {
     name: string
-    label: string
+    label?: string
+    value?: string | null
+    onChange?: (value: string | null) => void
     disabled?: boolean
     placeholder?: string
+    description?: string
 }
 
-export function PhongBanDisplayField({ name, label, disabled, placeholder }: PhongBanDisplayFieldProps) {
-    const form = useFormContext()
+export function PhongBanDisplayField({ value, disabled, placeholder }: PhongBanDisplayFieldProps) {
     const { data: phongBans } = usePhongBan()
-    const maPhong = form.watch(name)
     
     // Find phong ban by ma_phong_ban
     const phongBan = React.useMemo(() => {
-        if (!maPhong || !phongBans) return null
-        return phongBans.find(pb => pb.ma_phong_ban === maPhong)
-    }, [maPhong, phongBans])
+        if (!value || !phongBans) return null
+        return phongBans.find(pb => pb.ma_phong_ban === value)
+    }, [value, phongBans])
     
     const displayValue = phongBan 
-        ? `${maPhong} - ${phongBan.ten_phong_ban}`
-        : maPhong || ""
+        ? `${value} - ${phongBan.ten_phong_ban}`
+        : value || ""
     
     return (
-        <FormField
-            control={form.control}
-            name={name}
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>{label}</FormLabel>
-                    <FormControl>
-                        <Input
-                            {...field}
-                            value={displayValue}
-                            disabled={disabled}
-                            placeholder={placeholder}
-                            readOnly
-                            className="bg-muted cursor-not-allowed"
-                        />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}
+        <Input
+            value={displayValue}
+            disabled={disabled}
+            placeholder={placeholder}
+            readOnly
+            className="bg-muted cursor-not-allowed"
+            onChange={() => {}} // Read-only, prevent changes
         />
     )
 }

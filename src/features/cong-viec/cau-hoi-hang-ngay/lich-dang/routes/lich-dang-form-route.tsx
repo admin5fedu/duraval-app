@@ -1,10 +1,10 @@
 "use client"
 
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { ViecHangNgayFormView } from "../components/viec-hang-ngay-form-view"
-import { viecHangNgayConfig } from "../config"
+import { LichDangFormView } from "../components/lich-dang-form-view"
+import { lichDangConfig } from "../config"
 
-export default function ViecHangNgayFormRoute() {
+export default function LichDangFormRoute() {
     const { id: idParam } = useParams<{ id?: string }>()
     const navigate = useNavigate()
     const location = useLocation()
@@ -18,7 +18,7 @@ export default function ViecHangNgayFormRoute() {
 
     // Validate ID if in edit mode
     if (isEditMode && (!id || isNaN(id))) {
-        navigate(viecHangNgayConfig.routePath)
+        navigate(lichDangConfig.routePath)
         return null
     }
 
@@ -30,29 +30,28 @@ export default function ViecHangNgayFormRoute() {
         if (isEditMode && id) {
             // After edit, go to detail view if returnTo is detail, otherwise go to list
             if (returnTo === 'detail') {
-                navigate(`${viecHangNgayConfig.routePath}/${id}`)
+                navigate(`${lichDangConfig.routePath}/${id}`)
             } else {
-                // returnTo === 'list' or fallback
-                navigate(viecHangNgayConfig.routePath)
+                navigate(lichDangConfig.routePath)
             }
         } else {
             // After create, go to list view
-            navigate(viecHangNgayConfig.routePath)
+            navigate(lichDangConfig.routePath)
         }
     }
 
     const handleCancel = () => {
         if (returnTo === 'detail' && isEditMode && id) {
             // Return to detail view
-            navigate(`${viecHangNgayConfig.routePath}/${id}`)
+            navigate(`${lichDangConfig.routePath}/${id}`)
         } else {
-            // Return to list view (default or returnTo === 'list')
-            navigate(viecHangNgayConfig.routePath)
+            // Return to list view
+            navigate(lichDangConfig.routePath)
         }
     }
 
     return (
-        <ViecHangNgayFormView
+        <LichDangFormView
             id={isEditMode ? id : undefined}
             onComplete={handleComplete}
             onCancel={handleCancel}

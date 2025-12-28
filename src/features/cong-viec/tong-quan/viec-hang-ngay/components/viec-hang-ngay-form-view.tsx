@@ -1,6 +1,5 @@
 "use client"
 
-import { useNavigate, useSearchParams } from "react-router-dom"
 import { GenericFormView, type FormSection } from "@/shared/components"
 import { viecHangNgaySchema, ViecHangNgay } from "../schema"
 import type { CreateViecHangNgayInput, UpdateViecHangNgayInput } from "../types"
@@ -167,8 +166,6 @@ interface ViecHangNgayFormViewProps {
 }
 
 export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayFormViewProps) {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const createMutation = useCreateViecHangNgay()
   const updateMutation = useUpdateViecHangNgay()
   const { data: phongBans } = usePhongBan()
@@ -178,7 +175,6 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
   // If id is provided, fetch existing data for edit mode
   const { data: existingData, isLoading } = useViecHangNgayById(id || 0, undefined)
   
-  const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
 
   // Create sections
@@ -369,34 +365,6 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
     }
   }
 
-  const handleSuccess = () => {
-    if (onComplete) {
-      onComplete()
-    } else {
-      if (returnTo === 'list') {
-        navigate(viecHangNgayConfig.routePath)
-      } else if (returnTo === 'detail' && id) {
-        navigate(`${viecHangNgayConfig.routePath}/${id}`)
-      } else {
-        navigate(viecHangNgayConfig.routePath)
-      }
-    }
-  }
-
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel()
-    } else {
-      const cancelUrl = returnTo === 'list' 
-        ? viecHangNgayConfig.routePath
-        : (id ? `${viecHangNgayConfig.routePath}/${id}` : viecHangNgayConfig.routePath)
-      navigate(cancelUrl)
-    }
-  }
-
-  const cancelUrl = returnTo === 'list' 
-    ? viecHangNgayConfig.routePath
-    : (id ? `${viecHangNgayConfig.routePath}/${id}` : viecHangNgayConfig.routePath)
 
 
   if (isEditMode && isLoading) {
@@ -410,9 +378,8 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
       schema={viecHangNgaySchema}
       sections={sections}
       onSubmit={handleSubmit}
-      onSuccess={handleSuccess}
-      onCancel={handleCancel}
-      cancelUrl={cancelUrl}
+      onSuccess={onComplete}
+      onCancel={onCancel}
       successMessage={isEditMode ? "Cập nhật việc hàng ngày thành công" : "Thêm mới việc hàng ngày thành công"}
       errorMessage={isEditMode ? "Có lỗi xảy ra khi cập nhật việc hàng ngày" : "Có lỗi xảy ra khi thêm mới việc hàng ngày"}
       defaultValues={formDefaultValues}

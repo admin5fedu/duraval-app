@@ -8,7 +8,7 @@ export default function ViecHangNgayListRoute() {
     const navigate = useNavigate()
 
     const handleEdit = (id: number) => {
-        navigate(`${viecHangNgayConfig.routePath}/${id}/sua`)
+        navigate(`${viecHangNgayConfig.routePath}/${id}/sua?returnTo=list`)
     }
 
     const handleAddNew = () => {

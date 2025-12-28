@@ -9,6 +9,9 @@ import { ModuleConfig } from "@/shared/types/module-config"
 import { nhanSuConfig } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/config"
 import { nguoiThanConfig } from "@/features/he-thong/nhan-su/nguoi-than/config"
 import { keHoach168Config } from "@/features/cong-viec/tong-quan/ke-hoach-168/config"
+import { viecHangNgayConfig } from "@/features/cong-viec/tong-quan/viec-hang-ngay/config"
+import { danhMucCauHoiConfig } from "@/features/cong-viec/cau-hoi-hang-ngay/danh-muc-cau-hoi/config"
+import { lichDangConfig } from "@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/config"
 
 /**
  * Registry class for managing module configurations
@@ -96,6 +99,9 @@ export const moduleRegistry = new ModuleRegistry()
 moduleRegistry.register(nhanSuConfig)
 moduleRegistry.register(nguoiThanConfig)
 moduleRegistry.register(keHoach168Config)
+moduleRegistry.register(viecHangNgayConfig)
+moduleRegistry.register(danhMucCauHoiConfig)
+moduleRegistry.register(lichDangConfig)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {

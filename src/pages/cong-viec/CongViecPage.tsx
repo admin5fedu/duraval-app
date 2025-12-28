@@ -93,8 +93,8 @@ export default function CongViecPage() {
       icon: MessageCircleQuestion,
       items: [
         {
-          title: "Danh mục",
-          href: "/cong-viec/danh-muc-cau-hoi-hang-ngay",
+          title: "Danh mục câu hỏi",
+          href: "/cong-viec/danh-muc-cau-hoi",
           icon: HelpCircle,
           description: "Quản lý danh mục các chủ đề câu hỏi hàng ngày.",
         },

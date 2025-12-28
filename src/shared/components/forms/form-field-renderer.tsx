@@ -204,8 +204,13 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
                                     <field.customComponent
+                                        name={field.name}
+                                        label={field.label}
                                         value={formField.value}
                                         onChange={formField.onChange}
+                                        disabled={field.disabled}
+                                        placeholder={field.placeholder}
+                                        description={field.description}
                                     />
                                 ) : (
                                     <Input
