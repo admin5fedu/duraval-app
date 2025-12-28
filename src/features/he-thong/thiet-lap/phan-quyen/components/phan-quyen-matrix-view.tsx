@@ -572,7 +572,7 @@ export function PhanQuyenMatrixView() {
           </CardHeader>
           <CardContent className="p-0">
             {selectedModule ? (
-              <ScrollArea className="h-[calc(100vh-24rem)]">
+              <ScrollArea className="h-[calc(100vh-24rem)] [&>[data-radix-scroll-area-viewport]]:pb-0">
                 <div className="min-w-[800px]">
                   <table className="w-full border-collapse">
                     <thead className="sticky top-0 z-20 bg-background border-b">
@@ -615,8 +615,8 @@ export function PhanQuyenMatrixView() {
                         return (
                           <React.Fragment key={phongGroup.maPhong ?? `phong-${phongIndex}`}>
                             {/* Phòng Header Row */}
-                            <tr className="bg-muted/50 border-b border-t-2 border-primary/20">
-                              <td className="sticky left-0 z-10 bg-muted/50 border-r p-3" colSpan={2}>
+                            <tr className="bg-muted/40 border-b">
+                              <td className="sticky left-0 z-10 bg-muted/40 border-r p-2.5" colSpan={2}>
                                 <div className="flex items-center gap-2">
                                   <span className="font-semibold text-sm text-foreground">{phongGroup.tenPhong}</span>
                                 </div>
@@ -637,7 +637,7 @@ export function PhanQuyenMatrixView() {
                                 return (
                                   <td
                                     key={key}
-                                    className="bg-muted/50 p-3 text-center text-sm border-r last:border-r-0"
+                                    className="bg-muted/40 p-2.5 text-center text-sm border-r last:border-r-0"
                                   >
                                     <div className="flex justify-center">
                                       <Checkbox
@@ -666,8 +666,8 @@ export function PhanQuyenMatrixView() {
                               return (
                                 <React.Fragment key={phongBanGroup.phongBanId ?? `pb-${pbIndex}`}>
                                   {showPhongBanHeader && (
-                                    <tr className="bg-muted/30 border-b">
-                                      <td className="sticky left-0 z-10 bg-muted/30 border-r p-2 pl-6" colSpan={2}>
+                                    <tr className="bg-muted/20 border-b">
+                                      <td className="sticky left-0 z-10 bg-muted/20 border-r p-2 pl-5" colSpan={2}>
                                         <div className="flex items-center gap-2">
                                           <span className="font-medium text-xs text-muted-foreground">{phongBanGroup.tenPhongBan}</span>
                                         </div>
@@ -681,7 +681,7 @@ export function PhanQuyenMatrixView() {
                                         return (
                                           <td
                                             key={key}
-                                            className="bg-muted/30 p-2 text-center text-sm border-r last:border-r-0"
+                                            className="bg-muted/20 p-2 text-center text-sm border-r last:border-r-0"
                                           >
                                             <div className="flex justify-center">
                                               <Checkbox
@@ -715,9 +715,9 @@ export function PhanQuyenMatrixView() {
                                     return (
                                       <tr
                                         key={chucVu.id}
-                                        className="border-b hover:bg-muted/50 transition-colors"
+                                        className="border-b hover:bg-muted/30 transition-colors"
                                       >
-                                        <td className="sticky left-0 z-10 bg-background border-r p-3">
+                                        <td className="sticky left-0 z-10 bg-background border-r p-2.5">
                                           <div className="flex justify-center">
                                             <Checkbox
                                               checked={allPermissionsSelected}
@@ -729,7 +729,7 @@ export function PhanQuyenMatrixView() {
                                             />
                                           </div>
                                         </td>
-                                        <td className="sticky left-[60px] z-10 bg-background border-r p-3">
+                                        <td className="sticky left-[60px] z-10 bg-background border-r p-2.5">
                                           <div className="flex items-center gap-2">
                                             <BriefcaseBusiness className="h-4 w-4 text-muted-foreground shrink-0" />
                                             <div className="font-medium text-sm">{chucVu.ten_chuc_vu}</div>
@@ -740,7 +740,7 @@ export function PhanQuyenMatrixView() {
                                           return (
                                             <td
                                               key={key}
-                                              className="p-3 text-center text-sm border-r last:border-r-0"
+                                              className="p-2.5 text-center text-sm border-r last:border-r-0"
                                             >
                                               <div className="flex justify-center">
                                                 <Checkbox
