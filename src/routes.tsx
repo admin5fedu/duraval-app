@@ -58,6 +58,14 @@ const ChucVuFormRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/rou
 // Phân quyền module routes
 const PhanQuyenListRoute = lazy(() => import('@/features/he-thong/thiet-lap/phan-quyen/routes/phan-quyen-list-route'))
 
+// Kế hoạch 168 module routes
+const KeHoach168ListRoute = lazy(() => import('@/features/cong-viec/tong-quan/ke-hoach-168/routes/ke-hoach-168-list-route'))
+
+// Việc hàng ngày module routes
+const ViecHangNgayListRoute = lazy(() => import('@/features/cong-viec/tong-quan/viec-hang-ngay/routes/viec-hang-ngay-list-route'))
+const ViecHangNgayDetailRoute = lazy(() => import('@/features/cong-viec/tong-quan/viec-hang-ngay/routes/viec-hang-ngay-detail-route'))
+const ViecHangNgayFormRoute = lazy(() => import('@/features/cong-viec/tong-quan/viec-hang-ngay/routes/viec-hang-ngay-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -409,6 +417,45 @@ export const routes: RouteConfig[] = [
     protected: true,
     layout: true,
     scrollBehavior: 'restore',
+  },
+  // Kế hoạch 168 module routes
+  {
+    path: '/cong-viec/ke-hoach-168',
+    element: KeHoach168ListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Việc hàng ngày module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/viec-hang-ngay/moi',
+    element: ViecHangNgayFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/viec-hang-ngay/:id/sua',
+    element: ViecHangNgayFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/viec-hang-ngay/:id',
+    element: ViecHangNgayDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/viec-hang-ngay',
+    element: ViecHangNgayListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
   },
   // Add more module routes here or use generateRoutesFromConfig()
   {

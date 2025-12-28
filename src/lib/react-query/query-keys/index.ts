@@ -12,5 +12,7 @@ export { phongBan, phongBan as phongBanQueryKeys } from "./phong-ban"
 export { capBac, capBac as capBacQueryKeys } from "./cap-bac"
 export { chucVu, chucVu as chucVuQueryKeys } from "./chuc-vu"
 export { phanQuyenQueryKeys } from "./phan-quyen"
+export { keHoach168, keHoach168 as keHoach168QueryKeys } from "./ke-hoach-168"
+export { viecHangNgay, viecHangNgay as viecHangNgayQueryKeys } from "./viec-hang-ngay"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

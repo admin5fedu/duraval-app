@@ -8,6 +8,7 @@
 import { ModuleConfig } from "@/shared/types/module-config"
 import { nhanSuConfig } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/config"
 import { nguoiThanConfig } from "@/features/he-thong/nhan-su/nguoi-than/config"
+import { keHoach168Config } from "@/features/cong-viec/tong-quan/ke-hoach-168/config"
 
 /**
  * Registry class for managing module configurations
@@ -94,6 +95,7 @@ export const moduleRegistry = new ModuleRegistry()
 // Register all modules
 moduleRegistry.register(nhanSuConfig)
 moduleRegistry.register(nguoiThanConfig)
+moduleRegistry.register(keHoach168Config)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {
