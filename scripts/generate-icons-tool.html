@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Icon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .preview {
+            margin: 20px 0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .icon-preview {
+            text-align: center;
+        }
+        .icon-preview img {
+            border: 1px solid #ddd;
+            margin: 5px;
+        }
+        .download-links {
+            margin-top: 20px;
+        }
+        .download-links a {
+            display: block;
+            margin: 5px 0;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PWA Icon Generator</h1>
+        <p>Upload logo để tạo các icon PWA cần thiết</p>
+        
+        <input type="file" id="logoInput" accept="image/*">
+        
+        <div>
+            <button onclick="generateIcons()">Generate Icons</button>
+            <button onclick="loadDefaultLogo()">Load Default Logo</button>
+        </div>
+        
+        <div id="preview" class="preview"></div>
+        
+        <div id="downloadLinks" class="download-links"></div>
+    </div>
+
+    <script>
+        const defaultLogoUrl = 'https://duraval.vn/wp-content/uploads/2024/08/logoduraval-png-khong-chu-e1724896799526-1024x370.png';
+        
+        function loadDefaultLogo() {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                generateIconsFromImage(img);
+            };
+            img.onerror = function() {
+                alert('Không thể load logo mặc định. Vui lòng upload logo từ máy tính.');
+            };
+            img.src = defaultLogoUrl;
+        }
+        
+        function generateIcons() {
+            const input = document.getElementById('logoInput');
+            if (!input.files || !input.files[0]) {
+                alert('Vui lòng chọn file logo');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    generateIconsFromImage(img);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+        
+        function generateIconsFromImage(img) {
+            const sizes = [
+                { name: 'icon-192', size: 192 },
+                { name: 'icon-512', size: 512 },
+                { name: 'apple-touch-icon', size: 180 }
+            ];
+            
+            const preview = document.getElementById('preview');
+            const downloadLinks = document.getElementById('downloadLinks');
+            preview.innerHTML = '';
+            downloadLinks.innerHTML = '<h3>Download Icons:</h3>';
+            
+            sizes.forEach(({ name, size }) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                // Fill with white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                
+                // Calculate dimensions to fit logo (square, centered)
+                const logoSize = Math.min(img.width, img.height);
+                const scale = size * 0.9 / Math.max(img.width, img.height);
+                const scaledWidth = img.width * scale;
+                const scaledHeight = img.height * scale;
+                const x = (size - scaledWidth) / 2;
+                const y = (size - scaledHeight) / 2;
+                
+                // Draw logo
+                ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                
+                // Convert to blob and create download link
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${name}.png`;
+                    a.textContent = `Download ${name}.png (${size}x${size})`;
+                    downloadLinks.appendChild(a);
+                    
+                    // Preview
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'icon-preview';
+                    previewDiv.innerHTML = `
+                        <div><strong>${name}</strong></div>
+                        <img src="${url}" width="${size}" height="${size}" alt="${name}">
+                        <div>${size}x${size}</div>
+                    `;
+                    preview.appendChild(previewDiv);
+                }, 'image/png');
+            });
+        }
+    </script>
+</body>
+</html>
+
