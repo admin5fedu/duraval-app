@@ -8,10 +8,10 @@ import { GenericListToolbarSection } from "./sections/generic-list-toolbar-secti
 import { GenericListMobileSection } from "./sections/generic-list-mobile-section"
 import { GenericListTableSection } from "./sections/generic-list-table-section"
 import { GenericListMobileFooterSection } from "./sections/generic-list-mobile-footer-section"
-import { GenericListFooterSection } from "./sections/generic-list-footer-section"
 import { useElementHeight } from "@/shared/hooks/use-element-height"
 import { useMobileBreakpoint } from "@/shared/hooks/use-mobile-breakpoint"
 import { getListViewContainerHeight } from "@/shared/constants"
+import { BatchDeleteConfirmationDialog } from "@/shared/components"
 
 /**
  * GenericListView Component
@@ -43,6 +43,7 @@ export function GenericListView<TData, TValue>({
     initialSorting = [{ id: "id", desc: true }],
     initialFilters = [],
     initialSearch = "",
+    initialColumnVisibility,
     onFiltersChange,
     onSearchChange,
     onSortChange,
@@ -64,7 +65,12 @@ export function GenericListView<TData, TValue>({
     onEdit,
     onDelete,
     renderLeftActions,
+    batchDeleteConfig,
 }: GenericListViewProps<TData, TValue>) {
+    // Batch delete confirmation dialog state
+    const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = React.useState(false)
+    const [selectedRowsToDelete, setSelectedRowsToDelete] = React.useState<TData[]>([])
+
     // 1. Manage table state (pagination, sorting, filtering, search)
     const {
         table,
@@ -87,6 +93,7 @@ export function GenericListView<TData, TValue>({
         initialFilters,
         initialSorting,
         initialSearch,
+        initialColumnVisibility,
         onFiltersChange,
         onSearchChange,
         onSortChange,
@@ -109,6 +116,34 @@ export function GenericListView<TData, TValue>({
         rowSelection,
         setRowSelection,
     })
+
+    // Handle batch delete with confirmation if config is provided
+    const handleDeleteSelected = React.useCallback(async (selectedRows: TData[]) => {
+        if (batchDeleteConfig && onDeleteSelected) {
+            // Show confirmation dialog
+            setSelectedRowsToDelete(selectedRows)
+            setBatchDeleteDialogOpen(true)
+        } else if (onDeleteSelected) {
+            // Direct call without confirmation (backward compatible)
+            await onDeleteSelected(selectedRows)
+        }
+    }, [batchDeleteConfig, onDeleteSelected])
+
+    // Confirm batch delete (must be after table is initialized)
+    const confirmBatchDelete = React.useCallback(async () => {
+        if (onDeleteSelected && selectedRowsToDelete.length > 0) {
+            try {
+                await onDeleteSelected(selectedRowsToDelete)
+                // Reset selection after successful delete
+                table.resetRowSelection()
+                setSelectedRowsToDelete([])
+                setBatchDeleteDialogOpen(false)
+            } catch (error) {
+                // Error is handled by mutation or parent component
+                console.error("Error in batch delete:", error)
+            }
+        }
+    }, [onDeleteSelected, selectedRowsToDelete, table])
 
     // 3. ESC key handler to clear selection / selection mode
     React.useEffect(() => {
@@ -167,7 +202,7 @@ export function GenericListView<TData, TValue>({
                     searchFields={searchFields || [filterColumn as keyof TData]}
                     module={module}
                     enableSuggestions={enableSuggestions}
-                    onDeleteSelected={onDeleteSelected}
+                    onDeleteSelected={batchDeleteConfig ? handleDeleteSelected : onDeleteSelected}
                     filteredRows={filteredRows}
                     isSearchActive={isSearchActive}
                     totalDataCount={totalDataCount}
@@ -234,6 +269,20 @@ export function GenericListView<TData, TValue>({
                     handlePageInputKeyDown={handlePageInputKeyDown}
                 />
             </div>
+
+            {/* Batch Delete Confirmation Dialog */}
+            {batchDeleteConfig && (
+                <BatchDeleteConfirmationDialog
+                    open={batchDeleteDialogOpen}
+                    onOpenChange={setBatchDeleteDialogOpen}
+                    selectedItems={selectedRowsToDelete}
+                    onConfirm={confirmBatchDelete}
+                    isLoading={batchDeleteConfig.isLoading}
+                    itemName={batchDeleteConfig.itemName}
+                    moduleName={batchDeleteConfig.moduleName}
+                    getItemLabel={batchDeleteConfig.getItemLabel}
+                />
+            )}
         </div>
     )
 }

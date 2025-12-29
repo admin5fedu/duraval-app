@@ -3,7 +3,6 @@
 import { type ColumnDef } from "@tanstack/react-table"
 import { KeHoach168 } from "../schema"
 import { DeleteKeHoach168Button } from "./delete-ke-hoach-168-button"
-import { keHoach168Config } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { SortableHeader } from "@/shared/components"
 import { Badge } from "@/components/ui/badge"

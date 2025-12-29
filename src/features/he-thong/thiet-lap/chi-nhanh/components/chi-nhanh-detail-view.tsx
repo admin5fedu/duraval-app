@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
@@ -78,8 +77,8 @@ export function ChiNhanhDetailView({ id, initialData, onEdit, onBack }: ChiNhanh
           label: "Định Vị", 
           key: "dinh_vi", 
           value: chiNhanh.dinh_vi ? "Xem vị trí" : "-", 
-          type: "link",
-          href: chiNhanh.dinh_vi ? (chiNhanh.dinh_vi.startsWith('http') ? chiNhanh.dinh_vi : `https://${chiNhanh.dinh_vi}`) : undefined,
+          type: "url",
+          link: chiNhanh.dinh_vi ? (chiNhanh.dinh_vi.startsWith('http') ? chiNhanh.dinh_vi : `https://${chiNhanh.dinh_vi}`) : undefined,
           colSpan: 2,
         },
         { label: "Mô Tả", key: "mo_ta", value: chiNhanh.mo_ta || "-", colSpan: 2 },
@@ -88,8 +87,8 @@ export function ChiNhanhDetailView({ id, initialData, onEdit, onBack }: ChiNhanh
     {
       title: "Thông Tin Hệ Thống",
       fields: [
-        { label: "Thời Gian Tạo", key: "tg_tao", value: chiNhanh.tg_tao, type: "datetime" },
-        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: chiNhanh.tg_cap_nhat, type: "datetime" },
+        { label: "Thời Gian Tạo", key: "tg_tao", value: chiNhanh.tg_tao, type: "date" },
+        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: chiNhanh.tg_cap_nhat, type: "date" },
       ]
     }
   ]

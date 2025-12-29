@@ -42,7 +42,6 @@ export interface EnumCellRendererProps<TData> {
 export function EnumCellRenderer<TData>({
   value,
   fieldKey,
-  row,
   columnDef,
 }: EnumCellRendererProps<TData>): React.ReactNode {
   // Handle null/undefined/empty

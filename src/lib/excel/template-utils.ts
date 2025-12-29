@@ -4,15 +4,15 @@
  * Professional Excel template generation for import
  */
 
-import ExcelJS from 'exceljs'
 import { createWorkbook, addDataToWorksheet, downloadWorkbook } from './exceljs-utils'
+import type { ExcelColumnType } from '@/shared/types/excel'
 
 export interface TemplateColumn {
   header: string
   description?: string
   required?: boolean
   example?: string | number
-  type?: 'text' | 'number' | 'date' | 'email' | 'phone'
+  type?: ExcelColumnType
 }
 
 /**
@@ -87,8 +87,6 @@ export async function generateImportTemplate(
     // Add data validation for required columns
     if (col?.required) {
       const headerRowIndex = 1
-      const exampleRowIndex = hasDescriptions ? 3 : 2
-      const dataStartRow = exampleRowIndex + 1
       
       // Add note/comment for required columns
       const headerCell = worksheet.getCell(headerRowIndex, index + 1)

@@ -5,7 +5,6 @@ import { cauTraLoiSchema } from "../schema"
 import type { CreateCauTraLoiInput, UpdateCauTraLoiInput } from "../types"
 import { useCreateCauTraLoi, useUpdateCauTraLoi } from "../hooks"
 import { useCauTraLoiById } from "../hooks"
-import { cauTraLoiConfig } from "../config"
 import { useMemo, useState, useEffect } from "react"
 import * as React from "react"
 import { CauTraLoiAPI } from "../services/cau-tra-loi.api"
@@ -120,6 +119,8 @@ function CauTraLoiButtonGroupWrapper({
     onChange: (value: string) => void
     [key: string]: any // Allow FormControl Slot to pass other props
 }) {
+    // ✅ FIX: Gọi Hook ở top level, không được gọi trong try-catch
+    const fallbackId = React.useId()
     const form = useFormContext()
     const currentLichDangId = form.watch("lich_dang_id")
     const previousLichDangIdRef = React.useRef(currentLichDangId)
@@ -130,8 +131,8 @@ function CauTraLoiButtonGroupWrapper({
         const formField = useFormField()
         formItemId = formField.formItemId
     } catch {
-        // Not in FormControl context, generate a unique id
-        formItemId = React.useId()
+        // Not in FormControl context, use fallback id
+        formItemId = fallbackId
     }
     
     // Reset cau_tra_loi when lich_dang_id changes

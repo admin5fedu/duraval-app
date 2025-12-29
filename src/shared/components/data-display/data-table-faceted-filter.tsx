@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { responsiveTextClass, mediumTextClass, smallTextClass, bodyTextClass } from "@/shared/utils/text-styles"
 import { BADGE_TYPOGRAPHY } from "@/shared/constants/typography"
-import { compactPaddingClass, standardPaddingClass } from "@/shared/utils/spacing-styles"
+import { compactPaddingClass } from "@/shared/utils/spacing-styles"
 import {
     Popover,
     PopoverContent,

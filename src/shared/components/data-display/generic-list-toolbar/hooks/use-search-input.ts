@@ -13,7 +13,7 @@ import { useFiltersStore } from "@/shared/stores/filters-store"
 export interface UseSearchInputOptions<TData> {
   table: Table<TData>
   filterColumn?: string
-  placeholder?: string
+  _placeholder?: string
   searchFields?: (keyof TData)[]
   module?: string
   enableSuggestions?: boolean
@@ -44,11 +44,13 @@ export interface UseSearchInputReturn {
 export function useSearchInput<TData>({
   table,
   filterColumn = "name",
-  placeholder = "Tìm kiếm...",
+  _placeholder = "Tìm kiếm...", // Reserved for future use
   searchFields,
   module,
   enableSuggestions = true,
 }: UseSearchInputOptions<TData>): UseSearchInputReturn {
+  // Suppress unused parameter warning - reserved for future use
+  void _placeholder
   const { addRecentSearch, getRecentSearches } = useFiltersStore()
   
   // State - Local state cho input value để responsive ngay lập tức

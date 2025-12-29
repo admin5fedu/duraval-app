@@ -41,7 +41,6 @@ export function LoaiPhieuAutocomplete({
     const emptyText = "Không tìm thấy. Nhấn Enter để thêm mới."
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
-    const [isCreating, setIsCreating] = React.useState(false)
     
     // Fetch unique loại phiếu values
     const { data: loaiPhieuList, isLoading } = useQuery({
@@ -79,7 +78,7 @@ export function LoaiPhieuAutocomplete({
         onChange(selectedValue)
         setOpen(false)
         setSearchQuery("")
-        setIsCreating(false)
+        // setIsCreating(false) // Removed: variable not defined
     }
 
     const handleCreateNew = () => {

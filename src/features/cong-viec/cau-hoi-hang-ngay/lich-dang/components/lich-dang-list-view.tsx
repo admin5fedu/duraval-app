@@ -174,6 +174,12 @@ export function LichDangListView({
             const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
             await batchDeleteMutation.mutateAsync(ids)
         },
+        batchDeleteConfig: {
+            itemName: "lịch đăng",
+            moduleName: lichDangConfig.moduleTitle,
+            isLoading: batchDeleteMutation.isPending,
+            getItemLabel: (item: LichDang) => String(item.id),
+        },
         onImport: () => setImportDialogOpen(true),
         isImporting: batchImportMutation.isPending,
         enableSuggestions: true,

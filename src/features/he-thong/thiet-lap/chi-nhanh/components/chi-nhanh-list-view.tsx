@@ -164,6 +164,12 @@ export function ChiNhanhListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "chi nhánh",
+                moduleName: chiNhanhConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: ChiNhanh) => item.ten_chi_nhanh || String(item.id),
+            }}
             filters={[]}
             searchFields={chiNhanhConfig.searchFields as (keyof ChiNhanh)[]}
             module={module}

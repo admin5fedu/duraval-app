@@ -1,7 +1,6 @@
 "use client"
 
-import * as React from "react"
-import { ImportDialog, type ImportOptions } from "@/shared/components/data-display/import/import-dialog"
+import { ImportDialog } from "@/shared/components/data-display/import/import-dialog"
 import { useBatchUpsertCauTraLoi } from "../actions/cau-tra-loi-excel-actions"
 import { CauTraLoi } from "../schema"
 import type { TemplateColumn } from "@/lib/excel/template-utils"
@@ -19,23 +18,20 @@ interface CauTraLoiImportDialogProps {
 // Template columns for export
 const templateColumns: TemplateColumn[] = [
     {
-        name: "lich_dang_id",
-        label: "Lịch đăng (ID)",
+        header: "Lịch đăng (ID)",
         type: "number",
         required: true,
         description: "ID của lịch đăng (bắt buộc)",
     },
     {
-        name: "cau_tra_loi",
-        label: "Câu trả lời",
-        type: "string",
+        header: "Câu trả lời",
+        type: "text",
         required: true,
         description: "Nội dung câu trả lời (bắt buộc)",
     },
     {
-        name: "ket_qua",
-        label: "Kết quả",
-        type: "string",
+        header: "Kết quả",
+        type: "text",
         required: true,
         description: "Kết quả: Đúng, Sai hoặc Chưa chấm (bắt buộc)",
     },
@@ -73,7 +69,7 @@ const columnMappings: ColumnMapping[] = [
 ]
 
 // Transform function to convert Excel rows to CauTraLoi
-function transformData(rows: Array<{ rowNumber: number; data: Record<string, any> }>): Partial<CauTraLoi>[] {
+function transformData(rows: Array<{ rowNumber: number; data: Record<string, any> }>): CauTraLoi[] {
     return rows.map(({ data }) => {
         const record: Partial<CauTraLoi> = {}
 
@@ -114,12 +110,19 @@ function transformData(rows: Array<{ rowNumber: number; data: Record<string, any
             }
         }
 
-        return record
+        // Ensure required fields are present
+        if (!record.lich_dang_id || !record.cau_tra_loi || !record.ket_qua) {
+            throw new Error(`Row missing required fields: lich_dang_id=${record.lich_dang_id}, cau_tra_loi=${record.cau_tra_loi}, ket_qua=${record.ket_qua}`)
+        }
+        return record as CauTraLoi
     })
 }
 
 export function CauTraLoiImportDialog({ open, onOpenChange, mutation }: CauTraLoiImportDialogProps) {
-    const batchUpsertMutation = mutation || useBatchUpsertCauTraLoi()
+    // ✅ FIX: Luôn gọi Hook ở top level, không được gọi conditionally
+    // Gọi Hook trước, sau đó dùng mutation từ props nếu có
+    const defaultMutation = useBatchUpsertCauTraLoi()
+    const batchUpsertMutation = mutation || defaultMutation
 
     const handleImport = async (records: Partial<CauTraLoi>[]) => {
         const result = await batchUpsertMutation.mutateAsync(records)

@@ -1,6 +1,4 @@
 "use client"
-
-import * as React from "react"
 import { ChevronRight, Edit, Trash2 } from "lucide-react"
 import type { GenericListMobileSectionProps } from "../types"
 import { cn } from "@/lib/utils"
@@ -19,7 +17,6 @@ export function GenericListMobileSection<TData>({
     renderMobileCard,
     onRowClick,
     table,
-    handleRowSelect,
     handleRowPointerDown,
     handleRowPointerUp,
     onEdit,

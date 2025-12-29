@@ -6,7 +6,7 @@
  */
 
 import { cn } from "@/lib/utils"
-import { SHADOWS, SHADOW_PRESETS } from "@/shared/constants/shadows"
+import { SHADOW_PRESETS } from "@/shared/constants/shadows"
 
 /**
  * Card shadow

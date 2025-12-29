@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
     useReactTable,
@@ -27,8 +26,6 @@ import {
 import { toast } from "sonner"
 import { createWorkbook, addDataToWorksheetWithFormat, downloadWorkbook, generateFilename } from "@/lib/excel/exceljs-utils"
 import { exportToPDF } from "@/lib/pdf/pdf-utils"
-import { cn } from "@/lib/utils"
-import { bodyTextClass } from "@/shared/utils/text-styles"
 import { ExportPreview } from "./export-preview"
 import { ColumnOrderSelector } from "./column-order-selector"
 import { ExportTemplateSelector } from "./export-template-selector"
@@ -36,16 +33,8 @@ import type { ExcelFormatOptions } from "@/shared/utils/excel-formatter"
 import { getColumnDisplayName } from "@/shared/utils/column-name-mapper"
 import { 
   loadExportPreferences, 
-  saveExportPreferences,
-  type ExportPreferences 
+  saveExportPreferences
 } from "@/shared/utils/export-preferences-manager"
-import {
-  getExportTemplates,
-  saveExportTemplate,
-  loadExportTemplate,
-  deleteExportTemplate,
-  type ExportTemplate
-} from "@/shared/utils/export-template-manager"
 
 export interface ExportOptions {
   includeMetadata?: boolean
@@ -390,7 +379,7 @@ export function ExportDialog<TData>({
                 // Prepare format options
                 const formatOptions: ExcelFormatOptions | undefined = options.professionalFormatting 
                     ? undefined // Use default formatting
-                    : false // Disable formatting
+                    : undefined // Disable formatting (use undefined instead of false)
                 
                 // Add data with formatting
                 await addDataToWorksheetWithFormat(worksheet, headers, rows, {
@@ -650,7 +639,7 @@ export function ExportDialog<TData>({
                             data={getExportData()}
                             headers={previewHeaders}
                             columnIds={previewColumnIds}
-                            getCellValue={getCellValue}
+                            getCellValue={getCellValue ? (row: TData, columnId: string) => getCellValue(row, columnId, undefined) : undefined}
                             moduleName={moduleName}
                             rowCount={rowCount}
                             onExport={handleExport}

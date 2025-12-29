@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase"
-import { ViecHangNgay, CreateViecHangNgayInput, UpdateViecHangNgayInput } from "../schema"
+import { ViecHangNgay } from "../schema"
+import type { CreateViecHangNgayInput, UpdateViecHangNgayInput } from "../types"
 
 const TABLE_NAME = "cong_viec_viec_hang_ngay"
 
@@ -80,15 +81,24 @@ export class ViecHangNgayAPI {
             .select("*")
             .eq("ma_nhan_vien", ma_nhan_vien)
             .eq("ngay_bao_cao", ngay_bao_cao)
-            .single()
+            .maybeSingle()
 
         if (error) {
+            // Handle 406 Not Acceptable error
+            if (error.code === "406" || error.message?.includes("406")) {
+                console.error("Lỗi 406 - Not Acceptable khi tải việc hàng ngày:", error)
+                throw new Error(
+                    "Không thể truy cập dữ liệu. Vui lòng kiểm tra quyền truy cập hoặc liên hệ quản trị viên."
+                )
+            }
+            
             if (error.code === "PGRST116") {
                 // Not found - return null (not an error)
                 return null
             }
+            
             console.error("Lỗi khi tải việc hàng ngày:", error)
-            throw new Error(error.message)
+            throw new Error(error.message || "Có lỗi xảy ra khi tải dữ liệu")
         }
 
         // Normalize IDs
@@ -172,7 +182,8 @@ export class ViecHangNgayAPI {
      * Update việc hàng ngày
      */
     static async update(id: number, input: UpdateViecHangNgayInput): Promise<ViecHangNgay> {
-        // Check for duplicate if ma_nhan_vien or ngay_bao_cao is being updated
+        // ✅ Tối ưu: Chỉ check duplicate khi ma_nhan_vien hoặc ngay_bao_cao thay đổi
+        // Nếu chỉ update chi_tiet_cong_viec (auto-save), không cần check duplicate
         if (input.ma_nhan_vien && input.ngay_bao_cao) {
             const duplicateCheck = await this.checkDuplicateReport(
                 input.ma_nhan_vien,

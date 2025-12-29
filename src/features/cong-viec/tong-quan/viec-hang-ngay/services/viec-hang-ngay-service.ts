@@ -3,7 +3,7 @@ import type {
   CreateViecHangNgayInput,
   UpdateViecHangNgayInput,
   BatchViecHangNgayOperationResult,
-} from "../types/viec-hang-ngay-types"
+} from "../types"
 
 /**
  * Domain service cho Việc hàng ngày.
@@ -87,7 +87,7 @@ export class ViecHangNgayService {
         const updateData: Partial<ViecHangNgay> = {}
         Object.entries(record).forEach(([k, value]) => {
           if (value !== null && value !== undefined && value !== "") {
-            ;(updateData as any)[k] = value
+            (updateData as any)[k] = value
           }
         })
         delete (updateData as any).id

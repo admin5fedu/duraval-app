@@ -7,7 +7,6 @@ import { nhanSuSchema } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/sche
 import type { UpdateNhanSuInput } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/schema"
 import { NhanSuAPI } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/services/nhan-su.api"
 import { useAuthStore } from "@/shared/stores/auth-store"
-import { toast } from "sonner"
 
 const sections: FormSection[] = [
   {

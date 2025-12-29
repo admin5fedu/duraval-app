@@ -26,7 +26,7 @@ const columnMappings: ColumnMapping[] = [
             "Branch Code", "BranchCode", "branch_code", "Code", "code"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã chi nhánh (bắt buộc)",
     },
     {
@@ -37,7 +37,7 @@ const columnMappings: ColumnMapping[] = [
             "Branch Name", "BranchName", "branch_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên chi nhánh (bắt buộc)",
     },
     {
@@ -48,7 +48,7 @@ const columnMappings: ColumnMapping[] = [
             "Address", "address", "Addr", "addr"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Địa chỉ (không bắt buộc)",
     },
     {
@@ -59,7 +59,7 @@ const columnMappings: ColumnMapping[] = [
             "Location", "location", "Map", "map", "GPS", "gps"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Định vị (link bản đồ, không bắt buộc)",
     },
     {
@@ -70,7 +70,7 @@ const columnMappings: ColumnMapping[] = [
             "Image", "image", "Photo", "photo", "Picture", "picture"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Hình ảnh (URL, không bắt buộc)",
     },
     {
@@ -81,7 +81,7 @@ const columnMappings: ColumnMapping[] = [
             "Description", "description", "Desc", "desc", "Note", "note"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mô tả (không bắt buộc)",
     },
 ]
@@ -89,44 +89,38 @@ const columnMappings: ColumnMapping[] = [
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ma_chi_nhanh",
-        label: "Mã chi nhánh",
-        type: "string",
+        header: "Mã chi nhánh",
+        type: "text",
         required: true,
         description: "Mã chi nhánh (bắt buộc)",
     },
     {
-        name: "ten_chi_nhanh",
-        label: "Tên chi nhánh",
-        type: "string",
+        header: "Tên chi nhánh",
+        type: "text",
         required: true,
         description: "Tên chi nhánh (bắt buộc)",
     },
     {
-        name: "dia_chi",
-        label: "Địa chỉ",
-        type: "string",
+        header: "Địa chỉ",
+        type: "text",
         required: false,
         description: "Địa chỉ (không bắt buộc)",
     },
     {
-        name: "dinh_vi",
-        label: "Định vị",
-        type: "string",
+        header: "Định vị",
+        type: "text",
         required: false,
         description: "Định vị (link bản đồ, không bắt buộc)",
     },
     {
-        name: "hinh_anh",
-        label: "Hình ảnh",
-        type: "string",
+        header: "Hình ảnh",
+        type: "text",
         required: false,
         description: "Hình ảnh (URL, không bắt buộc)",
     },
     {
-        name: "mo_ta",
-        label: "Mô tả",
-        type: "string",
+        header: "Mô tả",
+        type: "text",
         required: false,
         description: "Mô tả (không bắt buộc)",
     },
@@ -135,7 +129,7 @@ const templateColumns: TemplateColumn[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -220,9 +214,9 @@ function mapExcelToDb(
 export function ChiNhanhImportDialog({ open, onOpenChange, mutation }: ChiNhanhImportDialogProps) {
     const defaultMutation = useBatchUpsertChiNhanh()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'insert', // Only insert for chi nhánh
+        upsertMode: 'update', // Only insert for chi nhánh
     })
 
     const handleImport = async (rows: Partial<ChiNhanh>[]): Promise<{
@@ -263,12 +257,12 @@ export function ChiNhanhImportDialog({ open, onOpenChange, mutation }: ChiNhanhI
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="chi nhánh"
-            expectedHeaders={["ma_chi_nhanh", "ten_chi_nhanh"]}
+            
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

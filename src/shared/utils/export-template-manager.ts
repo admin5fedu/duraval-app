@@ -67,14 +67,13 @@ export function saveExportTemplate(
   
   const templates = getExportTemplates(moduleName)
   const now = new Date().toISOString()
+  const id = `template-${Date.now()}`
   
   const newTemplate: ExportTemplate = {
-    id: template.id || `template-${Date.now()}`,
+    id,
     name: template.name,
     moduleName,
-    createdAt: template.id 
-      ? templates.find(t => t.id === template.id)?.createdAt || now
-      : now,
+    createdAt: now,
     updatedAt: now,
     config: template.config,
   }

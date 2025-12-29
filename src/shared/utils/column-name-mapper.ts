@@ -75,7 +75,6 @@ const COLUMN_NAME_MAP: Record<string, string> = {
   // Additional common patterns
   ten_phong_ban: 'Tên phòng ban',
   ten_chuc_vu: 'Tên chức vụ',
-  ten_cap_bac: 'Tên cấp bậc',
   ten_bo_phan: 'Tên bộ phận',
   ten_nhom: 'Tên nhóm',
 }
@@ -108,7 +107,7 @@ const WORD_MAP: Record<string, string> = {
   trang: 'Trạng',
   thai: 'Thái',
   gioi: 'Giới',
-  tinh: 'Tính',
+  tinh_tinh: 'Tính',
   hon: 'Hôn',
   nhan: 'Nhân',
   sinh: 'Sinh',
@@ -126,7 +125,7 @@ const WORD_MAP: Record<string, string> = {
   url: 'URL',
   tg: 'TG',
   tao: 'Tạo',
-  cap: 'Cập',
+  cap_nhat: 'Cập nhật',
   nhat: 'Nhật',
   dia: 'Địa',
   chi: 'Chỉ',

@@ -1,11 +1,10 @@
 "use client"
 
 import { GenericFormView, type FormSection } from "@/shared/components"
-import { viecHangNgaySchema, ViecHangNgay } from "../schema"
+import { viecHangNgaySchema } from "../schema"
 import type { CreateViecHangNgayInput, UpdateViecHangNgayInput } from "../types"
 import { useCreateViecHangNgay, useUpdateViecHangNgay } from "../hooks"
 import { useViecHangNgayById } from "../hooks"
-import { viecHangNgayConfig } from "../config"
 import { useMemo, useEffect } from "react"
 import { ChiTietCongViecEditor, CongViec } from "./chi-tiet-cong-viec-editor"
 import { EmployeeComboboxField } from "@/shared/components/forms/employee-combobox-field"

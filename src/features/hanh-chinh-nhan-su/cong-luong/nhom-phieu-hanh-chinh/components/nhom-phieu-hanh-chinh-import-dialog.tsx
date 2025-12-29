@@ -26,7 +26,7 @@ const columnMappings: ColumnMapping[] = [
             "Type", "type", "Category", "category"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Loại phiếu (bắt buộc)",
     },
     {
@@ -37,7 +37,7 @@ const columnMappings: ColumnMapping[] = [
             "Group Code", "GroupCode", "group_code", "Code", "code"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã nhóm phiếu (bắt buộc)",
     },
     {
@@ -48,7 +48,7 @@ const columnMappings: ColumnMapping[] = [
             "Group Name", "GroupName", "group_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên nhóm phiếu (bắt buộc)",
     },
     {
@@ -71,7 +71,7 @@ const columnMappings: ColumnMapping[] = [
             "Need Approval", "need_approval", "Approval", "approval"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Cần HCNS duyệt (Có/Không, mặc định: Không)",
     },
     {
@@ -81,7 +81,7 @@ const columnMappings: ColumnMapping[] = [
             "Night Shift", "night_shift", "Night", "night"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Ca tối (Có/Không, có thể để trống)",
     },
 ]
@@ -240,7 +240,7 @@ function mapExcelToDb(
 export function NhomPhieuHanhChinhImportDialog({ open, onOpenChange, mutation }: NhomPhieuHanhChinhImportDialogProps) {
     const defaultMutation = useBatchUpsertNhomPhieuHanhChinh()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
         upsertMode: 'update', // Update mode: update if exists, insert if not
     })
@@ -292,12 +292,12 @@ export function NhomPhieuHanhChinhImportDialog({ open, onOpenChange, mutation }:
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="nhóm phiếu hành chính"
-            expectedHeaders={["loai_phieu", "ma_nhom_phieu", "ten_nhom_phieu", "so_luong_cho_phep_thang", "can_hcns_duyet", "ca_toi"]}
+            
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

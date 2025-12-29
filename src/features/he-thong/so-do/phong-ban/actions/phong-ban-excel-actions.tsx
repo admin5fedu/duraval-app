@@ -18,7 +18,7 @@ export function useBatchUpsertPhongBan() {
   return useMutation({
     mutationFn: async (records: Partial<PhongBan>[]): Promise<BatchPhongBanOperationResult> => {
       let inserted = 0
-      let updated = 0
+      const updated = 0
       const errors: BatchPhongBanOperationResult["errors"] = []
 
       // Process in batches of 1000

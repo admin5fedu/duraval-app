@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Eye, Download, X } from "lucide-react"
+import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,7 +22,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { mediumTextClass, smallTextClass } from "@/shared/utils/text-styles"
+import { smallTextClass } from "@/shared/utils/text-styles"
 
 interface ExportPreviewProps<TData> {
   open: boolean

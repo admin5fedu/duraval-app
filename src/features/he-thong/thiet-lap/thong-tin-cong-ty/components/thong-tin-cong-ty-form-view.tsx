@@ -117,7 +117,7 @@ export function ThongTinCongTyFormView({ id, onComplete, onCancel }: ThongTinCon
     }
     
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: submitData as UpdateThongTinCongTyInput })
+      await updateMutation.mutateAsync({ id, input: submitData as UpdateThongTinCongTyInput })
     } else {
       await createMutation.mutateAsync(submitData as CreateThongTinCongTyInput)
     }

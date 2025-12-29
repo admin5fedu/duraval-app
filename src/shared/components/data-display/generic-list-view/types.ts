@@ -1,4 +1,4 @@
-import type { ColumnDef, ColumnFiltersState, SortingState } from "@tanstack/react-table"
+import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table"
 
 /**
  * Main props interface for GenericListView component
@@ -21,6 +21,7 @@ export interface GenericListViewProps<TData, TValue> {
     initialSorting?: SortingState
     initialFilters?: ColumnFiltersState
     initialSearch?: string
+    initialColumnVisibility?: VisibilityState
     onFiltersChange?: (filters: ColumnFiltersState) => void
     onSearchChange?: (search: string) => void
     onSortChange?: (sorting: SortingState) => void
@@ -52,6 +53,12 @@ export interface GenericListViewProps<TData, TValue> {
     onEdit?: (row: TData) => void
     onDelete?: (row: TData) => void
     renderLeftActions?: (row: TData) => React.ReactNode
+    batchDeleteConfig?: {
+        itemName: string
+        moduleName: string
+        isLoading: boolean
+        getItemLabel: (item: TData) => string
+    }
 }
 
 /**
@@ -63,6 +70,7 @@ export interface UseGenericListTableStateParams<TData, TValue> {
     initialFilters?: ColumnFiltersState
     initialSorting?: SortingState
     initialSearch?: string
+    initialColumnVisibility?: VisibilityState
     onFiltersChange?: (filters: ColumnFiltersState) => void
     onSearchChange?: (search: string) => void
     onSortChange?: (sorting: SortingState) => void

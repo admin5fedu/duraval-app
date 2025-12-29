@@ -42,7 +42,7 @@ const columnMappings: ColumnMapping[] = [
             "Full Name", "FullName", "full_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Họ và tên đầy đủ",
     },
     {
@@ -66,7 +66,7 @@ const columnMappings: ColumnMapping[] = [
             "Gender", "gender", "Sex", "sex"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Nam hoặc Nữ",
     },
     {
@@ -99,7 +99,7 @@ const columnMappings: ColumnMapping[] = [
             "Department", "department", "Dept", "dept"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Tên phòng ban",
     },
     {
@@ -110,7 +110,7 @@ const columnMappings: ColumnMapping[] = [
             "Position", "position", "Title", "title", "Job Title", "job_title"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Tên chức vụ",
     },
     {
@@ -121,7 +121,7 @@ const columnMappings: ColumnMapping[] = [
             "Status", "status", "State", "state"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Chính thức, Thử việc, Nghỉ việc, Tạm nghỉ",
     },
     {
@@ -230,7 +230,7 @@ const templateColumns: TemplateColumn[] = [
 ]
 
 // Validate a row of data (using mapped field names)
-function validateRow(row: Record<string, any>, rowNumber: number): string[] {
+function validateRow(row: Record<string, any>, _rowNumber: number): string[] {
     const errors: string[] = []
 
     // Required fields (using db field names after mapping)
@@ -367,7 +367,7 @@ function mapExcelToDb(
 export function NhanSuImportDialog({ open, onOpenChange, mutation }: NhanSuImportDialogProps) {
     const defaultMutation = useBatchUpsertNhanSu()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
         upsertMode: 'update',
         dateFormat: 'dd/mm/yyyy',
@@ -411,12 +411,12 @@ export function NhanSuImportDialog({ open, onOpenChange, mutation }: NhanSuImpor
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="nhân sự"
-            expectedHeaders={["ma_nhan_vien", "ho_ten"]} // Use db field names after mapping
+             // Use db field names after mapping
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

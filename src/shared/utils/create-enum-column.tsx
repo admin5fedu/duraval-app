@@ -14,7 +14,7 @@ import { autoDetectAndRegisterEnum } from "./enum-detection"
 /**
  * Options for creating an enum column
  */
-export interface CreateEnumColumnOptions<TData> {
+export interface CreateEnumColumnOptions {
   accessorKey: string
   header: string | ((props: any) => React.ReactNode)
   size?: number
@@ -48,7 +48,7 @@ export interface CreateEnumColumnOptions<TData> {
  * ```
  */
 export function createEnumColumn<TData>(
-  options: CreateEnumColumnOptions<TData>
+  options: CreateEnumColumnOptions
 ): ColumnDef<TData> {
   const {
     accessorKey,
@@ -106,7 +106,7 @@ export function createEnumColumn<TData>(
  * Create multiple enum columns at once
  */
 export function createEnumColumns<TData>(
-  columns: CreateEnumColumnOptions<TData>[]
+  columns: CreateEnumColumnOptions[]
 ): ColumnDef<TData>[] {
   return columns.map(col => createEnumColumn(col))
 }

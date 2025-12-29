@@ -1,6 +1,4 @@
 "use client"
-
-import * as React from "react"
 import { Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"

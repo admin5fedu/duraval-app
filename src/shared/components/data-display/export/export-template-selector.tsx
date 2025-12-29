@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Save, FolderOpen, Trash2, X } from "lucide-react"
+import { Save, FolderOpen, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { smallTextClass } from "@/shared/utils/text-styles"

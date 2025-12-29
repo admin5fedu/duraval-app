@@ -3,8 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
-import { ChhnLichDangBai } from "../schema"
-import type { BatchChhnLichDangBaiOperationResult } from "../types"
+import { LichDang } from "../schema"
+import type { BatchLichDangOperationResult } from "../types"
 import { lichDangQueryKeys } from "@/lib/react-query/query-keys"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
@@ -19,10 +19,10 @@ export function useBatchUpsertLichDang() {
   const { employee } = useAuthStore()
 
   return useMutation({
-    mutationFn: async (records: Partial<ChhnLichDangBai>[]): Promise<BatchChhnLichDangBaiOperationResult> => {
+    mutationFn: async (records: Partial<LichDang>[]): Promise<BatchLichDangOperationResult> => {
       let inserted = 0
       let updated = 0
-      const errors: BatchChhnLichDangBaiOperationResult["errors"] = []
+      const errors: BatchLichDangOperationResult["errors"] = []
 
       // Get current user's ma_nhan_vien for nguoi_tao_id
       const nguoiTaoId = employee?.ma_nhan_vien
@@ -67,10 +67,10 @@ export function useBatchUpsertLichDang() {
         }
 
         // Separate into inserts and updates
-        const toInsert: Array<{ record: Partial<ChhnLichDangBai>; originalIndex: number }> = []
+        const toInsert: Array<{ record: Partial<LichDang>; originalIndex: number }> = []
         const toUpdate: Array<{
           id: number
-          data: Partial<ChhnLichDangBai>
+          data: Partial<LichDang>
           originalIndex: number
         }> = []
 
@@ -108,7 +108,7 @@ export function useBatchUpsertLichDang() {
           
           if (existingId) {
             // Update existing
-            const updateData: Partial<ChhnLichDangBai> = {}
+            const updateData: Partial<LichDang> = {}
             if (record.nhom_cau_hoi !== undefined) updateData.nhom_cau_hoi = record.nhom_cau_hoi
             if (record.hinh_anh !== undefined) updateData.hinh_anh = record.hinh_anh || null
             if (record.dap_an_1 !== undefined) updateData.dap_an_1 = record.dap_an_1

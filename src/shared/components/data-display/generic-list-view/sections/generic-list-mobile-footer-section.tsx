@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -34,7 +33,6 @@ export function GenericListMobileFooterSection({
     handlePageInputKeyDown,
 }: GenericListMobileFooterSectionProps) {
     const { setDefaultPageSize } = useUserPreferencesStore()
-    const pageIndex = table.getState().pagination.pageIndex
     const pageCount = table.getPageCount() || 1
     const pageSize = table.getState().pagination.pageSize
 

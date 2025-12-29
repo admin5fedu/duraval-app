@@ -1,7 +1,7 @@
 "use client"
 
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { GenericFormView, type FormSection } from "@/shared/components"
+import { GenericFormView, type FormSection, AutoFillFields } from "@/shared/components"
 import { phongBanSchema } from "../schema"
 import type { CreatePhongBanInput, UpdatePhongBanInput } from "../schema"
 import { useCreatePhongBan, useUpdatePhongBan } from "../hooks/use-phong-ban-mutations"
@@ -9,8 +9,9 @@ import { usePhongBanById } from "../hooks/use-phong-ban"
 import { phongBanConfig } from "../config"
 import { useMemo } from "react"
 import { usePhongBan } from "../hooks/use-phong-ban"
+import type { AutoFillRule } from "@/shared/hooks/use-auto-fill-fields"
 
-const getSections = (phongBanList: any[] = [], excludeId?: number): FormSection[] => [
+const getSections = (_phongBanList: any[] = [], excludeId?: number): FormSection[] => [
   {
     title: "Thông Tin Cơ Bản",
     fields: [
@@ -115,19 +116,35 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
     ? phongBanConfig.routePath
     : (id ? `${phongBanConfig.routePath}/${id}` : phongBanConfig.routePath)
 
+  // Auto-fill rules: Tự động điền truc_thuoc_phong_ban khi chọn truc_thuoc_id
+  const autoFillRules = useMemo<AutoFillRule[]>(() => [
+    {
+      watchField: "truc_thuoc_id",
+      targetFields: [
+        {
+          fieldName: "truc_thuoc_phong_ban",
+          mapper: (trucThuocId) => {
+            if (!trucThuocId || !phongBanList) return null
+            const selectedPhongBan = phongBanList.find((pb) => pb.id === trucThuocId)
+            return selectedPhongBan?.ten_phong_ban || null
+          }
+        }
+      ],
+      dependencies: [phongBanList]
+    }
+  ], [phongBanList])
+
   const handleSubmit = async (data: any) => {
     // truc_thuoc_id is already a number from PhongBanSelect
+    // truc_thuoc_phong_ban is already auto-filled by AutoFillFields
     const submitData = {
       ...data,
       truc_thuoc_id: data.truc_thuoc_id || null,
-      // Auto-fill truc_thuoc_phong_ban from selected truc_thuoc_id
-      truc_thuoc_phong_ban: data.truc_thuoc_id 
-        ? phongBanList?.find((pb) => pb.id === data.truc_thuoc_id)?.ten_phong_ban || null
-        : null,
+      truc_thuoc_phong_ban: data.truc_thuoc_phong_ban || null,
     }
     
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: submitData as UpdatePhongBanInput })
+      await updateMutation.mutateAsync({ id, input: submitData as UpdatePhongBanInput })
     } else {
       await createMutation.mutateAsync(submitData as CreatePhongBanInput)
     }
@@ -170,7 +187,10 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
       successMessage={isEditMode ? "Cập nhật phòng ban thành công" : "Thêm mới phòng ban thành công"}
       errorMessage={isEditMode ? "Có lỗi xảy ra khi cập nhật phòng ban" : "Có lỗi xảy ra khi thêm mới phòng ban"}
       defaultValues={defaultValues}
-    />
+    >
+      {/* ⚡ Auto-fill Fields: Tự động điền truc_thuoc_phong_ban khi chọn truc_thuoc_id */}
+      <AutoFillFields rules={autoFillRules} />
+    </GenericFormView>
   )
 }
 

@@ -10,7 +10,7 @@ import type { GenericFormViewProps } from "../types"
  * Hook to handle form submission logic
  */
 export function useGenericFormSubmit<T extends z.ZodType<any, any>>(
-    form: UseFormReturn<z.infer<T>>,
+    _form: UseFormReturn<z.infer<T>>,
     {
         onSubmit,
         onSuccess,
@@ -40,8 +40,8 @@ export function useGenericFormSubmit<T extends z.ZodType<any, any>>(
                 // Call onSuccess callback if provided (for navigation)
                 if (onSuccess) {
                     // Use startTransition for navigation to avoid blocking UI
-                    startTransition(async () => {
-                        await onSuccess()
+                    startTransition(() => {
+                        void onSuccess()
                     })
                 } else {
                     handleCancel()

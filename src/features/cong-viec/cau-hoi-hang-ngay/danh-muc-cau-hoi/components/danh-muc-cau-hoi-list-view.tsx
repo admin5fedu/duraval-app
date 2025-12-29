@@ -132,7 +132,7 @@ export function DanhMucCauHoiListView({
                     rightActions={
                         <>
                             <Button
-                                size="xs"
+                                size="sm"
                                 variant="outline"
                                 onClick={(e) => {
                                     e.stopPropagation()
@@ -231,6 +231,12 @@ export function DanhMucCauHoiListView({
             onDeleteSelected={async (selectedRows) => {
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
+            }}
+            batchDeleteConfig={{
+                itemName: "danh mục câu hỏi",
+                moduleName: danhMucCauHoiConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: DanhMucCauHoi) => item.ten_nhom || String(item.id),
             }}
             searchFields={danhMucCauHoiConfig.searchFields as (keyof DanhMucCauHoi)[]}
             module={module}

@@ -3,11 +3,11 @@
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GenericFormView, type FormSection } from "@/shared/components"
 import { capBacSchema } from "../schema"
-import type { CapBac } from "../schema"
 import { useCreateCapBac, useUpdateCapBac } from "../hooks/use-cap-bac-mutations"
 import { useCapBacById } from "../hooks/use-cap-bac"
 import { capBacConfig } from "../config"
 import { useMemo } from "react"
+import type { CreateCapBacInput, UpdateCapBacInput } from "../types"
 
 const getSections = (): FormSection[] => [
   {
@@ -74,7 +74,7 @@ export function CapBacFormView({ id, onComplete, onCancel }: CapBacFormViewProps
 
   const handleSubmit = async (data: any) => {
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: data as UpdateCapBacInput })
+      await updateMutation.mutateAsync({ id, input: data as UpdateCapBacInput })
     } else {
       await createMutation.mutateAsync(data as CreateCapBacInput)
     }

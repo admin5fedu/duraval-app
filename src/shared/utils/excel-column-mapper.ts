@@ -5,11 +5,13 @@
  * Supports multiple Vietnamese variations (with/without diacritics)
  */
 
+import type { ExcelColumnType } from '@/shared/types/excel'
+
 export interface ColumnMapping {
   dbField: string
   excelNames: string[] // All possible column name variations
   required?: boolean
-  type?: 'string' | 'number' | 'date' | 'email' | 'phone'
+  type?: ExcelColumnType
   description?: string
 }
 

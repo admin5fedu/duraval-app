@@ -1,2 +1,3 @@
-export type { NhomPhieuHanhChinh, CreateNhomPhieuHanhChinhInput, UpdateNhomPhieuHanhChinhInput } from "../schema"
+export type { NhomPhieuHanhChinh } from "../schema"
+export * from "./nhom-phieu-hanh-chinh-types"
 

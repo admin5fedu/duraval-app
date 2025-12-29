@@ -26,7 +26,7 @@ const columnMappings: ColumnMapping[] = [
             "Company Code", "CompanyCode", "company_code", "Code", "code"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã công ty (bắt buộc)",
     },
     {
@@ -37,7 +37,7 @@ const columnMappings: ColumnMapping[] = [
             "Company Name", "CompanyName", "company_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên công ty (bắt buộc)",
     },
     {
@@ -48,7 +48,7 @@ const columnMappings: ColumnMapping[] = [
             "Full Name", "FullName", "full_name", "Full", "full"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên đầy đủ (bắt buộc)",
     },
     {
@@ -59,7 +59,7 @@ const columnMappings: ColumnMapping[] = [
             "Logo URL", "LogoURL", "logo_url", "Logo", "logo"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Link logo (bắt buộc, URL)",
     },
     {
@@ -70,7 +70,7 @@ const columnMappings: ColumnMapping[] = [
             "Address", "address", "Addr", "addr"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Địa chỉ (bắt buộc)",
     },
     {
@@ -101,7 +101,7 @@ const columnMappings: ColumnMapping[] = [
             "URL", "url", "Site", "site"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Website (bắt buộc, URL)",
     },
     {
@@ -112,7 +112,7 @@ const columnMappings: ColumnMapping[] = [
             "Active", "active", "Enabled", "enabled", "Apply", "apply"
         ],
         required: false,
-        type: "boolean",
+        type: "text",
         description: "Áp dụng (true/false, mặc định: false)",
     },
 ]
@@ -120,65 +120,56 @@ const columnMappings: ColumnMapping[] = [
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ma_cong_ty",
-        label: "Mã công ty",
-        type: "string",
+        header: "Mã công ty",
+        type: "text",
         required: true,
         description: "Mã công ty (bắt buộc)",
     },
     {
-        name: "ten_cong_ty",
-        label: "Tên công ty",
-        type: "string",
+        header: "Tên công ty",
+        type: "text",
         required: true,
         description: "Tên công ty (bắt buộc)",
     },
     {
-        name: "ten_day_du",
-        label: "Tên đầy đủ",
-        type: "string",
+        header: "Tên đầy đủ",
+        type: "text",
         required: true,
         description: "Tên đầy đủ (bắt buộc)",
     },
     {
-        name: "link_logo",
-        label: "Link logo",
-        type: "string",
+        header: "Link logo",
+        type: "text",
         required: true,
         description: "Link logo (bắt buộc, URL)",
     },
     {
-        name: "dia_chi",
-        label: "Địa chỉ",
-        type: "string",
+        header: "Địa chỉ",
+        type: "text",
         required: true,
         description: "Địa chỉ (bắt buộc)",
     },
     {
-        name: "so_dien_thoai",
-        label: "Số điện thoại",
-        type: "string",
+        header: "Số điện thoại",
+        type: "text",
         required: true,
         description: "Số điện thoại (bắt buộc, 10-11 chữ số)",
     },
     {
-        name: "email",
-        label: "Email",
+        header: "Email",
         type: "email",
         required: true,
         description: "Email (bắt buộc, định dạng email hợp lệ)",
     },
     {
-        name: "website",
-        label: "Website",
-        type: "string",
+        header: "Website",
+        type: "text",
         required: true,
         description: "Website (bắt buộc, URL)",
     },
     {
-        name: "ap_dung",
-        label: "Áp dụng",
-        type: "boolean",
+        header: "Áp dụng",
+        type: "text",
         required: false,
         description: "Áp dụng (true/false, mặc định: false)",
     },
@@ -187,7 +178,7 @@ const templateColumns: TemplateColumn[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -331,9 +322,9 @@ function mapExcelToDb(
 export function ThongTinCongTyImportDialog({ open, onOpenChange, mutation }: ThongTinCongTyImportDialogProps) {
     const defaultMutation = useBatchUpsertThongTinCongTy()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'insert', // Only insert for thông tin công ty
+        upsertMode: 'update', // Only insert for thông tin công ty
     })
 
     const handleImport = async (rows: Partial<ThongTinCongTy>[]): Promise<{
@@ -374,12 +365,12 @@ export function ThongTinCongTyImportDialog({ open, onOpenChange, mutation }: Tho
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="thông tin công ty"
-            expectedHeaders={["ma_cong_ty", "ten_cong_ty", "ten_day_du", "link_logo", "dia_chi", "so_dien_thoai", "email", "website"]}
+            
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

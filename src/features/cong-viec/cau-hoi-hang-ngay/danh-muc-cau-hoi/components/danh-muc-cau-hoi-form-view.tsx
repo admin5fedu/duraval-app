@@ -5,7 +5,6 @@ import { danhMucCauHoiSchema } from "../schema"
 import type { CreateDanhMucCauHoiInput, UpdateDanhMucCauHoiInput } from "../types"
 import { useCreateDanhMucCauHoi, useUpdateDanhMucCauHoi } from "../hooks"
 import { useDanhMucCauHoiById } from "../hooks"
-import { danhMucCauHoiConfig } from "../config"
 import { useMemo } from "react"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
@@ -105,9 +104,8 @@ export function DanhMucCauHoiFormView({ id, onComplete, onCancel }: DanhMucCauHo
         sections={sections}
         defaultValues={{}}
         onSubmit={handleSubmit}
-        onComplete={handleComplete}
-        onCancel={handleCancel}
-        isLoading={true}
+        onSuccess={onComplete}
+        onCancel={onCancel}
       />
     )
   }
@@ -124,7 +122,6 @@ export function DanhMucCauHoiFormView({ id, onComplete, onCancel }: DanhMucCauHo
       onCancel={onCancel}
       successMessage={isEditMode ? "Cập nhật danh mục câu hỏi thành công" : "Thêm mới danh mục câu hỏi thành công"}
       errorMessage={isEditMode ? "Có lỗi xảy ra khi cập nhật danh mục câu hỏi" : "Có lỗi xảy ra khi thêm mới danh mục câu hỏi"}
-      isLoading={createMutation.isPending || updateMutation.isPending}
     />
   )
 }

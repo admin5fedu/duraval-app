@@ -64,7 +64,7 @@ export class NhanSuAPI {
                 return null
             }
             // Handle rate limit errors gracefully
-            if (error.status === 429 || (error as any).code === 'over_request_rate_limit') {
+            if ((error as any).status === 429 || (error as any).code === 'over_request_rate_limit') {
                 console.warn('Rate limit reached when fetching employee by email')
                 return null
             }

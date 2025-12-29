@@ -1,7 +1,7 @@
 "use client"
 
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { GenericFormView, type FormSection } from "@/shared/components"
+import { GenericFormView, type FormSection, AutoFillFields } from "@/shared/components"
 import { chucVuSchema } from "../schema"
 import type { CreateChucVuInput, UpdateChucVuInput } from "../schema"
 import { useCreateChucVu, useUpdateChucVu } from "../hooks/use-chuc-vu-mutations"
@@ -10,7 +10,7 @@ import { chucVuConfig } from "../config"
 import { useMemo } from "react"
 import { usePhongBan } from "../../phong-ban/hooks"
 import { useCapBac } from "../../cap-bac/hooks"
-import { ChucVuFormAutoFill } from "./chuc-vu-form-auto-fill"
+import type { AutoFillRule } from "@/shared/hooks/use-auto-fill-fields"
 
 const getSections = (): FormSection[] => [
   {
@@ -122,9 +122,49 @@ export function ChucVuFormView({ id, onComplete, onCancel }: ChucVuFormViewProps
     ? chucVuConfig.routePath
     : (id ? `${chucVuConfig.routePath}/${id}` : chucVuConfig.routePath)
 
+  // Auto-fill rules: Tự động điền ma_cap_bac, ten_cap_bac, ma_phong_ban khi chọn cap_bac_id hoặc phong_ban_id
+  const autoFillRules = useMemo<AutoFillRule[]>(() => [
+    {
+      watchField: "cap_bac_id",
+      targetFields: [
+        {
+          fieldName: "ma_cap_bac",
+          mapper: (capBacId) => {
+            if (!capBacId || !capBacList) return ""
+            const selectedCapBac = capBacList.find((cb) => cb.id === capBacId)
+            return selectedCapBac?.ma_cap_bac || ""
+          }
+        },
+        {
+          fieldName: "ten_cap_bac",
+          mapper: (capBacId) => {
+            if (!capBacId || !capBacList) return null
+            const selectedCapBac = capBacList.find((cb) => cb.id === capBacId)
+            return selectedCapBac?.ten_cap_bac || null
+          }
+        }
+      ],
+      dependencies: [capBacList]
+    },
+    {
+      watchField: "phong_ban_id",
+      targetFields: [
+        {
+          fieldName: "ma_phong_ban",
+          mapper: (phongBanId) => {
+            if (!phongBanId || !phongBanList) return ""
+            const selectedPhongBan = phongBanList.find((pb) => pb.id === phongBanId)
+            return selectedPhongBan?.ma_phong_ban || ""
+          }
+        }
+      ],
+      dependencies: [phongBanList]
+    }
+  ], [capBacList, phongBanList])
+
   const handleSubmit = async (data: any) => {
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: data as UpdateChucVuInput })
+      await updateMutation.mutateAsync({ id, input: data as UpdateChucVuInput })
     } else {
       await createMutation.mutateAsync(data as CreateChucVuInput)
     }
@@ -168,7 +208,8 @@ export function ChucVuFormView({ id, onComplete, onCancel }: ChucVuFormViewProps
       errorMessage={isEditMode ? "Có lỗi xảy ra khi cập nhật chức vụ" : "Có lỗi xảy ra khi thêm mới chức vụ"}
       defaultValues={defaultValues}
     >
-      <ChucVuFormAutoFill capBacList={capBacList} phongBanList={phongBanList} />
+      {/* ⚡ Auto-fill Fields: Sử dụng useWatch + useEffect pattern (Imperative cho data mutation) */}
+      <AutoFillFields rules={autoFillRules} />
     </GenericFormView>
   )
 }

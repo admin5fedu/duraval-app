@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
@@ -67,8 +66,8 @@ export function CapBacDetailView({ id, initialData, onEdit, onBack }: CapBacDeta
     {
       title: "Thông Tin Hệ Thống",
       fields: [
-        { label: "Thời Gian Tạo", key: "tg_tao", value: capBac.tg_tao, type: "datetime" },
-        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: capBac.tg_cap_nhat, type: "datetime" },
+        { label: "Thời Gian Tạo", key: "tg_tao", value: capBac.tg_tao, type: "date" },
+        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: capBac.tg_cap_nhat, type: "date" },
       ]
     }
   ]

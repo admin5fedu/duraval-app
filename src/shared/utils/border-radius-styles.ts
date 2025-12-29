@@ -6,7 +6,7 @@
  */
 
 import { cn } from "@/lib/utils"
-import { BORDER_RADIUS, RADIUS_PRESETS } from "@/shared/constants/border-radius"
+import { RADIUS_PRESETS } from "@/shared/constants/border-radius"
 
 /**
  * Button border radius

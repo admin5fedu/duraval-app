@@ -1,9 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { ImportDialog, type ImportOptions } from "@/shared/components/data-display/import/import-dialog"
 import { useBatchUpsertLichDang } from "../actions/lich-dang-excel-actions"
-import { ChhnLichDangBai } from "../schema"
+import { LichDang } from "../schema"
 import type { TemplateColumn } from "@/lib/excel/template-utils"
 import type { ColumnMapping } from "@/shared/utils/excel-column-mapper"
 import { shouldSkipValue } from "@/shared/utils/excel-data-cleaner"
@@ -19,72 +18,62 @@ interface LichDangImportDialogProps {
 // Template columns for export
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ngay_dang",
-        label: "Ngày đăng",
+        header: "Ngày đăng",
         type: "date",
         required: true,
         description: "Ngày đăng câu hỏi (bắt buộc, định dạng: YYYY-MM-DD)",
     },
     {
-        name: "nhom_cau_hoi",
-        label: "Nhóm câu hỏi (ID)",
+        header: "Nhóm câu hỏi (ID)",
         type: "number",
         required: true,
         description: "ID của nhóm câu hỏi (bắt buộc)",
     },
     {
-        name: "cau_hoi",
-        label: "Câu hỏi",
-        type: "string",
+        header: "Câu hỏi",
+        type: "text",
         required: true,
         description: "Nội dung câu hỏi (bắt buộc)",
     },
     {
-        name: "hinh_anh",
-        label: "Hình ảnh (URL)",
-        type: "string",
+        header: "Hình ảnh (URL)",
+        type: "text",
         required: false,
         description: "URL hình ảnh (không bắt buộc)",
     },
     {
-        name: "dap_an_1",
-        label: "Đáp án 1",
-        type: "string",
+        header: "Đáp án 1",
+        type: "text",
         required: true,
         description: "Đáp án 1 (bắt buộc)",
     },
     {
-        name: "dap_an_2",
-        label: "Đáp án 2",
-        type: "string",
+        header: "Đáp án 2",
+        type: "text",
         required: true,
         description: "Đáp án 2 (bắt buộc)",
     },
     {
-        name: "dap_an_3",
-        label: "Đáp án 3",
-        type: "string",
+        header: "Đáp án 3",
+        type: "text",
         required: true,
         description: "Đáp án 3 (bắt buộc)",
     },
     {
-        name: "dap_an_4",
-        label: "Đáp án 4",
-        type: "string",
+        header: "Đáp án 4",
+        type: "text",
         required: true,
         description: "Đáp án 4 (bắt buộc)",
     },
     {
-        name: "dap_an_dung",
-        label: "Đáp án đúng",
+        header: "Đáp án đúng",
         type: "number",
         required: true,
         description: "Số thứ tự đáp án đúng (1, 2, 3 hoặc 4) (bắt buộc)",
     },
     {
-        name: "chuc_vu_ap_dung",
-        label: "Chức vụ áp dụng (IDs)",
-        type: "string",
+        header: "Chức vụ áp dụng (IDs)",
+        type: "text",
         required: false,
         description: "Danh sách ID chức vụ áp dụng, phân cách bằng dấu phẩy (ví dụ: 1,2,3). Để trống = tất cả chức vụ",
     },
@@ -123,7 +112,7 @@ const columnMappings: ColumnMapping[] = [
             "Question", "question", "Q", "q", "Nội dung", "Noi dung"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Nội dung câu hỏi (bắt buộc)",
     },
     {
@@ -134,7 +123,7 @@ const columnMappings: ColumnMapping[] = [
             "Image", "image", "Img", "img", "Picture", "picture", "URL", "url"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "URL hình ảnh (không bắt buộc)",
     },
     {
@@ -145,7 +134,7 @@ const columnMappings: ColumnMapping[] = [
             "Answer 1", "answer_1", "Answer1", "answer1", "Option 1", "option_1"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Đáp án 1 (bắt buộc)",
     },
     {
@@ -156,7 +145,7 @@ const columnMappings: ColumnMapping[] = [
             "Answer 2", "answer_2", "Answer2", "answer2", "Option 2", "option_2"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Đáp án 2 (bắt buộc)",
     },
     {
@@ -167,7 +156,7 @@ const columnMappings: ColumnMapping[] = [
             "Answer 3", "answer_3", "Answer3", "answer3", "Option 3", "option_3"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Đáp án 3 (bắt buộc)",
     },
     {
@@ -178,7 +167,7 @@ const columnMappings: ColumnMapping[] = [
             "Answer 4", "answer_4", "Answer4", "answer4", "Option 4", "option_4"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Đáp án 4 (bắt buộc)",
     },
     {
@@ -201,15 +190,14 @@ const columnMappings: ColumnMapping[] = [
             "Position", "position", "Positions", "positions", "Roles", "roles"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Danh sách ID chức vụ áp dụng, phân cách bằng dấu phẩy",
     },
 ]
 
 // Validate a single row
 function validateRow(
-    row: Record<string, any>,
-    rowNumber: number
+    row: Record<string, any>
 ): string[] {
     const errors: string[] = []
 
@@ -302,8 +290,8 @@ function checkDuplicates(
 }
 
 // Transform row data before saving
-function transformRow(row: Record<string, any>): Partial<ChhnLichDangBai> {
-    const transformed: Partial<ChhnLichDangBai> = {}
+function transformRow(row: Record<string, any>): Partial<LichDang> {
+    const transformed: Partial<LichDang> = {}
 
     // Required fields
     if (row.ngay_dang) {
@@ -358,34 +346,57 @@ function transformRow(row: Record<string, any>): Partial<ChhnLichDangBai> {
     return transformed
 }
 
+// Transform Excel data to database format
+function transformData(rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>): Partial<LichDang>[] {
+    return rows.map((row) => transformRow(row.data))
+}
+
 const importOptions: ImportOptions = {
-    templateColumns,
-    columnMappings,
-    validateRow,
-    checkDuplicates,
-    transformRow,
-    moduleName: "Lịch Đăng",
-    uniqueFields: ["ngay_dang", "cau_hoi"], // Unique combination
-    duplicateCheckMessage: (key: string) => {
-        const [ngayDang, cauHoi] = key.split('|')
-        return `Trùng lặp: Ngày đăng "${ngayDang}" + Câu hỏi "${cauHoi}"`
-    },
+    skipEmptyCells: true,
+    upsertMode: 'update',
+    dateFormat: 'dd/mm/yyyy',
 }
 
 export function LichDangImportDialog({ open, onOpenChange, mutation }: LichDangImportDialogProps) {
     const batchUpsertMutation = mutation || useBatchUpsertLichDang()
 
-    const handleImport = async (records: Partial<ChhnLichDangBai>[]) => {
-        await batchUpsertMutation.mutateAsync(records as Partial<ChhnLichDangBai>[])
+    const handleImport = async (rows: Partial<LichDang>[]): Promise<{
+        success: boolean
+        inserted: number
+        updated: number
+        failed: number
+        errors?: Array<{ rowNumber: number; errors: string[] }>
+    }> => {
+        try {
+            const result = await batchUpsertMutation.mutateAsync(rows)
+            return {
+                success: result.errors.length === 0,
+                inserted: result.inserted,
+                updated: result.updated,
+                failed: result.errors.length,
+                errors: result.errors.map((err) => ({
+                    rowNumber: err.row + 1, // Convert 0-based to 1-based for better UX
+                    errors: [err.error],
+                })),
+            }
+        } catch (error) {
+            throw error
+        }
     }
 
     return (
-        <ImportDialog
+        <ImportDialog<Partial<LichDang>>
             open={open}
             onOpenChange={onOpenChange}
-            options={importOptions}
             onImport={handleImport}
-            isImporting={batchUpsertMutation.isPending}
+            validateRow={validateRow}
+            checkDuplicates={checkDuplicates}
+            transformData={transformData}
+            moduleName="Lịch Đăng"
+            templateColumns={templateColumns}
+            columnMappings={columnMappings}
+            enableAutoMapping={true}
+            importOptions={importOptions}
         />
     )
 }

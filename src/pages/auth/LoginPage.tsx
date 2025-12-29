@@ -10,7 +10,7 @@ import { supabase } from "@/lib/supabase"
 // Tách component sử dụng useSearchParams ra riêng
 function LoginContent() {
   const navigate = useNavigate()
-  const searchParams = useSearchParams()
+  const [searchParams] = useSearchParams()
   const { user, setUser, loading, setLoading } = useAuthStore()
   const [isChecking, setIsChecking] = useState(true)
 

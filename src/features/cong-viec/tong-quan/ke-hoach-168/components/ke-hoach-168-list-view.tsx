@@ -22,7 +22,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { DeleteKeHoach168Button } from "./delete-ke-hoach-168-button"
 
 interface KeHoach168ListViewProps {
     initialData?: KeHoach168[]
@@ -202,6 +201,12 @@ export function KeHoach168ListView({
             onDeleteSelected={async (selectedRows) => {
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
+            }}
+            batchDeleteConfig={{
+                itemName: "kế hoạch 168",
+                moduleName: keHoach168Config.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: KeHoach168) => `Mã NV: ${item.ma_nhan_vien}`,
             }}
             filters={filters}
             searchFields={keHoach168Config.searchFields as (keyof KeHoach168)[]}

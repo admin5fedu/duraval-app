@@ -129,12 +129,13 @@ export function matchToken(text: string, token: SearchToken, caseSensitive = fal
         case 'exact':
             return searchText === searchValue
 
-        case 'wildcard':
+        case 'wildcard': {
             const pattern = searchValue
                 .replace(/\*/g, '.*')
                 .replace(/\?/g, '.')
             const regex = new RegExp(`^${pattern}$`, caseSensitive ? '' : 'i')
             return regex.test(text)
+        }
 
         case 'text':
             return searchText.includes(searchValue)

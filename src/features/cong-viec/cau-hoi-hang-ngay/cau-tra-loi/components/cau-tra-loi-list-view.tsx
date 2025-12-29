@@ -10,7 +10,6 @@ import { createColumns } from "./cau-tra-loi-columns"
 import { cauTraLoiConfig } from "../config"
 import { CauTraLoiAPI } from "../services/cau-tra-loi.api"
 import { cauTraLoiQueryKeys } from "@/lib/react-query/query-keys"
-import { useReferenceQuery } from "@/lib/react-query"
 import { useMemo, useState, useCallback } from "react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
@@ -37,10 +36,6 @@ interface CauTraLoiListViewProps {
 
 export function CauTraLoiListView({ 
     initialData,
-    initialDanhSachLichDangBai,
-    onEdit,
-    onAddNew,
-    onView,
 }: CauTraLoiListViewProps = {}) {
     const navigate = useNavigate()
     const batchDeleteMutation = useBatchDeleteCauTraLoi()
@@ -94,11 +89,7 @@ export function CauTraLoiListView({
         filterColumn: "cau_tra_loi",
         searchFields: cauTraLoiConfig.searchFields as (keyof CauTraLoi)[],
         onRowClick: (row) => {
-            if (onView) {
-                onView(row.id!)
-            } else {
-                navigate(`${cauTraLoiConfig.routePath}/${row.id}`)
-            }
+            navigate(`${cauTraLoiConfig.routePath}/${row.id}`)
         },
         onDelete: (row) => {
             setRowToDelete(row)
@@ -108,11 +99,18 @@ export function CauTraLoiListView({
             const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
             await batchDeleteMutation.mutateAsync(ids)
         },
+        batchDeleteConfig: {
+            itemName: "câu trả lời",
+            moduleName: cauTraLoiConfig.moduleTitle,
+            isLoading: batchDeleteMutation.isPending,
+            getItemLabel: (item: CauTraLoi) => String(item.id),
+        },
         onImport: () => setImportDialogOpen(true),
         isImporting: batchImportMutation.isPending,
-        getColumnTitle,
-        getCellValue,
-        batchDeleteMutation: batchDeleteMutation,
+        exportOptions: {
+            getColumnTitle,
+            getCellValue,
+        },
     })
 
     // Handle individual delete
@@ -210,7 +208,6 @@ export function CauTraLoiListView({
         <>
             <GenericListView
                 {...dataTableProps}
-                moduleConfig={cauTraLoiConfig}
                 filters={filters}
                 addHref={`${cauTraLoiConfig.routePath}/them-moi`}
                 exportOptions={exportOptionsWithCount}

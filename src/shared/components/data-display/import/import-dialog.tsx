@@ -12,17 +12,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { parseExcelFile } from "@/lib/excel/exceljs-utils"
 import { generateImportTemplate, exportImportErrors, type TemplateColumn } from "@/lib/excel/template-utils"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { mediumTextClass, smallTextClass, bodyTextClass } from "@/shared/utils/text-styles"
-import { dialogContentSpacingClass, dialogPaddingClass, standardPaddingClass } from "@/shared/utils/spacing-styles"
+import { dialogContentSpacingClass, standardPaddingClass } from "@/shared/utils/spacing-styles"
 import { autoMapColumns, type ColumnMapping, validateMapping } from "@/shared/utils/excel-column-mapper"
-import { filterEmptyRows, cleanDataset } from "@/shared/utils/excel-data-cleaner"
-import { parseDate } from "@/shared/utils/excel-date-parser"
+import { cleanDataset } from "@/shared/utils/excel-data-cleaner"
 import { 
   loadImportPreferences, 
   saveImportPreferences,
@@ -61,7 +59,6 @@ interface ImportDialogProps<TData> {
   checkDuplicates?: (rows: ImportRow[]) => Map<string, number[]>
   transformData?: (rows: ImportRow[]) => TData[]
   moduleName?: string
-  expectedHeaders?: string[]
   templateColumns?: TemplateColumn[]
   // Auto-mapping
   columnMappings?: ColumnMapping[]
@@ -69,7 +66,6 @@ interface ImportDialogProps<TData> {
   onMappingChange?: (mapping: Record<string, string>) => void
   // Options
   importOptions?: ImportOptions
-  onOptionsChange?: (options: ImportOptions) => void
 }
 
 export function ImportDialog<TData extends Record<string, any>>({
@@ -80,7 +76,6 @@ export function ImportDialog<TData extends Record<string, any>>({
   checkDuplicates,
   transformData,
   moduleName = "data",
-  expectedHeaders,
   templateColumns,
   columnMappings,
   enableAutoMapping = true,
@@ -90,7 +85,6 @@ export function ImportDialog<TData extends Record<string, any>>({
     upsertMode: 'update',
     dateFormat: 'dd/mm/yyyy',
   },
-  onOptionsChange,
 }: ImportDialogProps<TData>) {
   const [file, setFile] = React.useState<File | null>(null)
   const [parseResult, setParseResult] = React.useState<ParseResult | null>(null)
@@ -167,7 +161,7 @@ export function ImportDialog<TData extends Record<string, any>>({
       const result = await parseExcelFile(selectedFile)
 
       // Clean data: filter empty rows
-      const { cleaned: cleanedData, emptyRowsRemoved } = cleanDataset(result.sheetData)
+      const { cleaned: cleanedData } = cleanDataset(result.sheetData)
       
       if (cleanedData.length < 2) {
         throw new Error('File Excel không có dữ liệu hợp lệ (sau khi loại bỏ dòng trống)')
@@ -411,8 +405,13 @@ export function ImportDialog<TData extends Record<string, any>>({
   React.useEffect(() => {
     if (open) {
       const savedPrefs = loadImportPreferences(moduleName)
-      if (savedPrefs) {
-        setOptions(savedPrefs.importOptions)
+      if (savedPrefs && savedPrefs.importOptions) {
+        setOptions({
+          skipEmptyCells: savedPrefs.importOptions.skipEmptyCells ?? true,
+          upsertMode: savedPrefs.importOptions.upsertMode ?? 'update',
+          defaultValues: savedPrefs.importOptions.defaultValues,
+          dateFormat: savedPrefs.importOptions.dateFormat ?? 'dd/mm/yyyy',
+        })
         if (savedPrefs.columnMapping && Object.keys(savedPrefs.columnMapping).length > 0) {
           setColumnMapping(savedPrefs.columnMapping)
         }

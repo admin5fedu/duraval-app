@@ -222,6 +222,12 @@ export function NguoiThanListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "người thân",
+                moduleName: nguoiThanConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: NguoiThan) => item.ho_va_ten || String(item.id),
+            }}
             filters={[
                 {
                     columnId: "moi_quan_he",

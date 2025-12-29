@@ -186,6 +186,12 @@ export function ThongTinCongTyListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "thông tin công ty",
+                moduleName: thongTinCongTyConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: ThongTinCongTy) => item.ten_cong_ty || String(item.id),
+            }}
             filters={[
                 {
                     columnId: "ap_dung",

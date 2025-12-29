@@ -26,7 +26,7 @@ const columnMappings: ColumnMapping[] = [
             "Level Code", "LevelCode", "level_code", "Code", "code"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã cấp bậc (bắt buộc)",
     },
     {
@@ -37,7 +37,7 @@ const columnMappings: ColumnMapping[] = [
             "Level Name", "LevelName", "level_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên cấp bậc (bắt buộc)",
     },
     {
@@ -55,22 +55,19 @@ const columnMappings: ColumnMapping[] = [
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ma_cap_bac",
-        label: "Mã cấp bậc",
-        type: "string",
+        header: "Mã cấp bậc",
+        type: "text",
         required: true,
         description: "Mã cấp bậc (bắt buộc)",
     },
     {
-        name: "ten_cap_bac",
-        label: "Tên cấp bậc",
-        type: "string",
+        header: "Tên cấp bậc",
+        type: "text",
         required: true,
         description: "Tên cấp bậc (bắt buộc)",
     },
     {
-        name: "bac",
-        label: "Bậc",
+        header: "Bậc",
         type: "number",
         required: true,
         description: "Bậc (bắt buộc, phải là số nguyên dương)",
@@ -80,7 +77,7 @@ const templateColumns: TemplateColumn[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -161,9 +158,9 @@ function mapExcelToDb(
 export function CapBacImportDialog({ open, onOpenChange, mutation }: CapBacImportDialogProps) {
     const defaultMutation = useBatchUpsertCapBac()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'upsert', // Upsert mode: update if exists, insert if not
+        upsertMode: 'update', // Update mode: update if exists, insert if not
     })
 
     const handleImport = async (rows: Partial<CapBac>[]): Promise<{
@@ -210,12 +207,10 @@ export function CapBacImportDialog({ open, onOpenChange, mutation }: CapBacImpor
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="cấp bậc"
-            expectedHeaders={["ma_cap_bac", "ten_cap_bac", "bac"]}
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
         />
     )
 }

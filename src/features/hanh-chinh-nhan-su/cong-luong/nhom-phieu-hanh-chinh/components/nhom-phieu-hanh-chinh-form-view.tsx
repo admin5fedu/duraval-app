@@ -9,6 +9,57 @@ import { nhomPhieuHanhChinhConfig } from "../config"
 import { useMemo } from "react"
 import type { CreateNhomPhieuHanhChinhInput, UpdateNhomPhieuHanhChinhInput } from "../types"
 import { LoaiPhieuAutocomplete } from "./loai-phieu-autocomplete"
+import { ToggleButtonGroup } from "./toggle-button-group"
+import { useFormField } from "@/components/ui/form"
+import * as React from "react"
+
+// Custom component for Cần HCNS Duyệt toggle buttons
+function CanHcnsDuyetToggleButtons({ value, onChange, disabled }: { value?: string; onChange: (value: string) => void; disabled?: boolean }) {
+  // Get id from FormControl context if available
+  let formItemId: string | undefined
+  try {
+    const formField = useFormField()
+    formItemId = formField.formItemId
+  } catch {
+    // Not in FormControl context, generate a unique id
+    formItemId = React.useId()
+  }
+  
+  const options = [
+    { label: "Có", value: "Có" },
+    { label: "Không", value: "Không" },
+  ]
+  
+  const handleChange = (val: string | number) => {
+    onChange(String(val))
+  }
+  
+  return <ToggleButtonGroup id={formItemId} value={value} onChange={handleChange} options={options} disabled={disabled} />
+}
+
+// Custom component for Ca Tối toggle buttons
+function CaToiToggleButtons({ value, onChange, disabled }: { value?: string; onChange: (value: string) => void; disabled?: boolean }) {
+  // Get id from FormControl context if available
+  let formItemId: string | undefined
+  try {
+    const formField = useFormField()
+    formItemId = formField.formItemId
+  } catch {
+    // Not in FormControl context, generate a unique id
+    formItemId = React.useId()
+  }
+  
+  const options = [
+    { label: "Có", value: "Có" },
+    { label: "Không", value: "Không" },
+  ]
+  
+  const handleChange = (val: string | number) => {
+    onChange(String(val))
+  }
+  
+  return <ToggleButtonGroup id={formItemId} value={value} onChange={handleChange} options={options} disabled={disabled} />
+}
 
 const getSections = (): FormSection[] => [
   {
@@ -38,20 +89,14 @@ const getSections = (): FormSection[] => [
       { 
         name: "can_hcns_duyet", 
         label: "Cần HCNS Duyệt", 
-        type: "toggle",
-        options: [
-          { label: "Có", value: "Có" },
-          { label: "Không", value: "Không" },
-        ]
+        type: "custom",
+        customComponent: CanHcnsDuyetToggleButtons,
       },
       { 
         name: "ca_toi", 
         label: "Ca Tối", 
-        type: "toggle",
-        options: [
-          { label: "Có", value: "Có" },
-          { label: "Không", value: "Không" },
-        ]
+        type: "custom",
+        customComponent: CaToiToggleButtons,
       },
     ]
   }

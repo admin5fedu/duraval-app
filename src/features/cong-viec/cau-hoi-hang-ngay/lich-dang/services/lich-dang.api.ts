@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { toPromise } from "@/lib/supabase-utils"
 import { LichDang } from "../schema"
 import type { CreateLichDangInput, UpdateLichDangInput } from "../types"
 
@@ -52,11 +53,12 @@ export class LichDangAPI {
         // Fetch nhom cau hoi
         if (nhomCauHoiIds.length > 0) {
             queries.push(
-                supabase
-                    .from("chhn_nhom_cau_hoi")
-                    .select("id, ten_nhom")
-                    .in("id", nhomCauHoiIds)
-                    .then(({ data }) => data || [])
+                toPromise(
+                    supabase
+                        .from("chhn_nhom_cau_hoi")
+                        .select("id, ten_nhom")
+                        .in("id", nhomCauHoiIds)
+                ).then(({ data }) => data || [])
             )
         } else {
             queries.push(Promise.resolve([]))
@@ -65,11 +67,12 @@ export class LichDangAPI {
         // Fetch nguoi tao
         if (nguoiTaoIds.length > 0) {
             queries.push(
-                supabase
-                    .from("var_nhan_su")
-                    .select("ma_nhan_vien, ho_ten")
-                    .in("ma_nhan_vien", nguoiTaoIds)
-                    .then(({ data }) => data || [])
+                toPromise(
+                    supabase
+                        .from("var_nhan_su")
+                        .select("ma_nhan_vien, ho_ten")
+                        .in("ma_nhan_vien", nguoiTaoIds)
+                ).then(({ data }) => data || [])
             )
         } else {
             queries.push(Promise.resolve([]))
@@ -136,13 +139,13 @@ export class LichDangAPI {
 
         if (data.nhom_cau_hoi) {
             queries.push(
-                supabase
-                    .from("chhn_nhom_cau_hoi")
-                    .select("ten_nhom")
-                    .eq("id", data.nhom_cau_hoi)
-                    .single()
-                    .then(({ data }) => data?.ten_nhom || null)
-                    .catch(() => null)
+                toPromise(
+                    supabase
+                        .from("chhn_nhom_cau_hoi")
+                        .select("ten_nhom")
+                        .eq("id", data.nhom_cau_hoi)
+                        .single()
+                ).then((result: { data: { ten_nhom: string } | null }) => result.data?.ten_nhom || null).catch(() => null)
             )
         } else {
             queries.push(Promise.resolve(null))
@@ -150,13 +153,13 @@ export class LichDangAPI {
 
         if (data.nguoi_tao_id) {
             queries.push(
-                supabase
-                    .from("var_nhan_su")
-                    .select("ho_ten")
-                    .eq("ma_nhan_vien", data.nguoi_tao_id)
-                    .single()
-                    .then(({ data }) => data?.ho_ten || null)
-                    .catch(() => null)
+                toPromise(
+                    supabase
+                        .from("var_nhan_su")
+                        .select("ho_ten")
+                        .eq("ma_nhan_vien", data.nguoi_tao_id)
+                        .single()
+                ).then((result: { data: { ho_ten: string } | null }) => result.data?.ho_ten || null).catch(() => null)
             )
         } else {
             queries.push(Promise.resolve(null))
@@ -329,23 +332,23 @@ export class LichDangAPI {
         
         if (phongBanIds.length > 0) {
             phongBanQueries.push(
-                supabase
-                    .from("var_phong_ban")
-                    .select("id, ma_phong_ban, ten_phong_ban")
-                    .in("id", phongBanIds)
-                    .then(({ data }) => data || [])
-                    .catch(() => [])
+                toPromise(
+                    supabase
+                        .from("var_phong_ban")
+                        .select("id, ma_phong_ban, ten_phong_ban")
+                        .in("id", phongBanIds)
+                ).then(({ data }) => data || []).catch(() => [])
             )
         }
         
         if (phongBanMas.length > 0) {
             phongBanQueries.push(
-                supabase
-                    .from("var_phong_ban")
-                    .select("id, ma_phong_ban, ten_phong_ban")
-                    .in("ma_phong_ban", phongBanMas)
-                    .then(({ data }) => data || [])
-                    .catch(() => [])
+                toPromise(
+                    supabase
+                        .from("var_phong_ban")
+                        .select("id, ma_phong_ban, ten_phong_ban")
+                        .in("ma_phong_ban", phongBanMas)
+                ).then(({ data }) => data || []).catch(() => [])
             )
         }
 

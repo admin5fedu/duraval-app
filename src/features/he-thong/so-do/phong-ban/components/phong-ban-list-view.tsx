@@ -228,6 +228,12 @@ export function PhongBanListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "phòng ban",
+                moduleName: phongBanConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: PhongBan) => item.ten_phong_ban || item.ma_phong_ban || String(item.id),
+            }}
             filters={filters}
             searchFields={phongBanConfig.searchFields as (keyof PhongBan)[]}
             module={module}

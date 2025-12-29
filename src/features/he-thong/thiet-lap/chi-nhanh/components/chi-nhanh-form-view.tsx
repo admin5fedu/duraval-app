@@ -89,7 +89,7 @@ export function ChiNhanhFormView({ id, onComplete, onCancel }: ChiNhanhFormViewP
 
   const handleSubmit = async (data: any) => {
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: data as UpdateChiNhanhInput })
+      await updateMutation.mutateAsync({ id, input: data as UpdateChiNhanhInput })
     } else {
       await createMutation.mutateAsync(data as CreateChiNhanhInput)
     }

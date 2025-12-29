@@ -7,7 +7,7 @@ import { DetailViewSkeleton } from "./detail/detail-view-skeleton"
 import { useDetailNavigation } from "@/hooks/use-detail-navigation"
 import { DetailHeader } from "./detail/detail-header"
 import { DetailSectionCard } from "./detail/detail-section-card"
-import { DetailField, DetailSection } from "./generic-detail-view/"
+import { DetailSection } from "./generic-detail-view/"
 import { useBreadcrumb } from "@/components/providers/BreadcrumbProvider"
 
 interface GenericDetailViewSimpleProps {

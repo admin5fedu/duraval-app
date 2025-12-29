@@ -13,7 +13,7 @@
 import { lazy } from "react"
 import { RouteConfig } from "@/routes"
 import { ModuleConfig } from "@/shared/types/module-config"
-import { getDefaultScrollBehavior, detectRouteTypeFromPath } from "./route-scroll-behavior-helper"
+import { getDefaultScrollBehavior } from "./route-scroll-behavior-helper"
 
 /**
  * Generate explicit routes for a module

@@ -1,4 +1,5 @@
-import { nhomPhieuHanhChinhSchema, type NhomPhieuHanhChinh, type CreateNhomPhieuHanhChinhInput, type UpdateNhomPhieuHanhChinhInput } from "../schema"
+import { nhomPhieuHanhChinhSchema, type NhomPhieuHanhChinh } from "../schema"
+import type { CreateNhomPhieuHanhChinhInput, UpdateNhomPhieuHanhChinhInput } from "../types"
 
 /**
  * Domain service cho Nhóm Phiếu Hành Chính.

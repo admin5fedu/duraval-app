@@ -130,7 +130,7 @@ export function NguoiThanFormView({ id, onComplete, onCancel }: NguoiThanFormVie
     }
     
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: submitData as UpdateNguoiThanInput })
+      await updateMutation.mutateAsync({ id, input: submitData as UpdateNguoiThanInput })
     } else {
       await createMutation.mutateAsync(submitData as CreateNguoiThanInput)
     }

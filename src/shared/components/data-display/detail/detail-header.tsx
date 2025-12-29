@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { ZoomableAvatar } from "@/components/ui/zoomable-avatar"
 import { ArrowLeft } from "lucide-react"

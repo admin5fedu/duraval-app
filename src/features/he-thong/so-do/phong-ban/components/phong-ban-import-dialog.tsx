@@ -37,7 +37,7 @@ const columnMappings: ColumnMapping[] = [
             "Department Code", "DepartmentCode", "dept_code", "Code", "code"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã phòng ban (bắt buộc)",
     },
     {
@@ -48,7 +48,7 @@ const columnMappings: ColumnMapping[] = [
             "Department Name", "DepartmentName", "dept_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên phòng ban (bắt buộc)",
     },
     {
@@ -59,7 +59,7 @@ const columnMappings: ColumnMapping[] = [
             "Level", "level", "Grade", "grade"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Cấp độ (bắt buộc)",
     },
     {
@@ -70,7 +70,7 @@ const columnMappings: ColumnMapping[] = [
             "Parent Department", "ParentDepartment", "parent_dept", "Parent", "parent"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Trực thuộc phòng ban (không bắt buộc)",
     },
 ]
@@ -78,37 +78,32 @@ const columnMappings: ColumnMapping[] = [
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
     {
-        name: "tt",
-        label: "Số thứ tự",
+        header: "Số thứ tự",
         type: "number",
         required: false,
         description: "Số thứ tự (không bắt buộc)",
     },
     {
-        name: "ma_phong_ban",
-        label: "Mã phòng ban",
-        type: "string",
+        header: "Mã phòng ban",
+        type: "text",
         required: true,
         description: "Mã phòng ban (bắt buộc)",
     },
     {
-        name: "ten_phong_ban",
-        label: "Tên phòng ban",
-        type: "string",
+        header: "Tên phòng ban",
+        type: "text",
         required: true,
         description: "Tên phòng ban (bắt buộc)",
     },
     {
-        name: "cap_do",
-        label: "Cấp độ",
-        type: "string",
+        header: "Cấp độ",
+        type: "text",
         required: true,
         description: "Cấp độ (bắt buộc)",
     },
     {
-        name: "truc_thuoc_phong_ban",
-        label: "Trực thuộc phòng ban",
-        type: "string",
+        header: "Trực thuộc phòng ban",
+        type: "text",
         required: false,
         description: "Trực thuộc phòng ban (không bắt buộc)",
     },
@@ -117,7 +112,7 @@ const templateColumns: TemplateColumn[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -203,9 +198,9 @@ function mapExcelToDb(
 export function PhongBanImportDialog({ open, onOpenChange, mutation }: PhongBanImportDialogProps) {
     const defaultMutation = useBatchUpsertPhongBan()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'insert', // Only insert for phòng ban
+        upsertMode: 'update', // Update mode: update if exists, insert if not
     })
 
     const handleImport = async (rows: Partial<PhongBan>[]): Promise<{
@@ -246,12 +241,12 @@ export function PhongBanImportDialog({ open, onOpenChange, mutation }: PhongBanI
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="phòng ban"
-            expectedHeaders={["ma_phong_ban", "ten_phong_ban", "cap_do"]}
+            
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

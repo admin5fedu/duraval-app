@@ -2,8 +2,8 @@
 
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GenericFormView, type FormSection } from "@/shared/components"
-import { nhanSuSchema, NhanSu } from "../types"
-import type { UpdateNhanSuInput } from "../types"
+import { nhanSuSchema } from "../types"
+import type { CreateNhanSuInput, UpdateNhanSuInput } from "../types"
 import { useCreateNhanSu, useUpdateNhanSu } from "../hooks/use-nhan-su-mutations"
 import { useNhanSuById } from "../hooks/use-nhan-su"
 import { nhanSuConfig } from "../config"
@@ -96,9 +96,9 @@ export function NhanSuFormView({ id, onComplete, onCancel }: NhanSuFormViewProps
 
   const handleSubmit = async (data: any) => {
     if (isEditMode && id) {
-      await updateMutation.mutateAsync({ id, data: data as UpdateNhanSuInput })
+      await updateMutation.mutateAsync({ id, input: data as UpdateNhanSuInput })
     } else {
-      await createMutation.mutateAsync(data as NhanSu)
+      await createMutation.mutateAsync(data as CreateNhanSuInput)
     }
   }
 

@@ -2,7 +2,6 @@ import { nguoiThanSchema, type NguoiThan } from "../schema"
 import type {
   CreateNguoiThanInput,
   UpdateNguoiThanInput,
-  BatchNguoiThanOperationResult,
 } from "../schema"
 
 /**

@@ -18,7 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { mediumTextClass, smallTextClass, bodyTextClass } from "@/shared/utils/text-styles"
-import { compactPaddingClass, standardPaddingClass } from "@/shared/utils/spacing-styles"
+import { standardPaddingClass } from "@/shared/utils/spacing-styles"
 
 interface DataTableViewOptionsProps<TData> {
     table: Table<TData>
@@ -50,11 +50,18 @@ function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
                 return String(element)
             }
             if (React.isValidElement(element)) {
-                if (element.props?.title) {
-                    return String(element.props.title)
+                const props = element.props as { title?: string; children?: React.ReactNode }
+                if (props?.title) {
+                    return String(props.title)
                 }
-                if (element.props?.children) {
-                    return extractText(element.props.children)
+                if (props?.children) {
+                    const children = props.children
+                    if (typeof children === 'string' || typeof children === 'number') {
+                        return String(children)
+                    }
+                    if (React.isValidElement(children)) {
+                        return extractText(children)
+                    }
                 }
             }
             return ''
@@ -92,7 +99,8 @@ export function DataTableViewOptions<TData>({
     if (defaultVisibilityRef.current === null) {
         const defaultVisibility: Record<string, boolean> = {}
         table.getAllColumns().forEach(column => {
-            const hasAccessor = column.accessorKey || column.accessorFn
+            const def = column.columnDef as any
+            const hasAccessor = def.accessorKey || def.accessorFn || column.accessorFn
             const canHide = column.getCanHide()
             const isSelectionColumn = column.id === 'select'
             const hidingDisabled = column.columnDef.enableHiding === false
@@ -108,7 +116,8 @@ export function DataTableViewOptions<TData>({
     const handleResetToDefault = React.useCallback(() => {
         if (defaultVisibilityRef.current) {
             table.getAllColumns().forEach(column => {
-                const hasAccessor = column.accessorKey || column.accessorFn
+                const def = column.columnDef as any
+            const hasAccessor = def.accessorKey || def.accessorFn || column.accessorFn
                 const canHide = column.getCanHide()
                 const isSelectionColumn = column.id === 'select'
                 const hidingDisabled = column.columnDef.enableHiding === false
@@ -142,7 +151,8 @@ export function DataTableViewOptions<TData>({
             .getAllColumns()
             .filter((column) => {
                 // Must have accessor (either accessorKey or accessorFn)
-                const hasAccessor = column.accessorKey || column.accessorFn
+                const def = column.columnDef as any
+            const hasAccessor = def.accessorKey || def.accessorFn || column.accessorFn
                 
                 // Must be able to hide (getCanHide() checks enableHiding)
                 const canHide = column.getCanHide()

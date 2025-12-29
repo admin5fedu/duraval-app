@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/status-badge"
 import { CompactAvatarUpload } from "@/components/ui/compact-avatar-upload"
 import { getEnumBadgeClass, hasEnumColorConfig } from "@/shared/utils/enum-color-registry"
-import { isEnumField, autoDetectAndRegisterEnum } from "@/shared/utils/enum-detection"
+import { autoDetectAndRegisterEnum } from "@/shared/utils/enum-detection"
 
 interface CopyableFieldProps {
   value: string
@@ -140,7 +140,7 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
         </div>
       )
 
-    case "email":
+    case "email": {
       const email = valueStr.trim()
       if (isValidEmail(email)) {
         return (
@@ -156,6 +156,7 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
         )
       }
       return <span className={cn("text-base text-foreground break-all", bodyTextClass())}>{email}</span>
+    }
 
     case "phone":
       const phone = valueStr.trim()

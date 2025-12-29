@@ -29,12 +29,14 @@ import { useViecHangNgayByDateAndEmployee } from "../hooks/use-viec-hang-ngay-by
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { viecHangNgayQueryKeys } from "@/lib/react-query/query-keys"
 import { ViecHangNgayAPI } from "../../viec-hang-ngay/services/viec-hang-ngay.api"
-import type { CreateViecHangNgayInput, UpdateViecHangNgayInput } from "../../viec-hang-ngay/schema"
+import type { CreateViecHangNgayInput, UpdateViecHangNgayInput } from "../../viec-hang-ngay/types"
 import type { ViecHangNgay } from "../../viec-hang-ngay/schema"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { useDebounce } from "@/shared/hooks/useDebounce"
+import { supabase } from "@/lib/supabase"
 
 interface CongViec {
     id: number
@@ -67,14 +69,32 @@ export function ViecHangNgayWidget() {
     const [linkErrors, setLinkErrors] = React.useState<Map<string, boolean>>(new Map())
     const [saveStatus, setSaveStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle")
     const [lastSaved, setLastSaved] = React.useState<Date | null>(null)
+    // State để track saving status (dùng trong auto-save effect)
+    const [isSaving, setIsSaving] = React.useState(false)
+    // State để track unsaved changes (debounce để tránh nhấp nháy)
+    const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
     const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+    const statusUpdateTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
     const isInitialLoadRef = React.useRef(true)
     const previousDataRef = React.useRef<string>("")
     const hasUnsavedChangesRef = React.useRef(false)
     const isSavingRef = React.useRef(false)
     const previousPathnameRef = React.useRef<string>(location.pathname)
+    // ✅ Chuyên nghiệp: Track trạng thái đang gõ để chặn auto-save
+    const isTypingRef = React.useRef(false)
+    const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+    // ✅ FIX: Track khi user đang gõ để chặn load effect ghi đè state
+    const isUserTypingRef = React.useRef(false)
+    // ✅ Chuyên nghiệp: Track dữ liệu đang save để tránh duplicate requests
+    const savingDataRef = React.useRef<string | null>(null)
+    // ✅ Guard để tránh nhiều blur save cùng lúc
+    const isBlurSavingRef = React.useRef(false)
+    // ✅ FIX DỨT ĐIỂM: Track retry count và previous date để reset khi chuyển ngày
+    const consecutiveErrorCountRef = React.useRef(0)
+    const previousSelectedDateRef = React.useRef<string>(selectedDate)
+    const MAX_CONSECUTIVE_ERRORS = 3
 
-    const { data: viecHangNgayData, isLoading, refetch } = useViecHangNgayByDateAndEmployee(
+    const { data: viecHangNgayData, isLoading } = useViecHangNgayByDateAndEmployee(
         employee?.ma_nhan_vien,
         selectedDate,
         !employeeLoading && !!employee?.ma_nhan_vien
@@ -88,17 +108,17 @@ export function ViecHangNgayWidget() {
             return await ViecHangNgayAPI.create(input)
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ 
-                queryKey: viecHangNgayQueryKeys.all(),
-                exact: false
-            })
-            queryClient.setQueryData(
-                viecHangNgayQueryKeys.byDateAndEmployee(
-                    employee?.ma_nhan_vien || 0,
-                    selectedDate
-                ),
-                data
-            )
+            // ✅ BỎ invalidateQueries để tránh trigger refetch (gây request GET mỗi khi gõ)
+            // Chỉ update cache thủ công bằng setQueryData
+            if (employee?.ma_nhan_vien && selectedDate && viecHangNgayQueryKeys?.byDateAndEmployee) {
+                queryClient.setQueryData(
+                    viecHangNgayQueryKeys.byDateAndEmployee(
+                        employee.ma_nhan_vien,
+                        selectedDate
+                    ),
+                    data
+                )
+            }
         },
     })
 
@@ -107,17 +127,25 @@ export function ViecHangNgayWidget() {
             return await ViecHangNgayAPI.update(id, data)
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ 
-                queryKey: viecHangNgayQueryKeys.all(),
-                exact: false
-            })
-            queryClient.setQueryData(
-                viecHangNgayQueryKeys.byDateAndEmployee(
-                    employee?.ma_nhan_vien || 0,
-                    selectedDate
-                ),
-                data
-            )
+            // ✅ Reset error count khi success
+            consecutiveErrorCountRef.current = 0
+            // ✅ BỎ invalidateQueries để tránh trigger refetch (gây request GET mỗi khi gõ)
+            // Chỉ update cache thủ công bằng setQueryData
+            if (employee?.ma_nhan_vien && selectedDate && viecHangNgayQueryKeys?.byDateAndEmployee) {
+                queryClient.setQueryData(
+                    viecHangNgayQueryKeys.byDateAndEmployee(
+                        employee.ma_nhan_vien,
+                        selectedDate
+                    ),
+                    data
+                )
+            }
+        },
+        onError: (error: any) => {
+            // ✅ Xử lý lỗi 406 đặc biệt
+            if (error.message?.includes("406") || error.message?.includes("Not Acceptable")) {
+                console.error("Lỗi 406 - Không có quyền truy cập:", error)
+            }
         },
     })
 
@@ -135,6 +163,13 @@ export function ViecHangNgayWidget() {
     React.useEffect(() => {
         if (employeeLoading || !employee?.ma_nhan_vien || !selectedDate) return
         if (isLoading) return
+        
+        // ✅ FIX DỨT ĐIỂM: Chỉ chặn load khi đang gõ trong CÙNG ngày, KHÔNG chặn khi chuyển ngày
+        // Đây là nguyên nhân gốc rễ: setQueryData trigger load effect → ghi đè state đang gõ
+        if (previousSelectedDateRef.current === selectedDate && 
+            (isUserTypingRef.current || (hasUnsavedChangesRef.current && !isInitialLoadRef.current))) {
+            return // Giữ nguyên dữ liệu đang gõ (chỉ trong cùng ngày)
+        }
 
         isInitialLoadRef.current = true
 
@@ -144,61 +179,133 @@ export function ViecHangNgayWidget() {
                 ? viecHangNgayData.chi_tiet_cong_viec 
                 : []
             
-            const items = chiTiet.length > 0 
-                ? (() => {
-                    const existingItems = chiTiet.slice(0, DEFAULT_ITEMS_COUNT)
-                    const maxId = existingItems.length > 0 
-                        ? Math.max(...existingItems.map(item => item.id || 0), 0)
-                        : 0
+            // ✅ FIX: Merge thông minh - giữ lại dữ liệu user đang gõ, chỉ update từ database
+            // Thay vì ghi đè hoàn toàn, merge để bảo vệ dữ liệu đang gõ
+            setCongViecList(prev => {
+                // Tạo map để dễ lookup items từ database theo ID
+                const itemsMap = new Map<number, CongViec>()
+                chiTiet.forEach(item => {
+                    if (item.id) {
+                        itemsMap.set(item.id, item)
+                    }
+                })
+                
+                // Merge: Ưu tiên dữ liệu đang gõ, fallback về database
+                return Array.from({ length: DEFAULT_ITEMS_COUNT }, (_, index) => {
+                    const itemId = index + 1
+                    const existingInState = prev.find(item => item.id === itemId)
+                    const existingInDB = itemsMap.get(itemId)
                     
-                    const newItems = Array.from(
-                        { length: Math.max(0, DEFAULT_ITEMS_COUNT - existingItems.length) }, 
-                        (_, idx) => ({
-                            id: maxId + idx + 1,
-                            ke_hoach: '',
-                            ket_qua: '',
-                            links: []
-                        })
-                    )
+                    // ✅ Nếu user đang gõ (có nội dung), giữ lại dữ liệu đang gõ
+                    if (existingInState && (
+                        existingInState.ke_hoach?.trim() || 
+                        existingInState.ket_qua?.trim() || 
+                        (existingInState.links && existingInState.links.length > 0 && existingInState.links.some((link: string) => link?.trim()))
+                    )) {
+                        // ✅ FIX: Giữ nguyên toàn bộ dữ liệu đang gõ (không merge với DB)
+                        // Vì user đang gõ, ưu tiên dữ liệu từ state
+                        return existingInState
+                    }
                     
-                    const merged = [...existingItems, ...newItems].slice(0, DEFAULT_ITEMS_COUNT)
-                    
-                    const seenIds = new Set<number>()
-                    return merged.map((item, index) => {
-                        let uniqueId = item.id || (index + 1)
-                        while (seenIds.has(uniqueId)) {
-                            uniqueId = (seenIds.size > 0 ? Math.max(...Array.from(seenIds)) : 0) + 1
-                        }
-                        seenIds.add(uniqueId)
-                        return { ...item, id: uniqueId }
-                    })
-                })()
-                : initializeDefaultCongViec()
+                    // Nếu không có dữ liệu đang gõ, dùng từ database hoặc tạo mới
+                    return existingInDB || {
+                        id: itemId,
+                        ke_hoach: '',
+                        ket_qua: '',
+                        links: []
+                    }
+                })
+            })
             
-            setCongViecList(items)
+            // Update previousDataRef sau khi merge
             setTimeout(() => {
-                const filteredList = items.filter(item => 
-                    item.ke_hoach?.trim() || 
-                    item.ket_qua?.trim() || 
-                    (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
-                )
-                previousDataRef.current = JSON.stringify(filteredList)
+                setCongViecList(currentList => {
+                    const filteredList = currentList.filter(item => 
+                        item.ke_hoach?.trim() || 
+                        item.ket_qua?.trim() || 
+                        (item.links && item.links.length > 0 && item.links.some((link: string) => link?.trim()))
+                    )
+                    previousDataRef.current = JSON.stringify(filteredList)
+                    return currentList
+                })
                 hasUnsavedChangesRef.current = false
+                setHasUnsavedChanges(false)
                 setSaveStatus("idle")
             }, 0)
         } else {
-            const defaultItems = initializeDefaultCongViec()
-            setCurrentRecord(null)
-            setCongViecList(defaultItems)
-            previousDataRef.current = JSON.stringify([])
-            hasUnsavedChangesRef.current = false
-            setSaveStatus("idle")
+            // ✅ FIX: Khi không có data, chỉ set default nếu chưa có dữ liệu đang gõ
+            setCongViecList(prev => {
+                // Nếu đã có dữ liệu đang gõ, giữ lại
+                const hasUserData = prev.some(item => 
+                    item.ke_hoach?.trim() || 
+                    item.ket_qua?.trim() || 
+                    (item.links && item.links.length > 0 && item.links.some((link: string) => link?.trim()))
+                )
+                
+                if (hasUserData) {
+                    // Đảm bảo có đủ DEFAULT_ITEMS_COUNT items
+                    const currentLength = prev.length
+                    if (currentLength < DEFAULT_ITEMS_COUNT) {
+                        const defaultItems = initializeDefaultCongViec()
+                        // Merge: giữ items đang có, thêm items trống cho các vị trí còn thiếu
+                        const merged = [...prev]
+                        for (let i = currentLength; i < DEFAULT_ITEMS_COUNT; i++) {
+                            merged.push(defaultItems[i])
+                        }
+                        return merged
+                    }
+                    return prev
+                }
+                
+                // Nếu không có dữ liệu đang gõ, set default
+                const defaultItems = initializeDefaultCongViec()
+                setCurrentRecord(null)
+                previousDataRef.current = JSON.stringify([])
+                hasUnsavedChangesRef.current = false
+                setHasUnsavedChanges(false)
+                setSaveStatus("idle")
+                return defaultItems
+            })
         }
 
         setTimeout(() => {
             isInitialLoadRef.current = false
         }, 100)
     }, [selectedDate, employee?.ma_nhan_vien, employeeLoading, viecHangNgayData, isLoading, initializeDefaultCongViec])
+
+    // ✅ FIX DỨT ĐIỂM: Reset tất cả state/refs khi chuyển ngày
+    React.useEffect(() => {
+        // Chỉ reset khi selectedDate thực sự thay đổi
+        if (previousSelectedDateRef.current === selectedDate) return
+        
+        // Reset tất cả refs và state khi chuyển ngày
+        previousSelectedDateRef.current = selectedDate
+        consecutiveErrorCountRef.current = 0
+        hasUnsavedChangesRef.current = false
+        setHasUnsavedChanges(false)
+        isUserTypingRef.current = false
+        isTypingRef.current = false
+        isSavingRef.current = false
+        savingDataRef.current = null
+        previousDataRef.current = ""
+        isInitialLoadRef.current = true
+        setSaveStatus("idle")
+        setCurrentRecord(null)
+        
+        // Clear tất cả timeouts
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current)
+            saveTimeoutRef.current = null
+        }
+        if (statusUpdateTimeoutRef.current) {
+            clearTimeout(statusUpdateTimeoutRef.current)
+            statusUpdateTimeoutRef.current = null
+        }
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current)
+            typingTimeoutRef.current = null
+        }
+    }, [selectedDate])
 
     // Hàm lấy dữ liệu cần save
     const getDataToSave = React.useCallback((): CongViec[] => {
@@ -208,6 +315,78 @@ export function ViecHangNgayWidget() {
             (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
         )
     }, [congViecList])
+
+    // ✅ Helper: Check xem có dữ liệu cần save không (dựa trên dữ liệu thực tế, không phải ref)
+    const hasDataToSave = React.useCallback((): boolean => {
+        const dataToSave = getDataToSave()
+        if (dataToSave.length === 0) return false
+        
+        const currentDataString = JSON.stringify(dataToSave)
+        return currentDataString !== previousDataRef.current
+    }, [getDataToSave])
+
+    // ✅ Helper: Gọi fetch với keepalive cho beforeunload/unmount (không dùng sendBeacon vì không hỗ trợ PATCH và Header Auth)
+    const saveWithKeepalive = React.useCallback(async (dataToSave: CongViec[]): Promise<void> => {
+        if (!employee?.ma_nhan_vien || !selectedDate) return
+        
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session?.access_token) {
+                console.warn("No session token available for keepalive save")
+                return
+            }
+
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+            const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY || ''
+            const TABLE_NAME = "cong_viec_viec_hang_ngay"
+
+            if (currentRecord?.id) {
+                // Update existing record
+                const url = `${supabaseUrl}/rest/v1/${TABLE_NAME}?id=eq.${currentRecord.id}&select=*`
+                const payload = {
+                    chi_tiet_cong_viec: dataToSave
+                }
+                
+                await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(payload),
+                    keepalive: true // ✅ Đảm bảo request được gửi ngay cả khi trang đóng
+                })
+            } else {
+                // Create new record
+                const url = `${supabaseUrl}/rest/v1/${TABLE_NAME}?select=*`
+                const payload = {
+                    ma_nhan_vien: employee.ma_nhan_vien,
+                    ngay_bao_cao: selectedDate,
+                    chi_tiet_cong_viec: dataToSave
+                }
+                
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(payload),
+                    keepalive: true // ✅ Đảm bảo request được gửi ngay cả khi trang đóng
+                })
+            }
+        } catch (error) {
+            console.error("Error saving with keepalive:", error)
+        }
+    }, [employee?.ma_nhan_vien, selectedDate, currentRecord])
+
+    // ✅ Chuyên nghiệp: Debounce congViecList để chỉ save sau khi dừng gõ 3 giây
+    // Debounce 3 giây - chỉ trigger khi user dừng gõ 3 giây
+    const debouncedCongViecList = useDebounce(congViecList, 3000)
 
     // Validate tất cả links
     const validateAllLinks = React.useCallback((items: CongViec[]): boolean => {
@@ -229,14 +408,41 @@ export function ViecHangNgayWidget() {
         return !hasError
     }, [])
 
-    // Hàm thực hiện save
-    const performSave = React.useCallback(async (dataToSave: CongViec[], silent = false) => {
+    // Hàm thực hiện save (đơn giản hóa, bỏ queue, bỏ refetch)
+    const performSave = React.useCallback(async (dataToSave: CongViec[], silent = false, force = false): Promise<boolean> => {
         if (!employee?.ma_nhan_vien || !selectedDate || isInitialLoadRef.current) return false
 
-        if (isSavingRef.current) {
-            return false
+        // ✅ Force save: Bypass isSaving check nếu là force save (navigate/unmount)
+        if (!force) {
+            // ✅ Chuyên nghiệp: Xử lý race condition - đợi request cũ xong nếu đang save
+            // Sau đó check lại dữ liệu mới nhất để đảm bảo lưu đúng
+            if (isSavingRef.current || isSaving) {
+                // Đợi request cũ xong (tối đa 5 giây)
+                let waitCount = 0
+                while ((isSavingRef.current || isSaving) && waitCount < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100))
+                    waitCount++
+                }
+                
+                // Sau khi đợi xong, lấy dữ liệu mới nhất (có thể đã thay đổi)
+                const latestDataToSave = getDataToSave()
+                const latestDataString = JSON.stringify(latestDataToSave)
+                const currentDataString = JSON.stringify(dataToSave)
+                
+                // Nếu dữ liệu khác → dùng dữ liệu mới nhất
+                if (latestDataString !== currentDataString) {
+                    dataToSave = latestDataToSave
+                }
+                
+                // Check lại sau khi đợi
+                if (isSavingRef.current || isSaving) {
+                    console.warn("Save request still in progress, skipping duplicate save")
+                    return false
+                }
+            }
         }
 
+        // Validate links
         if (!validateAllLinks(dataToSave)) {
             if (!silent) {
                 toast.error("Vui lòng sửa lại các link không hợp lệ. Link phải bắt đầu bằng http:// hoặc https://")
@@ -252,43 +458,66 @@ export function ViecHangNgayWidget() {
             return false
         }
 
+        // Set flags để chống race condition
         isSavingRef.current = true
+        setIsSaving(true)
         if (!silent) {
             setSaveStatus("saving")
         }
         
         try {
-            const dataPayload: Partial<ViecHangNgay> = {
-                ma_nhan_vien: employee.ma_nhan_vien,
-                ngay_bao_cao: selectedDate,
-                chi_tiet_cong_viec: dataToSave
-            }
+            let savedRecord: ViecHangNgay | null = null
 
             if (currentRecord?.id) {
-                const updated = await updateMutation.mutateAsync({ 
+                // ✅ Tối ưu: Khi update, chỉ gửi chi_tiet_cong_viec (không gửi ma_nhan_vien và ngay_bao_cao)
+                // Để tránh trigger checkDuplicateReport không cần thiết
+                const updatePayload: Partial<ViecHangNgay> = {
+                    chi_tiet_cong_viec: dataToSave
+                }
+                savedRecord = await updateMutation.mutateAsync({ 
                     id: currentRecord.id, 
-                    data: dataPayload 
+                    data: updatePayload 
                 })
-                setCurrentRecord(updated)
-                // Refetch để đảm bảo data sync
-                await refetch()
+                // ✅ KHÔNG update currentRecord ngay - tránh trigger re-render và ghi đè dữ liệu đang gõ
+                // setCurrentRecord(savedRecord) // BỎ DÒNG NÀY
             } else {
+                // Khi create, cần gửi đầy đủ thông tin
                 if (dataToSave.length > 0) {
-                    const created = await createMutation.mutateAsync(dataPayload as any)
-                    setCurrentRecord(created)
-                    // Refetch để đảm bảo data sync
-                    await refetch()
+                    const createPayload: Partial<ViecHangNgay> = {
+                        ma_nhan_vien: employee.ma_nhan_vien,
+                        ngay_bao_cao: selectedDate,
+                        chi_tiet_cong_viec: dataToSave
+                    }
+                    savedRecord = await createMutation.mutateAsync(createPayload as any)
+                    // ✅ CHỈ update currentRecord khi create (lần đầu), không update khi update
+                    setCurrentRecord(savedRecord)
                 }
             }
 
+            // ✅ Update query cache thủ công (KHÔNG refetch để tránh ghi đè dữ liệu đang gõ)
+            if (savedRecord && employee?.ma_nhan_vien && selectedDate && viecHangNgayQueryKeys?.byDateAndEmployee) {
+                queryClient.setQueryData(
+                    viecHangNgayQueryKeys.byDateAndEmployee(
+                        employee.ma_nhan_vien,
+                        selectedDate
+                    ),
+                    savedRecord
+                )
+            }
+
+            // ✅ Cập nhật mốc so sánh NGAY SAU KHI API thành công
             hasUnsavedChangesRef.current = false
+            setHasUnsavedChanges(false) // ✅ Cập nhật state để trigger re-render status
             previousDataRef.current = JSON.stringify(dataToSave)
+            // ✅ Clear saving data ref sau khi save thành công
+            savingDataRef.current = null
+            // ✅ FIX: Clear flag đang gõ sau khi save thành công (cho phép load effect chạy lại nếu cần)
+            isUserTypingRef.current = false
             
             if (!silent) {
                 setSaveStatus("saved")
                 setLastSaved(new Date())
                 toast.success("Đã lưu thành công")
-                // Reset status sau 3 giây
                 setTimeout(() => {
                     setSaveStatus("idle")
                 }, 3000)
@@ -297,100 +526,198 @@ export function ViecHangNgayWidget() {
             return true
         } catch (error: any) {
             console.error("Lỗi khi lưu:", error)
+            
+            // ✅ FIX: Tăng consecutive error count
+            consecutiveErrorCountRef.current += 1
+            
+            // ✅ FIX: Xử lý lỗi PGRST116 (record không tồn tại) - tạo mới thay vì update
+            if (error.message?.includes("PGRST116") || error.message?.includes("0 rows") || error.message?.includes("Cannot coerce")) {
+                // Record không tồn tại, thử tạo mới
+                if (currentRecord?.id && employee?.ma_nhan_vien && selectedDate) {
+                    try {
+                        const createPayload: Partial<ViecHangNgay> = {
+                            ma_nhan_vien: employee.ma_nhan_vien,
+                            ngay_bao_cao: selectedDate,
+                            chi_tiet_cong_viec: dataToSave
+                        }
+                        const newRecord = await createMutation.mutateAsync(createPayload as any)
+                        setCurrentRecord(newRecord)
+                        
+                        // Update cache
+                        if (viecHangNgayQueryKeys?.byDateAndEmployee) {
+                            queryClient.setQueryData(
+                                viecHangNgayQueryKeys.byDateAndEmployee(
+                                    employee.ma_nhan_vien,
+                                    selectedDate
+                                ),
+                                newRecord
+                            )
+                        }
+                        
+                        // Reset error count và clear flags
+                        consecutiveErrorCountRef.current = 0
+                        hasUnsavedChangesRef.current = false
+                        setHasUnsavedChanges(false)
+                        previousDataRef.current = JSON.stringify(dataToSave)
+                        savingDataRef.current = null
+                        
+                        if (!silent) {
+                            setSaveStatus("saved")
+                            setLastSaved(new Date())
+                            toast.success("Đã lưu thành công")
+                        }
+                        
+                        return true
+                    } catch (createError: any) {
+                        console.error("Lỗi khi tạo mới sau khi update fail:", createError)
+                        // Fall through to error handling
+                    }
+                }
+            }
+            
+            // ✅ FIX: Nếu đã lỗi quá nhiều lần, dừng auto-save và thông báo
+            const currentDataString = JSON.stringify(dataToSave)
+            if (consecutiveErrorCountRef.current >= MAX_CONSECUTIVE_ERRORS) {
+                hasUnsavedChangesRef.current = true
+                setHasUnsavedChanges(true)
+                savingDataRef.current = currentDataString // ✅ KHÔNG clear để tránh retry
+                if (!silent) {
+                    setSaveStatus("error")
+                    toast.error(`Đã lỗi ${MAX_CONSECUTIVE_ERRORS} lần liên tiếp. Vui lòng kiểm tra kết nối hoặc quyền truy cập.`)
+                }
+                return false
+            }
+            
+            // ✅ XỬ LÝ LỖI: Giữ nguyên hasUnsavedChangesRef = true để người dùng có cơ hội lưu lại
+            // NHƯNG không clear savingDataRef để tránh retry ngay lập tức
+            hasUnsavedChangesRef.current = true
+            setHasUnsavedChanges(true)
+            savingDataRef.current = currentDataString // ✅ KHÔNG clear để tránh retry
+            
             if (!silent) {
                 setSaveStatus("error")
                 toast.error(error.message || "Có lỗi xảy ra khi lưu dữ liệu")
-                // Reset error status sau 5 giây
                 setTimeout(() => {
                     setSaveStatus("idle")
                 }, 5000)
             }
             return false
         } finally {
+            setIsSaving(false)
             isSavingRef.current = false
         }
-    }, [employee?.ma_nhan_vien, selectedDate, currentRecord, createMutation, updateMutation, validateAllLinks, linkErrors])
+    }, [employee?.ma_nhan_vien, selectedDate, currentRecord, createMutation, updateMutation, validateAllLinks, linkErrors, queryClient, isSaving, getDataToSave])
 
-    // Auto-save với debounce
+    // ✅ Chuyên nghiệp: Auto-save chỉ chạy khi debounced value thay đổi (sau 3 giây dừng gõ)
+    // Sử dụng debouncedCongViecList thay vì congViecList trực tiếp
     React.useEffect(() => {
-        if (isLoading || isSavingRef.current || isInitialLoadRef.current) return
+        // Bỏ qua nếu đang load, đang save, hoặc là initial load
+        if (isLoading || isInitialLoadRef.current) return
+        
+        // ✅ CHẶN: Không chạy auto-save nếu đang save (tránh race condition)
+        if (isSaving || isSavingRef.current) {
+            return
+        }
+        
+        // ✅ CHẶN: Không chạy auto-save nếu đang gõ (chuyên nghiệp)
+        if (isTypingRef.current) {
+            return // Đang gõ, không save
+        }
 
-        const filteredList = congViecList.filter(item => 
+        // Chuẩn bị dữ liệu để so sánh và lưu (dùng debouncedCongViecList)
+        const filteredList = debouncedCongViecList.filter(item => 
             item.ke_hoach?.trim() || 
             item.ket_qua?.trim() || 
             (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
         )
         
+        // Serialize để so sánh với previous data
         const currentDataString = JSON.stringify(filteredList)
         
+        // ✅ CHẶN: Không save nếu dữ liệu giống với lần save trước (tránh duplicate)
         if (currentDataString === previousDataRef.current) {
-            return
+            return // Không có thay đổi, không cần save
         }
         
+        // ✅ CHẶN: Không save nếu đang save cùng dữ liệu này (tránh duplicate requests)
+        if (currentDataString === savingDataRef.current) {
+            return // Đang save dữ liệu này rồi, không save lại
+        }
+        
+        // Đánh dấu có thay đổi chưa lưu
         hasUnsavedChangesRef.current = true
         
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current)
+        // ✅ DEBOUNCE STATUS TEXT: Chỉ hiển thị "Có thay đổi chưa lưu" sau 500ms dừng gõ
+        if (statusUpdateTimeoutRef.current) {
+            clearTimeout(statusUpdateTimeoutRef.current)
         }
+        statusUpdateTimeoutRef.current = setTimeout(() => {
+            setHasUnsavedChanges(true)
+        }, 500)
+        
+        // ✅ Đánh dấu dữ liệu đang save (tránh duplicate)
+        savingDataRef.current = currentDataString
+        
+        // Thực hiện save với debounced data
+        performSave(filteredList, true)
+            .then(() => {
+                // ✅ Reset error count khi save thành công
+                consecutiveErrorCountRef.current = 0
+                // ✅ Clear saving data ref sau khi save thành công
+                if (savingDataRef.current === currentDataString) {
+                    savingDataRef.current = null
+                }
+            })
+            .catch(err => {
+                console.error("Auto-save error:", err)
+                // ✅ KHÔNG clear savingDataRef khi lỗi để tránh retry ngay lập tức
+                // Chỉ clear nếu đã vượt quá retry limit
+                if (consecutiveErrorCountRef.current >= MAX_CONSECUTIVE_ERRORS) {
+                    // Đã vượt quá limit, clear để user có thể thử lại sau
+                    if (savingDataRef.current === currentDataString) {
+                        savingDataRef.current = null
+                    }
+                }
+                // Nếu chưa vượt limit, giữ nguyên savingDataRef để tránh retry
+            })
+    }, [debouncedCongViecList, isLoading, isSaving, performSave])
 
-        saveTimeoutRef.current = setTimeout(async () => {
-            const latestFiltered = congViecList.filter(item => 
-                item.ke_hoach?.trim() || 
-                item.ket_qua?.trim() || 
-                (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
-            )
-            const latestDataString = JSON.stringify(latestFiltered)
-            
-            if (latestDataString === previousDataRef.current) {
-                return
-            }
-            
-            const success = await performSave(latestFiltered, true) // Silent auto-save (no toast)
-            if (success) {
-                previousDataRef.current = latestDataString
-            }
-        }, 2000)
-
-        return () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current)
-            }
-        }
-    }, [congViecList, isLoading, performSave])
-
-    // Lưu khi component unmount
+    // ✅ Lưu khi component unmount (dùng fetch với keepalive)
     React.useEffect(() => {
         return () => {
+            // Clear timeouts
             if (saveTimeoutRef.current) {
                 clearTimeout(saveTimeoutRef.current)
+                saveTimeoutRef.current = null
             }
-            if (hasUnsavedChangesRef.current && !isSavingRef.current) {
-                const dataToSave = congViecList.filter(item => 
-                    item.ke_hoach?.trim() || 
-                    item.ket_qua?.trim() || 
-                    (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
-                )
-                if (dataToSave.length > 0 && employee?.ma_nhan_vien && selectedDate) {
-                    performSave(dataToSave, true).catch(err => {
-                        console.error("Error saving on unmount:", err)
-                    })
-                }
+            if (statusUpdateTimeoutRef.current) {
+                clearTimeout(statusUpdateTimeoutRef.current)
+                statusUpdateTimeoutRef.current = null
+            }
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current)
+                typingTimeoutRef.current = null
+            }
+            
+            // ✅ Check dữ liệu thực tế (không chỉ dựa vào hasUnsavedChangesRef)
+            if (hasDataToSave()) {
+                const dataToSave = getDataToSave()
+                // Dùng fetch với keepalive để đảm bảo request được gửi
+                saveWithKeepalive(dataToSave).catch(err => {
+                    console.error("Error saving on unmount:", err)
+                })
             }
         }
-    }, [congViecList, employee?.ma_nhan_vien, selectedDate, performSave])
+    }, [hasDataToSave, getDataToSave, saveWithKeepalive])
 
-    // Lưu khi đóng tab/trình duyệt
+    // ✅ Lưu khi đóng tab/trình duyệt (dùng fetch với keepalive)
     React.useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (hasUnsavedChangesRef.current && !isSavingRef.current) {
-                const dataToSave = congViecList.filter(item => 
-                    item.ke_hoach?.trim() || 
-                    item.ket_qua?.trim() || 
-                    (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
-                )
-                if (dataToSave.length > 0 && employee?.ma_nhan_vien && selectedDate) {
-                    performSave(dataToSave, true).catch(() => {})
-                }
+            // ✅ Check dữ liệu thực tế (không chỉ dựa vào hasUnsavedChangesRef)
+            if (hasDataToSave()) {
+                const dataToSave = getDataToSave()
+                // ✅ Dùng fetch với keepalive để đảm bảo request được gửi ngay cả khi trang đóng
+                saveWithKeepalive(dataToSave).catch(() => {})
                 
                 e.preventDefault()
                 e.returnValue = ''
@@ -401,27 +728,153 @@ export function ViecHangNgayWidget() {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload)
         }
-    }, [congViecList, employee?.ma_nhan_vien, selectedDate, performSave])
+    }, [hasDataToSave, getDataToSave, saveWithKeepalive])
 
-    // Lưu khi navigate
+    // ✅ Lưu khi ẩn trình duyệt/chuyển tab (dùng fetch với keepalive)
+    React.useEffect(() => {
+        const handleVisibilityChange = () => {
+            // ✅ Lưu khi ẩn trình duyệt/chuyển tab
+            if (document.hidden && hasDataToSave()) {
+                const dataToSave = getDataToSave()
+                // Dùng fetch với keepalive để đảm bảo request được gửi
+                saveWithKeepalive(dataToSave).catch(err => {
+                    console.error("Error saving on visibility change:", err)
+                })
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+    }, [hasDataToSave, getDataToSave, saveWithKeepalive])
+
+    // ✅ Chuyên nghiệp: Force save khi navigate (chuyển module)
     React.useEffect(() => {
         if (previousPathnameRef.current !== location.pathname && previousPathnameRef.current) {
-            if (hasUnsavedChangesRef.current && !isSavingRef.current) {
-                performSave(getDataToSave(), true).catch(err => {
+            // Clear tất cả timeouts (tránh save trùng lặp)
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current)
+                saveTimeoutRef.current = null
+            }
+            if (statusUpdateTimeoutRef.current) {
+                clearTimeout(statusUpdateTimeoutRef.current)
+                statusUpdateTimeoutRef.current = null
+            }
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current)
+                typingTimeoutRef.current = null
+            }
+            isTypingRef.current = false // Tắt flag đang gõ
+            isUserTypingRef.current = false // ✅ FIX: Tắt flag khi navigate
+            
+            // ✅ Check dữ liệu thực tế (không chỉ dựa vào hasUnsavedChangesRef)
+            if (hasDataToSave()) {
+                const dataToSave = getDataToSave()
+                // ✅ Force save: bypass isSaving check (lệnh force-save cuối cùng)
+                performSave(dataToSave, true, true).catch(err => {
+                    // ✅ Log lỗi nhưng không block navigation
                     console.error("Error saving on navigation:", err)
                 })
             }
         }
         previousPathnameRef.current = location.pathname
-    }, [location.pathname, performSave, getDataToSave])
+    }, [location.pathname, performSave, getDataToSave, hasDataToSave])
 
     const updateItem = React.useCallback((index: number, updates: Partial<CongViec>) => {
+        // ✅ FIX: Đánh dấu user đang gõ để chặn load effect ghi đè state
+        isUserTypingRef.current = true
+        // ✅ Set flag ngay lập tức khi gõ (không đợi debounce) - để các handler biết có thay đổi
+        hasUnsavedChangesRef.current = true
+        
+        // ✅ Chuyên nghiệp: Đánh dấu đang gõ khi user thay đổi input
+        isTypingRef.current = true
+        
+        // Clear timeout cũ
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current)
+        }
+        
+        // ✅ FIX: Sau 5 giây không gõ → tắt cả 2 flags (tăng từ 3 giây để an toàn hơn)
+        typingTimeoutRef.current = setTimeout(() => {
+            isTypingRef.current = false
+            isUserTypingRef.current = false // ✅ Tắt flag để cho phép load effect chạy lại
+        }, 5000)
+        
+        // Update local state ngay lập tức (không chờ debounce)
         setCongViecList(prev => {
+            // ✅ FIX: Đảm bảo index hợp lệ
+            if (index < 0 || index >= prev.length) {
+                console.warn(`Invalid index: ${index}, list length: ${prev.length}`)
+                return prev
+            }
+            
             const newList = [...prev]
             newList[index] = { ...newList[index], ...updates }
             return newList
         })
     }, [])
+
+    // ✅ Chuyên nghiệp: Force save khi blur (rời khỏi ô input)
+    const handleInputBlur = React.useCallback(async () => {
+        // ✅ GUARD: Chặn nếu đang blur save (tránh 170 requests)
+        if (isBlurSavingRef.current) {
+            return
+        }
+        
+        // Clear timeout auto-save 3s (tránh save trùng lặp)
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current)
+            saveTimeoutRef.current = null
+        }
+        if (statusUpdateTimeoutRef.current) {
+            clearTimeout(statusUpdateTimeoutRef.current)
+            statusUpdateTimeoutRef.current = null
+        }
+        
+        // Clear typing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current)
+            typingTimeoutRef.current = null
+        }
+        isTypingRef.current = false // Tắt flag đang gõ
+        isUserTypingRef.current = false // ✅ FIX: Tắt flag để cho phép load effect chạy lại sau khi save
+        
+        // Kiểm tra có thay đổi chưa lưu không
+        if (!hasUnsavedChangesRef.current) {
+            return // Không có thay đổi, không cần save
+        }
+        
+        const dataToSave = getDataToSave()
+        if (dataToSave.length === 0) {
+            return
+        }
+        
+        // ✅ DIRTY CHECK: So sánh với previousDataRef (tránh save dữ liệu không thay đổi)
+        const currentDataString = JSON.stringify(dataToSave)
+        if (currentDataString === previousDataRef.current) {
+            // Dữ liệu không thay đổi, không cần save
+            hasUnsavedChangesRef.current = false
+            setHasUnsavedChanges(false)
+            return
+        }
+        
+        // ✅ Set flag trước khi save
+        isBlurSavingRef.current = true
+        
+        try {
+            // ✅ Force save ngay lập tức (silent, không toast)
+            // performSave sẽ tự xử lý race condition (đợi request cũ xong và lấy dữ liệu mới nhất)
+            // Validate sẽ được thực hiện trong performSave
+            await performSave(dataToSave, true).catch(err => {
+                console.error("Error saving on blur:", err)
+                // Giữ hasUnsavedChangesRef = true (đã được xử lý trong performSave khi lỗi)
+            })
+        } finally {
+            // ✅ Clear flag sau khi xong
+            isBlurSavingRef.current = false
+        }
+    }, [getDataToSave, performSave])
 
     const toggleItemExpand = React.useCallback((itemId: number) => {
         setExpandedItemId(expandedItemId === itemId ? null : itemId)
@@ -543,12 +996,13 @@ export function ViecHangNgayWidget() {
             case "error":
                 return <span className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Lỗi lưu</span>
             default:
-                if (hasUnsavedChangesRef.current) {
+                // ✅ Sử dụng state đã được debounce (500ms) để tránh nhấp nháy
+                if (hasUnsavedChanges) {
                     return <span className="text-xs text-amber-500">Có thay đổi chưa lưu</span>
                 }
                 return <span className="text-xs text-muted-foreground">Đã lưu</span>
         }
-    }, [saveStatus, lastSaved])
+    }, [saveStatus, lastSaved, hasUnsavedChanges])
 
     if (employeeLoading) {
         return (
@@ -723,6 +1177,7 @@ export function ViecHangNgayWidget() {
                                                     target.style.height = 'auto'
                                                     target.style.height = Math.max(40, target.scrollHeight) + 'px'
                                                 }}
+                                                onBlur={handleInputBlur}
                                                 onInput={(e) => {
                                                     const target = e.target as HTMLTextAreaElement
                                                     target.style.height = 'auto'
@@ -824,6 +1279,7 @@ export function ViecHangNgayWidget() {
                                                             target.style.height = 'auto'
                                                             target.style.height = Math.max(80, target.scrollHeight) + 'px'
                                                         }}
+                                                        onBlur={handleInputBlur}
                                                         onInput={(e) => {
                                                             const target = e.target as HTMLTextAreaElement
                                                             target.style.height = 'auto'
@@ -949,7 +1405,7 @@ export function ViecHangNgayWidget() {
                     const isValid = validateAllLinks(dataToSave)
                     if (isValid) {
                         // Force save trước khi đóng dialog nếu có thay đổi
-                        if (hasUnsavedChangesRef.current && !isSavingRef.current) {
+                        if (hasUnsavedChangesRef.current && !isSavingRef.current && !isSaving) {
                             performSave(dataToSave, false).then(() => {
                                 setShowFullViewDialog(false)
                             }).catch(() => {
@@ -993,11 +1449,10 @@ export function ViecHangNgayWidget() {
                     <div className="flex-1 overflow-y-auto">
                         <div className="space-y-0.5">
                             {congViecList.map((item, itemIndex) => {
-                                const hasPlan = item.ke_hoach?.trim()
-                                const hasReport = item.ket_qua?.trim() || (item.links && item.links.length > 0 && item.links.some(link => link.trim()))
                                 const links = item.links || []
 
-                                if (!hasPlan && !hasReport) return null
+                                // ✅ SỬA: Luôn hiển thị tất cả items, kể cả trống (để đảm bảo đủ từ 1, 2, 3...)
+                                // Không return null nữa
 
                                 return (
                                     <div 
@@ -1020,6 +1475,7 @@ export function ViecHangNgayWidget() {
                                                             target.style.height = 'auto'
                                                             target.style.height = Math.max(50, target.scrollHeight) + 'px'
                                                         }}
+                                                        onBlur={handleInputBlur}
                                                         className="flex-1 resize-none text-sm border-0 shadow-none focus-visible:ring-1 bg-transparent"
                                                         style={{ minHeight: '50px', maxHeight: 'none' }}
                                                         rows={2}
@@ -1037,6 +1493,7 @@ export function ViecHangNgayWidget() {
                                                         target.style.height = 'auto'
                                                         target.style.height = Math.max(50, target.scrollHeight) + 'px'
                                                     }}
+                                                    onBlur={handleInputBlur}
                                                     className="w-full resize-none text-sm border-0 shadow-none focus-visible:ring-1 bg-transparent"
                                                     style={{ minHeight: '50px', maxHeight: 'none' }}
                                                     rows={2}

@@ -87,7 +87,7 @@ export class KeHoach168Service {
         const updateData: Partial<KeHoach168> = {}
         Object.entries(record).forEach(([k, value]) => {
           if (value !== null && value !== undefined && value !== "") {
-            ;(updateData as any)[k] = value
+            (updateData as any)[k] = value
           }
         })
         delete (updateData as any).id

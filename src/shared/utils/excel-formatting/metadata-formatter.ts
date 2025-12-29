@@ -54,10 +54,12 @@ export function addMetadataToWorksheet(
   
   // Adjust freeze panes to account for metadata row
   if (worksheet.views && worksheet.views.length > 0) {
-    const view = worksheet.views[0]
+    const view = worksheet.views[0] as any
     if (view.ySplit !== undefined) {
       view.ySplit = (view.ySplit ?? 0) + 1
-      view.topLeftCell = view.topLeftCell?.replace(/^A/, 'A')?.replace(/^(\d+)/, (match) => String(Number(match) + 1))
+      if (view.topLeftCell) {
+        view.topLeftCell = view.topLeftCell.replace(/^A/, 'A')?.replace(/^(\d+)/, (match: string) => String(Number(match) + 1))
+      }
     }
   }
 }

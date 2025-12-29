@@ -1,4 +1,4 @@
-import { PhanQuyen, CreatePhanQuyenInput, UpdatePhanQuyenInput, quyenSchema } from "../schema"
+import { CreatePhanQuyenInput, UpdatePhanQuyenInput, quyenSchema } from "../schema"
 
 /**
  * Domain service for Phân Quyền

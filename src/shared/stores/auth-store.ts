@@ -82,7 +82,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Cleanup cache cũ (giữ tối đa 50 entries)
         if (employeeCache.size > 50) {
           const firstKey = employeeCache.keys().next().value
-          employeeCache.delete(firstKey)
+          if (firstKey) {
+            employeeCache.delete(firstKey)
+          }
         }
       } else {
         set({ employee: null, employeeLoading: false })

@@ -276,7 +276,7 @@ export function ViecHangNgayListView({
                     rightActions={
                         <>
                             <Button
-                                size="xs"
+                                size="sm"
                                 variant="outline"
                                 onClick={(e) => {
                                     e.stopPropagation()
@@ -380,6 +380,17 @@ export function ViecHangNgayListView({
             onDeleteSelected={async (selectedRows) => {
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
+            }}
+            batchDeleteConfig={{
+                itemName: "việc hàng ngày",
+                moduleName: viecHangNgayConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: ViecHangNgay) => {
+                    const employee = employees?.find(emp => emp.ma_nhan_vien === item.ma_nhan_vien)
+                    return employee 
+                        ? `${employee.ma_nhan_vien} - ${employee.ho_ten}`
+                        : String(item.ma_nhan_vien)
+                },
             }}
             filters={filters}
             searchFields={viecHangNgayConfig.searchFields as (keyof ViecHangNgay)[]}

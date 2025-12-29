@@ -1,6 +1,7 @@
 "use client"
 
 import { supabase } from "@/lib/supabase"
+import { toPromise } from "@/lib/supabase-utils"
 import { CauTraLoi } from "../schema"
 import type { CreateCauTraLoiInput, UpdateCauTraLoiInput } from "../types"
 
@@ -46,11 +47,12 @@ export class CauTraLoiAPI {
         // Fetch lich dang
         if (lichDangIds.length > 0) {
             queries.push(
-                supabase
-                    .from("chhn_lich_dang_bai")
-                    .select("id, cau_hoi")
-                    .in("id", lichDangIds)
-                    .then(({ data }) => data || [])
+                toPromise(
+                    supabase
+                        .from("chhn_lich_dang_bai")
+                        .select("id, cau_hoi")
+                        .in("id", lichDangIds)
+                ).then(({ data }) => data || [])
             )
         } else {
             queries.push(Promise.resolve([]))
@@ -59,11 +61,12 @@ export class CauTraLoiAPI {
         // Fetch nguoi tao
         if (nguoiTaoIds.length > 0) {
             queries.push(
-                supabase
-                    .from("var_nhan_su")
-                    .select("ma_nhan_vien, ho_ten")
-                    .in("ma_nhan_vien", nguoiTaoIds)
-                    .then(({ data }) => data || [])
+                toPromise(
+                    supabase
+                        .from("var_nhan_su")
+                        .select("ma_nhan_vien, ho_ten")
+                        .in("ma_nhan_vien", nguoiTaoIds)
+                ).then(({ data }) => data || [])
             )
         } else {
             queries.push(Promise.resolve([]))
@@ -109,13 +112,13 @@ export class CauTraLoiAPI {
         
         if (data.lich_dang_id) {
             queries.push(
-                supabase
-                    .from("chhn_lich_dang_bai")
-                    .select("cau_hoi")
-                    .eq("id", data.lich_dang_id)
-                    .single()
-                    .then(({ data }) => data?.cau_hoi || null)
-                    .catch(() => null)
+                toPromise(
+                    supabase
+                        .from("chhn_lich_dang_bai")
+                        .select("cau_hoi")
+                        .eq("id", data.lich_dang_id)
+                        .single()
+                ).then((result: { data: { cau_hoi: string } | null }) => result.data?.cau_hoi || null).catch(() => null)
             )
         } else {
             queries.push(Promise.resolve(null))
@@ -123,13 +126,13 @@ export class CauTraLoiAPI {
 
         if (data.nguoi_tao_id) {
             queries.push(
-                supabase
-                    .from("var_nhan_su")
-                    .select("ho_ten")
-                    .eq("ma_nhan_vien", data.nguoi_tao_id)
-                    .single()
-                    .then(({ data }) => data?.ho_ten || null)
-                    .catch(() => null)
+                toPromise(
+                    supabase
+                        .from("var_nhan_su")
+                        .select("ho_ten")
+                        .eq("ma_nhan_vien", data.nguoi_tao_id)
+                        .single()
+                ).then((result: { data: { ho_ten: string } | null }) => result.data?.ho_ten || null).catch(() => null)
             )
         } else {
             queries.push(Promise.resolve(null))

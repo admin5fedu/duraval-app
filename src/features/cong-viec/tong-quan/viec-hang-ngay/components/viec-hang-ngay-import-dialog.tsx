@@ -20,30 +20,26 @@ interface ViecHangNgayImportDialogProps {
 // Template columns for export
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ma_nhan_vien",
-        label: "Mã nhân viên",
+        header: "Mã nhân viên",
         type: "number",
         required: true,
         description: "Mã nhân viên (bắt buộc, số nguyên)",
     },
     {
-        name: "ngay_bao_cao",
-        label: "Ngày báo cáo",
+        header: "Ngày báo cáo",
         type: "date",
         required: true,
         description: "Ngày báo cáo (định dạng dd/mm/yyyy)",
     },
     {
-        name: "ma_phong",
-        label: "Mã phòng",
-        type: "string",
+        header: "Mã phòng",
+        type: "text",
         required: false,
         description: "Mã phòng (không bắt buộc)",
     },
     {
-        name: "ma_nhom",
-        label: "Mã nhóm",
-        type: "string",
+        header: "Mã nhóm",
+        type: "text",
         required: false,
         description: "Mã nhóm (không bắt buộc)",
     },
@@ -84,7 +80,7 @@ const columnMappings: ColumnMapping[] = [
             "Room Code", "RoomCode", "room_code", "Room", "room"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mã phòng (không bắt buộc)",
     },
     {
@@ -95,7 +91,7 @@ const columnMappings: ColumnMapping[] = [
             "Group Code", "GroupCode", "group_code", "Group", "group"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mã nhóm (không bắt buộc)",
     },
 ]
@@ -103,7 +99,7 @@ const columnMappings: ColumnMapping[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -192,9 +188,9 @@ function mapExcelToDb(
 export function ViecHangNgayImportDialog({ open, onOpenChange, mutation }: ViecHangNgayImportDialogProps) {
     const defaultMutation = useBatchUpsertViecHangNgay()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'upsert', // Upsert mode: update if exists (ma_nhan_vien + ngay_bao_cao), insert if not
+        upsertMode: 'update', // Update mode: update if exists (ma_nhan_vien + ngay_bao_cao), insert if not
         dateFormat: 'dd/mm/yyyy',
     })
 
@@ -236,12 +232,10 @@ export function ViecHangNgayImportDialog({ open, onOpenChange, mutation }: ViecH
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="việc hàng ngày"
-            expectedHeaders={["ma_nhan_vien", "ngay_bao_cao"]} // Use db field names after mapping
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
         />
     )
 }

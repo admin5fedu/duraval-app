@@ -21,7 +21,7 @@
  * ```
  */
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import type { z } from "zod"
 import type { DetailSection } from "@/shared/components"
@@ -191,7 +191,7 @@ export function useEmbeddedListSection<TData, TParentId>({
         skipConfirmStorageKey,
         getItemId,
         getItemName,
-        isLoading: mutations.create.isPending || mutations.update.isPending || mutations.delete.isPending,
+        isMutating: mutations.create.isPending || mutations.update.isPending || mutations.delete.isPending,
     }
 }
 

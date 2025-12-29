@@ -151,8 +151,10 @@ export default function SettingsPage() {
             <ToggleGroup
               type="single"
               value={tempTheme}
-              onValueChange={(value: 'light' | 'dark' | 'system') => {
-                if (value) setTempTheme(value)
+              onValueChange={(value: string | string[]) => {
+                if (typeof value === 'string' && (value === 'light' || value === 'dark' || value === 'system')) {
+                  setTempTheme(value)
+                }
               }}
             >
               <ToggleGroupItem value="light" aria-label="Chế độ sáng">
@@ -220,8 +222,8 @@ export default function SettingsPage() {
               <ToggleGroup
                 type="single"
                 value={tempFontFamily}
-                onValueChange={(value: string) => {
-                  if (value) setTempFontFamily(value)
+                onValueChange={(value: string | string[]) => {
+                  if (typeof value === 'string' && value) setTempFontFamily(value)
                 }}
                 className="flex flex-wrap gap-2"
               >
@@ -230,7 +232,6 @@ export default function SettingsPage() {
                     key={font.value}
                     value={font.value}
                     aria-label={`Chọn font ${font.label}`}
-                    style={{ fontFamily: font.font }}
                   >
                     {font.label}
                   </ToggleGroupItem>
@@ -272,8 +273,8 @@ export default function SettingsPage() {
               <ToggleGroup
                 type="single"
                 value={tempFontSize}
-                onValueChange={(value: 'small' | 'medium' | 'large' | 'xlarge') => {
-                  if (value) setTempFontSize(value)
+                onValueChange={(value: string | string[]) => {
+                  if (typeof value === 'string' && value) setTempFontSize(value as 'small' | 'medium' | 'large' | 'xlarge')
                 }}
                 className="flex flex-wrap gap-2"
               >

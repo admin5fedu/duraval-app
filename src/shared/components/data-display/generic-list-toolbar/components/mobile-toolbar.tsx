@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { toolbarGapClass, actionButtonClass } from "@/shared/utils/toolbar-styles"
+import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { SearchInput } from "./search-input"
 import { MobileFilterDropdown } from "./mobile-filter-dropdown"
 import { SelectionToolbar } from "../../selection/selection-toolbar"

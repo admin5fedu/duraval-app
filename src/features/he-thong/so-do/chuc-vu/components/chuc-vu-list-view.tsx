@@ -382,6 +382,12 @@ export function ChucVuListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "chức vụ",
+                moduleName: chucVuConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: ChucVu) => item.ten_chuc_vu || String(item.id),
+            }}
             filters={filters}
             searchFields={chucVuConfig.searchFields as (keyof ChucVu)[]}
             module={module}

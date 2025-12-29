@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
@@ -128,8 +127,8 @@ export function ChucVuDetailView({ id, initialData, onEdit, onBack }: ChucVuDeta
             ? `${nguoiTaoDisplay.ma_nhan_vien} - ${nguoiTaoDisplay.ho_ten}` 
             : (chucVu.nguoi_tao?.toString() || "-") 
         },
-        { label: "Thời Gian Tạo", key: "tg_tao", value: chucVu.tg_tao, type: "datetime" },
-        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: chucVu.tg_cap_nhat, type: "datetime" },
+        { label: "Thời Gian Tạo", key: "tg_tao", value: chucVu.tg_tao, type: "date" },
+        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: chucVu.tg_cap_nhat, type: "date" },
       ]
     }
   ]

@@ -51,7 +51,7 @@ export function getStickyCellStyles(
     
     return { 
         cellStyle, 
-        isSticky
+        isSticky: !!isSticky
     }
 }
 

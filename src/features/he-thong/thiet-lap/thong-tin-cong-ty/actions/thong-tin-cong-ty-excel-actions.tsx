@@ -18,7 +18,7 @@ export function useBatchUpsertThongTinCongTy() {
   return useMutation({
     mutationFn: async (records: Partial<ThongTinCongTy>[]): Promise<BatchThongTinCongTyOperationResult> => {
       let inserted = 0
-      let updated = 0
+      const updated = 0
       const errors: BatchThongTinCongTyOperationResult["errors"] = []
 
       // Process in batches of 1000

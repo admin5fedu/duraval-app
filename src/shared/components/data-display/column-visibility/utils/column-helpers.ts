@@ -27,16 +27,17 @@ export function getColumnDisplayName<TData>(column: Column<TData, unknown>): str
   // 3. Try to extract text from React element header (if it contains text)
   if (React.isValidElement(header)) {
     // Try to find text in children
-    const extractText = (element: React.ReactElement | string | number | null | undefined): string => {
+    const extractText = (element: React.ReactElement | string | number | null | undefined | React.ReactNode): string => {
       if (typeof element === 'string' || typeof element === 'number') {
         return String(element)
       }
       if (React.isValidElement(element)) {
-        if (element.props?.title) {
-          return String(element.props.title)
+        const props = element.props as { title?: string; children?: React.ReactNode }
+        if (props?.title) {
+          return String(props.title)
         }
-        if (element.props?.children) {
-          return extractText(element.props.children)
+        if (props?.children) {
+          return extractText(props.children as React.ReactElement | string | number | null | undefined)
         }
       }
       return ''
@@ -71,7 +72,8 @@ export function getColumnOrder<TData>(column: Column<TData, unknown>): number {
  * 4. It's not an actions column (typically has enableHiding: false)
  */
 export function isColumnHideable<TData>(column: Column<TData, unknown>): boolean {
-  const hasAccessor = column.accessorKey || column.accessorFn
+  const def = column.columnDef as any
+  const hasAccessor = def.accessorKey || def.accessorFn || column.accessorFn
   const canHide = column.getCanHide()
   const isSelectionColumn = column.id === 'select'
   const hidingDisabled = column.columnDef.enableHiding === false

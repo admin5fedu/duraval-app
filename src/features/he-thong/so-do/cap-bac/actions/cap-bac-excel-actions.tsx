@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { capBacQueryKeys } from "@/lib/react-query/query-keys"
 import { CapBacAPI } from "../services/cap-bac.api"
-import type { CapBac, CreateCapBacInput } from "../schema"
+import type { CreateCapBacInput } from "../types"
 import { capBacSchema } from "../schema"
 
 interface ExcelRow {

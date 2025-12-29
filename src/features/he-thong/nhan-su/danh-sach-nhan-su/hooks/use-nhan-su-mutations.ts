@@ -10,7 +10,7 @@ import type { CreateNhanSuInput, UpdateNhanSuInput } from "../schema"
  * Mutation hooks for nhân sự module
  * ✅ Generated using createMutationHooks factory
  */
-const mutations = createMutationHooks<NhanSu, CreateNhanSuInput, UpdateNhanSuInput>({
+const mutations = createMutationHooks<NhanSu & { id?: number }, CreateNhanSuInput, UpdateNhanSuInput>({
     queryKeys: nhanSuQueryKeys,
     api: NhanSuAPI,
     messages: {

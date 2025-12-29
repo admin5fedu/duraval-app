@@ -1,6 +1,4 @@
 "use client"
-
-import * as React from "react"
 import { GenericListToolbar } from "../../generic-list-toolbar"
 import type { GenericListToolbarSectionProps } from "../types"
 
@@ -61,6 +59,9 @@ export function GenericListToolbarSection<TData>({
                                   )
                               try {
                                   await onDeleteSelected(selectedData)
+                                  // Reset selection after successful delete
+                                  // If batchDeleteConfig is used, the dialog will handle resetting
+                                  // Otherwise, reset immediately
                                   table.resetRowSelection()
                               } catch (error) {
                                   if (error !== "CANCELLED") {

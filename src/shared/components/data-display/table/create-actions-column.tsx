@@ -1,10 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { type ColumnDef } from "@tanstack/react-table"
 import { Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
 interface CreateActionsColumnOptions<TData> {
   /**

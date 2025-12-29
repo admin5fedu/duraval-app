@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator"
 
 interface DateRangeFilterProps<TData, TValue> {
     column?: Column<TData, TValue>
+    columnId?: string // For use with customFilters - will be resolved to column by GenericListToolbar
     title?: string
 }
 

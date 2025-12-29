@@ -23,7 +23,7 @@ export function useGenericDetailState<T extends Record<string, any>>(
     const [isDeleting, setIsDeleting] = React.useState(false)
 
     // Extract fields from config
-    const idField = config.idField || "id"
+    // const idField = config.idField || "id" // Reserved for future use
     const titleField = config.titleField || "name" || "ten"
     const subtitleField = config.subtitleField
     const avatarField = config.avatarField || "avatar_url" || "avatar"

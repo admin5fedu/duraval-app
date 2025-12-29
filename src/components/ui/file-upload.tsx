@@ -50,7 +50,7 @@ export function FileUpload({
         try {
             // Upload to Cloudinary
             const result = await uploadImageToCloudinary(file, folder)
-            onChange?.(result.secure_url || result.url)
+            onChange?.(result.secure_url)
             toast.success("Tải file lên thành công")
         } catch (error: any) {
             console.error("Upload error:", error)

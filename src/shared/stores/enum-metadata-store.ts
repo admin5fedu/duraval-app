@@ -8,7 +8,7 @@
 import { FormFieldConfig } from "@/shared/components/forms/generic-form-view/types"
 import { ColumnDef } from "@tanstack/react-table"
 import { EnumColorConfig } from "@/shared/utils/enum-color-registry"
-import { autoDetectAndRegisterEnum, autoRegisterEnumFromFormField } from "@/shared/utils/enum-detection"
+import { autoRegisterEnumFromFormField } from "@/shared/utils/enum-detection"
 
 /**
  * Metadata for an enum field

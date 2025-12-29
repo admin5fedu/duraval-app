@@ -122,7 +122,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
             void _ma_nhan_vien
             await updateMutation.mutateAsync({
                 id: selectedRelative.id!,
-                data: submitData
+                input: submitData
             })
         } else {
             const { id: _id, tg_tao: _tg_tao, tg_cap_nhat: _tg_cap_nhat, ma_nhan_vien: _ma_nhan_vien, ...submitData } = sanitizedData
@@ -157,7 +157,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
                         label: "Mã Nhân Viên", 
                         key: "ma_nhan_vien", 
                         value: employeeDisplay,
-                        type: "link",
+                        type: "url",
                         link: `/he-thong/danh-sach-nhan-su/${relative.ma_nhan_vien}`
                     },
                 { label: "Họ và Tên", key: "ho_va_ten", value: relative.ho_va_ten },

@@ -1,15 +1,35 @@
 /**
  * Phiếu Hành Chính List Route
+ * 
+ * Route component for list view
  */
 
 "use client"
 
+import { useNavigate } from "react-router-dom"
+import { PhieuHanhChinhListView } from "../components/phieu-hanh-chinh-list-view"
+import { phieuHanhChinhConfig } from "../config"
+
 export default function PhieuHanhChinhListRoute() {
+  const navigate = useNavigate()
+
+  const handleEdit = (id: number) => {
+    navigate(`${phieuHanhChinhConfig.routePath}/${id}/sua`)
+  }
+
+  const handleAddNew = () => {
+    navigate(`${phieuHanhChinhConfig.routePath}/moi`)
+  }
+
+  const handleView = (id: number) => {
+    navigate(`${phieuHanhChinhConfig.routePath}/${id}`)
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Phiếu Hành Chính</h1>
-      <p className="text-muted-foreground">Module đang được phát triển...</p>
-    </div>
+    <PhieuHanhChinhListView
+      onEdit={handleEdit}
+      onAddNew={handleAddNew}
+      onView={handleView}
+    />
   )
 }
-

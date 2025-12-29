@@ -116,7 +116,7 @@ export class NhanSuService {
         const updateData: Partial<NhanSu> = {}
         Object.entries(record).forEach(([key, value]) => {
           if (value !== null && value !== undefined && value !== "") {
-            ;(updateData as any)[key] = value
+            (updateData as any)[key] = value
           }
         })
         delete (updateData as any).ma_nhan_vien

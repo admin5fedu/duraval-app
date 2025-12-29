@@ -198,6 +198,12 @@ export function CapBacListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "cấp bậc",
+                moduleName: capBacConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: CapBac) => item.ten_cap_bac || String(item.id),
+            }}
             filters={filters}
             searchFields={capBacConfig.searchFields as (keyof CapBac)[]}
             module={module}

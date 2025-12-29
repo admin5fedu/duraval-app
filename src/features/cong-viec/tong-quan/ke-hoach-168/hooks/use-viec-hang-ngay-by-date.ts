@@ -14,10 +14,10 @@ export function useViecHangNgayByDateAndEmployee(
     enabled: boolean = true
 ) {
     return useQuery({
-        queryKey: viecHangNgayQueryKeys.byDateAndEmployee(
-            ma_nhan_vien || 0,
-            ngay_bao_cao || ""
-        ),
+        queryKey: viecHangNgayQueryKeys?.byDateAndEmployee?.(
+            ma_nhan_vien ?? 0,
+            ngay_bao_cao ?? ""
+        ) ?? ['viec-hang-ngay', ma_nhan_vien ?? 0, ngay_bao_cao ?? ""],
         queryFn: async (): Promise<ViecHangNgay | null> => {
             if (!ma_nhan_vien || !ngay_bao_cao) {
                 return null

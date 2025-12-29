@@ -42,7 +42,7 @@ const columnMappings: ColumnMapping[] = [
             "Full Name", "FullName", "full_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Họ và tên đầy đủ (bắt buộc)",
     },
     {
@@ -53,7 +53,7 @@ const columnMappings: ColumnMapping[] = [
             "Relationship", "relationship", "Relation", "relation"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mối quan hệ (bắt buộc: Cha/Bố, Mẹ, Vợ/Chồng, Con, Anh/Chị/Em, Khác)",
     },
     {
@@ -86,7 +86,7 @@ const columnMappings: ColumnMapping[] = [
             "Note", "note", "Notes", "notes", "Comment", "comment"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Ghi chú (không bắt buộc)",
     },
 ]
@@ -94,44 +94,38 @@ const columnMappings: ColumnMapping[] = [
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ma_nhan_vien",
-        label: "Mã nhân viên",
+        header: "Mã nhân viên",
         type: "number",
         required: true,
         description: "Mã nhân viên (bắt buộc, số nguyên)",
     },
     {
-        name: "ho_va_ten",
-        label: "Họ và tên",
-        type: "string",
+        header: "Họ và tên",
+        type: "text",
         required: true,
         description: "Họ và tên đầy đủ (bắt buộc)",
     },
     {
-        name: "moi_quan_he",
-        label: "Mối quan hệ",
-        type: "string",
+        header: "Mối quan hệ",
+        type: "text",
         required: true,
         description: "Mối quan hệ: Cha/Bố, Mẹ, Vợ/Chồng, Con, Anh/Chị/Em, Khác",
     },
     {
-        name: "ngay_sinh",
-        label: "Ngày sinh",
+        header: "Ngày sinh",
         type: "date",
         required: false,
         description: "Định dạng dd/mm/yyyy",
     },
     {
-        name: "so_dien_thoai",
-        label: "Số điện thoại",
-        type: "string",
+        header: "Số điện thoại",
+        type: "text",
         required: false,
         description: "Số điện thoại (10-11 chữ số)",
     },
     {
-        name: "ghi_chu",
-        label: "Ghi chú",
-        type: "string",
+        header: "Ghi chú",
+        type: "text",
         required: false,
         description: "Ghi chú (không bắt buộc)",
     },
@@ -140,7 +134,7 @@ const templateColumns: TemplateColumn[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -252,9 +246,9 @@ function mapExcelToDb(
 export function NguoiThanImportDialog({ open, onOpenChange, mutation }: NguoiThanImportDialogProps) {
     const defaultMutation = useBatchUpsertNguoiThan()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'insert', // Only insert for người thân
+        upsertMode: 'update', // Update mode for người thân
         dateFormat: 'dd/mm/yyyy',
     })
 
@@ -296,12 +290,11 @@ export function NguoiThanImportDialog({ open, onOpenChange, mutation }: NguoiTha
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="người thân"
-            expectedHeaders={["ma_nhan_vien", "ho_va_ten", "moi_quan_he"]} // Use db field names after mapping
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

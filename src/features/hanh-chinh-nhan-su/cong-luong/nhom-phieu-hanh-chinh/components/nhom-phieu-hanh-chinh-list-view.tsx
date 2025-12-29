@@ -247,6 +247,12 @@ export function NhomPhieuHanhChinhListView({
                 const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                 await batchDeleteMutation.mutateAsync(ids)
             }}
+            batchDeleteConfig={{
+                itemName: "nhóm phiếu hành chính",
+                moduleName: nhomPhieuHanhChinhConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: NhomPhieuHanhChinh) => item.ma_nhom_phieu || item.ten_nhom_phieu || String(item.id),
+            }}
             filters={filters}
             searchFields={nhomPhieuHanhChinhConfig.searchFields as (keyof NhomPhieuHanhChinh)[]}
             module={module}

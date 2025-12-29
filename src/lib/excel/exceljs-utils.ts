@@ -31,7 +31,7 @@ export async function parseExcelFile(file: File): Promise<{
 
   // Load workbook
   const workbook = new ExcelJS.Workbook()
-  await workbook.xlsx.load(buffer)
+  await workbook.xlsx.load(buffer as any)
 
   // Validate workbook
   if (workbook.worksheets.length === 0) {
@@ -106,7 +106,7 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<{
 
   // Load workbook
   const workbook = new ExcelJS.Workbook()
-  await workbook.xlsx.load(buffer)
+  await workbook.xlsx.load(buffer as any)
 
   // Validate workbook
   if (workbook.worksheets.length === 0) {
@@ -230,7 +230,7 @@ export async function addDataToWorksheetWithFormat(
   const { formatWorksheet, addMetadataToWorksheet, detectAndFormatColumn } = await import('@/shared/utils/excel-formatter')
   
   // Add headers
-  const headerRow = worksheet.addRow(headers)
+  worksheet.addRow(headers)
   
   // Add data rows
   rows.forEach(row => {
@@ -252,7 +252,7 @@ export async function addDataToWorksheetWithFormat(
   } else {
     // Auto-detect formats
     const dateFormat = options?.metadata?.exportDate ? 
-      (options.formatOptions?.dateFormat || 'dd/mm/yyyy') : 'dd/mm/yyyy'
+      ((options.formatOptions as any)?.dateFormat || 'dd/mm/yyyy') : 'dd/mm/yyyy'
     
     worksheet.columns.forEach((column, index) => {
       const columnData = rows.map(row => row[index])
@@ -265,8 +265,8 @@ export async function addDataToWorksheetWithFormat(
   }
   
   // Apply professional formatting
-  if (options?.formatOptions !== false) {
-    formatWorksheet(worksheet, options?.formatOptions)
+  if (options?.formatOptions) {
+    formatWorksheet(worksheet, options.formatOptions)
   }
   
   // Add metadata if requested
@@ -284,7 +284,7 @@ export async function downloadWorkbook(
 ): Promise<void> {
   // Sanitize filename
   const sanitizedFilename = filename
-    .replace(/[\\\/\?\*\[\]:]/g, '_')
+    .replace(/[\\/?:*[\]:]/g, '_')
     .substring(0, 255)
 
   // Generate buffer
@@ -309,7 +309,7 @@ export async function downloadWorkbook(
  * Convert workbook to buffer (server-side)
  */
 export async function workbookToBuffer(workbook: ExcelJS.Workbook): Promise<Buffer> {
-  return await workbook.xlsx.writeBuffer() as Buffer
+  return (await workbook.xlsx.writeBuffer()) as unknown as Buffer
 }
 
 /**

@@ -6,7 +6,7 @@ import type { QueryKeyFactory } from "./types"
 export const danhMucCauHoi: QueryKeyFactory = {
   all: () => ["danh-muc-cau-hoi"] as const,
   list: () => ["danh-muc-cau-hoi", "list"] as const,
-  detail: (id: number) => ["danh-muc-cau-hoi", "detail", id] as const,
+  detail: (id: number | string) => ["danh-muc-cau-hoi", "detail", id] as const,
   search: (query: string) => ["danh-muc-cau-hoi", "search", query] as const,
 }
 

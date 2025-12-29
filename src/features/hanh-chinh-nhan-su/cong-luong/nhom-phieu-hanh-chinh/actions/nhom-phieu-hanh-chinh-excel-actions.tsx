@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { nhomPhieuHanhChinhQueryKeys } from "@/lib/react-query/query-keys"
 import { NhomPhieuHanhChinhAPI } from "../services/nhom-phieu-hanh-chinh.api"
-import type { NhomPhieuHanhChinh, CreateNhomPhieuHanhChinhInput } from "../schema"
+import type { CreateNhomPhieuHanhChinhInput } from "../types"
 import { nhomPhieuHanhChinhSchema } from "../schema"
 
 interface ExcelRow {

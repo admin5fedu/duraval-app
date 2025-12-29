@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react"
 import { Column } from "@tanstack/react-table"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { responsiveTextClass, mediumTextClass, smallTextClass, bodyTextClass } from "@/shared/utils/text-styles"
 import { BADGE_TYPOGRAPHY } from "@/shared/constants/typography"
-import { compactPaddingClass, standardPaddingClass } from "@/shared/utils/spacing-styles"
+import { standardPaddingClass } from "@/shared/utils/spacing-styles"
 import {
   Popover,
   PopoverContent,

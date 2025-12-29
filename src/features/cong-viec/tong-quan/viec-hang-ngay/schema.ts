@@ -30,13 +30,3 @@ export const viecHangNgaySchema = z.object({
 
 export type ViecHangNgay = z.infer<typeof viecHangNgaySchema>
 
-/**
- * Schema for creating new việc hàng ngày
- */
-export type CreateViecHangNgayInput = Omit<ViecHangNgay, "id" | "tg_tao" | "tg_cap_nhat">
-
-/**
- * Schema for updating việc hàng ngày
- */
-export type UpdateViecHangNgayInput = Partial<Omit<ViecHangNgay, "id" | "tg_tao">>
-

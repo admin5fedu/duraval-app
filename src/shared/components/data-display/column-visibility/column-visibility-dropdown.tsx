@@ -5,8 +5,6 @@
  */
 
 "use client"
-
-import * as React from "react"
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import { Columns3 } from "lucide-react"
 import { Table } from "@tanstack/react-table"

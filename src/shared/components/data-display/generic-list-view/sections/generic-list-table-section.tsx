@@ -55,7 +55,6 @@ export function GenericListTableSection<TData, TValue>({
     const { ref: footerRef } = useElementHeight<HTMLDivElement>()
 
     // ✅ Ref để đồng bộ scroll giữa header và body
-    const scrollContainerRef = React.useRef<HTMLDivElement>(null)
     const headerScrollRef = React.useRef<HTMLDivElement>(null)
     const bodyScrollRef = React.useRef<HTMLDivElement>(null)
 

@@ -14,7 +14,6 @@ import { useNhanSu, useBatchDeleteNhanSu, useDeleteNhanSu } from "../hooks"
 import { nhanSuColumns } from "./nhan-su-columns"
 import { nhanSuConfig } from "../config"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
-import { DataTableFacetedFilter } from "@/shared/components/data-display/data-table-faceted-filter"
 import { NhanSuImportDialog } from "./nhan-su-import-dialog"
 import { useBatchUpsertNhanSu } from "../actions/nhan-su-excel-actions"
 import {
@@ -162,7 +161,11 @@ export function NhanSuListView({
 
     // Export utilities
     const getColumnTitle = React.useCallback((columnId: string) => {
-        const column = nhanSuColumns.find((col) => col.id === columnId || col.accessorKey === columnId)
+        const column = nhanSuColumns.find((col) => {
+            if (col.id === columnId) return true
+            if ('accessorKey' in col && col.accessorKey === columnId) return true
+            return false
+        })
         return (column?.meta as any)?.title || columnId
     }, [])
 
@@ -226,6 +229,12 @@ export function NhanSuListView({
             onDeleteSelected={async (selectedRows) => {
                 const ids = selectedRows.map((row) => row.ma_nhan_vien)
                 await batchDeleteMutation.mutateAsync(ids)
+            }}
+            batchDeleteConfig={{
+                itemName: "nhân sự",
+                moduleName: nhanSuConfig.moduleTitle,
+                isLoading: batchDeleteMutation.isPending,
+                getItemLabel: (item: NhanSu) => `${item.ma_nhan_vien} - ${item.ho_ten || ""}`,
             }}
             filters={[
                 {

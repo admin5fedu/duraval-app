@@ -80,7 +80,7 @@ export function ScrollRestoration({
   const navigationType = useNavigationType()
   const routeScrollBehavior = useRouteScrollBehavior()
   const previousPathnameRef = useRef<string>(location.pathname)
-  const containerRef = useRef<HTMLElement | null>(null)
+  const containerRef = useRef<HTMLElement | Window | null>(null)
   const isInitialMountRef = useRef(true)
   
   // Ưu tiên prop, sau đó route config, cuối cùng là 'auto'
@@ -199,7 +199,7 @@ export function ScrollRestoration({
         window.requestAnimationFrame(() => {
           const scrollTop = container === window 
             ? window.scrollY 
-            : (container as HTMLElement).scrollTop
+            : (container as HTMLElement)?.scrollTop ?? 0
 
           // Chỉ lưu nếu scroll behavior là 'restore' hoặc 'auto' và route type là 'list'
           const routeType = scrollManager.detectRouteType(location.pathname)

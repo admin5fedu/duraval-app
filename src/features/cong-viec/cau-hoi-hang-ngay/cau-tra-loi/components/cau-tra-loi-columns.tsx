@@ -73,7 +73,6 @@ export function createColumns(): ColumnDef<CauTraLoi>[] {
         },
         cell: ({ row }) => {
             const cauHoi = row.getValue("lich_dang_cau_hoi") as string | null
-            const lichDangId = row.original.lich_dang_id
             if (!cauHoi) {
                 return <div className="min-w-[200px] text-muted-foreground">-</div>
             }

@@ -9,7 +9,7 @@ import type { User } from '@supabase/supabase-js'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
-export async function exportProfileToPDF(employee: NhanSu, user: User): Promise<void> {
+export async function exportProfileToPDF(employee: NhanSu, _user: User): Promise<void> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',

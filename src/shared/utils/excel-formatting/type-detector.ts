@@ -9,7 +9,7 @@
  */
 export function detectAndFormatColumn(
   columnData: any[],
-  columnIndex: number,
+  _columnIndex: number,
   dateFormat: 'dd/mm/yyyy' | 'mm/dd/yyyy' | 'yyyy-mm-dd' | 'auto' = 'dd/mm/yyyy'
 ): {
   numberFormat?: string

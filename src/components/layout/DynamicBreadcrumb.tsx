@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import { useLocation, Link, useNavigate } from "react-router-dom"
-import { Home, MoreHorizontal, ArrowLeft, List } from "lucide-react"
+import { useLocation, Link } from "react-router-dom"
+import { Home, MoreHorizontal } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,8 +25,6 @@ import {
 import { useBreadcrumb } from "@/components/providers/BreadcrumbProvider"
 import { moduleRegistry } from "@/shared/config/module-registry"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
-import { getParentRouteFromBreadcrumb } from "@/lib/utils"
 
 /**
  * Dynamic Breadcrumb Component
@@ -34,7 +32,6 @@ import { getParentRouteFromBreadcrumb } from "@/lib/utils"
  * Tự động tạo breadcrumb từ URL pathname
  * Sử dụng routing-config để format labels và skip segments
  * Mobile-friendly: chỉ hiển thị 2 items cuối, còn lại trong dropdown
- * Professional: Thêm "Back to List" button cho detail pages
  */
 export function DynamicBreadcrumb() {
   const location = useLocation()
@@ -42,12 +39,6 @@ export function DynamicBreadcrumb() {
   const segments = pathname.split('/').filter(Boolean)
   const { detailTitle } = useBreadcrumb()
   const isMobile = useIsMobile()
-  const navigate = useNavigate()
-  
-  // Check if current page is a detail page (has numeric ID as last segment)
-  const lastSegment = segments[segments.length - 1]
-  const isDetailPage = /^\d+$/.test(lastSegment)
-  const listPath = isDetailPage ? getParentRouteFromBreadcrumb(pathname) : null
   
   // Nếu là trang chủ
   if (segments.length === 0 || (segments.length === 1 && segments[0] === 'trang-chu')) {
@@ -68,7 +59,7 @@ export function DynamicBreadcrumb() {
   const breadcrumbItems: Array<{ label: string; href: string }> = []
   let currentPath = ""
 
-  segments.forEach((segment, index) => {
+  segments.forEach((segment) => {
     // Build current path for module lookup
     const segmentPath = currentPath + `/${segment}`
     
@@ -109,13 +100,6 @@ export function DynamicBreadcrumb() {
       })
     }
   })
-
-  // Handle back to list
-  const handleBackToList = () => {
-    if (listPath) {
-      navigate(listPath)
-    }
-  }
 
   // Mobile: chỉ hiển thị 2 items cuối, còn lại trong dropdown
   if (isMobile && breadcrumbItems.length > 2) {
@@ -189,24 +173,11 @@ export function DynamicBreadcrumb() {
             })}
           </BreadcrumbList>
         </Breadcrumb>
-        
-        {/* Back to List button for detail pages on mobile */}
-        {isDetailPage && listPath && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToList}
-            className="h-7 px-2 text-xs shrink-0"
-            title="Về danh sách"
-          >
-            <List className="h-3.5 w-3.5" />
-          </Button>
-        )}
       </div>
     )
   }
 
-  // Desktop: hiển thị đầy đủ với Back to List button
+  // Desktop: hiển thị đầy đủ
   return (
     <div className="min-w-0 flex-1 flex items-center gap-2">
       <Breadcrumb className="min-w-0 flex-1">
@@ -245,20 +216,6 @@ export function DynamicBreadcrumb() {
           )}
         </BreadcrumbList>
       </Breadcrumb>
-      
-      {/* Back to List button for detail pages on desktop */}
-      {isDetailPage && listPath && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleBackToList}
-          className="h-8 px-3 shrink-0 gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Về danh sách</span>
-          <List className="h-4 w-4 sm:hidden" />
-        </Button>
-      )}
     </div>
   )
 }

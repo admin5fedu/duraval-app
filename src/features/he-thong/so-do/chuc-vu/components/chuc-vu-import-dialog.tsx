@@ -26,7 +26,7 @@ const columnMappings: ColumnMapping[] = [
             "Position Code", "PositionCode", "position_code", "Code", "code"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã chức vụ (bắt buộc)",
     },
     {
@@ -37,7 +37,7 @@ const columnMappings: ColumnMapping[] = [
             "Position Name", "PositionName", "position_name", "Name", "name"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên chức vụ (bắt buộc)",
     },
     {
@@ -47,7 +47,7 @@ const columnMappings: ColumnMapping[] = [
             "Level Code", "level_code", "Ma_CB", "Ma_cb"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã cấp bậc (bắt buộc)",
     },
     {
@@ -57,7 +57,7 @@ const columnMappings: ColumnMapping[] = [
             "Level Name", "level_name", "Ten_CB", "Ten_cb"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Tên cấp bậc (không bắt buộc)",
     },
     {
@@ -67,35 +67,35 @@ const columnMappings: ColumnMapping[] = [
             "Department Code", "dept_code", "Ma_PB", "Ma_pb"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Mã phòng ban (bắt buộc)",
     },
     {
         dbField: "ma_nhom",
         excelNames: ["Mã nhóm", "Mã Nhóm", "Ma nhom", "Ma Nhom", "Group Code", "group_code"],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mã nhóm (không bắt buộc)",
     },
     {
         dbField: "ma_bo_phan",
         excelNames: ["Mã bộ phận", "Mã Bộ Phận", "Ma bo phan", "Ma Bo Phan", "Division Code", "division_code"],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mã bộ phận (không bắt buộc)",
     },
     {
         dbField: "ma_phong",
         excelNames: ["Mã phòng", "Mã Phòng", "Ma phong", "Ma Phong", "Room Code", "room_code"],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mã phòng (không bắt buộc)",
     },
     {
         dbField: "ngach_luong",
         excelNames: ["Ngạch lương", "Ngạch Lương", "Ngach luong", "Ngach Luong", "Salary Grade", "salary_grade"],
         required: false,
-        type: "string",
+        type: "text",
         description: "Ngạch lương (không bắt buộc)",
     },
     {
@@ -109,14 +109,14 @@ const columnMappings: ColumnMapping[] = [
         dbField: "so_ngay_nghi_thu_7",
         excelNames: ["Số ngày nghỉ thứ 7", "Số Ngày Nghỉ Thứ 7", "So ngay nghi thu 7", "Saturday Leave", "saturday_leave"],
         required: false,
-        type: "string",
+        type: "text",
         description: "Số ngày nghỉ thứ 7 (không bắt buộc)",
     },
     {
         dbField: "nhom_thuong",
         excelNames: ["Nhóm thưởng", "Nhóm Thưởng", "Nhom thuong", "Nhom Thuong", "Bonus Group", "bonus_group"],
         required: false,
-        type: "string",
+        type: "text",
         description: "Nhóm thưởng (không bắt buộc)",
     },
     {
@@ -131,92 +131,79 @@ const columnMappings: ColumnMapping[] = [
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ma_chuc_vu",
-        label: "Mã chức vụ",
-        type: "string",
+        header: "Mã chức vụ",
+        type: "text",
         required: true,
         description: "Mã chức vụ (bắt buộc)",
     },
     {
-        name: "ten_chuc_vu",
-        label: "Tên chức vụ",
-        type: "string",
+        header: "Tên chức vụ",
+        type: "text",
         required: true,
         description: "Tên chức vụ (bắt buộc)",
     },
     {
-        name: "ma_cap_bac",
-        label: "Mã cấp bậc",
-        type: "string",
+        header: "Mã cấp bậc",
+        type: "text",
         required: true,
         description: "Mã cấp bậc (bắt buộc)",
     },
     {
-        name: "ten_cap_bac",
-        label: "Tên cấp bậc",
-        type: "string",
+        header: "Tên cấp bậc",
+        type: "text",
         required: false,
         description: "Tên cấp bậc (không bắt buộc)",
     },
     {
-        name: "ma_phong_ban",
-        label: "Mã phòng ban",
-        type: "string",
+        header: "Mã phòng ban",
+        type: "text",
         required: true,
         description: "Mã phòng ban (bắt buộc)",
     },
     {
-        name: "ma_nhom",
-        label: "Mã nhóm",
-        type: "string",
+        header: "Mã nhóm",
+        type: "text",
         required: false,
         description: "Mã nhóm (không bắt buộc)",
     },
     {
-        name: "ma_bo_phan",
-        label: "Mã bộ phận",
-        type: "string",
+        header: "Mã bộ phận",
+        type: "text",
         required: false,
         description: "Mã bộ phận (không bắt buộc)",
     },
     {
-        name: "ma_phong",
-        label: "Mã phòng",
-        type: "string",
+        header: "Mã phòng",
+        type: "text",
         required: false,
         description: "Mã phòng (không bắt buộc)",
     },
     {
-        name: "ngach_luong",
-        label: "Ngạch lương",
-        type: "string",
+        header: "Ngạch lương",
+        type: "text",
         required: false,
         description: "Ngạch lương (không bắt buộc)",
     },
     {
-        name: "muc_dong_bao_hiem",
-        label: "Mức đóng bảo hiểm",
+        header: "Mức đóng bảo hiểm",
         type: "number",
         required: false,
         description: "Mức đóng bảo hiểm (không bắt buộc)",
     },
     {
-        name: "so_ngay_nghi_thu_7",
-        label: "Số ngày nghỉ thứ 7",
-        type: "string",
+        header: "Số ngày nghỉ thứ 7",
+        type: "text",
         required: false,
         description: "Số ngày nghỉ thứ 7 (không bắt buộc)",
     },
     {
-        name: "nhom_thuong",
-        label: "Nhóm thưởng",
-        type: "string",
+        header: "Nhóm thưởng",
+        type: "text",
         required: false,
         description: "Nhóm thưởng (không bắt buộc)",
     },
     {
-        name: "diem_thuong",
-        label: "Điểm thưởng",
+        header: "Điểm thưởng",
         type: "number",
         required: false,
         description: "Điểm thưởng (không bắt buộc)",
@@ -226,7 +213,7 @@ const templateColumns: TemplateColumn[] = [
 // Validate a single row
 function validateRow(
     row: Record<string, any>,
-    rowNumber: number
+    _rowNumber: number
 ): string[] {
     const errors: string[] = []
 
@@ -347,9 +334,9 @@ function mapExcelToDb(
 export function ChucVuImportDialog({ open, onOpenChange, mutation }: ChucVuImportDialogProps) {
     const defaultMutation = useBatchUpsertChucVu()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'upsert', // Upsert mode: update if exists, insert if not
+        upsertMode: 'update', // Update mode: update if exists, insert if not
     })
 
     const handleImport = async (rows: Partial<ChucVu>[]): Promise<{
@@ -406,12 +393,12 @@ export function ChucVuImportDialog({ open, onOpenChange, mutation }: ChucVuImpor
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="chức vụ"
-            expectedHeaders={["ma_chuc_vu", "ten_chuc_vu", "ma_cap_bac", "ma_phong_ban"]}
+            
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
+            
         />
     )
 }

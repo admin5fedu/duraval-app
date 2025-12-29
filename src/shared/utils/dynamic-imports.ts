@@ -15,10 +15,7 @@ import { lazy, ComponentType } from "react"
  * ```
  */
 export function createDynamicDialog<T extends ComponentType<any>>(
-    importFn: () => Promise<{ default: T }>,
-    options?: {
-        loading?: () => React.ReactNode
-    }
+    importFn: () => Promise<{ default: T }>
 ) {
     return lazy(importFn)
 }
@@ -37,9 +34,7 @@ export function createDynamicDialog<T extends ComponentType<any>>(
 export function createExportDialog<T extends ComponentType<any>>(
     importFn: () => Promise<{ default: T }>
 ) {
-    return createDynamicDialog(importFn, {
-        loading: () => null, // Don't show loading indicator for dialogs
-    })
+    return createDynamicDialog(importFn)
 }
 
 /**
@@ -56,8 +51,6 @@ export function createExportDialog<T extends ComponentType<any>>(
 export function createImportDialog<T extends ComponentType<any>>(
     importFn: () => Promise<{ default: T }>
 ) {
-    return createDynamicDialog(importFn, {
-        loading: () => null, // Don't show loading indicator for dialogs
-    })
+    return createDynamicDialog(importFn)
 }
 

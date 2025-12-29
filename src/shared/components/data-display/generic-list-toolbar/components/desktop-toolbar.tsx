@@ -19,7 +19,6 @@ import type { UseSearchInputReturn } from "../hooks/use-search-input"
 import { hasActiveFilters, getFilterCount, clearAllFilters } from "../utils/toolbar-helpers"
 import { Table } from "@tanstack/react-table"
 import type { BulkAction } from "../../selection/bulk-actions-menu"
-import type { ColumnDef } from "@tanstack/react-table"
 
 interface DesktopToolbarProps<TData> {
   table: Table<TData>

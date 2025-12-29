@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase"
-import { NhomPhieuHanhChinh, CreateNhomPhieuHanhChinhInput, UpdateNhomPhieuHanhChinhInput } from "../schema"
+import { NhomPhieuHanhChinh } from "../schema"
+import type { CreateNhomPhieuHanhChinhInput, UpdateNhomPhieuHanhChinhInput } from "../types"
 
 const TABLE_NAME = "hanh_chinh_nhom_phieu"
 
@@ -172,9 +173,12 @@ export class NhomPhieuHanhChinhAPI {
      * Create new nhóm phiếu hành chính
      */
     static async create(input: CreateNhomPhieuHanhChinhInput): Promise<NhomPhieuHanhChinh> {
+        // Remove fields that don't exist in the database table
+        const { nguoi_tao, nguoi_tao_ten, ...createInput } = input as any
+        
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .insert(input)
+            .insert(createInput)
             .select()
             .single()
 
@@ -215,9 +219,12 @@ export class NhomPhieuHanhChinhAPI {
      * Update nhóm phiếu hành chính
      */
     static async update(id: number, input: UpdateNhomPhieuHanhChinhInput): Promise<NhomPhieuHanhChinh> {
+        // Remove fields that don't exist in the database table
+        const { nguoi_tao, nguoi_tao_ten, ...updateInput } = input as any
+        
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .update(input)
+            .update(updateInput)
             .eq("id", id)
             .select()
             .single()

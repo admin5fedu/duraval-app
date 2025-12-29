@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Upload, Camera, X, Loader2, Image as ImageIcon, ZoomIn, Trash2 } from "lucide-react"
+import { Upload, Camera, Loader2, Image as ImageIcon, ZoomIn, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { uploadImageToCloudinary } from "@/lib/cloudinary"

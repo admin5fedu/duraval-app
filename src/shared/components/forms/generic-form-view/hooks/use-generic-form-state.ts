@@ -30,7 +30,7 @@ export function useGenericFormState<T extends z.ZodType<any, any>>({
                 const currentStr = currentValue?.toString() || ''
                 const newStr = value?.toString() || ''
                 if (currentStr !== newStr) {
-                    form.setValue(key as any, value, { shouldValidate: false, shouldDirty: false })
+                    form.setValue(key as any, value as any, { shouldValidate: false, shouldDirty: false })
                 }
             })
         }

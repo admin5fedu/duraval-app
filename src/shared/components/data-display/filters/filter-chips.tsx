@@ -1,8 +1,6 @@
 "use client"
 
-import * as React from "react"
 import { Table } from "@tanstack/react-table"
-import type { ColumnFiltersState } from "@tanstack/react-table"
 import { X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -31,7 +29,7 @@ interface FilterChipsProps<TData> {
 export function FilterChips<TData>({
   table,
   onClearFilter,
-  onClearSearch,
+  onClearSearch: _onClearSearch,
   className,
 }: FilterChipsProps<TData>) {
   const columnFilters = table.getState().columnFilters
@@ -55,14 +53,6 @@ export function FilterChips<TData>({
     }
   }
 
-  const handleRemoveSearch = () => {
-    if (onClearSearch) {
-      onClearSearch()
-    } else {
-      table.setGlobalFilter("")
-    }
-  }
-
   const getFilterLabel = (columnId: string): string => {
     const column = columns.find(col => col.id === columnId)
     const meta = column?.columnDef?.meta as { title?: string } | undefined
@@ -70,7 +60,7 @@ export function FilterChips<TData>({
   }
 
   const formatFilterValue = (filter: { id: string; value: any }): string => {
-    const { id, value } = filter
+    const { value } = filter
     
     // Handle array values (multi-select filters)
     if (Array.isArray(value)) {

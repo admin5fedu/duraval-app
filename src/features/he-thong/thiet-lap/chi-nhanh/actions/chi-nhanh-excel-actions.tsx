@@ -18,7 +18,7 @@ export function useBatchUpsertChiNhanh() {
   return useMutation({
     mutationFn: async (records: Partial<ChiNhanh>[]): Promise<BatchChiNhanhOperationResult> => {
       let inserted = 0
-      let updated = 0
+      const updated = 0
       const errors: BatchChiNhanhOperationResult["errors"] = []
 
       // Process in batches of 1000

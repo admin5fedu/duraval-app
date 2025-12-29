@@ -2,7 +2,6 @@
  * Column List Component
  */
 
-import * as React from "react"
 import { Column } from "@tanstack/react-table"
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"

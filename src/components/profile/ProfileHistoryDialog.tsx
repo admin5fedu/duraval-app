@@ -41,7 +41,7 @@ export function ProfileHistoryDialog({
 }: ProfileHistoryDialogProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [loading, setLoading] = useState(false)
-  const [currentData, setCurrentData] = useState<NhanSu | null>(null)
+  const [, setCurrentData] = useState<NhanSu | null>(null)
 
   useEffect(() => {
     if (open && employeeId) {

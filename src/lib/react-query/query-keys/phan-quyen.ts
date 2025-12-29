@@ -4,10 +4,8 @@
 
 export const phanQuyenQueryKeys = {
   all: () => ["phan-quyen"] as const,
-  lists: () => [...phanQuyenQueryKeys.all(), "list"] as const,
-  list: () => [...phanQuyenQueryKeys.lists()] as const,
-  details: () => [...phanQuyenQueryKeys.all(), "detail"] as const,
-  detail: (id: number) => [...phanQuyenQueryKeys.details(), id] as const,
-  byChucVu: (chucVuId: number) => [...phanQuyenQueryKeys.all(), "by-chuc-vu", chucVuId] as const,
+  list: () => ["phan-quyen", "list"] as const,
+  detail: (id: number | string) => ["phan-quyen", "detail", id] as const,
+  byChucVu: (chucVuId: number) => ["phan-quyen", "by-chuc-vu", chucVuId] as const,
 }
 

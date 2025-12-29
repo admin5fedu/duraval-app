@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -57,7 +57,8 @@ export function LoginForm({
       }
 
       // Redirect to requested page or home
-      const redirectTo = searchParams.get("redirectedFrom") || "/"
+      const [searchParamsObj] = searchParams
+      const redirectTo = searchParamsObj.get("redirectedFrom") || "/"
       navigate(redirectTo)
       toast.success("Đăng nhập thành công!")
     } catch (err: any) {

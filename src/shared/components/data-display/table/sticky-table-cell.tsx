@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { TableCell } from "@/components/ui/table"
 
 interface StickyTableCellProps {

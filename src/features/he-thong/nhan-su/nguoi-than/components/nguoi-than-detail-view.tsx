@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
@@ -75,8 +74,8 @@ export function NguoiThanDetailView({ id, initialData, onEdit, onBack }: NguoiTh
           label: "Mã Nhân Viên", 
           key: "ma_nhan_vien", 
           value: nguoiThan.ma_nhan_vien, 
-          type: "link",
-          href: `/he-thong/danh-sach-nhan-su/${nguoiThan.ma_nhan_vien}`
+          type: "url",
+          link: `/he-thong/danh-sach-nhan-su/${nguoiThan.ma_nhan_vien}`
         },
         { label: "Họ và Tên", key: "ho_ten", value: nhanSu?.ho_ten || "-" },
         { label: "Email", key: "email_cong_ty", value: nhanSu?.email_cong_ty || "-", type: "email" },
@@ -93,8 +92,8 @@ export function NguoiThanDetailView({ id, initialData, onEdit, onBack }: NguoiTh
     {
       title: "Thông Tin Hệ Thống",
       fields: [
-        { label: "Thời Gian Tạo", key: "tg_tao", value: nguoiThan.tg_tao, type: "datetime" },
-        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: nguoiThan.tg_cap_nhat, type: "datetime" },
+        { label: "Thời Gian Tạo", key: "tg_tao", value: nguoiThan.tg_tao, type: "date" },
+        { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: nguoiThan.tg_cap_nhat, type: "date" },
       ]
     }
   ]

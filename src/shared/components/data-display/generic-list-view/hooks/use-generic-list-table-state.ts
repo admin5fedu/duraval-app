@@ -3,7 +3,6 @@
 import * as React from "react"
 import { useDeferredValue, useMemo } from "react"
 import {
-    type ColumnDef,
     type ColumnFiltersState,
     type SortingState,
     type VisibilityState,
@@ -32,6 +31,7 @@ export function useGenericListTableState<TData, TValue>({
     initialFilters,
     initialSorting,
     initialSearch,
+    initialColumnVisibility,
     onFiltersChange,
     onSearchChange,
     onSortChange,
@@ -45,7 +45,7 @@ export function useGenericListTableState<TData, TValue>({
         persistSelectionRef.current = persistSelection
     }, [persistSelection])
 
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility || {})
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(initialFilters || [])
     const [sorting, setSorting] = React.useState<SortingState>(initialSorting || [])
     const [globalFilter, setGlobalFilter] = React.useState(initialSearch || "")

@@ -20,7 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { mediumTextClass, smallTextClass, bodyTextClass } from "@/shared/utils/text-styles"
-import { standardPaddingClass, compactPaddingClass } from "@/shared/utils/spacing-styles"
+import { standardPaddingClass } from "@/shared/utils/spacing-styles"
 
 interface ColumnOptionsPopoverProps<TData> {
   table: Table<TData>
@@ -28,8 +28,8 @@ interface ColumnOptionsPopoverProps<TData> {
   onOpenChange: (open: boolean) => void
 }
 
-// Helper function to get display name for a column
-function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
+// Helper function to get display name for a column (needs table context)
+function getColumnDisplayNameWithTable<TData>(column: Column<TData, unknown>, table: Table<TData>): string {
   const meta = column.columnDef.meta as { title?: string } | undefined
   if (meta?.title) {
     return meta.title
@@ -41,9 +41,13 @@ function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
   }
   
   if (typeof header === 'function') {
-    const result = header({ column, header: column.id, table })
-    if (typeof result === 'string') {
-      return result
+    try {
+      const result = header({ column, header: column.id as any, table })
+      if (typeof result === 'string') {
+        return result
+      }
+    } catch {
+      // If header function throws, fall back to column.id
     }
   }
   
@@ -78,7 +82,7 @@ export function ColumnOptionsPopover<TData>({
     }
     const query = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     return hideableColumns.filter(column => {
-      const displayName = getColumnDisplayName(column)
+      const displayName = getColumnDisplayNameWithTable(column, table)
       const normalized = displayName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       return normalized.includes(query) || column.id.toLowerCase().includes(query)
     })
@@ -145,7 +149,7 @@ export function ColumnOptionsPopover<TData>({
                 </div>
               ) : (
                 filteredColumns.map((column) => {
-                  const displayName = getColumnDisplayName(column)
+                  const displayName = getColumnDisplayNameWithTable(column, table)
                   return (
                     <div
                       key={column.id}

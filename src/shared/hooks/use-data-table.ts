@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useCallback } from "react"
+import { useMemo } from "react"
 import type { ColumnDef, ColumnFiltersState, SortingState } from "@tanstack/react-table"
 import { useListQuery } from "@/lib/react-query"
 import type { QueryKeyFactory } from "@/lib/react-query/query-keys/types"
@@ -175,6 +175,16 @@ export interface UseDataTableConfig<TData> {
    * Render left actions
    */
   renderLeftActions?: (row: TData) => React.ReactNode
+
+  /**
+   * Batch delete configuration
+   */
+  batchDeleteConfig?: {
+    itemName: string
+    moduleName: string
+    isLoading: boolean
+    getItemLabel: (item: TData) => string
+  }
 }
 
 /**
@@ -259,6 +269,7 @@ export function useDataTable<TData>(config: UseDataTableConfig<TData>) {
       isImporting: config.isImporting,
       exportOptions: config.exportOptions,
       renderLeftActions: config.renderLeftActions,
+      batchDeleteConfig: config.batchDeleteConfig,
     }),
     [
       config.columns,
@@ -294,6 +305,7 @@ export function useDataTable<TData>(config: UseDataTableConfig<TData>) {
       config.isImporting,
       config.exportOptions,
       config.renderLeftActions,
+      config.batchDeleteConfig,
     ]
   )
 

@@ -18,7 +18,7 @@ interface FormSectionCardProps {
 /**
  * Helper function to get icon for section
  */
-function getFormSectionIcon(title: string): React.ComponentType<{ className?: string }> {
+function getFormSectionIcon(_title: string): React.ComponentType<{ className?: string }> {
     // Default icon
     return FileText
 }
@@ -26,8 +26,8 @@ function getFormSectionIcon(title: string): React.ComponentType<{ className?: st
 /**
  * Component để render một section trong form view
  */
-export function FormSectionCard({ section, form, onFieldChange }: FormSectionCardProps) {
-    const SectionIcon = section.icon || getFormSectionIcon(section.title)
+export function FormSectionCard({ section, form }: FormSectionCardProps) {
+    const SectionIcon = getFormSectionIcon(section.title)
 
     return (
         <div className={sectionSpacingClass()}>

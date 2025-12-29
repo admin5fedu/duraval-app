@@ -19,16 +19,14 @@ interface DanhMucCauHoiImportDialogProps {
 // Template columns for export
 const templateColumns: TemplateColumn[] = [
     {
-        name: "ten_nhom",
-        label: "Tên nhóm",
-        type: "string",
+        header: "Tên nhóm",
+        type: "text",
         required: true,
         description: "Tên nhóm câu hỏi (bắt buộc)",
     },
     {
-        name: "mo_ta",
-        label: "Mô tả",
-        type: "string",
+        header: "Mô tả",
+        type: "text",
         required: false,
         description: "Mô tả nhóm câu hỏi (không bắt buộc)",
     },
@@ -45,7 +43,7 @@ const columnMappings: ColumnMapping[] = [
             "Group Name", "GroupName", "group_name", "Name", "name", "Title", "title"
         ],
         required: true,
-        type: "string",
+        type: "text",
         description: "Tên nhóm câu hỏi (bắt buộc)",
     },
     {
@@ -57,15 +55,14 @@ const columnMappings: ColumnMapping[] = [
             "Description", "description", "Desc", "desc", "Note", "note"
         ],
         required: false,
-        type: "string",
+        type: "text",
         description: "Mô tả nhóm câu hỏi (không bắt buộc)",
     },
 ]
 
 // Validate a single row
 function validateRow(
-    row: Record<string, any>,
-    rowNumber: number
+    row: Record<string, any>
 ): string[] {
     const errors: string[] = []
 
@@ -131,9 +128,9 @@ function mapExcelToDb(
 export function DanhMucCauHoiImportDialog({ open, onOpenChange, mutation }: DanhMucCauHoiImportDialogProps) {
     const defaultMutation = useBatchUpsertDanhMucCauHoi()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
-        upsertMode: 'upsert', // Upsert mode: update if exists (ten_nhom), insert if not
+        upsertMode: 'update', // Update mode: update if exists (ten_nhom), insert if not
     })
 
     const handleImport = async (rows: Partial<DanhMucCauHoi>[]): Promise<{
@@ -174,12 +171,10 @@ export function DanhMucCauHoiImportDialog({ open, onOpenChange, mutation }: Danh
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="danh mục câu hỏi"
-            expectedHeaders={["ten_nhom"]} // Use db field names after mapping
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            onOptionsChange={setImportOptions}
         />
     )
 }

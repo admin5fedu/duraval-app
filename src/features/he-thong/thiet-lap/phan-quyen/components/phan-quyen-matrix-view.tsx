@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Quyen } from "../schema"
 import { 
   Loader2, 
@@ -231,7 +230,7 @@ export function PhanQuyenMatrixView() {
         // Only save if at least one permission is true
         if (quyen.xem || quyen.them || quyen.sua || quyen.xoa || quyen.quan_tri) {
           permissionsToSave.push({
-            chuc_vu_id: chucVu.id,
+            chuc_vu_id: chucVu.id!,
             module_id: module.id,
             quyen,
           })
@@ -735,7 +734,7 @@ export function PhanQuyenMatrixView() {
                                             <div className="font-medium text-sm">{chucVu.ten_chuc_vu}</div>
                                           </div>
                                         </td>
-                                        {QUYEN_LABELS.map(({ key, label }) => {
+                                        {QUYEN_LABELS.map(({ key, label: _label }) => {
                                           const hasPerm = quyen[key]
                                           return (
                                             <td

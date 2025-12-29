@@ -37,7 +37,7 @@ export function generatePDFFilename(prefix: string = 'export'): string {
 /**
  * Create PDF document with table
  */
-export function createPDFTable<TData extends Record<string, any>>(
+export function createPDFTable(
     headers: string[],
     rows: any[][],
     options: PDFExportOptions = {}
@@ -130,7 +130,7 @@ export function createPDFTable<TData extends Record<string, any>>(
 export function downloadPDF(doc: jsPDF, filename: string): void {
     // Sanitize filename
     const sanitizedFilename = filename
-        .replace(/[\\\/\?\*\[\]:]/g, '_')
+        .replace(/[\\/?:*[\]:]/g, '_')
         .substring(0, 255)
 
     doc.save(sanitizedFilename)
@@ -139,7 +139,7 @@ export function downloadPDF(doc: jsPDF, filename: string): void {
 /**
  * Export data to PDF
  */
-export function exportToPDF<TData extends Record<string, any>>(
+export function exportToPDF(
     headers: string[],
     rows: any[][],
     options: PDFExportOptions = {}

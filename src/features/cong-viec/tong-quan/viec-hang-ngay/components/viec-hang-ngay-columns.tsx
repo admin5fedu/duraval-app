@@ -3,7 +3,6 @@
 import { type ColumnDef } from "@tanstack/react-table"
 import { ViecHangNgay } from "../schema"
 import { DeleteViecHangNgayButton } from "./delete-viec-hang-ngay-button"
-import { viecHangNgayConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { SortableHeader } from "@/shared/components"
 import { Badge } from "@/components/ui/badge"
@@ -226,7 +225,7 @@ export function createColumns(
             },
             size: 180,
             minSize: 150,
-            filterFn: (row, id, value) => {
+            filterFn: (row, _id, value) => {
                 const phongBanId = (row.original as any).phong_ban_id
                 return value.includes(String(phongBanId))
             },

@@ -17,8 +17,6 @@ export function useGenericListSelection(
         enableRangeSelection,
         enableLongPress,
         persistSelection,
-        rowSelection,
-        setRowSelection,
     }: UseGenericListSelectionParams
 ): UseGenericListSelectionReturn {
     const [rangeStartIndex, setRangeStartIndex] = React.useState<number | null>(null)

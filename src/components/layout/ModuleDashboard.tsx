@@ -26,8 +26,6 @@ interface ModuleDashboardProps {
 }
 
 export const ModuleDashboard = memo(function ModuleDashboard({ 
-  title, 
-  description, 
   groups 
 }: ModuleDashboardProps) {
   return (

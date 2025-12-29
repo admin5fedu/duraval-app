@@ -67,7 +67,6 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "danh-muc-cau-hoi": "Danh Mục Câu Hỏi",
   "lich-dang": "Lịch Đăng",
   "danh-muc-cau-hoi-hang-ngay": "Danh Mục Câu Hỏi Hàng Ngày", // Legacy, có thể xóa nếu không dùng
-  "lich-dang": "Lịch Đăng",
   "cau-tra-loi": "Câu Trả Lời",
   
   // Hanh-chinh-nhan-su sub-modules

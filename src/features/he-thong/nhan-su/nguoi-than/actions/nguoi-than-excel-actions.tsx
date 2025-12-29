@@ -22,7 +22,7 @@ export function useBatchUpsertNguoiThan() {
   return useMutation({
     mutationFn: async (records: Partial<NguoiThan>[]): Promise<BatchNguoiThanOperationResult> => {
       let inserted = 0
-      let updated = 0
+      const updated = 0
       const errors: BatchNguoiThanOperationResult["errors"] = []
 
       // Process in batches of 1000

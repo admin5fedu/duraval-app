@@ -99,7 +99,7 @@ export function useLazySelection<TData>(
         const selectedData: TData[] = []
         for (const row of rows) {
             if (selectedIds.has(row.id)) {
-                selectedData.push(row.original as TData)
+                selectedData.push(row.original as unknown as TData)
             }
         }
         

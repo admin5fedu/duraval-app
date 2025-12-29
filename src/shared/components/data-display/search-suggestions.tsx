@@ -4,7 +4,7 @@ import * as React from "react"
 import { Search, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { extractSearchSuggestions } from "@/shared/utils/search-operators"
-import { smallTextClass, bodyTextClass, smallMediumTextClass } from "@/shared/utils/text-styles"
+import { bodyTextClass, smallMediumTextClass } from "@/shared/utils/text-styles"
 import { compactPaddingClass, standardPaddingClass } from "@/shared/utils/spacing-styles"
 import { toolbarGapClass } from "@/shared/utils/toolbar-styles"
 

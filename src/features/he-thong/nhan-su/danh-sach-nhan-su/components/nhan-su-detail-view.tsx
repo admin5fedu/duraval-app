@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"

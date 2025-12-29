@@ -24,13 +24,3 @@ export const nhomPhieuHanhChinhSchema = z.object({
 
 export type NhomPhieuHanhChinh = z.infer<typeof nhomPhieuHanhChinhSchema>
 
-/**
- * Schema for creating new nhóm phiếu hành chính
- */
-export type CreateNhomPhieuHanhChinhInput = Omit<NhomPhieuHanhChinh, "id" | "tg_tao" | "tg_cap_nhat" | "nguoi_tao_id">
-
-/**
- * Schema for updating nhóm phiếu hành chính
- */
-export type UpdateNhomPhieuHanhChinhInput = Partial<Omit<NhomPhieuHanhChinh, "id" | "tg_tao" | "nguoi_tao_id">>
-

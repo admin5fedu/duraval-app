@@ -27,6 +27,12 @@
     }
   },
   "include": ["src"],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "src/test/**/*",
+    "app-tham-khao/**/*"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
 

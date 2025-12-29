@@ -59,7 +59,6 @@ export async function importData<TData extends Record<string, any>>(
     // Process in batches
     for (let i = 0; i < data.length; i += batchSize) {
       const batch = data.slice(i, i + batchSize)
-      const batchNumber = Math.floor(i / batchSize) + 1
       
       try {
         let batchResult: { data: any[] | null; error: PostgrestError | null }
@@ -265,7 +264,7 @@ export function validateImportData<TData>(
 
     // Check required fields
     requiredFields.forEach(field => {
-      if (!row || row[field] === undefined || row[field] === null || row[field] === '') {
+      if (!row || (row as any)[field] === undefined || (row as any)[field] === null || (row as any)[field] === '') {
         rowErrors.push(`Thiếu trường bắt buộc: ${field}`)
       }
     })

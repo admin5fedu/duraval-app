@@ -77,6 +77,7 @@ export const nhomPhieuHanhChinhColumns: ColumnDef<NhomPhieuHanhChinh>[] = [
         cell: ({ row }) => {
             const loaiPhieu = row.getValue("loai_phieu") as string | null
             const id = row.original.id!
+            const navigate = useNavigate()
             
             if (!loaiPhieu || loaiPhieu === "") {
                 return (

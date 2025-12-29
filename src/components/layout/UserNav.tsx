@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { ChevronDown, Moon, Sun, LogOut } from 'lucide-react'
+import { ChevronDown, Moon, Sun } from 'lucide-react'
 import { useUserPreferencesStore } from '@/shared/stores/user-preferences-store'
 import { useAuthStore } from '@/shared/stores/auth-store'
 import { transformCloudinaryUrl } from '@/lib/cloudinary'

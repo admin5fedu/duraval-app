@@ -14,7 +14,17 @@ import type { CreatePhanQuyenInput, UpdatePhanQuyenInput } from "../schema"
  */
 const mutations = createMutationHooks<PhanQuyen, CreatePhanQuyenInput, UpdatePhanQuyenInput>({
     queryKeys: phanQuyenQueryKeys,
-    api: PhanQuyenAPI,
+    api: {
+        create: PhanQuyenAPI.create,
+        update: PhanQuyenAPI.update,
+        delete: PhanQuyenAPI.delete,
+        batchDelete: async (ids: number[]) => {
+            // PhanQuyen không có batchDelete, implement fallback
+            for (const id of ids) {
+                await PhanQuyenAPI.delete(id)
+            }
+        },
+    },
     messages: {
         createSuccess: "Tạo phân quyền thành công",
         updateSuccess: "Cập nhật phân quyền thành công",

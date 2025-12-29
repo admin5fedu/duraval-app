@@ -37,14 +37,18 @@ export function InlineImageUpload({
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
   
-  // Get id from FormControl context if available
+  // ✅ FIX: Gọi Hook ở top level, không được gọi trong try-catch
+  // Luôn gọi useId() ở top level
+  const fallbackId = React.useId()
+  
+  // Thử lấy formItemId từ FormControl context (không dùng try-catch với Hook)
   let formItemId: string | undefined
   try {
     const formField = useFormField()
     formItemId = formField.formItemId
   } catch {
-    // Not in FormControl context, generate a unique id
-    formItemId = React.useId()
+    // Not in FormControl context, use fallback id
+    formItemId = fallbackId
   }
   
   const fileInputId = `${formItemId}-file-input`

@@ -75,7 +75,7 @@ function GenericListToolbarComponent<TData>({
   const search = useSearchInput({
     table,
     filterColumn,
-    placeholder,
+    _placeholder: placeholder,
     searchFields,
     module,
     enableSuggestions,
