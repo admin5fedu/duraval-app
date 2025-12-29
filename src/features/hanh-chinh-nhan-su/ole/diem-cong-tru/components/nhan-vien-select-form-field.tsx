@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useNhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/hooks/use-nhan-su"
 import { Check, ChevronsUpDown, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -10,86 +11,73 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useNhomLuong } from "../hooks/use-nhom-luong"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface NhomLuongSelectProps {
-    value?: number | null // ID của nhóm lương được chọn
-    onChange: (id: number | null) => void
+interface NhanVienSelectFormFieldProps {
+    name: string
+    label?: string
+    value?: any
+    onChange: (value: any) => void
     placeholder?: string
-    searchPlaceholder?: string
-    emptyText?: string
+    description?: string
     disabled?: boolean
-    className?: string
-    excludeIds?: number[] // Danh sách ID cần loại trừ
     id?: string // ID từ FormControl
-    name?: string // Name từ FormControl
     onBlur?: () => void // onBlur từ FormControl
+    // Các props khác từ formField
+    [key: string]: any
 }
 
 /**
- * Component chọn nhóm lương với ô search
- * Kiểu 1: Combobox với search theo tên nhóm
+ * Wrapper component để tích hợp Nhân Viên Select với react-hook-form
  * Sử dụng forwardRef để FormControl có thể truyền id và các props khác
  */
-export const NhomLuongSelect = React.forwardRef<HTMLButtonElement, NhomLuongSelectProps>(
-function NhomLuongSelect({
-    className,
-    placeholder = "Chọn nhóm lương...",
-    searchPlaceholder = "Tìm kiếm theo tên nhóm...",
-    emptyText = "Không tìm thấy nhóm lương.",
-    disabled = false,
-    excludeIds = [],
-    id,
+export const NhanVienSelectFormField = React.forwardRef<HTMLButtonElement, NhanVienSelectFormFieldProps>(
+function NhanVienSelectFormField({
     value,
     onChange,
-    ...props
+    placeholder = "Chọn nhân viên...",
+    description,
+    disabled,
+    id,
+    name,
+    onBlur,
 }, ref) {
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
-    
-    // Fetch danh sách nhóm lương
-    const { data: nhomLuongList, isLoading } = useNhomLuong()
-    
+    const { data: nhanSuList, isLoading } = useNhanSu()
     const searchInputId = React.useId()
 
-    // Filter danh sách nhóm lương: loại trừ các ID trong excludeIds
-    const availableNhomLuong = React.useMemo(() => {
-        if (!nhomLuongList) return []
-        return nhomLuongList.filter((nl) => !excludeIds.includes(nl.id!))
-    }, [nhomLuongList, excludeIds])
+    // Tìm nhân viên được chọn (value là ma_nhan_vien)
+    const selectedNhanVien = React.useMemo(() => {
+        if (!value || !nhanSuList) return null
+        return nhanSuList.find((ns) => ns.ma_nhan_vien === Number(value))
+    }, [value, nhanSuList])
 
-    // Tìm nhóm lương được chọn
-    const selectedNhomLuong = React.useMemo(() => {
-        if (!value || !nhomLuongList) return null
-        return nhomLuongList.find((nl) => nl.id === value)
-    }, [value, nhomLuongList])
-
-    // Filter options dựa trên search query (tìm theo tên nhóm)
+    // Filter options dựa trên search query
     const filteredOptions = React.useMemo(() => {
+        if (!nhanSuList) return []
         if (!searchQuery.trim()) {
-            return availableNhomLuong
+            return nhanSuList
         }
-        
         const query = searchQuery.toLowerCase()
-        return availableNhomLuong.filter((nl) => {
-            const tenNhom = nl.ten_nhom?.toLowerCase() || ""
-            const moTa = nl.mo_ta?.toLowerCase() || ""
-            return tenNhom.includes(query) || moTa.includes(query)
+        return nhanSuList.filter((ns) => {
+            const maNhanVien = ns.ma_nhan_vien?.toString() || ""
+            const hoTen = ns.ho_ten?.toLowerCase() || ""
+            return maNhanVien.includes(query) || hoTen.includes(query)
         })
-    }, [availableNhomLuong, searchQuery])
+    }, [nhanSuList, searchQuery])
 
-    const handleSelect = (nhomLuongId: number) => {
-        onChange(nhomLuongId)
+    const handleSelect = React.useCallback((maNhanVien: number) => {
+        onChange(maNhanVien)
         setOpen(false)
         setSearchQuery("")
-    }
+    }, [onChange])
 
-    const handleClear = (e: React.MouseEvent) => {
+    const handleClear = React.useCallback((e: React.MouseEvent) => {
         e.stopPropagation()
         onChange(null)
         setSearchQuery("")
-    }
+    }, [onChange])
 
     // Reset search when popover closes
     React.useEffect(() => {
@@ -99,9 +87,7 @@ function NhomLuongSelect({
     }, [open])
 
     if (isLoading) {
-        return (
-            <Skeleton className={cn("h-10 w-full", className)} />
-        )
+        return <Skeleton className="h-10 w-full" />
     }
 
     return (
@@ -110,22 +96,22 @@ function NhomLuongSelect({
                 <Button
                     ref={ref}
                     id={id}
+                    name={name}
                     type="button"
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
                     disabled={disabled}
+                    onBlur={onBlur}
                     className={cn(
                         "w-full justify-between",
-                        !selectedNhomLuong && "text-muted-foreground",
-                        className
+                        !selectedNhanVien && "text-muted-foreground"
                     )}
-                    {...props}
                 >
-                    {selectedNhomLuong ? (
+                    {selectedNhanVien ? (
                         <div className="flex items-center justify-between flex-1 min-w-0 mr-2">
                             <span className="truncate">
-                                {selectedNhomLuong.ten_nhom}
+                                {selectedNhanVien.ma_nhan_vien} - {selectedNhanVien.ho_ten}
                             </span>
                             {!disabled && (
                                 <X
@@ -147,7 +133,7 @@ function NhomLuongSelect({
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                         <Input
                             id={searchInputId}
-                            placeholder={searchPlaceholder}
+                            placeholder={description || "Tìm kiếm theo mã hoặc tên nhân viên..."}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="border-0 focus-ring-0 focus:ring-0 focus-visible:ring-0"
@@ -163,21 +149,21 @@ function NhomLuongSelect({
                     <div className="max-h-[300px] overflow-y-auto">
                         {filteredOptions.length === 0 ? (
                             <div className="p-4 text-sm text-muted-foreground text-center">
-                                {emptyText}
+                                Không tìm thấy nhân viên.
                             </div>
                         ) : (
                             <div className="p-1">
-                                {filteredOptions.map((nl) => {
-                                    const isSelected = value === nl.id
+                                {filteredOptions.map((ns) => {
+                                    const isSelected = value === ns.ma_nhan_vien
                                     
                                     return (
                                         <div
-                                            key={nl.id}
+                                            key={ns.ma_nhan_vien}
                                             className={cn(
                                                 "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
                                                 isSelected && "bg-accent text-accent-foreground"
                                             )}
-                                            onClick={() => handleSelect(nl.id!)}
+                                            onClick={() => handleSelect(ns.ma_nhan_vien!)}
                                         >
                                             <Check
                                                 className={cn(
@@ -186,10 +172,7 @@ function NhomLuongSelect({
                                                 )}
                                             />
                                             <div className="flex-1">
-                                                <div className="font-medium">{nl.ten_nhom}</div>
-                                                {nl.mo_ta && (
-                                                    <div className="text-xs text-muted-foreground truncate">{nl.mo_ta}</div>
-                                                )}
+                                                <div className="font-medium">{ns.ma_nhan_vien} - {ns.ho_ten}</div>
                                             </div>
                                         </div>
                                     )
@@ -203,5 +186,5 @@ function NhomLuongSelect({
     )
 })
 
-NhomLuongSelect.displayName = "NhomLuongSelect"
+NhanVienSelectFormField.displayName = "NhanVienSelectFormField"
 

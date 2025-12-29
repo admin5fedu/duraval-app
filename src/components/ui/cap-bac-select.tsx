@@ -22,13 +22,18 @@ export interface CapBacSelectProps {
     disabled?: boolean
     className?: string
     excludeIds?: number[] // Danh sách ID cần loại trừ
+    id?: string // ID từ FormControl
+    name?: string // Name từ FormControl
+    onBlur?: () => void // onBlur từ FormControl
 }
 
 /**
  * Component chọn cấp bậc với ô search
  * Reusable UI component - có thể dùng chung trong toàn bộ ứng dụng
+ * Sử dụng forwardRef để FormControl có thể truyền id và các props khác
  */
-export function CapBacSelect({
+export const CapBacSelect = React.forwardRef<HTMLButtonElement, CapBacSelectProps>(
+function CapBacSelect({
     value,
     onChange,
     placeholder = "Chọn cấp bậc...",
@@ -37,7 +42,10 @@ export function CapBacSelect({
     disabled = false,
     className,
     excludeIds = [],
-}: CapBacSelectProps) {
+    id,
+    name,
+    onBlur,
+}, ref) {
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
     
@@ -109,11 +117,15 @@ export function CapBacSelect({
         <Popover open={open && !disabled} onOpenChange={(isOpen) => !disabled && setOpen(isOpen)}>
             <PopoverTrigger asChild>
                 <Button
+                    ref={ref}
+                    id={id}
+                    name={name}
                     type="button"
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
                     disabled={disabled}
+                    onBlur={onBlur}
                     className={cn(
                         "w-full justify-between font-normal",
                         !value && "text-muted-foreground",
@@ -123,17 +135,25 @@ export function CapBacSelect({
                     <span className="truncate flex-1 text-left">{displayText}</span>
                     <div className="flex items-center gap-1 shrink-0">
                         {value && (
-                            <button
-                                type="button"
+                            <span
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     handleClear()
                                 }}
-                                className="h-4 w-4 rounded-full hover:bg-destructive/10 flex items-center justify-center text-muted-foreground hover:text-destructive"
+                                className="h-4 w-4 rounded-full hover:bg-destructive/10 flex items-center justify-center text-muted-foreground hover:text-destructive cursor-pointer"
                                 title="Bỏ chọn"
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleClear()
+                                    }
+                                }}
                             >
                                 <span className="text-xs">×</span>
-                            </button>
+                            </span>
                         )}
                         <ChevronsUpDown className="h-4 w-4 opacity-50" />
                     </div>
@@ -212,5 +232,7 @@ export function CapBacSelect({
             </PopoverContent>
         </Popover>
     )
-}
+})
+
+CapBacSelect.displayName = "CapBacSelect"
 

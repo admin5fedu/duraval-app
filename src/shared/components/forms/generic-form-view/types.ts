@@ -18,15 +18,7 @@ export interface FormFieldConfig {
     colSpan?: number // 1, 2, 3
     required?: boolean
     disabled?: boolean
-    customComponent?: React.ComponentType<{ 
-        name: string
-        label?: string
-        value: any
-        onChange: (value: any) => void
-        disabled?: boolean
-        placeholder?: string
-        description?: string
-    }>
+    customComponent?: React.ComponentType<any> | React.ForwardRefExoticComponent<any>
     // For image type
     imageFolder?: string // Cloudinary folder
     imageMaxSize?: number // Max size in MB

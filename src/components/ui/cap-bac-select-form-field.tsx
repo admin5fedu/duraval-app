@@ -14,6 +14,7 @@ interface CapBacSelectFormFieldProps<TFieldValues extends FieldValues = FieldVal
 
 /**
  * Wrapper component để tích hợp CapBacSelect với react-hook-form
+ * FormControl sẽ tự động truyền id, name, onBlur vào CapBacSelect qua forwardRef
  */
 export function CapBacSelectFormField<TFieldValues extends FieldValues = FieldValues>({
     field,
@@ -37,6 +38,9 @@ export function CapBacSelectFormField<TFieldValues extends FieldValues = FieldVa
             searchPlaceholder={description}
             disabled={disabled}
             excludeIds={excludeIds || []}
+            id={field.name} // FormControl sẽ override id này
+            name={field.name}
+            onBlur={field.onBlur}
         />
     )
 }

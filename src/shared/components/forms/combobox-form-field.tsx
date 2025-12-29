@@ -10,8 +10,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useFormField } from "@/components/ui/form"
-
 interface ComboboxFormFieldProps {
     value: string
     onChange: (value: string) => void
@@ -21,9 +19,13 @@ interface ComboboxFormFieldProps {
     emptyText?: string
     className?: string
     disabled?: boolean
+    id?: string // ID từ FormControl
+    name?: string // Name từ FormControl
+    onBlur?: () => void // onBlur từ FormControl
 }
 
-export function ComboboxFormField({
+export const ComboboxFormField = React.forwardRef<HTMLButtonElement, ComboboxFormFieldProps>(
+function ComboboxFormField({
     value,
     onChange,
     options,
@@ -31,20 +33,13 @@ export function ComboboxFormField({
     searchPlaceholder = "Tìm kiếm...",
     emptyText = "Không tìm thấy.",
     className,
-    disabled = false
-}: ComboboxFormFieldProps) {
+    disabled = false,
+    id,
+    name,
+    onBlur,
+}, ref) {
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
-    
-    // Get id from FormControl context if available
-    let formItemId: string | undefined
-    try {
-        const formField = useFormField()
-        formItemId = formField.formItemId
-    } catch {
-        // Not in FormControl context, generate a unique id
-        formItemId = React.useId()
-    }
     
     const searchInputId = React.useId()
 
@@ -80,12 +75,15 @@ export function ComboboxFormField({
         <Popover open={open && !disabled} onOpenChange={(open) => !disabled && setOpen(open)}>
             <PopoverTrigger asChild>
                 <Button
+                    ref={ref}
+                    id={id}
+                    name={name}
                     type="button"
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    id={formItemId}
                     disabled={disabled}
+                    onBlur={onBlur}
                     className={cn(
                         "w-full justify-between font-normal",
                         !value && "text-muted-foreground",
@@ -103,7 +101,6 @@ export function ComboboxFormField({
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                         <Input
                             id={searchInputId}
-                            name={`${formItemId}-search`}
                             type="search"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
@@ -146,5 +143,7 @@ export function ComboboxFormField({
             </PopoverContent>
         </Popover>
     )
-}
+})
+
+ComboboxFormField.displayName = "ComboboxFormField"
 

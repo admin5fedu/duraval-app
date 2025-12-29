@@ -7,7 +7,6 @@ import {
     FormControl,
     FormDescription,
     FormMessage,
-    useFormField,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -29,59 +28,9 @@ interface FormFieldRendererProps {
 }
 
 /**
- * Wrapper component for Select to ensure it receives id and name from FormControl
- */
-function SelectWrapper({
-    value,
-    onValueChange,
-    disabled,
-    placeholder,
-    options,
-    isMobile,
-}: {
-    value?: string
-    onValueChange: (value: string) => void
-    disabled?: boolean
-    placeholder?: string
-    options: Array<{ label: string; value: string }>
-    isMobile: boolean
-}) {
-    const { formItemId } = useFormField()
-    
-    return (
-        <Select 
-            onValueChange={onValueChange}
-            value={value}
-            disabled={disabled}
-        >
-            <SelectTrigger 
-                id={formItemId}
-                className={cn(
-                    "w-full",
-                    isMobile && "h-11 text-base" // Larger touch target
-                )}
-            >
-                <SelectValue placeholder={placeholder} />
-            </SelectTrigger>
-            <SelectContent>
-                {options
-                    .filter(option => option.value !== "")
-                    .map((option) => (
-                        <SelectItem 
-                            key={option.value} 
-                            value={option.value}
-                            className={isMobile ? "text-base py-3" : ""}
-                        >
-                            {option.label}
-                        </SelectItem>
-                    ))}
-            </SelectContent>
-        </Select>
-    )
-}
-
-/**
  * Component để render các field types khác nhau trong form
+ * Tuân thủ pattern Shadcn/UI: FormItem -> FormLabel -> FormControl -> [Component]
+ * FormControl sẽ tự động clone element con và truyền id, aria-describedby vào đó
  * Mobile-optimized: Larger touch targets, better spacing, full width on mobile
  */
 export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
@@ -148,15 +97,13 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         value={formField.value ? String(formField.value) : ""}
                                         onChange={(value) => {
                                             if (field.disabled) return
-                                            // Toggle returns "Có" or "Không" - use directly, empty string becomes null
                                             formField.onChange(value === "" ? null : value)
                                         }}
                                         options={field.options || []}
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "select" ? (
-                                    <SelectWrapper
-                                        value={formField.value && formField.value !== "" ? String(formField.value) : undefined}
+                                    <Select 
                                         onValueChange={(value) => {
                                             if (field.disabled) return
                                             if (value === "" || value === "__empty__") {
@@ -165,11 +112,31 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                                 formField.onChange(value)
                                             }
                                         }}
+                                        value={formField.value && formField.value !== "" ? String(formField.value) : undefined}
                                         disabled={field.disabled}
-                                        placeholder={field.placeholder || "Chọn..."}
-                                        options={field.options || []}
-                                        isMobile={isMobile}
-                                    />
+                                    >
+                                        <SelectTrigger 
+                                            className={cn(
+                                                "w-full",
+                                                isMobile && "h-11 text-base"
+                                            )}
+                                        >
+                                            <SelectValue placeholder={field.placeholder || "Chọn..."} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {field.options
+                                                ?.filter(option => option.value !== "")
+                                                .map((option) => (
+                                                    <SelectItem 
+                                                        key={option.value} 
+                                                        value={option.value}
+                                                        className={isMobile ? "text-base py-3" : ""}
+                                                    >
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
                                 ) : field.type === "textarea" ? (
                                     <Textarea
                                         {...formField}
@@ -204,10 +171,9 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
                                     <field.customComponent
+                                        {...formField} // Truyền toàn bộ formField object (bao gồm ref, id, name, value, onChange, onBlur)
                                         name={field.name}
                                         label={field.label}
-                                        value={formField.value}
-                                        onChange={formField.onChange}
                                         disabled={field.disabled}
                                         placeholder={field.placeholder}
                                         description={field.description}
@@ -221,13 +187,12 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                         min={field.type === "number" && field.name === "so_luong_cho_phep_thang" ? 0 : undefined}
                                         className={cn(
-                                            isMobile && "h-11 text-base" // Larger touch target
+                                            isMobile && "h-11 text-base"
                                         )}
                                         onChange={e => {
                                             if (field.disabled) return
                                             if (field.type === 'number') {
                                                 const numValue = e.target.valueAsNumber
-                                                // Prevent negative values for so_luong_cho_phep_thang
                                                 if (field.name === "so_luong_cho_phep_thang" && numValue < 0) {
                                                     formField.onChange(0)
                                                 } else {
@@ -265,4 +230,3 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
         />
     )
 }
-
