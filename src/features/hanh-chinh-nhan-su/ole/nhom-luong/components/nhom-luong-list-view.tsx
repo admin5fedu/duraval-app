@@ -8,17 +8,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
-import { NhomDiemCongTru } from "../schema"
-import { useNhomDiemCongTru, useBatchDeleteNhomDiemCongTru, useDeleteNhomDiemCongTru } from "../hooks"
-import { nhomDiemCongTruColumns } from "./nhom-diem-cong-tru-columns"
-import { nhomDiemCongTruConfig } from "../config"
+import { NhomLuong } from "../schema"
+import { useNhomLuong, useBatchDeleteNhomLuong, useDeleteNhomLuong } from "../hooks"
+import { nhomLuongColumns } from "./nhom-luong-columns"
+import { nhomLuongConfig } from "../config"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
-import { useBatchUpsertNhomDiemCongTru } from "../actions/nhom-diem-cong-tru-excel-actions"
-import { NhomDiemCongTruImportDialog } from "./nhom-diem-cong-tru-import-dialog"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { NhomDiemCongTruAPI } from "../services/nhom-diem-cong-tru.api"
-import { nhomDiemCongTruQueryKeys } from "@/lib/react-query/query-keys"
+import { NhomLuongAPI } from "../services/nhom-luong.api"
+import { nhomLuongQueryKeys } from "@/lib/react-query/query-keys"
+import { useBatchUpsertNhomLuong } from "../actions/nhom-luong-excel-actions"
+import { NhomLuongImportDialog } from "./nhom-luong-import-dialog"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -30,32 +28,32 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface NhomDiemCongTruListViewProps {
-    initialData?: NhomDiemCongTru[]
+interface NhomLuongListViewProps {
+    initialData?: NhomLuong[]
     onEdit?: (id: number) => void
     onAddNew?: () => void
     onView?: (id: number) => void
 }
 
-export function NhomDiemCongTruListView({ 
+export function NhomLuongListView({ 
     initialData,
     onEdit,
     onAddNew,
     onView,
-}: NhomDiemCongTruListViewProps = {}) {
-    const { data: nhomDiemList, isLoading, isError, refetch } = useNhomDiemCongTru(initialData)
+}: NhomLuongListViewProps = {}) {
+    const { data: nhomLuongList, isLoading, isError, refetch } = useNhomLuong(initialData)
     const navigate = useNavigate()
-    const batchDeleteMutation = useBatchDeleteNhomDiemCongTru()
-    const deleteMutation = useDeleteNhomDiemCongTru()
-    const batchImportMutation = useBatchUpsertNhomDiemCongTru()
-    const module = nhomDiemCongTruConfig.moduleName
+    const batchDeleteMutation = useBatchDeleteNhomLuong()
+    const deleteMutation = useDeleteNhomLuong()
+    const batchImportMutation = useBatchUpsertNhomLuong()
+    const module = nhomLuongConfig.moduleName
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
-    const [rowToDelete, setRowToDelete] = React.useState<NhomDiemCongTru | null>(null)
+    const [rowToDelete, setRowToDelete] = React.useState<NhomLuong | null>(null)
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
 
     // Create columns
     const columns = React.useMemo(() => {
-        return nhomDiemCongTruColumns
+        return nhomLuongColumns
     }, [])
 
     // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
@@ -66,56 +64,18 @@ export function NhomDiemCongTruListView({
         handleFiltersChange,
         handleSearchChange,
         handleSortChange,
-    } = useListViewFilters(module, nhomDiemCongTruConfig.defaultSorting || [])
+    } = useListViewFilters(module, nhomLuongConfig.defaultSorting || [])
 
     // Fetch unique người tạo for filter
     const { data: nguoiTaoList } = useQuery({
-        queryKey: [...nhomDiemCongTruQueryKeys.all(), "nguoi-tao-filter"],
-        queryFn: () => NhomDiemCongTruAPI.getUniqueNguoiTaoIds(),
-        staleTime: 10 * 60 * 1000, // 10 minutes
-    })
-
-    // Fetch unique hạng mục for filter
-    const { data: hangMucList } = useQuery({
-        queryKey: [...nhomDiemCongTruQueryKeys.all(), "hang-muc-filter"],
-        queryFn: () => NhomDiemCongTruAPI.getUniqueHangMuc(),
-        staleTime: 10 * 60 * 1000, // 10 minutes
-    })
-
-    // Fetch unique nhóm for filter
-    const { data: nhomList } = useQuery({
-        queryKey: [...nhomDiemCongTruQueryKeys.all(), "nhom-filter"],
-        queryFn: () => NhomDiemCongTruAPI.getUniqueNhom(),
+        queryKey: [...nhomLuongQueryKeys.all(), "nguoi-tao-filter"],
+        queryFn: () => NhomLuongAPI.getUniqueNguoiTaoIds(),
         staleTime: 10 * 60 * 1000, // 10 minutes
     })
 
     // Build filters array from config with dynamic options
     const filters = React.useMemo(() => {
         const baseFilters: any[] = []
-        
-        // Add hang_muc filter
-        if (hangMucList && hangMucList.length > 0) {
-            baseFilters.push({
-                columnId: "hang_muc",
-                title: "Hạng Mục",
-                options: hangMucList.map((hangMuc) => ({
-                    label: hangMuc,
-                    value: hangMuc,
-                })),
-            })
-        }
-        
-        // Add nhom filter
-        if (nhomList && nhomList.length > 0) {
-            baseFilters.push({
-                columnId: "nhom",
-                title: "Nhóm",
-                options: nhomList.map((nhom) => ({
-                    label: nhom,
-                    value: nhom,
-                })),
-            })
-        }
         
         // Add nguoi_tao_id filter
         if (nguoiTaoList && nguoiTaoList.length > 0) {
@@ -124,59 +84,40 @@ export function NhomDiemCongTruListView({
                 title: "Người Tạo",
                 options: nguoiTaoList
                     .filter((item) => item.id != null)
-                    .map((item) => ({
-                        label: item.ten && item.ten !== `ID: ${item.id}` ? `${item.id} - ${item.ten}` : String(item.id),
-                        value: String(item.id),
-                    })),
+                    .map((item) => {
+                        const maNhanVien = item.ma_nhan_vien || item.id
+                        const label = item.ten && item.ten !== `ID: ${item.id}` 
+                            ? `${maNhanVien} - ${item.ten}` 
+                            : String(maNhanVien)
+                        return {
+                            label,
+                            value: String(item.id),
+                        }
+                    }),
             })
         }
         
         return baseFilters
-    }, [hangMucList, nhomList, nguoiTaoList])
+    }, [nguoiTaoList])
 
     // Mobile card renderer
-    const renderMobileCard = React.useCallback((row: NhomDiemCongTru) => {
-        const hangMuc = row.hang_muc
-        const badgeClass = hangMuc === "Cộng" 
-            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-            : "bg-red-50 text-red-700 border-red-200"
-        
+    const renderMobileCard = React.useCallback((row: NhomLuong) => {
         return (
             <div className="flex flex-col gap-3 w-full">
                 {/* Thông tin chính */}
                 <div className="flex gap-3 items-center">
                     <div className="flex-1 min-w-0 flex items-start gap-2">
                         <div className="flex-1 min-w-0">
-                            <Badge variant="outline" className={cn(badgeClass, "font-semibold text-base")}>
-                                {hangMuc}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground leading-tight truncate block mt-1">
-                                Nhóm: {row.nhom}
-                            </span>
+                            <span className="font-semibold text-base">{row.ten_nhom}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Thông tin phụ */}
                 <div className="space-y-1 text-xs text-muted-foreground">
-                    {row.min !== null && row.min !== undefined && (
-                        <p className="leading-snug">
-                            Min: <span className="font-medium text-foreground">{row.min}</span>
-                        </p>
-                    )}
-                    {row.max !== null && row.max !== undefined && (
-                        <p className="leading-snug">
-                            Max: <span className="font-medium text-foreground">{row.max}</span>
-                        </p>
-                    )}
                     {row.mo_ta && (
                         <p className="leading-snug">
                             Mô tả: <span className="font-medium text-foreground">{row.mo_ta}</span>
-                        </p>
-                    )}
-                    {row.pb_ap_dung_ib && row.pb_ap_dung_ib.length > 0 && (
-                        <p className="leading-snug">
-                            Phòng ban: <span className="font-medium text-foreground">{row.pb_ap_dung_ib.length} phòng ban</span>
                         </p>
                     )}
                     {row.nguoi_tao_id && (
@@ -204,7 +145,7 @@ export function NhomDiemCongTruListView({
         return (column?.meta as any)?.title || columnId
     }, [columns])
 
-    const getCellValue = React.useCallback((row: NhomDiemCongTru, columnId: string) => {
+    const getCellValue = React.useCallback((row: NhomLuong, columnId: string) => {
         // Skip select and actions columns
         if (columnId === "select" || columnId === "actions") {
             return ""
@@ -215,10 +156,13 @@ export function NhomDiemCongTruListView({
             if (!value) return ""
             return format(new Date(value), "dd/MM/yyyy HH:mm", { locale: vi })
         }
-        if (columnId === "pb_ap_dung_ib") {
-            const value = (row as any)[columnId]
-            if (!value || !Array.isArray(value) || value.length === 0) return ""
-            return `${value.length} phòng ban`
+        if (columnId === "nguoi_tao_id") {
+            const nguoiTaoId = row.nguoi_tao_id
+            const nguoiTaoTen = row.nguoi_tao_ten
+            const nguoiTaoMaNhanVien = (row as any).nguoi_tao?.ma_nhan_vien as number | null
+            if (!nguoiTaoId) return ""
+            const maNhanVien = nguoiTaoMaNhanVien || nguoiTaoId
+            return nguoiTaoTen ? `${maNhanVien} - ${nguoiTaoTen}` : maNhanVien.toString()
         }
         if (columnId === "id") {
             return row.id?.toString() || ""
@@ -250,8 +194,7 @@ export function NhomDiemCongTruListView({
         <>
             <GenericListView
                 columns={columns}
-                data={nhomDiemList || []}
-                filterColumn="hang_muc"
+                data={nhomLuongList || []}
                 initialSorting={initialSorting}
                 initialFilters={initialFilters}
                 initialSearch={initialSearch}
@@ -262,44 +205,44 @@ export function NhomDiemCongTruListView({
                     if (onView) {
                         onView(row.id!)
                     } else {
-                        navigate(`${nhomDiemCongTruConfig.routePath}/${row.id}`)
+                        navigate(`${nhomLuongConfig.routePath}/${row.id}`)
                     }
                 }}
                 onAdd={() => {
                     if (onAddNew) {
                         onAddNew()
                     } else {
-                        navigate(`${nhomDiemCongTruConfig.routePath}/moi`)
+                        navigate(`${nhomLuongConfig.routePath}/moi`)
                     }
                 }}
-                addHref={`${nhomDiemCongTruConfig.routePath}/moi`}
+                addHref={`${nhomLuongConfig.routePath}/moi`}
                 onBack={() => {
-                    navigate(nhomDiemCongTruConfig.parentPath)
+                    navigate(nhomLuongConfig.parentPath)
                 }}
                 onDeleteSelected={async (selectedRows) => {
                     const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
                     await batchDeleteMutation.mutateAsync(ids)
                 }}
                 batchDeleteConfig={{
-                    itemName: "nhóm điểm cộng trừ",
-                    moduleName: nhomDiemCongTruConfig.moduleTitle,
+                    itemName: "nhóm lương",
+                    moduleName: nhomLuongConfig.moduleTitle,
                     isLoading: batchDeleteMutation.isPending,
-                    getItemLabel: (item: NhomDiemCongTru) => item.hang_muc || item.nhom || String(item.id),
+                    getItemLabel: (item: NhomLuong) => item.ten_nhom || String(item.id),
                 }}
                 filters={filters}
-                searchFields={nhomDiemCongTruConfig.searchFields as (keyof NhomDiemCongTru)[]}
+                searchFields={nhomLuongConfig.searchFields as (keyof NhomLuong)[]}
                 module={module}
                 enableSuggestions={true}
                 enableRangeSelection={true}
                 enableLongPress={true}
                 persistSelection={false}
                 renderMobileCard={renderMobileCard}
-                enableVirtualization={(nhomDiemList?.length || 0) > 100}
+                enableVirtualization={(nhomLuongList?.length || 0) > 100}
                 virtualRowHeight={60}
                 exportOptions={{
                     columns: columns,
-                    totalCount: nhomDiemList?.length || 0,
-                    moduleName: nhomDiemCongTruConfig.moduleTitle,
+                    totalCount: nhomLuongList?.length || 0,
+                    moduleName: nhomLuongConfig.moduleTitle,
                     getColumnTitle,
                     getCellValue,
                 }}
@@ -307,7 +250,7 @@ export function NhomDiemCongTruListView({
                     if (onEdit) {
                         onEdit(row.id!)
                     } else {
-                        navigate(`${nhomDiemCongTruConfig.routePath}/${row.id}/sua`)
+                        navigate(`${nhomLuongConfig.routePath}/${row.id}/sua`)
                     }
                 }}
                 onDelete={(row) => {
@@ -317,13 +260,6 @@ export function NhomDiemCongTruListView({
                 onImport={() => setImportDialogOpen(true)}
                 isImporting={batchImportMutation.isPending}
             />
-
-            {/* Import Dialog */}
-            <NhomDiemCongTruImportDialog
-                open={importDialogOpen}
-                onOpenChange={setImportDialogOpen}
-                mutation={batchImportMutation}
-            />
             
             {/* Delete confirmation dialog */}
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -331,7 +267,7 @@ export function NhomDiemCongTruListView({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa nhóm điểm cộng trừ <strong>{rowToDelete?.hang_muc}</strong>? Hành động này không thể hoàn tác.
+                            Bạn có chắc chắn muốn xóa nhóm lương <strong>{rowToDelete?.ten_nhom}</strong>? Hành động này không thể hoàn tác.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -356,6 +292,13 @@ export function NhomDiemCongTruListView({
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Import Dialog */}
+            <NhomLuongImportDialog
+                open={importDialogOpen}
+                onOpenChange={setImportDialogOpen}
+                mutation={batchImportMutation}
+            />
         </>
     )
 }

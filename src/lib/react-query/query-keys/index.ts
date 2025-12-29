@@ -20,5 +20,6 @@ export { cauTraLoiQueryKeys } from "./cau-tra-loi"
 export { nhomPhieuHanhChinh, nhomPhieuHanhChinh as nhomPhieuHanhChinhQueryKeys } from "./nhom-phieu-hanh-chinh"
 export { phieuHanhChinh, phieuHanhChinh as phieuHanhChinhQueryKeys } from "./phieu-hanh-chinh"
 export { nhomDiemCongTru, nhomDiemCongTru as nhomDiemCongTruQueryKeys } from "./nhom-diem-cong-tru"
+export { nhomLuong, nhomLuong as nhomLuongQueryKeys } from "./nhom-luong"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

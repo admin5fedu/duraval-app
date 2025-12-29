@@ -78,6 +78,7 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "cham-ole": "Chấm OLE",
   "diem-cong-tru": "Điểm Cộng Trừ",
   "nhom-diem-cong-tru": "Nhóm Điểm Cộng Trừ",
+  "nhom-luong": "Nhóm Lương",
   "de-xuat-tuyen-dung": "Đề Xuất Tuyển Dụng",
   "ung-vien": "Ứng Viên",
   

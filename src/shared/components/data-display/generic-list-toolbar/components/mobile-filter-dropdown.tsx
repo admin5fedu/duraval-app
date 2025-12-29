@@ -38,20 +38,25 @@ export function MobileFilterDropdown<TData>({
   filters = [],
   customFilters = [],
 }: MobileFilterDropdownProps<TData>) {
+  // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   const [isOpen, setIsOpen] = React.useState(false)
   
-  // Chỉ hiển thị nếu có filters
-  const hasFilters = filters.length > 0 || customFilters.length > 0
-  if (!hasFilters) {
-    return null
-  }
-
   const handleClearAll = React.useCallback(() => {
     clearAllFilters(table)
     setIsOpen(false)
   }, [table])
 
   const hasActiveFilters = table.getState().columnFilters.length > 0
+  
+  // ✅ Đảm bảo filters luôn là array
+  const safeFilters = React.useMemo(() => Array.isArray(filters) ? filters : [], [filters])
+  const safeCustomFilters = React.useMemo(() => Array.isArray(customFilters) ? customFilters : [], [customFilters])
+  
+  // Chỉ hiển thị nếu có filters (sau khi đã gọi tất cả hooks)
+  const hasFilters = safeFilters.length > 0 || safeCustomFilters.length > 0
+  if (!hasFilters) {
+    return null
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -92,7 +97,7 @@ export function MobileFilterDropdown<TData>({
           <ScrollArea className="max-h-[400px]">
             <div className={cn(compactPaddingClass(), "space-y-2 py-2")}>
               {/* Custom Filters */}
-              {customFilters.map((filter, index) => {
+              {safeCustomFilters.map((filter, index) => {
                 if (React.isValidElement(filter)) {
                   const filterProps = filter.props as Record<string, any>
                   if (filterProps.column === undefined) {
@@ -116,7 +121,7 @@ export function MobileFilterDropdown<TData>({
               })}
 
               {/* Standard Filters */}
-              {filters.map(filter => {
+              {safeFilters.map(filter => {
                 const column = table.getColumn(filter.columnId)
                 if (!column) return null
                 
@@ -131,7 +136,7 @@ export function MobileFilterDropdown<TData>({
                 )
               })}
 
-              {filters.length === 0 && customFilters.length === 0 && (
+              {safeFilters.length === 0 && safeCustomFilters.length === 0 && (
                 <div className="py-6 text-center text-sm text-muted-foreground">
                   Không có bộ lọc
                 </div>

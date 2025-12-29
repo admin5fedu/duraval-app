@@ -111,6 +111,10 @@ const NhomDiemCongTruListRoute = lazy(() => import('@/features/hanh-chinh-nhan-s
 const NhomDiemCongTruDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/routes/nhom-diem-cong-tru-detail-route'))
 const NhomDiemCongTruFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/routes/nhom-diem-cong-tru-form-route'))
 
+const NhomLuongListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-luong/routes/nhom-luong-list-route'))
+const NhomLuongDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-luong/routes/nhom-luong-detail-route'))
+const NhomLuongFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/ole/nhom-luong/routes/nhom-luong-form-route'))
+
 // Hành chính nhân sự - Tuyển dụng module routes
 const DeXuatTuyenDungListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/de-xuat-tuyen-dung/routes/de-xuat-tuyen-dung-list-route'))
 const DeXuatTuyenDungDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/de-xuat-tuyen-dung/routes/de-xuat-tuyen-dung-detail-route'))
@@ -813,6 +817,35 @@ export const routes: RouteConfig[] = [
   {
     path: '/hanh-chinh-nhan-su/nhom-diem-cong-tru',
     element: NhomDiemCongTruListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Nhóm lương
+  {
+    path: '/hanh-chinh-nhan-su/nhom-luong/moi',
+    element: NhomLuongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-luong/:id/sua',
+    element: NhomLuongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-luong/:id',
+    element: NhomLuongDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/nhom-luong',
+    element: NhomLuongListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore',

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { GenericListView } from "@/shared/components"
+import { GenericListView } from "@/shared/components/data-display/generic-list-view/generic-list-view"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

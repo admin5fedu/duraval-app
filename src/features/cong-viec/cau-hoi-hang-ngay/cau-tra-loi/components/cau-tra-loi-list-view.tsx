@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { GenericListView } from "@/shared/components"
+import { GenericListView } from "@/shared/components/data-display/generic-list-view/generic-list-view"
 import { useDataTable } from "@/shared/hooks/use-data-table"
 import { CauTraLoi } from "../schema"
 import { useBatchDeleteCauTraLoi, useDeleteCauTraLoi } from "../hooks"

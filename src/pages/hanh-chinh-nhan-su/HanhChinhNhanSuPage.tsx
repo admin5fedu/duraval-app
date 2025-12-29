@@ -69,6 +69,12 @@ export default function HanhChinhNhanSuPage() {
           icon: FolderTree,
           description: "Quản lý nhóm các điểm cộng trừ.",
         },
+        {
+          title: "Nhóm lương",
+          href: "/hanh-chinh-nhan-su/nhom-luong",
+          icon: Wallet,
+          description: "Quản lý nhóm lương.",
+        },
       ]
     },
     {
