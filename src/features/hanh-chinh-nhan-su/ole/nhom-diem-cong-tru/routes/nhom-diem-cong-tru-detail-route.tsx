@@ -1,19 +1,43 @@
 /**
  * Nhóm Điểm Cộng Trừ Detail Route
+ * 
+ * Route component for detail view
  */
 
 "use client"
 
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
+import { NhomDiemCongTruDetailView } from "../components/nhom-diem-cong-tru-detail-view"
+import { nhomDiemCongTruConfig } from "../config"
 
 export default function NhomDiemCongTruDetailRoute() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
+  if (!id) {
+    navigate(nhomDiemCongTruConfig.routePath)
+    return null
+  }
+
+  const nhomDiemId = Number(id)
+  if (isNaN(nhomDiemId)) {
+    navigate(nhomDiemCongTruConfig.routePath)
+    return null
+  }
+
+  const handleEdit = () => {
+    navigate(`${nhomDiemCongTruConfig.routePath}/${id}/sua?returnTo=detail`)
+  }
+
+  const handleBack = () => {
+    navigate(nhomDiemCongTruConfig.routePath)
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Chi tiết Nhóm Điểm Cộng Trừ #{id}</h1>
-      <p className="text-muted-foreground">Module đang được phát triển...</p>
-    </div>
+    <NhomDiemCongTruDetailView
+      id={nhomDiemId}
+      onEdit={handleEdit}
+      onBack={handleBack}
+    />
   )
 }
-

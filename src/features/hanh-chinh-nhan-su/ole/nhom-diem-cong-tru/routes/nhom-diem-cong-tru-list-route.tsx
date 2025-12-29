@@ -1,15 +1,35 @@
 /**
  * Nhóm Điểm Cộng Trừ List Route
+ * 
+ * Route component for list view
  */
 
 "use client"
 
+import { useNavigate } from "react-router-dom"
+import { NhomDiemCongTruListView } from "../components/nhom-diem-cong-tru-list-view"
+import { nhomDiemCongTruConfig } from "../config"
+
 export default function NhomDiemCongTruListRoute() {
+  const navigate = useNavigate()
+
+  const handleEdit = (id: number) => {
+    navigate(`${nhomDiemCongTruConfig.routePath}/${id}/sua`)
+  }
+
+  const handleAddNew = () => {
+    navigate(`${nhomDiemCongTruConfig.routePath}/moi`)
+  }
+
+  const handleView = (id: number) => {
+    navigate(`${nhomDiemCongTruConfig.routePath}/${id}`)
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Nhóm Điểm Cộng Trừ</h1>
-      <p className="text-muted-foreground">Module đang được phát triển...</p>
-    </div>
+    <NhomDiemCongTruListView
+      onEdit={handleEdit}
+      onAddNew={handleAddNew}
+      onView={handleView}
+    />
   )
 }
-

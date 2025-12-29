@@ -30,7 +30,7 @@ import { BatchDeleteConfirmationDialog } from "@/shared/components"
  * />
  * ```
  */
-export function GenericListView<TData, TValue>({
+export function GenericListView<TData = any, TValue = unknown>({
     columns,
     data,
     filterColumn = "name",

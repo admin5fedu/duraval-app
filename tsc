@@ -1,0 +1,212 @@
+
+src/features/cong-viec/tong-quan/ke-hoach-168/components/viec-hang-ngay
+src/features/cong-viec/tong-quan/ke-hoach-168/components/viec-hang-ngay-widget.helpers.tsx:1:1 - error TS6133: 'React' is declared but its val
+src/features/cong-viec/tong-quan/ke-hoach-168/components/viec-hang-ngay-widget.helpers.tsx:1:1 - error TS6133: 'React' is declared but its value is never read.
+
+1 import * as React from "react"
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-
+src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-widget-handlers.ts:19:5 - error TS6133: 'refs' is declared but its valu
+src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-widget-handlers.ts:19:5 - error TS6133: 'refs' is declared but its value is never read.
+
+19     refs,
+       ~~~~
+
+src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-
+src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-widget-handlers.src/featu- error TS6133: 'currentExpandedId' is declare
+src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-widget-handlers.ts:125:9 - error TS6133: 'currentExpandedId' is declared but its value is never read.
+
+125         currentExpandedId: number | null,
+            ~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-detail-view.tsx:149:20 - error TS6133: 'val' is declared 
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-detail-view.tsx:149:20 - error TS6133: 'val' is declared but its value is never read.
+
+149           format: (val: any) => {
+                       ~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:17:63 - error TS6133: 'props' is declared b
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:17:63 - error TS6133: 'props' is declared but its value is never read.
+
+17 function HangMucToggleButtons({ value, onChange, disabled, ...props 
+17 function HangMucToggleButtons({ value, onChange, disabled, ...props }: { value?: string; onChange: (value: string) => void; disabled?: bool
+17 function HangMucToggleButtons({ value, onChange, disabled, ...props }: { value?: string; onChange: (value: string) => void; disabled?: boolean; [key: string]: any }) {
+                                                                 ~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ...
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: neverma: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }>; defaultValues: ...' is not assignable to type 'IntrinsicAttributes &
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.ts- error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }>; defaultValues: ...' is not assignable to type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }>; defaultValues: ...' is not assignable to type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; ... 8 more ...; nguoi_
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | " "strip", ZodTypeAny, { ...; }, { ...; }>; defaultValues: ...' is not assignable to type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; ... 8 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "st
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:155:9 - error TS2322: Type '{ title: string; sections: never[]; schema: ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; min: ZodDefault<ZodNumber>; ... 7 more ...; ng ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }>; defaultValues: ...' is not assignable to type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; ... 8 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }>>'.
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & Ge
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_mu
+  Property 'isLoading' does not exist on type 'Intrinsicibutes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; ... 8 more ...; nguoi_tao
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; ... 8 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & GenericFormViewProps<ZodObject<Omit<{ id: ZodOptional<ZodNumber>; hang_muc: ZodEnum<["Cộng", "Trừ"]>; nhom: ZodString; ... 8 more ...; nguoi_tao: ZodNullable<...>; }, "id" | ... 4 more ... | "nguoi_tao_ten">, "strip", ZodTypeAny, { ...; }, { ...; }>>'.
+
+155         isLoading={true}
+            ~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-import-dialog.tsx:218:21 - error TS2322: Type 'string' is
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-import-dialog.tsx:218:21 - error TS2322: Type 'string' is not assignable to type '"Cộng" | "Trừ" | undefined'.
+
+218                     mapped.hang_muc = hangMuc // Keep original, wil
+218                     mapped.hang_muc = hangMuc // Keep original, will be validated
+                        ~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:46:19 - error TS6133: 'nhomDiemList' is dec
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:46:19 - error TS6133: 'nhomDiemList' is  value is never read.
+
+46     const { data: nhomDiemList, isLoading, isError, refetch } = useN
+46     const { data: nhomDiemList, isLoading, isError, refetch } = useNhomDiemCongTru(initialData)
+                     ~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:62:11 - error TS6198: All destructured elem
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:62:11 - error TS6198: All destructured elements are unused.
+
+ 62     const {
+              ~
+ 63         initialFilters,
+    ~~~~~~~~~~~~~~~~~~~~~~~
+... 
+ 68         handleSortChange,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 69     } = useListViewFilters(module, nhomDiemCongTruConfig.defaultSor
+ 69     } = useListViewFilters(module, nhomDiemCongTruConfig.defaultSorting || [])
+    ~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:93:11 - error TS6133: 'filters' is declared
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:93:11 - error TS6133: 'filters' is declared but its value is never read.
+
+93     const filters = React.useMemo(() => {
+             ~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:138:11 - error TS6133: 'handleAddNewInterna
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:138:11 - error TS6133: 'handleAddNewInternal' is declared but its value is never read.
+
+138     const handleAddNewInternal = React.useCallback(() => {
+              ~~~~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:147:11 - error TS6133: 'handleEditInternal'
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:147:11 - error TS6133: 'handleEditInternal' is declared but its value is never read.
+
+147     const handleEditInternal = React.useCallback((id: number) => {
+              ~~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:156:11 - error TS6133: 'handleViewInternal'
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:156:11 - error TS6133: 'handleViewInternal' is declared but its value is never read.
+
+156     const handleViewInternal = React.useCallback((id: number) => {
+              ~~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:165:11 - error TS6133: 'handleDeleteClick' 
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:165:11 - error TS6133: 'handleDeleteClick' is declared but its value is never read.
+
+165     const handleDeleteClick = React.useCallback((row: NhomDiemCongT
+165     const handleDeleteClick = React.useCallback((row: NhomDiemCongTru) => {
+              ~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:170:11 - error TS6133: 'handleDeleteConfirm
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:170:11 - error TS6133: 'handleDeleteConfirm' is declared but its value is never read.
+
+170     const handleDeleteConfirm = React.useCallback(async () => {
+              ~~~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:182:11 - error TS6133: 'handleBatchDelete' 
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:182:11 - error TS6133: 'handleBatchDelete' is declared but its value is never read.
+
+182     const handleBatchDelete = React.useCallback(async (ids: number[
+182     const handleBatchDelete = React.useCallback(async (ids: number[]) => {
+              ~~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:191:11 - error TS6133: 'renderMobileCard' i
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:191:11 - error TS6133: 'renderMobileCard' is declared but its value is never read.
+
+191     const renderMobileCard = React.useCallback((row: NhomDiemCongTr
+191     const renderMobileCard = React.useCallback((row: NhomDiemCongTru) => {
+              ~~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:251:11 - error TS6133: 'getColumnTitle' is 
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:251:11 - error TS6133: 'getColumnTitle' is declared but its value is never read.
+
+251     const getColumnTitle = React.useCallback((columnId: string) => 
+251     const getColumnTitle = React.useCallback((columnId: string) => {
+              ~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:260:11 - error TS6133: 'getCellValue' is de
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:260:11 - error TS6133: 'getCellValue' is declared but its value is never read.
+
+260     const getCellValue = React.useCallback((row: NhomDiemCongTru, c
+260     const getCellValue = React.useCallback((row: NhomDiemCongTru, columnId: string) => {
+              ~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:304:30 - error TS2558: Expected 2 type argu
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:304:30 - error TS2558: Expected 2 type arguments, but got 1.
+
+304             <GenericListView<NhomDiemCongTru>
+                                 ~~~~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-select.tsx:161:43 - error TS6133: 'displayLabel' is decla
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-select.tsx:161:43 - error TS6133: 'displayLabel' is declared but its value is never read.
+
+161                                     const displayLabel = `${nd.hang
+161                                     const displayLabel = `${nd.hang_muc} - ${nd.nhom}`
+                                              ~~~~~~~~~~~~
+
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/phong
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/phong-ban-multi-select-form-field.tsx:36:5 - error TS6133: 'description' is 
+src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/phong-ban-multi-select-form-field.tsx:36:5 - error TS6133: 'description' is declared but its value is never read.
+
+36     description,
+       ~~~~~~~~~~~
+
+src/shared/components/forms/phong-multi-select.tsx:37:5 - error TS6133:
+src/shared/components/forms/phong-multi-select.tsx:37:5 - error TS6133: 'description' is declared but its value is never read.
+
+37     description,
+       ~~~~~~~~~~~
+
+
+Found 23 errors in 9 files.
+
+Errors  Files
+     1  src/features/cong-viec/tong-quan/ke-hoach-168/components/viec-h
+     1  src/features/cong-viec/tong-quan/ke-hoach-168/components/viec-hang-ngay-widget.helpers.tsx:1
+     2  src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-ha
+     2  src/features/cong-viec/tong-quan/ke-hoach-168/hooks/use-viec-hang-ngay-widget-handlers.ts:19
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/componen
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-detail-view.tsx:149
+     2  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/componen
+     2  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-form-view.tsx:17
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/componen
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-import-dialog.tsx:218
+    13  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/componen
+    13  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-list-view.tsx:46
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/componen
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/nhom-diem-cong-tru-select.tsx:161
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/componen
+     1  src/features/hanh-chinh-nhan-su/ole/nhom-diem-cong-tru/components/phong-ban-multi-select-form-field.tsx:36

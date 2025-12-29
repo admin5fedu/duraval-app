@@ -19,5 +19,6 @@ export { lichDang, lichDang as lichDangQueryKeys } from "./lich-dang"
 export { cauTraLoiQueryKeys } from "./cau-tra-loi"
 export { nhomPhieuHanhChinh, nhomPhieuHanhChinh as nhomPhieuHanhChinhQueryKeys } from "./nhom-phieu-hanh-chinh"
 export { phieuHanhChinh, phieuHanhChinh as phieuHanhChinhQueryKeys } from "./phieu-hanh-chinh"
+export { nhomDiemCongTru, nhomDiemCongTru as nhomDiemCongTruQueryKeys } from "./nhom-diem-cong-tru"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 
