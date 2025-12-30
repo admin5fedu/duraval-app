@@ -106,15 +106,10 @@ export function DiemCongTruListView({
                     ...filter,
                     options: (phongBanList || [])
                         .filter((item) => item.id != null)
-                        .map((item) => {
-                            const label = item.ma_phong_ban && item.ten !== `ID: ${item.id}` 
-                                ? `${item.ma_phong_ban} - ${item.ten}` 
-                                : (item.ten || String(item.id))
-                            return {
-                                label,
-                                value: String(item.id),
-                            }
-                        }),
+                        .map((item) => ({
+                            label: item.ten || `ID: ${item.id}`,
+                            value: String(item.id),
+                        })),
                 }
             }
             // Populate loai filter with dynamic options

@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "toggle" | "textarea" | "image" | "custom" | "phong-ban-select" | "cap-bac-select"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select"
 
 /**
  * Form field configuration
@@ -23,6 +23,8 @@ export interface FormFieldConfig {
     imageFolder?: string // Cloudinary folder
     imageMaxSize?: number // Max size in MB
     displayName?: string // For avatar fallback initials
+    // For multiple-image type
+    // Uses same imageFolder and imageMaxSize as image type
     // For phong-ban-select and cap-bac-select type
     excludeIds?: number[] // IDs to exclude from selection
     // For number type

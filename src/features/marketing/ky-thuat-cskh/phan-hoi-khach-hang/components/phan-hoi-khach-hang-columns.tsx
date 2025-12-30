@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Edit } from "lucide-react"
 import { DeletePhanHoiKhachHangButton } from "./delete-phan-hoi-khach-hang-button"
+import { KyThuatPhanHoiButton } from "./ky-thuat-phan-hoi-button"
+import { DonHoanKhoButton } from "./don-hoan-kho-button"
 import { phanHoiKhachHangConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { SortableHeader } from "@/shared/components"
@@ -28,11 +30,19 @@ function NameCell({ tenSanPham, id }: { tenSanPham: string | null; id: number })
 }
 
 // Actions cell component
-function ActionsCell({ id, tenSanPham }: { id: number; tenSanPham: string | null }) {
+function ActionsCell({ row }: { row: PhanHoiKhachHang }) {
     const navigate = useNavigate()
+    const id = row.id!
+    const tenSanPham = row.ten_san_pham
     
     return (
-        <div className="flex items-center gap-2 justify-end pr-4 min-w-[100px]">
+        <div className="flex items-center gap-2 justify-end pr-4 w-full overflow-visible">
+            <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                <KyThuatPhanHoiButton phanHoi={row} iconOnly />
+            </div>
+            <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                <DonHoanKhoButton phanHoi={row} iconOnly />
+            </div>
             <Button
                 variant="ghost"
                 size="icon"
@@ -193,7 +203,26 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
         minSize: 150,
         cell: ({ row }) => {
             const loaiLoi = row.getValue("loai_loi") as string | null
-            return <div className="truncate">{loaiLoi || "-"}</div>
+            if (!loaiLoi) return <span className="text-muted-foreground">-</span>
+            
+            const colorMap: Record<string, string> = {
+                "Chất lượng SP": "bg-red-500",
+                "Hỏng lỗi": "bg-orange-500",
+                "Chăm sóc": "bg-blue-500",
+                "Giao hàng": "bg-purple-500",
+                "Bảo hành / Bảo trì": "bg-yellow-500",
+                "Giá cả": "bg-green-500",
+                "Hóa đơn": "bg-indigo-500",
+                "Khác": "bg-gray-500",
+            }
+            
+            const badgeColor = colorMap[loaiLoi] || "bg-slate-500"
+            
+            return (
+                <Badge variant="outline" className={badgeColor}>
+                    {loaiLoi}
+                </Badge>
+            )
         },
         filterFn: (row, id, value) => {
             if (!value || !Array.isArray(value) || value.length === 0) {
@@ -220,8 +249,10 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
             const colorMap: Record<string, string> = {
                 "Mới": "bg-blue-500",
                 "Đang xử lý": "bg-yellow-500",
-                "Hoàn thành": "bg-green-500",
+                "Đã xử lý": "bg-green-500",
+                "Hoàn thành": "bg-green-500", // Tương thích ngược
                 "Đã hủy": "bg-red-500",
+                "Hủy": "bg-red-500", // Tương thích ngược
             }
             return (
                 <Badge variant="outline" className={colorMap[trangThai] || ""}>
@@ -350,6 +381,16 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
             }
             return <div className="truncate">{`${phongBan.ma_phong_ban} - ${phongBan.ten_phong_ban}`}</div>
         },
+        filterFn: (row, id, value) => {
+            if (!value || !Array.isArray(value) || value.length === 0) {
+                return true
+            }
+            const phongId = row.getValue(id) as number | null | undefined
+            if (phongId === null || phongId === undefined) {
+                return false
+            }
+            return value.includes(String(phongId))
+        },
         meta: {
             title: "Phòng",
             order: 16,
@@ -431,7 +472,11 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
         size: 180,
         minSize: 150,
         cell: ({ row }) => {
+            const ktPhuTrachNhanVien = (row.original as any).kt_phu_trach_nhan_vien
             const ktPhuTrach = row.getValue("kt_phu_trach") as string | null
+            if (ktPhuTrachNhanVien) {
+                return <div className="truncate">{`${ktPhuTrachNhanVien.ma_nhan_vien} - ${ktPhuTrachNhanVien.ho_ten}`}</div>
+            }
             return <div className="truncate">{ktPhuTrach || "-"}</div>
         },
         filterFn: (row, id, value) => {
@@ -455,7 +500,24 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
         minSize: 150,
         cell: ({ row }) => {
             const trangThaiDonHoan = row.getValue("trang_thai_don_hoan") as string | null
-            return <div className="truncate">{trangThaiDonHoan || "-"}</div>
+            if (!trangThaiDonHoan) return <span className="text-muted-foreground">-</span>
+            
+            const colorMap: Record<string, string> = {
+                "chờ hoàn": "bg-yellow-500",
+                "đã hoàn": "bg-blue-500",
+                "đang xử lý": "bg-orange-500",
+                "hoàn thành": "bg-green-500",
+                "hủy": "bg-red-500",
+            }
+            
+            const normalizedStatus = trangThaiDonHoan.toLowerCase()
+            const badgeColor = colorMap[normalizedStatus] || ""
+            
+            return (
+                <Badge variant="outline" className={badgeColor}>
+                    {trangThaiDonHoan}
+                </Badge>
+            )
         },
         filterFn: (row, id, value) => {
             if (!value || !Array.isArray(value) || value.length === 0) {
@@ -495,18 +557,17 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
         id: "actions",
         header: () => <div className="text-right">Thao Tác</div>,
         cell: ({ row }) => {
-            const id = row.original.id!
-            const tenSanPham = row.original.ten_san_pham
-            return <ActionsCell id={id} tenSanPham={tenSanPham} />
+            return <ActionsCell row={row.original} />
         },
         enableSorting: false,
         enableHiding: false,
-        size: 100,
-        minSize: 100,
+        size: 180,
+        minSize: 180,
         meta: {
             title: "Thao Tác",
             order: 999,
             stickyRight: true,
+            minWidth: 180,
         },
     },
 ]

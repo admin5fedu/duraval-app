@@ -16,6 +16,7 @@ import { UseFormReturn } from "react-hook-form"
 import { FormFieldConfig } from "./generic-form-view/"
 import { ComboboxFormField } from "./combobox-form-field"
 import { ToggleButtonFormField } from "./toggle-button-form-field"
+import { MultipleImageUploadFormField } from "./multiple-image-upload-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
 import { PhongBanSelect } from "@/components/ui/phong-ban-select"
 import { CapBacSelectFormField } from "@/components/ui/cap-bac-select-form-field"
@@ -80,6 +81,17 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         folder={field.imageFolder}
                                         displayName={field.displayName || field.label}
                                         maxSize={field.imageMaxSize}
+                                    />
+                                ) : field.type === "multiple-image" ? (
+                                    <MultipleImageUploadFormField
+                                        value={formField.value}
+                                        onChange={(urls: string[]) => {
+                                            if (field.disabled) return
+                                            formField.onChange(urls)
+                                        }}
+                                        disabled={field.disabled}
+                                        folder={field.imageFolder || "uploads"}
+                                        maxSize={field.imageMaxSize || 10}
                                     />
                                 ) : field.type === "combobox" ? (
                                     <ComboboxFormField

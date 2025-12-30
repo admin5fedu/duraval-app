@@ -8,6 +8,8 @@ import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { usePhanHoiKhachHangById } from "../hooks"
 import { DeletePhanHoiKhachHangButton } from "./delete-phan-hoi-khach-hang-button"
 import { TraoDoiButton } from "./trao-doi-button"
+import { KyThuatPhanHoiButton } from "./ky-thuat-phan-hoi-button"
+import { DonHoanKhoButton } from "./don-hoan-kho-button"
 import { phanHoiKhachHangConfig } from "../config"
 import { TraoDoiHistory } from "@/shared/components/data-display/generic-detail-view"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
@@ -139,6 +141,25 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           label: "Loại", 
           key: "loai_loi", 
           value: phanHoi.loai_loi || "-",
+          format: (val: any) => {
+            if (!val) return "-"
+            const colorMap: Record<string, string> = {
+              "Chất lượng SP": "bg-red-500",
+              "Hỏng lỗi": "bg-orange-500",
+              "Chăm sóc": "bg-blue-500",
+              "Giao hàng": "bg-purple-500",
+              "Bảo hành / Bảo trì": "bg-yellow-500",
+              "Giá cả": "bg-green-500",
+              "Hóa đơn": "bg-indigo-500",
+              "Khác": "bg-gray-500",
+            }
+            const badgeColor = colorMap[String(val)] || "bg-slate-500"
+            return (
+              <Badge variant="outline" className={badgeColor}>
+                {val}
+              </Badge>
+            )
+          }
         },
         { 
           label: "Trạng Thái", 
@@ -149,8 +170,10 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
             const colorMap: Record<string, string> = {
               "Mới": "bg-blue-500",
               "Đang xử lý": "bg-yellow-500",
-              "Hoàn thành": "bg-green-500",
+              "Đã xử lý": "bg-green-500",
+              "Hoàn thành": "bg-green-500", // Tương thích ngược
               "Đã hủy": "bg-red-500",
+              "Hủy": "bg-red-500", // Tương thích ngược
             }
             return <Badge variant="outline" className={colorMap[val] || ""}>{val}</Badge>
           }
@@ -164,6 +187,27 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           label: "Tên Lỗi", 
           key: "ten_loi", 
           value: phanHoi.ten_loi || "-",
+          colSpan: 2,
+        },
+        { 
+          label: "Mức Độ", 
+          key: "muc_do", 
+          value: phanHoi.muc_do || "-",
+          colSpan: 1,
+          format: (val: any) => {
+            if (!val) return "-"
+            const colorMap: Record<string, string> = {
+              "Nghiêm trọng": "bg-red-500",
+              "Bình thường": "bg-yellow-500",
+              "Thấp": "bg-green-500",
+            }
+            const badgeColor = colorMap[String(val)] || "bg-slate-500"
+            return (
+              <Badge variant="outline" className={badgeColor}>
+                {val}
+              </Badge>
+            )
+          }
         },
         { 
           label: "Mô Tả Lỗi", 
@@ -176,11 +220,6 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           }
         },
         { 
-          label: "Mức Độ", 
-          key: "muc_do", 
-          value: phanHoi.muc_do || "-",
-        },
-        { 
           label: "Yêu Cầu Khách Hàng", 
           key: "yeu_cau_khach_hang", 
           value: phanHoi.yeu_cau_khach_hang || "-",
@@ -191,9 +230,24 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           }
         },
         { 
-          label: "KT Mô Tả Lỗi", 
-          key: "kt_mo_ta_loi", 
-          value: phanHoi.kt_mo_ta_loi || "-",
+          label: "Biện Pháp Hiện Tại", 
+          key: "bien_phap_hien_tai", 
+          value: phanHoi.bien_phap_hien_tai || "-",
+          colSpan: 2,
+        },
+        { 
+          label: "Hạn Xử Lý", 
+          key: "han_xu_ly", 
+          value: phanHoi.han_xu_ly || "-",
+          colSpan: 1,
+          format: (val: any) => {
+            if (!val) return "-"
+            try {
+              return format(new Date(val), "dd/MM/yyyy", { locale: vi })
+            } catch {
+              return val
+            }
+          }
         },
         { 
           label: "Hình Ảnh", 
@@ -245,32 +299,23 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
       title: "Xử Lý",
       fields: [
         { 
-          label: "Biện Pháp Hiện Tại", 
-          key: "bien_phap_hien_tai", 
-          value: phanHoi.bien_phap_hien_tai || "-",
-        },
-        { 
-          label: "Hạn Xử Lý", 
-          key: "han_xu_ly", 
-          value: phanHoi.han_xu_ly || "-",
-          format: (val: any) => {
-            if (!val) return "-"
-            try {
-              return format(new Date(val), "dd/MM/yyyy", { locale: vi })
-            } catch {
-              return val
-            }
-          }
-        },
-        { 
           label: "KT Phụ Trách", 
           key: "kt_phu_trach", 
           value: phanHoi.kt_phu_trach || "-",
+          colSpan: 2,
+          format: () => {
+            const ktPhuTrachNhanVien = (phanHoi as any).kt_phu_trach_nhan_vien
+            if (ktPhuTrachNhanVien) {
+              return `${ktPhuTrachNhanVien.ma_nhan_vien} - ${ktPhuTrachNhanVien.ho_ten}`
+            }
+            return phanHoi.kt_phu_trach || "-"
+          }
         },
         { 
           label: "Chi Phí", 
           key: "chi_phi", 
           value: phanHoi.chi_phi?.toString() || "0",
+          colSpan: 1,
           format: (val: any) => {
             if (!val) return "0"
             return new Intl.NumberFormat('vi-VN').format(Number(val))
@@ -290,6 +335,23 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           label: "Trạng Thái Đơn Hoàn", 
           key: "trang_thai_don_hoan", 
           value: phanHoi.trang_thai_don_hoan || "-",
+          format: (val: any) => {
+            if (!val) return "-"
+            const colorMap: Record<string, string> = {
+              "chờ hoàn": "bg-yellow-500",
+              "đã hoàn": "bg-blue-500",
+              "đang xử lý": "bg-orange-500",
+              "hoàn thành": "bg-green-500",
+              "hủy": "bg-red-500",
+            }
+            const normalizedStatus = String(val).toLowerCase()
+            const badgeColor = colorMap[normalizedStatus] || ""
+            return (
+              <Badge variant="outline" className={badgeColor}>
+                {val}
+              </Badge>
+            )
+          }
         },
         { 
           label: "Biện Pháp Đơn Hoàn", 
@@ -401,6 +463,18 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
       sections={sections}
       actions={
         <div className="flex items-center gap-2">
+          <KyThuatPhanHoiButton
+            phanHoi={phanHoi}
+            onSuccess={() => {
+              query.refetch()
+            }}
+          />
+          <DonHoanKhoButton
+            phanHoi={phanHoi}
+            onSuccess={() => {
+              query.refetch()
+            }}
+          />
           <Button
             variant="outline"
             size="sm"

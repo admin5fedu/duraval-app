@@ -98,6 +98,12 @@ export function PhanHoiKhachHangListView({
         staleTime: 10 * 60 * 1000, // 10 minutes
     })
 
+    const { data: phongList } = useQuery({
+        queryKey: [...phanHoiKhachHangQueryKeys.all(), "phong-filter"],
+        queryFn: () => PhanHoiKhachHangAPI.getUniquePhongIds(),
+        staleTime: 10 * 60 * 1000, // 10 minutes
+    })
+
     // Build filters array from config with dynamic options
     const filters = React.useMemo(() => {
         const baseFilters = (phanHoiKhachHangConfig.filterColumns || []).map((filterConfig) => {
@@ -173,8 +179,22 @@ export function PhanHoiKhachHangListView({
             })
         }
         
+        // Add phong_id filter
+        if (phongList && phongList.length > 0) {
+            additionalFilters.push({
+                columnId: "phong_id",
+                title: "Phòng",
+                options: phongList
+                    .filter((item) => item.id != null)
+                    .map((item) => ({
+                        label: item.ten || `ID: ${item.id}`,
+                        value: String(item.id),
+                    })),
+            })
+        }
+        
         return [...baseFilters, ...additionalFilters]
-    }, [nhanVienList, nguoiTaoList, ngayList, ktPhuTrachList, trangThaiDonHoanList])
+    }, [nhanVienList, nguoiTaoList, ngayList, ktPhuTrachList, trangThaiDonHoanList, phongList])
 
     // Handle delete selected
     const handleDeleteSelected = async (selectedRows: PhanHoiKhachHang[]) => {
@@ -227,6 +247,18 @@ export function PhanHoiKhachHangListView({
             const nguoiTao = row.nguoi_tao
             if (!nguoiTao) return ""
             return `${nguoiTao.ma_nhan_vien} - ${nguoiTao.ho_ten}`
+        }
+        if (columnId === "phong_id") {
+            const phongBan = row.phong_ban
+            if (!phongBan) return row.phong_id ? String(row.phong_id) : ""
+            return `${phongBan.ma_phong_ban} - ${phongBan.ten_phong_ban}`
+        }
+        if (columnId === "kt_phu_trach") {
+            const ktPhuTrachNhanVien = (row as any).kt_phu_trach_nhan_vien
+            if (ktPhuTrachNhanVien) {
+                return `${ktPhuTrachNhanVien.ma_nhan_vien} - ${ktPhuTrachNhanVien.ho_ten}`
+            }
+            return row.kt_phu_trach || ""
         }
         if (columnId === "id") {
             return row.id?.toString() || ""

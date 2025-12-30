@@ -117,7 +117,16 @@ export function DiemCongTruDetailView({ id, initialData, onEdit, onBack }: DiemC
             )
           }
         },
-        { label: "Nhóm", key: "nhom", value: diemCongTru.nhom || "-" },
+        { 
+          label: "Nhóm", 
+          key: "nhom_luong_id", 
+          value: diemCongTru.nhom_luong_id?.toString() || "-",
+          format: () => {
+            const nhomLuong = diemCongTru.nhom_luong
+            if (!nhomLuong) return diemCongTru.nhom_luong_id ? String(diemCongTru.nhom_luong_id) : "-"
+            return nhomLuong.ten_nhom
+          }
+        },
       ]
     },
     {

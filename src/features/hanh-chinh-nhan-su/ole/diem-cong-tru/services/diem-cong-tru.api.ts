@@ -520,10 +520,17 @@ export class DiemCongTruAPI {
 
         return uniqueIds.map((id: number) => {
             const phongBan = phongBanMap.get(id)
+            if (phongBan && phongBan.ma_phong_ban && phongBan.ten_phong_ban) {
+                return {
+                    id,
+                    ma_phong_ban: phongBan.ma_phong_ban,
+                    ten: `${phongBan.ma_phong_ban} - ${phongBan.ten_phong_ban}`,
+                }
+            }
             return {
                 id,
-                ma_phong_ban: phongBan?.ma_phong_ban || "",
-                ten: phongBan?.ten_phong_ban || `ID: ${id}`,
+                ma_phong_ban: "",
+                ten: `ID: ${id}`,
             }
         })
     }

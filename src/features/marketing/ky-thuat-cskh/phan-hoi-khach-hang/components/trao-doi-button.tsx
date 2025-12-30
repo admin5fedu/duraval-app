@@ -41,7 +41,7 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
   const [open, setOpen] = React.useState(false)
   const [traoDoiMoi, setTraoDoiMoi] = React.useState("")
   const updateMutation = useUpdatePhanHoiKhachHang()
-  const { user } = useAuthStore()
+  const { employee } = useAuthStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -99,8 +99,8 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
       // Tạo trao đổi mới
       const traoDoiMoiItem: TraoDoiItem = {
         noi_dung: traoDoiMoi.trim(),
-        nguoi_trao_doi_id: user?.id ? Number(user.id) : null,
-        nguoi_trao_doi: user?.user_metadata?.ho_ten || user?.email || "Unknown",
+        nguoi_trao_doi_id: employee?.ma_nhan_vien || null,
+        nguoi_trao_doi: employee?.ho_ten || "",
         thoi_gian: new Date().toISOString(),
       }
 

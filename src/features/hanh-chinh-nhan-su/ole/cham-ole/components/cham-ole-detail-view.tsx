@@ -104,6 +104,16 @@ export function ChamOleDetailView({ id, initialData, onEdit, onBack }: ChamOleDe
             return chucVu.ten_chuc_vu
           }
         },
+        { 
+          label: "Nhóm", 
+          key: "nhom_id", 
+          value: chamOle.nhom_id?.toString() || "-",
+          format: () => {
+            const nhom = chamOle.nhom
+            if (!nhom) return chamOle.nhom_id ? String(chamOle.nhom_id) : "-"
+            return nhom.ten_nhom
+          }
+        },
       ]
     },
     {

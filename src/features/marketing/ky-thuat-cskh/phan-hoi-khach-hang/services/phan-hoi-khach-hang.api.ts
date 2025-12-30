@@ -63,6 +63,21 @@ export class PhanHoiKhachHangAPI {
             )
         )
 
+        // Get kt_phu_trach IDs (có thể là string chứa số ma_nhan_vien)
+        const ktPhuTrachIds = Array.from(
+            new Set(
+                phanHoiData
+                    .map((item: any) => {
+                        const ktPhuTrach = item.kt_phu_trach
+                        if (!ktPhuTrach) return null
+                        // Nếu là số hoặc string số, convert sang number
+                        const numValue = Number(ktPhuTrach)
+                        return isNaN(numValue) ? null : numValue
+                    })
+                    .filter((id): id is number => id !== null && id !== undefined)
+            )
+        )
+
         // Fetch related data
         let nhanVienMap = new Map<number, { ma_nhan_vien: number; ho_ten: string }>()
         if (nhanVienIds.length > 0) {
@@ -120,12 +135,30 @@ export class PhanHoiKhachHangAPI {
             }
         }
 
+        // Fetch kt_phu_trach relation
+        let ktPhuTrachMap = new Map<number, { ma_nhan_vien: number; ho_ten: string }>()
+        if (ktPhuTrachIds.length > 0) {
+            const { data: nhanSuData } = await supabase
+                .from("var_nhan_su")
+                .select("ma_nhan_vien, ho_ten")
+                .in("ma_nhan_vien", ktPhuTrachIds)
+
+            if (nhanSuData) {
+                ktPhuTrachMap = new Map(
+                    nhanSuData.map((ns: any) => [ns.ma_nhan_vien, ns])
+                )
+            }
+        }
+
         // Map data to include related objects
         return phanHoiData.map((item: any) => {
             const nhanVien = nhanVienMap.get(item.nhan_vien_id)
             const nguoiTao = nguoiTaoMap.get(item.nguoi_tao_id)
             const phongBan = phongBanMap.get(item.phong_id)
             const nhomItem = nhomDataMap.get(item.nhom_id)
+            // Get kt_phu_trach relation (kt_phu_trach có thể là string chứa số)
+            const ktPhuTrachId = item.kt_phu_trach ? Number(item.kt_phu_trach) : null
+            const ktPhuTrach = ktPhuTrachId && !isNaN(ktPhuTrachId) ? ktPhuTrachMap.get(ktPhuTrachId) : null
             
             return {
                 ...item,
@@ -133,6 +166,7 @@ export class PhanHoiKhachHangAPI {
                 nguoi_tao: nguoiTao || null,
                 phong_ban: phongBan || null,
                 nhom: nhomItem || null,
+                kt_phu_trach_nhan_vien: ktPhuTrach || null,
             }
         }) as PhanHoiKhachHang[]
     }
@@ -187,10 +221,58 @@ export class PhanHoiKhachHangAPI {
             }
         }
 
+        // Fetch phong_ban relation
+        let phongBan = null
+        if (data.phong_id) {
+            const { data: phongBanData } = await supabase
+                .from("var_phong_ban")
+                .select("id, ma_phong_ban, ten_phong_ban")
+                .eq("id", data.phong_id)
+                .single()
+
+            if (phongBanData) {
+                phongBan = phongBanData
+            }
+        }
+
+        // Fetch nhom relation
+        let nhom = null
+        if (data.nhom_id) {
+            const { data: nhomData } = await supabase
+                .from("ole_nhom_luong")
+                .select("id, ten_nhom")
+                .eq("id", data.nhom_id)
+                .single()
+
+            if (nhomData) {
+                nhom = nhomData
+            }
+        }
+
+        // Fetch kt_phu_trach relation
+        let ktPhuTrach = null
+        if (data.kt_phu_trach) {
+            const ktPhuTrachId = Number(data.kt_phu_trach)
+            if (!isNaN(ktPhuTrachId)) {
+                const { data: nhanSuData } = await supabase
+                    .from("var_nhan_su")
+                    .select("ma_nhan_vien, ho_ten")
+                    .eq("ma_nhan_vien", ktPhuTrachId)
+                    .single()
+
+                if (nhanSuData) {
+                    ktPhuTrach = nhanSuData
+                }
+            }
+        }
+
         return {
             ...data,
             nhan_vien: nhanVien,
             nguoi_tao: nguoiTao,
+            phong_ban: phongBan,
+            nhom: nhom,
+            kt_phu_trach_nhan_vien: ktPhuTrach,
         } as PhanHoiKhachHang
     }
 
@@ -200,6 +282,19 @@ export class PhanHoiKhachHangAPI {
     static async create(input: CreatePhanHoiKhachHangInput): Promise<PhanHoiKhachHang> {
         // Remove fields that don't exist in the database table
         const { nhan_vien, nguoi_tao, phong_ban, nhom, ...createInput } = input as any
+        
+        // Auto-fill ten_nhan_vien from var_nhan_su based on nhan_vien_id
+        if (createInput.nhan_vien_id) {
+            const { data: nhanSuData } = await supabase
+                .from("var_nhan_su")
+                .select("ho_ten")
+                .eq("ma_nhan_vien", createInput.nhan_vien_id)
+                .single()
+            
+            if (nhanSuData?.ho_ten) {
+                createInput.ten_nhan_vien = nhanSuData.ho_ten
+            }
+        }
         
         const { data, error } = await supabase
             .from(TABLE_NAME)
@@ -284,6 +379,19 @@ export class PhanHoiKhachHangAPI {
     static async update(id: number, input: UpdatePhanHoiKhachHangInput): Promise<PhanHoiKhachHang> {
         // Remove fields that don't exist in the database table
         const { nhan_vien, nguoi_tao, phong_ban, nhom, ...updateInput } = input as any
+        
+        // Auto-fill ten_nhan_vien from var_nhan_su if nhan_vien_id is being updated
+        if (updateInput.nhan_vien_id !== undefined && updateInput.nhan_vien_id !== null) {
+            const { data: nhanSuData } = await supabase
+                .from("var_nhan_su")
+                .select("ho_ten")
+                .eq("ma_nhan_vien", updateInput.nhan_vien_id)
+                .single()
+            
+            if (nhanSuData?.ho_ten) {
+                updateInput.ten_nhan_vien = nhanSuData.ho_ten
+            }
+        }
         
         const { data, error } = await supabase
             .from(TABLE_NAME)
@@ -609,6 +717,46 @@ export class PhanHoiKhachHangAPI {
         ).sort()
 
         return uniqueValues
+    }
+
+    /**
+     * Get unique phong_id values with names (for filter)
+     */
+    static async getUniquePhongIds(): Promise<Array<{ id: number; ten: string; ma_phong_ban?: string }>> {
+        const { data, error } = await supabase
+            .from(TABLE_NAME)
+            .select("phong_id")
+            .not("phong_id", "is", null)
+
+        if (error) {
+            console.error("Lỗi khi tải danh sách phòng:", error)
+            throw new Error(error.message)
+        }
+
+        const uniqueIds = Array.from(new Set((data || []).map((item: any) => item.phong_id)))
+
+        if (uniqueIds.length === 0) {
+            return []
+        }
+
+        // Fetch phong ban data
+        const { data: phongBanData } = await supabase
+            .from("var_phong_ban")
+            .select("id, ma_phong_ban, ten_phong_ban")
+            .in("id", uniqueIds)
+
+        const phongBanMap = new Map(
+            (phongBanData || []).map((pb: any) => [pb.id, pb])
+        )
+
+        return uniqueIds.map((id: number) => {
+            const phongBan = phongBanMap.get(id)
+            return {
+                id,
+                ma_phong_ban: phongBan?.ma_phong_ban,
+                ten: phongBan ? `${phongBan.ma_phong_ban} - ${phongBan.ten_phong_ban}` : `ID: ${id}`,
+            }
+        })
     }
 }
 

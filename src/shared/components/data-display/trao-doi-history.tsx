@@ -4,6 +4,7 @@ import * as React from "react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { useNhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/hooks/use-nhan-su"
 
 /**
  * Interface cho một item trao đổi
@@ -97,9 +98,51 @@ function formatThoiGian(thoiGian: string): string {
 }
 
 /**
+ * Format tên người dùng theo format "mã - tên"
+ */
+function formatNguoiDung(
+  item: TraoDoiItem,
+  nhanSuList?: any[]
+): string {
+  const nguoiId = item.nguoi_trao_doi_id || item.nguoi_xac_nhan_id
+  
+  // Nếu có ID và danh sách nhân sự, tìm nhân viên
+  if (nguoiId && nhanSuList && nhanSuList.length > 0) {
+    const nhanVien = nhanSuList.find(
+      (nv) => nv.ma_nhan_vien === Number(nguoiId)
+    )
+    if (nhanVien && nhanVien.ma_nhan_vien && nhanVien.ho_ten) {
+      return `${nhanVien.ma_nhan_vien} - ${nhanVien.ho_ten}`
+    }
+  }
+  
+  // Fallback: nếu có tên trong item, giữ nguyên (cho tương thích ngược)
+  // Hoặc nếu có ID nhưng không tìm thấy nhân viên, hiển thị ID
+  if (item.nguoi_trao_doi || item.nguoi_xac_nhan) {
+    // Nếu tên đã có format "mã - tên" thì giữ nguyên
+    const name = item.nguoi_trao_doi || item.nguoi_xac_nhan || ""
+    if (name.includes(" - ")) {
+      return name
+    }
+    // Nếu chỉ có tên, thử thêm mã nếu có ID
+    if (nguoiId) {
+      return `${nguoiId} - ${name}`
+    }
+    return name
+  }
+  
+  // Nếu có ID nhưng không có tên
+  if (nguoiId) {
+    return `ID: ${nguoiId}`
+  }
+  
+  return "Không xác định"
+}
+
+/**
  * Component hiển thị lịch sử trao đổi dạng table
  */
-function TraoDoiHistoryTable({ items }: { items: TraoDoiItem[] }) {
+function TraoDoiHistoryTable({ items, nhanSuList }: { items: TraoDoiItem[], nhanSuList?: any[] }) {
   return (
     <div className="w-full overflow-x-auto">
       <table className="w-full border-collapse table-fixed">
@@ -121,7 +164,7 @@ function TraoDoiHistoryTable({ items }: { items: TraoDoiItem[] }) {
               <td className="py-3 px-4 text-sm text-foreground align-top">
                 <div className="flex flex-col gap-1.5">
                   <span className="font-medium break-words">
-                    {item.nguoi_trao_doi || item.nguoi_xac_nhan || "Không xác định"}
+                    {formatNguoiDung(item, nhanSuList)}
                   </span>
                   {item.loai === "xac_nhan" && (
                     <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded w-fit">
@@ -147,14 +190,14 @@ function TraoDoiHistoryTable({ items }: { items: TraoDoiItem[] }) {
 /**
  * Component hiển thị lịch sử trao đổi dạng list
  */
-function TraoDoiHistoryList({ items }: { items: TraoDoiItem[] }) {
+function TraoDoiHistoryList({ items, nhanSuList }: { items: TraoDoiItem[], nhanSuList?: any[] }) {
   return (
     <div className="space-y-3 w-full">
       {items.map((item, index) => (
         <div key={index} className="flex flex-col gap-1 py-2 border-b last:border-0">
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium text-foreground">
-              {item.nguoi_trao_doi || item.nguoi_xac_nhan || "Không xác định"}
+              {formatNguoiDung(item, nhanSuList)}
             </span>
             <span className="text-muted-foreground">•</span>
             <span className="text-xs text-muted-foreground">
@@ -190,6 +233,7 @@ export function TraoDoiHistory({
   className,
   variant = "table"
 }: TraoDoiHistoryProps) {
+  const { data: nhanSuList } = useNhanSu()
   const traoDoiList = React.useMemo(() => parseTraoDoi(traoDoi), [traoDoi])
   
   if (traoDoiList.length === 0) {
@@ -199,9 +243,9 @@ export function TraoDoiHistory({
   return (
     <div className={className}>
       {variant === "table" ? (
-        <TraoDoiHistoryTable items={traoDoiList} />
+        <TraoDoiHistoryTable items={traoDoiList} nhanSuList={nhanSuList} />
       ) : (
-        <TraoDoiHistoryList items={traoDoiList} />
+        <TraoDoiHistoryList items={traoDoiList} nhanSuList={nhanSuList} />
       )}
     </div>
   )

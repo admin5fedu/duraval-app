@@ -56,6 +56,7 @@ export const phanHoiKhachHangSchema = z.object({
     trang_thai: z.string().optional().nullable().default("Mới"),
     kt_mo_ta_loi: z.string().optional().nullable(),
     kt_phu_trach: z.string().optional().nullable(),
+    kt_quyet_dinh: z.string().optional().nullable(),
     chi_phi: z.preprocess(
         (val) => {
             if (val === "" || val === null) return 0

@@ -62,6 +62,14 @@ export class ChamOleAPI {
             )
         )
 
+        const nhomIds = Array.from(
+            new Set(
+                chamOleData
+                    .map((item: any) => item.nhom_id)
+                    .filter((id): id is number => id !== null && id !== undefined)
+            )
+        )
+
         // Fetch related data
         let nhanVienMap = new Map<number, { ma_nhan_vien: number; ho_ten: string }>()
         if (nhanVienIds.length > 0) {
@@ -121,12 +129,27 @@ export class ChamOleAPI {
             }
         }
 
+        let nhomMap = new Map<number, { id: number; ten_nhom: string }>()
+        if (nhomIds.length > 0) {
+            const { data: nhomData } = await supabase
+                .from("ole_nhom_luong")
+                .select("id, ten_nhom")
+                .in("id", nhomIds)
+
+            if (nhomData) {
+                nhomMap = new Map(
+                    nhomData.map((n: any) => [n.id, n])
+                )
+            }
+        }
+
         // Map data to include related objects
         return chamOleData.map((item: any) => {
             const nhanVien = nhanVienMap.get(item.nhan_vien_id)
             const phongBan = phongBanMap.get(item.phong_id)
             const chucVu = chucVuMap.get(item.chuc_vu_id)
             const nguoiTao = nguoiTaoMap.get(item.nguoi_tao_id)
+            const nhom = nhomMap.get(item.nhom_id)
             
             return {
                 ...item,
@@ -134,6 +157,7 @@ export class ChamOleAPI {
                 phong_ban: phongBan || null,
                 chuc_vu: chucVu || null,
                 nguoi_tao: nguoiTao || null,
+                nhom: nhom || null,
             }
         }) as ChamOle[]
     }
@@ -218,12 +242,27 @@ export class ChamOleAPI {
             }
         }
 
+        // Fetch nhom relation
+        let nhom = null
+        if (data.nhom_id) {
+            const { data: nhomData } = await supabase
+                .from("ole_nhom_luong")
+                .select("id, ten_nhom")
+                .eq("id", data.nhom_id)
+                .single()
+
+            if (nhomData) {
+                nhom = nhomData
+            }
+        }
+
         return {
             ...data,
             nhan_vien: nhanVien,
             phong_ban: phongBan,
             chuc_vu: chucVu,
             nguoi_tao: nguoiTao,
+            nhom: nhom,
         } as ChamOle
     }
 
@@ -475,10 +514,17 @@ export class ChamOleAPI {
 
         return uniqueIds.map((id: number) => {
             const phongBan = phongBanMap.get(id)
+            if (phongBan && phongBan.ma_phong_ban && phongBan.ten_phong_ban) {
+                return {
+                    id,
+                    ma_phong_ban: phongBan.ma_phong_ban,
+                    ten: `${phongBan.ma_phong_ban} - ${phongBan.ten_phong_ban}`,
+                }
+            }
             return {
                 id,
-                ma_phong_ban: phongBan?.ma_phong_ban || "",
-                ten: phongBan?.ten_phong_ban || `ID: ${id}`,
+                ma_phong_ban: "",
+                ten: `ID: ${id}`,
             }
         })
     }

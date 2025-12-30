@@ -161,9 +161,11 @@ const getSections = (isEditMode: boolean): FormSection[] => [
       },
       { 
         name: "hinh_anh", 
-        label: "Hình Ảnh (URLs, cách nhau bởi dấu phẩy)", 
-        type: "textarea",
-        description: "Nhập các URL hình ảnh, cách nhau bởi dấu phẩy hoặc xuống dòng",
+        label: "Hình Ảnh", 
+        type: "multiple-image",
+        imageFolder: "phan-hoi-khach-hang",
+        imageMaxSize: 10,
+        colSpan: 3,
       },
     ]
   },
@@ -233,19 +235,27 @@ export function PhanHoiKhachHangFormView({ id, initialData, onComplete, onCancel
           yeu_cau_khach_hang: "",
           trang_thai: "Mới",
           chi_phi: 0,
-          hinh_anh: [],
+          hinh_anh: [] as string[],
         }
   }, [isEditMode, phanHoi, employee])
 
   const sections = useMemo(() => getSections(isEditMode), [isEditMode])
 
   const handleSubmit = async (data: any) => {
-    // Parse hinh_anh if it's a string (from textarea)
-    if (data.hinh_anh && typeof data.hinh_anh === 'string') {
-      data.hinh_anh = data.hinh_anh
-        .split(/[,\n]/)
-        .map((url: string) => url.trim())
-        .filter((url: string) => url.length > 0)
+    // Ensure hinh_anh is an array
+    if (data.hinh_anh && !Array.isArray(data.hinh_anh)) {
+      if (typeof data.hinh_anh === 'string') {
+        // If it's a string, try to parse it (fallback for old data)
+        data.hinh_anh = data.hinh_anh
+          .split(/[,\n]/)
+          .map((url: string) => url.trim())
+          .filter((url: string) => url.length > 0)
+      } else {
+        data.hinh_anh = []
+      }
+    }
+    if (!data.hinh_anh) {
+      data.hinh_anh = []
     }
     
     // Ensure nhan_vien_id is set from current employee when creating
