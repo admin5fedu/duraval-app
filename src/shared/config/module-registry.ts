@@ -12,6 +12,7 @@ import { keHoach168Config } from "@/features/cong-viec/tong-quan/ke-hoach-168/co
 import { viecHangNgayConfig } from "@/features/cong-viec/tong-quan/viec-hang-ngay/config"
 import { danhMucCauHoiConfig } from "@/features/cong-viec/cau-hoi-hang-ngay/danh-muc-cau-hoi/config"
 import { lichDangConfig } from "@/features/cong-viec/cau-hoi-hang-ngay/lich-dang/config"
+import { loaiTaiLieuConfig } from "@/features/cong-viec/tai-lieu/loai-tai-lieu/config"
 import { phanHoiKhachHangConfig } from "@/features/marketing/ky-thuat-cskh/phan-hoi-khach-hang/config"
 
 /**
@@ -103,6 +104,7 @@ moduleRegistry.register(keHoach168Config)
 moduleRegistry.register(viecHangNgayConfig)
 moduleRegistry.register(danhMucCauHoiConfig)
 moduleRegistry.register(lichDangConfig)
+moduleRegistry.register(loaiTaiLieuConfig)
 moduleRegistry.register(phanHoiKhachHangConfig)
 
 // Export helper functions

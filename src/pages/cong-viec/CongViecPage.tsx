@@ -18,6 +18,7 @@ import {
   School,
   MessageCircleQuestion,
   Archive,
+  Tag,
 } from "lucide-react"
 
 export default function CongViecPage() {
@@ -45,7 +46,13 @@ export default function CongViecPage() {
       icon: FolderKanban,
       items: [
         {
-          title: "Danh mục",
+          title: "Loại tài liệu",
+          href: "/cong-viec/loai-tai-lieu",
+          icon: Tag,
+          description: "Quản lý các loại và phân loại tài liệu trong hệ thống.",
+        },
+        {
+          title: "Danh mục tài liệu",
           href: "/cong-viec/tai-lieu/danh-muc",
           icon: FolderTree,
           description: "Quản lý danh mục và phân loại tài liệu trong hệ thống.",

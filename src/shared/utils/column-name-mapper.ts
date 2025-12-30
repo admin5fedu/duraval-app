@@ -67,6 +67,7 @@ const COLUMN_NAME_MAP: Record<string, string> = {
   
   // Other common fields
   loai: 'Loại',
+  hang_muc: 'Hạng mục',
   danh_muc: 'Danh mục',
   don_vi: 'Đơn vị',
   so_luong: 'Số lượng',

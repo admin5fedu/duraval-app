@@ -81,6 +81,11 @@ const CauTraLoiListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-
 const CauTraLoiDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-detail-route'))
 const CauTraLoiFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-form-route'))
 
+// Loại tài liệu module routes
+const LoaiTaiLieuListRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-list-route'))
+const LoaiTaiLieuDetailRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-detail-route'))
+const LoaiTaiLieuFormRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-form-route'))
+
 // Hành chính nhân sự - Công lương module routes
 const PhieuHanhChinhListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-list-route'))
 const PhieuHanhChinhDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-detail-route'))
@@ -568,6 +573,37 @@ export const routes: RouteConfig[] = [
   {
     path: '/cong-viec/danh-muc-cau-hoi',
     element: DanhMucCauHoiListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Loại tài liệu module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/loai-tai-lieu/moi',
+    element: LoaiTaiLieuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/loai-tai-lieu/:id/sua',
+    element: LoaiTaiLieuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/loai-tai-lieu/:id',
+    element: LoaiTaiLieuDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/loai-tai-lieu',
+    element: LoaiTaiLieuListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
