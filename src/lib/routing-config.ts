@@ -59,6 +59,7 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "viec-hang-ngay": "Việc Hàng Ngày",
   "tai-lieu": "Tài Liệu",
   "loai-tai-lieu": "Loại Tài Liệu",
+  "danh-muc-tai-lieu": "Danh Mục Tài Liệu",
   "danh-muc": "Danh Mục",
   "tai-lieu-bieu-mau": "Tài Liệu / Biểu Mẫu",
   "ho-so": "Hồ Sơ",

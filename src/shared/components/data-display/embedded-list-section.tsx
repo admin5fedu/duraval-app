@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, Eye, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { Plus, Eye, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Maximize2, ChevronRight } from "lucide-react"
 import {
     Table,
     TableBody,
@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { EmbeddedListFullViewDialog } from "./embedded-list-full-view-dialog"
 
 export interface EmbeddedListColumn<T> {
     key: string
@@ -23,6 +24,14 @@ export interface EmbeddedListColumn<T> {
     className?: string
     /** Enable sorting cho column này. Default: false */
     sortable?: boolean
+    /** Cố định cột này khi scroll ngang (sticky left) */
+    stickyLeft?: boolean
+    /** Offset từ trái (cho cột sticky thứ 2, 3...) */
+    stickyLeftOffset?: number
+    /** Min width cho cột sticky */
+    stickyMinWidth?: number
+    /** Ẩn cột này trong compact mode, chỉ hiện trong expand view */
+    hideInCompact?: boolean
 }
 
 // Sortable Header Component
@@ -88,6 +97,34 @@ interface EmbeddedListSectionProps<T> {
     defaultSortDirection?: "asc" | "desc"
     /** Custom sort function. Nếu có thì sẽ override defaultSortField */
     customSort?: (a: T, b: T) => number
+    /** Compact mode: chỉ hiển thị N dòng đầu, còn lại scroll */
+    compactMode?: boolean
+    /** Số dòng hiển thị trong compact mode. Default: 5 */
+    compactRowCount?: number
+    /** Hiển thị indicator "Xem thêm N items" */
+    showMoreIndicator?: boolean
+    /** Enable nút "Xem tất cả" để mở full view dialog */
+    enableExpandView?: boolean
+    /** Custom title cho expand dialog */
+    expandDialogTitle?: string
+    /** Max width của expand dialog. Default: "1200px" (giống GenericFormDialog/GenericDetailDialog) */
+    expandDialogMaxWidth?: string
+    /** Max height của expand dialog. Default: "95vh" (giống GenericFormDialog/GenericDetailDialog) */
+    expandDialogMaxHeight?: string
+    /** Callback khi mở expand dialog */
+    onExpand?: () => void
+    /** Hiển thị số lượng items */
+    showItemCount?: boolean
+    /** Total count (nếu có pagination) */
+    totalCount?: number
+    /** Format: "Hiển thị 5 / 20 items" */
+    countFormat?: (visible: number, total: number) => string
+    /** Enable search trong expand dialog */
+    enableSearch?: boolean
+    /** Search placeholder */
+    searchPlaceholder?: string
+    /** Fields để search (nếu không có thì search tất cả columns) */
+    searchFields?: string[]
 }
 
 /**
@@ -122,10 +159,25 @@ export function EmbeddedListSection<T>({
     defaultSortField = "tg_tao",
     defaultSortDirection = "desc",
     customSort,
+    compactMode = false,
+    compactRowCount = 5,
+    showMoreIndicator = true,
+    enableExpandView = false,
+    expandDialogTitle,
+    expandDialogMaxWidth = "1200px",
+    expandDialogMaxHeight = "95vh",
+    onExpand,
+    showItemCount = false,
+    totalCount,
+    countFormat,
+    enableSearch = true,
+    searchPlaceholder = "Tìm kiếm...",
+    searchFields,
 }: EmbeddedListSectionProps<T>) {
     // Sort state: track current sort field and direction
     const [sortField, setSortField] = useState<string | null>(defaultSortField)
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">(defaultSortDirection)
+    const [expandDialogOpen, setExpandDialogOpen] = useState(false)
 
     // Handle sort click
     const handleSort = (field: string) => {
@@ -233,30 +285,99 @@ export function EmbeddedListSection<T>({
     const hasActions = showActions && (onView || onEdit || onDelete)
     void getItemName
 
+    // Filter columns based on compact mode
+    const visibleColumns = useMemo(() => {
+        if (!compactMode) return columns
+        return columns.filter(col => !col.hideInCompact)
+    }, [columns, compactMode])
+
+    // Calculate sticky left offsets
+    const stickyLeftOffsets = useMemo(() => {
+        const offsets: number[] = []
+        let currentOffset = 0
+        visibleColumns.forEach((col) => {
+            if (col.stickyLeft) {
+                offsets.push(currentOffset)
+                currentOffset += col.stickyMinWidth || 150
+            } else {
+                offsets.push(0)
+            }
+        })
+        return offsets
+    }, [visibleColumns])
+
+    // Get data to display (compact mode limits rows)
+    const displayData = useMemo(() => {
+        if (!compactMode) return sortedData
+        return sortedData.slice(0, compactRowCount)
+    }, [sortedData, compactMode, compactRowCount])
+
+    const remainingCount = compactMode && sortedData.length > compactRowCount 
+        ? sortedData.length - compactRowCount 
+        : 0
+
+    // Format count display
+    const countText = useMemo(() => {
+        if (!showItemCount) return null
+        const total = totalCount ?? sortedData.length
+        const visible = displayData.length
+        if (countFormat) {
+            return countFormat(visible, total)
+        }
+        return total > visible ? `Hiển thị ${visible} / ${total} mục` : `${total} mục`
+    }, [showItemCount, totalCount, sortedData.length, displayData.length, countFormat])
+
+    // Handle expand
+    const handleExpand = () => {
+        setExpandDialogOpen(true)
+        onExpand?.()
+    }
+
     return (
-        <Card className={className}>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className={titleClassName || ""}>
-                            {titleIcon && (() => {
-                                const IconComponent = titleIcon
-                                return <IconComponent className="mr-2 h-5 w-5 inline-block" />
-                            })()}
-                            <span>{title}</span>
-                        </CardTitle>
-                        {description && (
-                            <CardDescription className="mt-1">{description}</CardDescription>
-                        )}
+        <>
+            <Card className={className}>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                                <CardTitle className={titleClassName || ""}>
+                                    {titleIcon && (() => {
+                                        const IconComponent = titleIcon
+                                        return <IconComponent className="mr-2 h-5 w-5 inline-block" />
+                                    })()}
+                                    <span>{title}</span>
+                                </CardTitle>
+                                {showItemCount && countText && (
+                                    <span className="text-sm text-muted-foreground font-normal">
+                                        ({countText})
+                                    </span>
+                                )}
+                            </div>
+                            {description && (
+                                <CardDescription className="mt-1">{description}</CardDescription>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {enableExpandView && sortedData.length > 0 && (
+                                <Button 
+                                    onClick={handleExpand} 
+                                    size="sm" 
+                                    variant="outline"
+                                    title="Xem tất cả"
+                                >
+                                    <Maximize2 className="mr-2 h-4 w-4" />
+                                    Xem tất cả
+                                </Button>
+                            )}
+                            {onAdd && (
+                                <Button onClick={onAdd} size="sm" variant={addButtonVariant}>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    {addLabel}
+                                </Button>
+                            )}
+                        </div>
                     </div>
-                    {onAdd && (
-                        <Button onClick={onAdd} size="sm" variant={addButtonVariant}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            {addLabel}
-                        </Button>
-                    )}
-                </div>
-            </CardHeader>
+                </CardHeader>
             <CardContent className="p-0">
                 {sortedData.length === 0 ? (
                     <div className="text-center py-8 px-6 text-muted-foreground">
@@ -267,130 +388,187 @@ export function EmbeddedListSection<T>({
                         <p>{emptyMessage}</p>
                     </div>
                 ) : (
-                    <div className="relative overflow-hidden">
-                        {/* Header - Sticky */}
-                        <div className={cn(
-                            "flex-shrink-0 border-b bg-background",
-                            enableStickyHeader && "sticky top-0 z-10"
-                        )}>
-                            <div className={cn(
-                                "overflow-x-auto",
-                                !enableHorizontalScroll && "overflow-x-hidden"
-                            )}>
-                                <Table>
-                                    <TableHeader className={cn(
-                                        "bg-background",
-                                        enableStickyHeader && "shadow-sm"
-                                    )} style={enableStickyHeader ? {
-                                        boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-                                    } : undefined}>
-                                        <TableRow>
-                                            {columns.map((column) => (
-                                                <TableHead key={column.key} className={column.className}>
-                                                    {column.sortable ? (
-                                                        <SortableHeader
-                                                            title={column.header}
-                                                            sorted={getSortState(column.key)}
-                                                            onSort={() => handleSort(column.key)}
-                                                        />
-                                                    ) : (
-                                                        column.header
-                                                    )}
-                                                </TableHead>
-                                            ))}
-                                            {hasActions && (
-                                                <TableHead className="text-right w-[120px] sticky right-0 bg-background">Thao tác</TableHead>
+                    <>
+                        <div className="relative overflow-hidden">
+                            <ScrollArea
+                                className={cn(
+                                    "w-full",
+                                    enableHorizontalScroll && "overflow-x-auto"
+                                )}
+                                style={{
+                                    maxHeight: compactMode ? "auto" : maxHeight,
+                                }}
+                            >
+                                <div className={cn(
+                                    enableHorizontalScroll && "min-w-full"
+                                )}>
+                                    <Table>
+                                        {/* Header - Sticky */}
+                                        <TableHeader 
+                                            className={cn(
+                                                "bg-background",
+                                                enableStickyHeader && "sticky top-0 z-10 shadow-sm"
                                             )}
-                                        </TableRow>
-                                    </TableHeader>
-                                </Table>
-                            </div>
-                        </div>
-
-                        {/* Body - Scrollable */}
-                        <ScrollArea
-                            className={cn(
-                                "w-full",
-                                enableHorizontalScroll && "overflow-x-auto"
-                            )}
-                            style={{
-                                maxHeight,
-                            }}
-                        >
-                            <div className={cn(
-                                enableHorizontalScroll && "min-w-full"
-                            )}>
-                                <Table>
-                                    <TableBody>
-                                        {sortedData.map((item, index) => (
-                                            <TableRow
-                                                key={getItemId ? String(getItemId(item)) : index}
-                                                className={onRowClick || onView ? "cursor-pointer" : ""}
-                                                onClick={() => (onRowClick ?? onView)?.(item)}
-                                            >
-                                                {columns.map((column) => (
-                                                    <TableCell key={column.key} className={column.className}>
-                                                        {column.render(item)}
-                                                    </TableCell>
+                                            style={enableStickyHeader ? {
+                                                boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+                                            } : undefined}
+                                        >
+                                            <TableRow>
+                                                {visibleColumns.map((column, colIndex) => (
+                                                    <TableHead
+                                                        key={column.key}
+                                                        className={cn(
+                                                            column.className,
+                                                            column.stickyLeft && "sticky bg-background z-20"
+                                                        )}
+                                                        style={column.stickyLeft ? {
+                                                            left: stickyLeftOffsets[colIndex],
+                                                            minWidth: column.stickyMinWidth || "150px",
+                                                            boxShadow: colIndex > 0 ? "2px 0 6px -2px rgba(0,0,0,0.1)" : undefined,
+                                                        } : undefined}
+                                                    >
+                                                        {column.sortable ? (
+                                                            <SortableHeader
+                                                                title={column.header}
+                                                                sorted={getSortState(column.key)}
+                                                                onSort={() => handleSort(column.key)}
+                                                            />
+                                                        ) : (
+                                                            column.header
+                                                        )}
+                                                    </TableHead>
                                                 ))}
                                                 {hasActions && (
-                                                    <TableCell className="text-right sticky right-0 bg-background z-10">
-                                                        <div className="flex items-center justify-end gap-1">
-                                                            {onView && (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation()
-                                                                        onView(item)
-                                                                    }}
-                                                                    title="Xem chi tiết"
-                                                                >
-                                                                    <Eye className="h-4 w-4" />
-                                                                </Button>
-                                                            )}
-                                                            {onEdit && (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation()
-                                                                        onEdit(item)
-                                                                    }}
-                                                                    title="Sửa"
-                                                                >
-                                                                    <Edit className="h-4 w-4" />
-                                                                </Button>
-                                                            )}
-                                                            {onDelete && (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8 text-destructive hover:text-destructive"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation()
-                                                                        onDelete(item)
-                                                                    }}
-                                                                    title="Xóa"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            )}
-                                                        </div>
-                                                    </TableCell>
+                                                    <TableHead className="text-right w-[120px] sticky right-0 bg-background z-20">
+                                                        Thao tác
+                                                    </TableHead>
                                                 )}
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                        </TableHeader>
+                                        {/* Body - Scrollable */}
+                                        <TableBody>
+                                            {displayData.map((item, index) => (
+                                                <TableRow
+                                                    key={getItemId ? String(getItemId(item)) : index}
+                                                    className={onRowClick || onView ? "cursor-pointer" : ""}
+                                                    onClick={() => (onRowClick ?? onView)?.(item)}
+                                                >
+                                                    {visibleColumns.map((column, colIndex) => (
+                                                        <TableCell
+                                                            key={column.key}
+                                                            className={cn(
+                                                                column.className,
+                                                                column.stickyLeft && "sticky bg-background z-10"
+                                                            )}
+                                                            style={column.stickyLeft ? {
+                                                                left: stickyLeftOffsets[colIndex],
+                                                                minWidth: column.stickyMinWidth || "150px",
+                                                                boxShadow: colIndex > 0 ? "2px 0 6px -2px rgba(0,0,0,0.1)" : undefined,
+                                                            } : undefined}
+                                                        >
+                                                            {column.render(item)}
+                                                        </TableCell>
+                                                    ))}
+                                                    {hasActions && (
+                                                        <TableCell className="text-right sticky right-0 bg-background z-10">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                {onView && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-8 w-8"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation()
+                                                                            onView(item)
+                                                                        }}
+                                                                        title="Xem chi tiết"
+                                                                    >
+                                                                        <Eye className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                                {onEdit && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-8 w-8"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation()
+                                                                            onEdit(item)
+                                                                        }}
+                                                                        title="Sửa"
+                                                                    >
+                                                                        <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                                {onDelete && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-8 w-8 text-destructive hover:text-destructive"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation()
+                                                                            onDelete(item)
+                                                                        }}
+                                                                        title="Xóa"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </TableCell>
+                                                    )}
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                        {/* Compact mode: Show more indicator */}
+                        {compactMode && remainingCount > 0 && showMoreIndicator && (
+                            <div className="border-t bg-muted/30 px-4 py-3">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleExpand}
+                                    className="w-full justify-between"
+                                >
+                                    <span className="text-sm text-muted-foreground">
+                                        Xem thêm {remainingCount} mục
+                                    </span>
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
                             </div>
-                        </ScrollArea>
-                    </div>
+                        )}
+                    </>
                 )}
             </CardContent>
         </Card>
+        {/* Expand Dialog */}
+        {enableExpandView && (
+            <EmbeddedListFullViewDialog
+                open={expandDialogOpen}
+                onOpenChange={setExpandDialogOpen}
+                title={expandDialogTitle || title}
+                data={sortedData}
+                columns={columns}
+                onRowClick={onRowClick}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                showActions={showActions}
+                getItemId={getItemId}
+                defaultSortField={defaultSortField}
+                defaultSortDirection={defaultSortDirection}
+                customSort={customSort}
+                maxWidth={expandDialogMaxWidth}
+                maxHeight={expandDialogMaxHeight}
+                enableSearch={enableSearch}
+                searchPlaceholder={searchPlaceholder}
+                searchFields={searchFields}
+            />
+        )}
+        </>
     )
 }
 

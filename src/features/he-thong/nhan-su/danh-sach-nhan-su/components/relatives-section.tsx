@@ -218,6 +218,8 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
             key: "ho_va_ten",
             header: "Họ và Tên",
             sortable: true,
+            stickyLeft: true, // Cố định cột tên khi scroll ngang
+            stickyMinWidth: 180,
             render: (item) => (
                 <span className="font-medium">{item.ho_va_ten}</span>
             )
@@ -239,6 +241,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
             key: "ngay_sinh",
             header: "Ngày Sinh",
             sortable: true,
+            hideInCompact: true, // Ẩn trong compact mode, chỉ hiện trong expand view
             render: (item) => (
                 item.ngay_sinh 
                     ? new Date(item.ngay_sinh).toLocaleDateString("vi-VN")
@@ -249,6 +252,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
             key: "so_dien_thoai",
             header: "Số Điện Thoại",
             sortable: true,
+            hideInCompact: true, // Ẩn trong compact mode, chỉ hiện trong expand view
             render: (item) => (
                 item.so_dien_thoai || <span className="text-muted-foreground">-</span>
             )
@@ -273,6 +277,20 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
                 onDelete={handleDelete}
                 getItemId={(item) => item.id!}
                 getItemName={(item) => item.ho_va_ten}
+                // Compact mode: chỉ hiển thị 5 dòng đầu
+                compactMode={true}
+                compactRowCount={5}
+                showMoreIndicator={true}
+                // Expand view: mở dialog fullscreen
+                enableExpandView={true}
+                expandDialogTitle="Danh Sách Đầy Đủ Người Thân"
+                // Item count
+                showItemCount={true}
+                totalCount={relatives?.length || 0}
+                // Search trong expand dialog
+                enableSearch={true}
+                searchPlaceholder="Tìm kiếm người thân..."
+                searchFields={["ho_va_ten", "so_dien_thoai"]}
             />
 
             {/* Detail Dialog - Click dòng hoặc từ actions */}

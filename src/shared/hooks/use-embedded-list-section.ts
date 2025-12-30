@@ -1,165 +1,183 @@
 /**
- * Hook factory để tái sử dụng logic cho embedded list sections
- * 
- * Giúp giảm code duplication khi tạo nhiều embedded lists (người thân, tài liệu, ...)
- * 
- * @example
- * ```tsx
- * const relativesSection = useEmbeddedListSection({
- *   fetchData: (parentId) => useNguoiThanByMaNhanVien(parentId),
- *   schema: nguoiThanSchema,
- *   mutations: {
- *     create: useCreateNguoiThan(),
- *     update: useUpdateNguoiThan(),
- *     delete: useDeleteNguoiThan(),
- *   },
- *   getDetailSections: (item) => getDetailSections(item),
- *   formSections: formSections,
- *   columns: columns,
- *   parentId: maNhanVien,
- * })
- * ```
+ * Hook để quản lý state và handlers cho EmbeddedListSection
+ * Giảm duplicate code khi tạo embedded sections
  */
 
-import { useState } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import type { z } from "zod"
 import type { DetailSection } from "@/shared/components"
 import type { FormSection } from "@/shared/components/forms/generic-form-view"
 
-interface UseEmbeddedListSectionConfig<TData, TParentId> {
-    /** Hook để fetch data */
-    fetchData: (parentId: TParentId) => { data: TData[] | undefined; isLoading: boolean }
-    /** Zod schema cho validation */
-    schema: z.ZodType<any, any>
-    /** Mutations cho CRUD operations */
-    mutations: {
-        create: {
-            mutateAsync: (data: any) => Promise<TData>
-            isPending: boolean
-        }
-        update: {
-            mutateAsync: (params: { id: number; data: any }) => Promise<TData>
-            isPending: boolean
-        }
-        delete: {
-            mutateAsync: (id: number) => Promise<void>
-            isPending: boolean
-        }
+export interface UseEmbeddedListSectionConfig<T> {
+    /** Module config để navigate */
+    moduleConfig: {
+        routePath: string
     }
-    /** Function để tạo detail sections */
-    getDetailSections: (item: TData) => DetailSection[]
-    /** Form sections cho create/edit */
-    formSections: FormSection[]
-    /** Columns definition */
-    columns: any[]
-    /** Parent ID (e.g., maNhanVien) */
-    parentId: TParentId
-    /** Route path để redirect khi click view */
-    routePath: string
-    /** Storage key cho skip confirm */
-    skipConfirmStorageKey: string
-    /** Function để get item ID */
-    getItemId: (item: TData) => number
-    /** Function để get item name */
-    getItemName: (item: TData) => string
-    /** Function để sanitize form data (optional) */
-    sanitizeData?: (data: any) => any
+    /** Storage key để skip confirm dialog (optional) */
+    viewDetailSkipConfirmStorageKey?: string
+    /** Get detail sections function */
+    getDetailSections: (item: T) => DetailSection[]
+    /** Get form sections function */
+    getFormSections: (selectedItem: T | null, isEditMode: boolean) => FormSection[]
+    /** Form schema (Zod) */
+    formSchema: any
+    /** Get form default values */
+    getFormDefaultValues: (selectedItem: T | null, isEditMode: boolean, parentData?: any) => any
+    /** Handle form submit */
+    handleFormSubmit: (data: any, selectedItem: T | null, isEditMode: boolean) => Promise<void>
+    /** Get item ID */
+    getItemId: (item: T) => string | number
+    /** Get item name for display */
+    getItemName?: (item: T) => string
+    /** Parent data (optional, for pre-filling form) */
+    parentData?: any
+    /** Handle delete confirmation */
+    handleDeleteConfirm?: (item: T) => Promise<void>
 }
 
-export function useEmbeddedListSection<TData, TParentId>({
-    fetchData,
-    schema,
-    mutations,
-    getDetailSections,
-    formSections,
-    columns,
-    parentId,
-    routePath,
-    skipConfirmStorageKey,
-    getItemId,
-    getItemName,
-    sanitizeData,
-}: UseEmbeddedListSectionConfig<TData, TParentId>) {
-    const navigate = useNavigate()
-    const { data, isLoading } = fetchData(parentId)
+export interface UseEmbeddedListSectionReturn<T> {
+    // State
+    detailDialogOpen: boolean
+    formDialogOpen: boolean
+    deleteDialogOpen: boolean
+    viewConfirmOpen: boolean
+    selectedItem: T | null
+    isEditMode: boolean
+    itemToView: T | null
+    
+    // Setters
+    setDetailDialogOpen: (open: boolean) => void
+    setFormDialogOpen: (open: boolean) => void
+    setDeleteDialogOpen: (open: boolean) => void
+    setViewConfirmOpen: (open: boolean) => void
+    setSelectedItem: (item: T | null) => void
+    setIsEditMode: (mode: boolean) => void
+    setItemToView: (item: T | null) => void
+    
+    // Handlers
+    handleRowClick: (item: T) => void
+    handleEyeClick: (item: T) => void
+    handleAdd: () => void
+    handleEdit: (item: T) => void
+    handleDelete: (item: T) => void
+    handleFormSubmit: (data: any) => Promise<void>
+    handleDeleteConfirm: () => Promise<void>
+    handleViewConfirm: () => void
+    
+    // Computed
+    detailSections: DetailSection[]
+    formSections: FormSection[]
+    formDefaultValues: any
+}
 
+export function useEmbeddedListSection<T>({
+    moduleConfig,
+    viewDetailSkipConfirmStorageKey,
+    getDetailSections,
+    getFormSections,
+    formSchema: _formSchema,
+    getFormDefaultValues,
+    handleFormSubmit: handleFormSubmitConfig,
+    getItemId,
+    getItemName: _getItemName,
+    parentData,
+    handleDeleteConfirm: handleDeleteConfirmConfig,
+}: UseEmbeddedListSectionConfig<T>): UseEmbeddedListSectionReturn<T> {
+    const navigate = useNavigate()
+
+    // State management
     const [detailDialogOpen, setDetailDialogOpen] = useState(false)
     const [formDialogOpen, setFormDialogOpen] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [viewConfirmOpen, setViewConfirmOpen] = useState(false)
-    const [selectedItem, setSelectedItem] = useState<TData | null>(null)
+    const [selectedItem, setSelectedItem] = useState<T | null>(null)
     const [isEditMode, setIsEditMode] = useState(false)
-    const [itemToView, setItemToView] = useState<TData | null>(null)
+    const [itemToView, setItemToView] = useState<T | null>(null)
 
-    // Handlers
-    const handleRowClick = (item: TData) => {
+    // Click dòng -> Mở popup detail
+    const handleRowClick = useCallback((item: T) => {
         setSelectedItem(item)
         setDetailDialogOpen(true)
-    }
+    }, [])
 
-    const handleEyeClick = (item: TData) => {
+    // Click icon mắt -> Confirm dialog -> Redirect đến page detail
+    const handleEyeClick = useCallback((item: T) => {
         const itemId = getItemId(item)
         if (!itemId) return
 
         const skipConfirm =
+            viewDetailSkipConfirmStorageKey &&
             typeof window !== "undefined" &&
-            window.localStorage.getItem(skipConfirmStorageKey) === "true"
+            window.localStorage.getItem(viewDetailSkipConfirmStorageKey) === "true"
 
         if (skipConfirm) {
-            navigate(`${routePath}/${itemId}`)
+            navigate(`${moduleConfig.routePath}/${itemId}`)
             return
         }
 
         setItemToView(item)
         setViewConfirmOpen(true)
-    }
+    }, [navigate, moduleConfig.routePath, getItemId, viewDetailSkipConfirmStorageKey])
 
-    const handleAdd = () => {
+    // Click thêm -> Mở popup form
+    const handleAdd = useCallback(() => {
         setSelectedItem(null)
         setIsEditMode(false)
         setFormDialogOpen(true)
-    }
+    }, [])
 
-    const handleEdit = (item: TData) => {
+    // Click sửa -> Mở popup form
+    const handleEdit = useCallback((item: T) => {
         setSelectedItem(item)
         setIsEditMode(true)
         setFormDialogOpen(true)
-    }
+    }, [])
 
-    const handleDelete = (item: TData) => {
+    // Click xóa -> Mở popup confirm
+    const handleDelete = useCallback((item: T) => {
         setSelectedItem(item)
         setDeleteDialogOpen(true)
-    }
+    }, [])
+    
+    // Handle form submit
+    const handleFormSubmit = useCallback(async (data: any) => {
+        await handleFormSubmitConfig(data, selectedItem, isEditMode)
+        setFormDialogOpen(false)
+        setSelectedItem(null)
+        setIsEditMode(false)
+    }, [selectedItem, isEditMode, handleFormSubmitConfig])
+    
+    // Handle view confirm
+    const handleViewConfirm = useCallback(() => {
+        if (!itemToView) return
+        const itemId = getItemId(itemToView)
+        if (!itemId) return
+        navigate(`${moduleConfig.routePath}/${itemId}`)
+    }, [itemToView, navigate, moduleConfig.routePath, getItemId])
 
-    const handleFormSubmit = async (formData: any) => {
-        const sanitized = sanitizeData ? sanitizeData(formData) : formData
-
-        if (isEditMode && selectedItem) {
-            const itemId = getItemId(selectedItem)
-            await mutations.update.mutateAsync({
-                id: itemId,
-                data: sanitized,
-            })
-        } else {
-            await mutations.create.mutateAsync({
-                ...sanitized,
-                // Add parentId to data
-            })
-        }
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (!selectedItem) return
-        const itemId = getItemId(selectedItem)
-        await mutations.delete.mutateAsync(itemId)
-    }
+    // Handle delete confirm
+    const handleDeleteConfirm = useCallback(async () => {
+        if (!selectedItem || !handleDeleteConfirmConfig) return
+        await handleDeleteConfirmConfig(selectedItem)
+        setDeleteDialogOpen(false)
+        setSelectedItem(null)
+    }, [selectedItem, handleDeleteConfirmConfig])
+    
+    // Computed values
+    const detailSections = useMemo(() => {
+        if (!selectedItem) return []
+        return getDetailSections(selectedItem)
+    }, [selectedItem, getDetailSections])
+    
+    const formSections = useMemo(() => {
+        return getFormSections(selectedItem, isEditMode)
+    }, [selectedItem, isEditMode, getFormSections])
+    
+    const formDefaultValues = useMemo(() => {
+        return getFormDefaultValues(selectedItem, isEditMode, parentData)
+    }, [selectedItem, isEditMode, parentData, getFormDefaultValues])
 
     return {
-        // Data
-        data: data || [],
-        isLoading,
-        columns,
         // State
         detailDialogOpen,
         formDialogOpen,
@@ -168,14 +186,7 @@ export function useEmbeddedListSection<TData, TParentId>({
         selectedItem,
         isEditMode,
         itemToView,
-        // Handlers
-        handleRowClick,
-        handleEyeClick,
-        handleAdd,
-        handleEdit,
-        handleDelete,
-        handleFormSubmit,
-        handleDeleteConfirm,
+        
         // Setters
         setDetailDialogOpen,
         setFormDialogOpen,
@@ -183,15 +194,21 @@ export function useEmbeddedListSection<TData, TParentId>({
         setViewConfirmOpen,
         setSelectedItem,
         setIsEditMode,
-        // Helpers
-        getDetailSections,
+        setItemToView,
+        
+        // Handlers
+        handleRowClick,
+        handleEyeClick,
+        handleAdd,
+        handleEdit,
+        handleDelete,
+        handleFormSubmit,
+        handleViewConfirm,
+        handleDeleteConfirm,
+        
+        // Computed
+        detailSections,
         formSections,
-        schema,
-        routePath,
-        skipConfirmStorageKey,
-        getItemId,
-        getItemName,
-        isMutating: mutations.create.isPending || mutations.update.isPending || mutations.delete.isPending,
+        formDefaultValues,
     }
 }
-

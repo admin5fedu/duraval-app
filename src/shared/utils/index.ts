@@ -16,6 +16,9 @@ export * from "./enum-cell-renderer"
 export * from "./create-enum-column"
 export * from "./initialize-enum-system"
 
+// Date formatting utilities
+export * from './date-format'
+
 // Other utilities
 export * from './dynamic-imports'
 

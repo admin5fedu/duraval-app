@@ -86,6 +86,11 @@ const LoaiTaiLieuListRoute = lazy(() => import('@/features/cong-viec/tai-lieu/lo
 const LoaiTaiLieuDetailRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-detail-route'))
 const LoaiTaiLieuFormRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-form-route'))
 
+// Danh mục tài liệu module routes
+const DanhMucTaiLieuListRoute = lazy(() => import('@/features/cong-viec/tai-lieu/danh-muc-tai-lieu/routes/danh-muc-tai-lieu-list-route'))
+const DanhMucTaiLieuDetailRoute = lazy(() => import('@/features/cong-viec/tai-lieu/danh-muc-tai-lieu/routes/danh-muc-tai-lieu-detail-route'))
+const DanhMucTaiLieuFormRoute = lazy(() => import('@/features/cong-viec/tai-lieu/danh-muc-tai-lieu/routes/danh-muc-tai-lieu-form-route'))
+
 // Hành chính nhân sự - Công lương module routes
 const PhieuHanhChinhListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-list-route'))
 const PhieuHanhChinhDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/cong-luong/phieu-hanh-chinh/routes/phieu-hanh-chinh-detail-route'))
@@ -604,6 +609,35 @@ export const routes: RouteConfig[] = [
   {
     path: '/cong-viec/loai-tai-lieu',
     element: LoaiTaiLieuListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Danh mục tài liệu module routes - explicit routes (no splat pattern)
+  {
+    path: '/cong-viec/danh-muc-tai-lieu/moi',
+    element: DanhMucTaiLieuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/danh-muc-tai-lieu/:id/sua',
+    element: DanhMucTaiLieuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/danh-muc-tai-lieu/:id',
+    element: DanhMucTaiLieuDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/danh-muc-tai-lieu',
+    element: DanhMucTaiLieuListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

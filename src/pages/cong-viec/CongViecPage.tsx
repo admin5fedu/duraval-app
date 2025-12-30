@@ -53,7 +53,7 @@ export default function CongViecPage() {
         },
         {
           title: "Danh mục tài liệu",
-          href: "/cong-viec/tai-lieu/danh-muc",
+          href: "/cong-viec/danh-muc-tai-lieu",
           icon: FolderTree,
           description: "Quản lý danh mục và phân loại tài liệu trong hệ thống.",
         },

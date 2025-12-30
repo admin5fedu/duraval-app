@@ -110,3 +110,34 @@ export const actionButtonClass = (additionalClasses?: string) => {
   )
 }
 
+/**
+ * Primary action button className for section actions
+ * Section actions (buttons in DetailSection.actions) should use variant="default" (primary)
+ * to distinguish them from header actions which use variant="outline"
+ * 
+ * @param additionalClasses - Additional classes to merge
+ * @returns Combined className string
+ * 
+ * @example
+ * ```tsx
+ * <Button 
+ *   variant="default" 
+ *   size="sm"
+ *   className={sectionActionButtonClass()}
+ * >
+ *   <Plus className="mr-2 h-4 w-4" /> Thêm danh mục con
+ * </Button>
+ * ```
+ * 
+ * @note
+ * - Header actions (in DetailHeader.actions): Use variant="outline" with actionButtonClass()
+ * - Section actions (in DetailSection.actions): Use variant="default" with sectionActionButtonClass()
+ * - This ensures primary actions in sections are visually distinct and follow design guidelines
+ */
+export const sectionActionButtonClass = (additionalClasses?: string) => {
+  return cn(
+    actionButtonClass(), // Inherit base action button styles
+    additionalClasses
+  )
+}
+
