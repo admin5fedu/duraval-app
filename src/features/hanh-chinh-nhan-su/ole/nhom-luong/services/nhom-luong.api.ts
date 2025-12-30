@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase"
-import { NhomLuong } from "../schema"
-import type { CreateNhomLuongInput, UpdateNhomLuongInput } from "../types"
+import type { NhomLuong, CreateNhomLuongInput, UpdateNhomLuongInput } from "../types"
 
 const TABLE_NAME = "ole_nhom_luong"
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Edit } from "lucide-react"
 import { DeleteDiemCongTruButton } from "./delete-diem-cong-tru-button"
+import { XacNhanButton } from "./xac-nhan-button"
 import { diemCongTruConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { SortableHeader } from "@/shared/components"
@@ -28,11 +29,14 @@ function NameCell({ hoVaTen, id }: { hoVaTen: string | null; id: number }) {
 }
 
 // Actions cell component
-function ActionsCell({ id, hoVaTen }: { id: number; hoVaTen: string | null }) {
+function ActionsCell({ id, hoVaTen, nhanVienId, trangThai }: { id: number; hoVaTen: string | null; nhanVienId: number | null | undefined; trangThai?: string | null }) {
     const navigate = useNavigate()
     
     return (
-        <div className="flex items-center gap-2 justify-end pr-4 min-w-[100px]">
+        <div className="flex items-center gap-2 justify-end pr-4 min-w-[140px]">
+            <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                <XacNhanButton id={id} nhanVienId={nhanVienId} trangThai={trangThai} iconOnly />
+            </div>
             <Button
                 variant="ghost"
                 size="icon"
@@ -202,7 +206,7 @@ export const diemCongTruColumns: ColumnDef<DiemCongTru>[] = [
         cell: ({ row }) => {
             const diem = row.getValue("diem") as number | null
             if (diem === null || diem === undefined) return <span className="text-muted-foreground">0</span>
-            return <span>{diem}</span>
+            return <span>{diem.toLocaleString("vi-VN")}</span>
         },
         meta: {
             title: "Điểm",
@@ -245,6 +249,50 @@ export const diemCongTruColumns: ColumnDef<DiemCongTru>[] = [
         },
     },
     {
+        accessorKey: "trang_thai",
+        header: ({ column }) => <SortableHeader column={column} title="Trạng Thái" />,
+        size: 140,
+        minSize: 120,
+        cell: ({ row }) => {
+            const trangThai = row.getValue("trang_thai") as string | null
+            if (!trangThai) {
+                return <span className="text-muted-foreground">-</span>
+            }
+            
+            // Format rules cho trạng thái
+            const getBadgeVariant = (status: string) => {
+                if (status === "Đã xác nhận") {
+                    return "default" // Green/primary
+                }
+                if (status === "Chờ xác nhận") {
+                    return "secondary" // Gray/yellow
+                }
+                return "outline"
+            }
+            
+            const getBadgeClassName = (status: string) => {
+                if (status === "Đã xác nhận") {
+                    return "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+                }
+                if (status === "Chờ xác nhận") {
+                    return "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
+                }
+                return ""
+            }
+            
+            return (
+                <Badge variant={getBadgeVariant(trangThai)} className={getBadgeClassName(trangThai)}>
+                    {trangThai}
+                </Badge>
+            )
+        },
+        meta: {
+            title: "Trạng Thái",
+            order: 9,
+            minWidth: 120,
+        },
+    },
+    {
         accessorKey: "nguoi_tao_id",
         header: ({ column }) => <SortableHeader column={column} title="Người Tạo" />,
         size: 180,
@@ -267,7 +315,7 @@ export const diemCongTruColumns: ColumnDef<DiemCongTru>[] = [
         },
         meta: {
             title: "Người Tạo",
-            order: 9,
+            order: 10,
             minWidth: 150,
         },
     },
@@ -287,7 +335,7 @@ export const diemCongTruColumns: ColumnDef<DiemCongTru>[] = [
         },
         meta: {
             title: "Thời gian tạo",
-            order: 10,
+            order: 11,
             minWidth: 140,
         },
     },
@@ -300,13 +348,15 @@ export const diemCongTruColumns: ColumnDef<DiemCongTru>[] = [
                 <ActionsCell
                     id={diemCongTru.id!}
                     hoVaTen={diemCongTru.ho_va_ten ?? null}
+                    nhanVienId={diemCongTru.nhan_vien_id}
+                    trangThai={diemCongTru.trang_thai}
                 />
             )
         },
         enableSorting: false,
         enableHiding: false,
-        size: 120,
-        minSize: 100,
+        size: 160,
+        minSize: 140,
         meta: {
             title: "Thao tác",
             order: 99,

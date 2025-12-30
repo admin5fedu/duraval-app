@@ -40,6 +40,7 @@ export {
 // Detail component exports
 export { DetailErrorState } from "../detail/detail-error-state"
 export { DetailViewSkeleton } from "../detail/detail-view-skeleton"
+export { TraoDoiHistory, type TraoDoiHistoryProps, type TraoDoiItem } from "../trao-doi-history"
 
 // Utils exports (if needed for reuse)
 export { renderFieldValue } from "./utils"

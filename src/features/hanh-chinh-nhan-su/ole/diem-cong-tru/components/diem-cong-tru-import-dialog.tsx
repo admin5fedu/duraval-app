@@ -289,7 +289,10 @@ function mapExcelToDb(
             mapped.phong_ban_id = Number(row.data["phong_ban_id"]) || null
         }
         if (!shouldSkipValue(row.data["loai"], options.skipEmptyCells)) {
-            mapped.loai = String(row.data["loai"]).trim() || null
+            const loaiValue = String(row.data["loai"]).trim()
+            if (loaiValue) {
+                mapped.loai = loaiValue
+            }
         }
         if (!shouldSkipValue(row.data["nhom"], options.skipEmptyCells)) {
             mapped.nhom = String(row.data["nhom"]).trim() || null
@@ -307,10 +310,14 @@ function mapExcelToDb(
             mapped.ten_nhom_luong = String(row.data["ten_nhom_luong"]).trim() || null
         }
         if (!shouldSkipValue(row.data["mo_ta"], options.skipEmptyCells)) {
-            mapped.mo_ta = String(row.data["mo_ta"]).trim() || null
+            const moTaValue = String(row.data["mo_ta"]).trim()
+            if (moTaValue) {
+                mapped.mo_ta = moTaValue
+            }
         }
         if (!shouldSkipValue(row.data["trang_thai"], options.skipEmptyCells)) {
-            mapped.trang_thai = String(row.data["trang_thai"]).trim() || null
+            const trangThaiValue = String(row.data["trang_thai"]).trim()
+            mapped.trang_thai = trangThaiValue || null
         }
 
         return mapped

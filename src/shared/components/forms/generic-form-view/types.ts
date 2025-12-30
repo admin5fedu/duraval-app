@@ -25,6 +25,9 @@ export interface FormFieldConfig {
     displayName?: string // For avatar fallback initials
     // For phong-ban-select and cap-bac-select type
     excludeIds?: number[] // IDs to exclude from selection
+    // For number type
+    min?: number // Minimum value
+    max?: number // Maximum value
 }
 
 /**

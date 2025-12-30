@@ -3,7 +3,7 @@
 import { createUseListQuery, createUseDetailQuery } from "@/lib/react-query"
 import { nhomLuongQueryKeys } from "@/lib/react-query/query-keys"
 import { NhomLuongAPI } from "../services/nhom-luong.api"
-import type { NhomLuong } from "../schema"
+import type { NhomLuong } from "../types"
 
 /**
  * Hook to fetch list of nhóm lương

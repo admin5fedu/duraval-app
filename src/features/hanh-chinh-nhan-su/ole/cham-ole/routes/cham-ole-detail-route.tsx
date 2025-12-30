@@ -1,19 +1,43 @@
 /**
  * Chấm OLE Detail Route
+ * 
+ * Route component for detail view
  */
 
 "use client"
 
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
+import { ChamOleDetailView } from "../components/cham-ole-detail-view"
+import { chamOleConfig } from "../config"
 
 export default function ChamOleDetailRoute() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
+  if (!id) {
+    navigate(chamOleConfig.routePath)
+    return null
+  }
+
+  const chamOleId = Number(id)
+  if (isNaN(chamOleId)) {
+    navigate(chamOleConfig.routePath)
+    return null
+  }
+
+  const handleEdit = () => {
+    navigate(`${chamOleConfig.routePath}/${id}/sua?returnTo=detail`)
+  }
+
+  const handleBack = () => {
+    navigate(chamOleConfig.routePath)
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Chi tiết Chấm OLE #{id}</h1>
-      <p className="text-muted-foreground">Module đang được phát triển...</p>
-    </div>
+    <ChamOleDetailView
+      id={chamOleId}
+      onEdit={handleEdit}
+      onBack={handleBack}
+    />
   )
 }
-

@@ -3,8 +3,7 @@
 import { createMutationHooks } from "@/lib/react-query"
 import { nhomLuongQueryKeys } from "@/lib/react-query/query-keys"
 import { NhomLuongAPI } from "../services/nhom-luong.api"
-import type { NhomLuong } from "../schema"
-import type { CreateNhomLuongInput, UpdateNhomLuongInput } from "../types"
+import type { NhomLuong, CreateNhomLuongInput, UpdateNhomLuongInput } from "../types"
 
 /**
  * Mutation hooks for nhóm lương module

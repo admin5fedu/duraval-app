@@ -1,15 +1,35 @@
 /**
  * Chấm OLE List Route
+ * 
+ * Route component for list view
  */
 
 "use client"
 
+import { useNavigate } from "react-router-dom"
+import { ChamOleListView } from "../components/cham-ole-list-view"
+import { chamOleConfig } from "../config"
+
 export default function ChamOleListRoute() {
+  const navigate = useNavigate()
+
+  const handleEdit = (id: number) => {
+    navigate(`${chamOleConfig.routePath}/${id}/sua`)
+  }
+
+  const handleAddNew = () => {
+    navigate(`${chamOleConfig.routePath}/moi`)
+  }
+
+  const handleView = (id: number) => {
+    navigate(`${chamOleConfig.routePath}/${id}`)
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Chấm OLE</h1>
-      <p className="text-muted-foreground">Module đang được phát triển...</p>
-    </div>
+    <ChamOleListView
+      onEdit={handleEdit}
+      onAddNew={handleAddNew}
+      onView={handleView}
+    />
   )
 }
-

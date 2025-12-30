@@ -46,11 +46,18 @@ export function DetailSectionCard({ section }: { section: DetailSection }) {
 
   return (
     <div className="space-y-3 sm:space-y-4 print:space-y-2 print:break-inside-avoid scroll-mt-28">
-      <div className="flex items-center gap-2 sm:gap-2.5 px-1">
-        <div className="p-1.5 rounded-md bg-primary/10 print:bg-transparent print:border print:border-primary">
-          <SectionIcon className="h-4 w-4 text-primary shrink-0" />
+      <div className="flex items-center justify-between gap-2 sm:gap-2.5 px-1">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="p-1.5 rounded-md bg-primary/10 print:bg-transparent print:border print:border-primary">
+            <SectionIcon className="h-4 w-4 text-primary shrink-0" />
+          </div>
+          <h3 className={sectionTitleClass("font-semibold tracking-tight text-primary")}>{section.title}</h3>
         </div>
-        <h3 className={sectionTitleClass("font-semibold tracking-tight text-primary")}>{section.title}</h3>
+        {section.actions && (
+          <div className="flex items-center gap-2 print:hidden">
+            {section.actions}
+          </div>
+        )}
       </div>
       <Card className="shadow-sm border bg-card hover:shadow-md transition-shadow duration-200 print:shadow-none print:border-2">
         <CardContent className={cn(cardPaddingClass(), "print:p-4")}>

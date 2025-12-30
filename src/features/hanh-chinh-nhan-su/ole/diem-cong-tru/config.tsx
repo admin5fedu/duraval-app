@@ -41,6 +41,14 @@ export const diemCongTruConfig: ModuleConfig = {
       title: "Ngày",
       options: [], // Will be populated dynamically
     },
+    {
+      columnId: "trang_thai",
+      title: "Trạng Thái",
+      options: [
+        { label: "Chờ xác nhận", value: "Chờ xác nhận" },
+        { label: "Đã xác nhận", value: "Đã xác nhận" },
+      ],
+    },
   ],
   searchFields: ["ho_va_ten", "mo_ta", "loai", "nhom"],
   defaultSorting: [{ id: "ngay", desc: true }],

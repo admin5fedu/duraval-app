@@ -24,6 +24,7 @@ export interface DetailSection {
     description?: string
     fields: DetailField[]
     icon?: React.ComponentType<{ className?: string }>
+    actions?: React.ReactNode // Action buttons to display in section header
 }
 
 /**

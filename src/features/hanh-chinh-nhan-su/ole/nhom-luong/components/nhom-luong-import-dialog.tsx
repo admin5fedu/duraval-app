@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ImportDialog, type ImportOptions } from "@/shared/components/data-display/import/import-dialog"
 import { useBatchUpsertNhomLuong } from "../actions/nhom-luong-excel-actions"
-import { NhomLuong } from "../schema"
+import type { NhomLuong } from "../types"
 import type { TemplateColumn } from "@/lib/excel/template-utils"
 import type { ColumnMapping } from "@/shared/utils/excel-column-mapper"
 import { shouldSkipValue } from "@/shared/utils/excel-data-cleaner"

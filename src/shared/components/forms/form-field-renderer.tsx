@@ -9,6 +9,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { NumberInput } from "@/components/ui/number-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UseFormReturn } from "react-hook-form"
@@ -178,14 +179,33 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         placeholder={field.placeholder}
                                         description={field.description}
                                     />
+                                ) : field.type === "number" && (field.name === "diem" || field.name === "tien") ? (
+                                    <NumberInput
+                                        {...formField}
+                                        value={formField.value !== null && formField.value !== undefined ? formField.value : undefined}
+                                        onChange={(value) => {
+                                            if (field.disabled) return
+                                            formField.onChange(value)
+                                        }}
+                                        placeholder={field.placeholder}
+                                        disabled={field.disabled}
+                                        min={0}
+                                        allowDecimals={false}
+                                        formatThousands={true}
+                                        formatOnBlur={true}
+                                        className={cn(
+                                            isMobile && "h-11 text-base"
+                                        )}
+                                    />
                                 ) : (
                                     <Input
                                         {...formField}
                                         type={field.type === "date" ? "date" : field.type === "email" ? "email" : field.type === "number" ? "number" : "text"}
-                                        value={formField.value || ''}
+                                        value={formField.value !== null && formField.value !== undefined ? formField.value : ''}
                                         placeholder={field.placeholder}
                                         disabled={field.disabled}
-                                        min={field.type === "number" && field.name === "so_luong_cho_phep_thang" ? 0 : undefined}
+                                        min={field.type === "number" ? (field.min !== undefined ? field.min : (field.name === "so_luong_cho_phep_thang" || field.name === "diem" || field.name === "tien") ? 0 : undefined) : undefined}
+                                        max={field.type === "number" ? field.max : undefined}
                                         className={cn(
                                             isMobile && "h-11 text-base"
                                         )}
@@ -193,7 +213,16 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                             if (field.disabled) return
                                             if (field.type === 'number') {
                                                 const numValue = e.target.valueAsNumber
-                                                if (field.name === "so_luong_cho_phep_thang" && numValue < 0) {
+                                                // Validate min/max if specified
+                                                if (field.min !== undefined && !isNaN(numValue) && numValue < field.min) {
+                                                    formField.onChange(field.min)
+                                                    return
+                                                }
+                                                if (field.max !== undefined && !isNaN(numValue) && numValue > field.max) {
+                                                    formField.onChange(field.max)
+                                                    return
+                                                }
+                                                if ((field.name === "so_luong_cho_phep_thang" || field.name === "diem" || field.name === "tien") && numValue < 0) {
                                                     formField.onChange(0)
                                                 } else {
                                                     formField.onChange(isNaN(numValue) ? null : numValue)
@@ -203,10 +232,21 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                             }
                                         }}
                                         onBlur={e => {
-                                            if (field.type === 'number' && field.name === "so_luong_cho_phep_thang") {
+                                            if (field.type === 'number') {
                                                 const numValue = e.target.valueAsNumber
-                                                if (isNaN(numValue) || numValue < 0) {
-                                                    formField.onChange(0)
+                                                // Validate min/max on blur
+                                                if (field.min !== undefined && !isNaN(numValue) && numValue < field.min) {
+                                                    formField.onChange(field.min)
+                                                    return
+                                                }
+                                                if (field.max !== undefined && !isNaN(numValue) && numValue > field.max) {
+                                                    formField.onChange(field.max)
+                                                    return
+                                                }
+                                                if (field.name === "so_luong_cho_phep_thang") {
+                                                    if (isNaN(numValue) || numValue < 0) {
+                                                        formField.onChange(0)
+                                                    }
                                                 }
                                             }
                                         }}

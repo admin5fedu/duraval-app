@@ -12,6 +12,7 @@ interface NumberInputProps extends Omit<React.ComponentProps<typeof Input>, "typ
     step?: number
     allowDecimals?: boolean
     formatOnBlur?: boolean
+    formatThousands?: boolean // Format với dấu phẩy phân tách hàng nghìn
 }
 
 export function NumberInput({
@@ -22,19 +23,64 @@ export function NumberInput({
     step = 1,
     allowDecimals = true,
     formatOnBlur = true,
+    formatThousands = false,
     className,
     ...props
 }: NumberInputProps) {
-    const [displayValue, setDisplayValue] = React.useState<string>(
-        value !== null && value !== undefined ? String(value) : ""
-    )
+    // Helper function để format số với dấu phẩy phân tách hàng nghìn
+    const formatWithThousands = (num: number): string => {
+        if (isNaN(num)) return ""
+        if (allowDecimals) {
+            return num.toLocaleString('vi-VN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: step < 1 ? 2 : 0
+            })
+        }
+        return Math.round(num).toLocaleString('vi-VN')
+    }
+
+    // Helper function để parse số từ string có dấu phẩy
+    const parseFormattedNumber = (str: string): number => {
+        // Remove all commas and spaces
+        const cleaned = str.replace(/[,\s]/g, '')
+        return parseFloat(cleaned)
+    }
+
+    const [displayValue, setDisplayValue] = React.useState<string>(() => {
+        if (value !== null && value !== undefined) {
+            const num = typeof value === 'string' ? parseFloat(value) : value
+            if (!isNaN(num) && formatThousands) {
+                return formatWithThousands(num)
+            }
+            return String(value)
+        }
+        return ""
+    })
 
     React.useEffect(() => {
-        setDisplayValue(value !== null && value !== undefined ? String(value) : "")
-    }, [value])
+        if (value !== null && value !== undefined) {
+            const num = typeof value === 'string' ? parseFloat(value) : value
+            if (!isNaN(num)) {
+                if (formatThousands) {
+                    setDisplayValue(formatWithThousands(num))
+                } else {
+                    setDisplayValue(String(value))
+                }
+            } else {
+                setDisplayValue("")
+            }
+        } else {
+            setDisplayValue("")
+        }
+    }, [value, formatThousands])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let inputValue = e.target.value
+
+        // Nếu có format thousands, remove commas trước khi xử lý
+        if (formatThousands) {
+            inputValue = inputValue.replace(/[,\s]/g, '')
+        }
 
         // Remove non-numeric characters except decimal point
         if (!allowDecimals) {
@@ -48,10 +94,9 @@ export function NumberInput({
             }
         }
 
-        setDisplayValue(inputValue)
-
-        // Convert to number and validate
+        // Convert to number
         if (inputValue === "" || inputValue === ".") {
+            setDisplayValue("")
             onChange?.(null)
             return
         }
@@ -68,19 +113,30 @@ export function NumberInput({
                 finalValue = max
             }
 
+            // Format display value với thousand separator nếu cần
+            if (formatThousands) {
+                setDisplayValue(formatWithThousands(finalValue))
+            } else {
+                setDisplayValue(inputValue)
+            }
+
             onChange?.(finalValue)
         }
     }
 
     const handleBlur = () => {
-        if (formatOnBlur && displayValue) {
-            const numValue = parseFloat(displayValue)
+        if (displayValue) {
+            const numValue = parseFormattedNumber(displayValue)
             if (!isNaN(numValue)) {
-                // Format with appropriate decimal places
-                const formatted = allowDecimals
-                    ? numValue.toFixed(step < 1 ? 2 : 0)
-                    : Math.round(numValue).toString()
-                setDisplayValue(formatted)
+                if (formatThousands) {
+                    setDisplayValue(formatWithThousands(numValue))
+                } else {
+                    // Format with appropriate decimal places
+                    const formatted = allowDecimals
+                        ? numValue.toFixed(step < 1 ? 2 : 0)
+                        : Math.round(numValue).toString()
+                    setDisplayValue(formatted)
+                }
             }
         }
     }

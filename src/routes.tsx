@@ -757,6 +757,27 @@ export const routes: RouteConfig[] = [
     scrollBehavior: 'top',
   },
   {
+    path: '/hanh-chinh-nhan-su/cham-ole/moi',
+    element: ChamOleFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/cham-ole/:id/sua',
+    element: ChamOleFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/hanh-chinh-nhan-su/cham-ole/:id',
+    element: ChamOleDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
     path: '/hanh-chinh-nhan-su/cham-ole',
     element: ChamOleListRoute,
     protected: true,

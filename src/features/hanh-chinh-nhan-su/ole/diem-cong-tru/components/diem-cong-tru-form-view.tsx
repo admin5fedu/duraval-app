@@ -18,7 +18,7 @@ import { useEffect } from "react"
 import { useNhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/hooks/use-nhan-su"
 import { useNhomLuong } from "@/features/hanh-chinh-nhan-su/ole/nhom-luong/hooks/use-nhom-luong"
 
-// Component wrapper để watch nhan_vien_id và cập nhật ho_va_ten, phong_ban_id
+// Component wrapper để watch nhan_vien_id và cập nhật ho_va_ten, phong_ban_id, ma_phong_id, nhom
 function NhanVienWatcher() {
     const { data: employees } = useNhanSu()
     const form = useFormContext()
@@ -28,13 +28,26 @@ function NhanVienWatcher() {
         if (nhanVienId && employees) {
             const selectedEmployee = employees.find(emp => emp.ma_nhan_vien === Number(nhanVienId))
             if (selectedEmployee) {
-                // Tự động cập nhật ho_va_ten và phong_ban_id
+                // Tự động cập nhật ho_va_ten
                 form.setValue("ho_va_ten", selectedEmployee.ho_ten || "", { shouldValidate: false, shouldDirty: false })
+                
+                // Tự động cập nhật phong_ban_id từ var_nhan_su.phong_ban_id
                 if (selectedEmployee.phong_ban_id) {
                     form.setValue("phong_ban_id", selectedEmployee.phong_ban_id, { shouldValidate: false, shouldDirty: false })
                 } else {
                     form.setValue("phong_ban_id", null, { shouldValidate: false, shouldDirty: false })
                 }
+                
+                // Tự động cập nhật ma_phong_id từ var_nhan_su.phong_id
+                const phongId = (selectedEmployee as any).phong_id
+                if (phongId) {
+                    form.setValue("ma_phong_id", phongId, { shouldValidate: false, shouldDirty: false })
+                } else {
+                    form.setValue("ma_phong_id", null, { shouldValidate: false, shouldDirty: false })
+                }
+                
+                // Tự động cập nhật nhom từ var_nhan_su
+                form.setValue("nhom", selectedEmployee.nhom || "", { shouldValidate: false, shouldDirty: false })
             }
         }
     }, [nhanVienId, employees, form])
@@ -73,10 +86,6 @@ const getSections = (): FormSection[] => [
         customComponent: NhanVienSelectFormField,
       },
       { 
-        name: "ho_va_ten", 
-        label: "Họ và Tên", 
-      },
-      { 
         name: "ngay", 
         label: "Ngày", 
         type: "date",
@@ -87,16 +96,19 @@ const getSections = (): FormSection[] => [
         label: "Phòng Ban", 
         type: "custom",
         customComponent: PhongBanSelectFormField,
+        disabled: true,
       },
       { 
         name: "loai", 
         label: "Loại", 
         type: "custom",
         customComponent: LoaiToggleFormField,
+        required: true,
       },
       { 
         name: "nhom", 
-        label: "Nhóm", 
+        label: "Nhóm",
+        disabled: true,
       },
     ]
   },
@@ -107,11 +119,13 @@ const getSections = (): FormSection[] => [
         name: "diem", 
         label: "Điểm", 
         type: "number",
+        required: true,
       },
       { 
         name: "tien", 
         label: "Tiền", 
         type: "number",
+        required: true,
       },
       { 
         name: "nhom_luong_id", 
@@ -132,10 +146,12 @@ const getSections = (): FormSection[] => [
         name: "mo_ta", 
         label: "Mô Tả", 
         type: "textarea",
+        required: true,
       },
       { 
         name: "trang_thai", 
-        label: "Trạng Thái", 
+        label: "Trạng Thái",
+        disabled: true,
       },
     ]
   },
@@ -176,6 +192,9 @@ export function DiemCongTruFormView({ id, onComplete, onCancel }: DiemCongTruFor
   // Prepare default values
   // Phải được tạo TRƯỚC early return
   const defaultValues = useMemo(() => {
+    // Lấy ngày hôm nay theo format YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0]
+    
     if (id && existingData) {
       return {
         nhan_vien_id: existingData.nhan_vien_id || null,
@@ -196,7 +215,7 @@ export function DiemCongTruFormView({ id, onComplete, onCancel }: DiemCongTruFor
     return {
       nhan_vien_id: null,
       ho_va_ten: "",
-      ngay: "",
+      ngay: today,
       ma_phong_id: null,
       phong_ban_id: null,
       loai: "",
@@ -206,7 +225,7 @@ export function DiemCongTruFormView({ id, onComplete, onCancel }: DiemCongTruFor
       nhom_luong_id: null,
       ten_nhom_luong: "",
       mo_ta: "",
-      trang_thai: "",
+      trang_thai: "Chờ xác nhận",
     }
   }, [id, existingData])
 

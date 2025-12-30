@@ -2,10 +2,10 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { diemCongTruQueryKeys } from "@/lib/react-query/query-keys"
-import { DiemCongTruAPI } from "../services/diem-cong-tru.api"
-import type { CreateDiemCongTruInput } from "../types"
-import { diemCongTruSchema } from "../schema"
+import { chamOleQueryKeys } from "@/lib/react-query/query-keys"
+import { ChamOleAPI } from "../services/cham-ole.api"
+import type { CreateChamOleInput } from "../types"
+import { chamOleSchema } from "../schema"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
 interface ExcelRow {
@@ -21,62 +21,57 @@ interface BatchUpsertResult {
 /**
  * Map Excel row to database format
  */
-function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateDiemCongTruInput; row: number } {
+function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateChamOleInput; row: number } {
   // Extract fields
   const nhanVienId = row.nhan_vien_id ? Number(row.nhan_vien_id) : null
-  const hoVaTen = row.ho_va_ten ? String(row.ho_va_ten).trim() : null
-  const ngay = row.ngay ? String(row.ngay).trim() : null
-  const maPhongId = row.ma_phong_id ? Number(row.ma_phong_id) : null
-  const phongBanId = row.phong_ban_id ? Number(row.phong_ban_id) : null
-  const loaiRaw = row.loai ? String(row.loai).trim() : ""
-  const nhom = row.nhom ? String(row.nhom).trim() : null
-  const diem = row.diem !== undefined && row.diem !== null ? Number(row.diem) : 0
-  const tien = row.tien !== undefined && row.tien !== null ? Number(row.tien) : 0
-  const nhomLuongId = row.nhom_luong_id ? Number(row.nhom_luong_id) : null
-  const tenNhomLuong = row.ten_nhom_luong ? String(row.ten_nhom_luong).trim() : null
-  const moTaRaw = row.mo_ta ? String(row.mo_ta).trim() : ""
-  const trangThai = row.trang_thai ? String(row.trang_thai).trim() : null
+  const nam = row.nam !== undefined && row.nam !== null ? Number(row.nam) : null
+  const thang = row.thang !== undefined && row.thang !== null ? Number(row.thang) : null
+  const phongId = row.phong_id ? Number(row.phong_id) : null
+  const nhomId = row.nhom_id ? Number(row.nhom_id) : null
+  const chucVuId = row.chuc_vu_id ? Number(row.chuc_vu_id) : null
+  const danhGia = row.danh_gia ? String(row.danh_gia).trim() : null
+  const ole = row.ole !== undefined && row.ole !== null ? Number(row.ole) : null
+  const kpi = row.kpi !== undefined && row.kpi !== null ? Number(row.kpi) : null
+  const cong = row.cong !== undefined && row.cong !== null ? Number(row.cong) : null
+  const tru = row.tru !== undefined && row.tru !== null ? Number(row.tru) : null
+  const ghiChu = row.ghi_chu ? String(row.ghi_chu).trim() : null
 
   // Validate required fields
   if (!nhanVienId) {
     throw new Error(`Dòng ${rowIndex + 1}: Mã nhân viên không được để trống`)
   }
-  if (!ngay) {
-    throw new Error(`Dòng ${rowIndex + 1}: Ngày không được để trống`)
+  if (!nam) {
+    throw new Error(`Dòng ${rowIndex + 1}: Năm không được để trống`)
   }
-  if (!loaiRaw) {
-    throw new Error(`Dòng ${rowIndex + 1}: Loại không được để trống`)
-  }
-  if (!moTaRaw) {
-    throw new Error(`Dòng ${rowIndex + 1}: Mô tả không được để trống`)
+  if (!thang) {
+    throw new Error(`Dòng ${rowIndex + 1}: Tháng không được để trống`)
   }
 
   // Build data object
-  const data: CreateDiemCongTruInput = {
+  const data: CreateChamOleInput = {
     nhan_vien_id: nhanVienId,
-    ho_va_ten: hoVaTen,
-    ngay: ngay,
-    ma_phong_id: maPhongId,
-    phong_ban_id: phongBanId,
-    loai: loaiRaw,
-    nhom: nhom,
-    diem: diem,
-    tien: tien,
-    nhom_luong_id: nhomLuongId,
-    ten_nhom_luong: tenNhomLuong,
-    mo_ta: moTaRaw,
-    trang_thai: trangThai,
+    nam: nam,
+    thang: thang,
+    phong_id: phongId,
+    nhom_id: nhomId,
+    chuc_vu_id: chucVuId,
+    danh_gia: danhGia,
+    ole: ole,
+    kpi: kpi,
+    cong: cong,
+    tru: tru,
+    ghi_chu: ghiChu,
   }
 
   // Validate with Zod schema
-  const result = diemCongTruSchema.omit({ 
+  const result = chamOleSchema.omit({ 
     id: true, 
     tg_tao: true, 
     tg_cap_nhat: true, 
     nguoi_tao_id: true,
     nhan_vien: true,
     phong_ban: true,
-    nhom_luong: true,
+    chuc_vu: true,
     nguoi_tao: true,
   }).safeParse(data)
   
@@ -85,13 +80,13 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateDiemCongTr
     throw new Error(`Dòng ${rowIndex + 1}: ${errors}`)
   }
 
-  return { data: result.data as CreateDiemCongTruInput, row: rowIndex + 1 }
+  return { data: result.data as CreateChamOleInput, row: rowIndex + 1 }
 }
 
 /**
- * Hook to batch upsert điểm cộng trừ from Excel
+ * Hook to batch upsert chấm OLE from Excel
  */
-export function useBatchUpsertDiemCongTru() {
+export function useBatchUpsertChamOle() {
   const queryClient = useQueryClient()
   const { employee } = useAuthStore()
 
@@ -104,7 +99,7 @@ export function useBatchUpsertDiemCongTru() {
       }
 
       // Map and validate all records first
-      const mappedRecords: { data: CreateDiemCongTruInput; row: number }[] = []
+      const mappedRecords: { data: CreateChamOleInput; row: number }[] = []
       for (let i = 0; i < rows.length; i++) {
         try {
           mappedRecords.push(mapExcelToDb(rows[i], i))
@@ -122,25 +117,25 @@ export function useBatchUpsertDiemCongTru() {
       }
 
       // Get all existing records to check for duplicates
-      // We'll match by nhan_vien_id + ngay
-      const existingRecords = await DiemCongTruAPI.getAll()
+      // We'll match by nhan_vien_id + nam + thang
+      const existingRecords = await ChamOleAPI.getAll()
       const existingMap = new Map(
-        existingRecords.map((r) => [`${r.nhan_vien_id}_${r.ngay}`, r])
+        existingRecords.map((r) => [`${r.nhan_vien_id}_${r.nam}_${r.thang}`, r])
       )
 
       // Process each mapped record
       for (const { data, row } of mappedRecords) {
         try {
-          const key = `${data.nhan_vien_id}_${data.ngay}`
+          const key = `${data.nhan_vien_id}_${data.nam}_${data.thang}`
           const existing = existingMap.get(key)
 
           if (existing) {
             // Update existing record
-            await DiemCongTruAPI.update(existing.id!, data)
+            await ChamOleAPI.update(existing.id!, data)
             result.updated++
           } else {
             // Create new record - tự động gán nguoi_tao_id từ employee hiện tại
-            await DiemCongTruAPI.create({
+            await ChamOleAPI.create({
               ...data,
               nguoi_tao_id: employee?.ma_nhan_vien || null,
             })
@@ -159,11 +154,11 @@ export function useBatchUpsertDiemCongTru() {
     onSuccess: (result) => {
       // Invalidate queries
       queryClient.invalidateQueries({
-        queryKey: diemCongTruQueryKeys.all(),
+        queryKey: chamOleQueryKeys.all(),
         exact: false,
       })
       queryClient.refetchQueries({
-        queryKey: diemCongTruQueryKeys.list(),
+        queryKey: chamOleQueryKeys.list(),
         exact: true,
       })
 
