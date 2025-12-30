@@ -129,6 +129,11 @@ const PhanHoiKhachHangListRoute = lazy(() => import('@/features/marketing/ky-thu
 const PhanHoiKhachHangDetailRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/phan-hoi-khach-hang/routes/phan-hoi-khach-hang-detail-route'))
 const PhanHoiKhachHangFormRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/phan-hoi-khach-hang/routes/phan-hoi-khach-hang-form-route'))
 
+// Trục hạt module routes
+const TrucHatListRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/truc-hat/routes/truc-hat-list-route'))
+const TrucHatDetailRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/truc-hat/routes/truc-hat-detail-route'))
+const TrucHatFormRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/truc-hat/routes/truc-hat-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -968,6 +973,35 @@ export const routes: RouteConfig[] = [
   {
     path: '/marketing/phan-hoi-khach-hang',
     element: PhanHoiKhachHangListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Marketing - Trục hạt module routes
+  {
+    path: '/marketing/truc-hat/moi',
+    element: TrucHatFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/marketing/truc-hat/:id/sua',
+    element: TrucHatFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/marketing/truc-hat/:id',
+    element: TrucHatDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/marketing/truc-hat',
+    element: TrucHatListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore',

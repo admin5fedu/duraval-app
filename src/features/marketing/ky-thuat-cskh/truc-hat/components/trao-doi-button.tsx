@@ -14,19 +14,19 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useUpdatePhanHoiKhachHang } from "../hooks"
+import { useUpdateTrucHat } from "../hooks"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { useAuthStore } from "@/shared/stores/auth-store"
 import { useToast } from "@/hooks/use-toast"
 import { useQueryClient } from "@tanstack/react-query"
-import { phanHoiKhachHangQueryKeys } from "@/lib/react-query/query-keys"
-import { PhanHoiKhachHang } from "../schema"
+import { trucHatQueryKeys } from "@/lib/react-query/query-keys"
+import { TrucHat } from "../schema"
 import { TraoDoiHistory } from "@/shared/components"
 import { checkModuleAdmin } from "@/shared/utils/check-module-admin"
-import { phanHoiKhachHangConfig } from "../config"
+import { trucHatConfig } from "../config"
 
 interface TraoDoiButtonProps {
-  phanHoi: PhanHoiKhachHang
+  trucHat: TrucHat
   onSuccess?: () => void
   variant?: "default" | "primary"
 }
@@ -39,24 +39,22 @@ interface TraoDoiItem {
   loai?: string
 }
 
-export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoDoiButtonProps) {
+export function TraoDoiButton({ trucHat, onSuccess, variant = "default" }: TraoDoiButtonProps) {
   const [open, setOpen] = React.useState(false)
   const [traoDoiMoi, setTraoDoiMoi] = React.useState("")
-  const updateMutation = useUpdatePhanHoiKhachHang()
+  const updateMutation = useUpdateTrucHat()
   const { employee } = useAuthStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Parse trao_doi để lấy danh sách hiện có
   const traoDoiList: TraoDoiItem[] = React.useMemo(() => {
-    if (!phanHoi.trao_doi) return []
+    if (!trucHat.trao_doi) return []
     
     try {
       let list: TraoDoiItem[] = []
       
-      // Nếu là array, map và convert
-      if (Array.isArray(phanHoi.trao_doi)) {
-        list = phanHoi.trao_doi.map((item: any) => ({
+      if (Array.isArray(trucHat.trao_doi)) {
+        list = trucHat.trao_doi.map((item: any) => ({
           noi_dung: item.noi_dung || "",
           nguoi_trao_doi_id: item.nguoi_trao_doi_id || null,
           nguoi_trao_doi: item.nguoi_trao_doi || "",
@@ -64,9 +62,8 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
           loai: item.loai || undefined,
         }))
       }
-      // Nếu là object, convert thành array
-      else if (typeof phanHoi.trao_doi === 'object') {
-        const item = phanHoi.trao_doi as any
+      else if (typeof trucHat.trao_doi === 'object') {
+        const item = trucHat.trao_doi as any
         list = [{
           noi_dung: item.noi_dung || "",
           nguoi_trao_doi_id: item.nguoi_trao_doi_id || null,
@@ -80,7 +77,7 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
     } catch {
       return []
     }
-  }, [phanHoi.trao_doi])
+  }, [trucHat.trao_doi])
 
   const handleOpenDialog = () => {
     setTraoDoiMoi("")
@@ -98,7 +95,6 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
     }
 
     try {
-      // Tạo trao đổi mới
       const traoDoiMoiItem: TraoDoiItem = {
         noi_dung: traoDoiMoi.trim(),
         nguoi_trao_doi_id: employee?.ma_nhan_vien || null,
@@ -106,19 +102,16 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
         thoi_gian: new Date().toISOString(),
       }
 
-      // Tạo array mới với trao đổi cũ + mới
       const traoDoiMoiArray = [...traoDoiList, traoDoiMoiItem]
 
-      // Update record
       await updateMutation.mutateAsync({
-        id: phanHoi.id!,
+        id: trucHat.id!,
         input: {
           trao_doi: traoDoiMoiArray,
         },
       })
 
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: phanHoiKhachHangQueryKeys.all() })
+      queryClient.invalidateQueries({ queryKey: trucHatQueryKeys.all() })
 
       toast({
         title: "Thành công",
@@ -146,13 +139,13 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
       const newTraoDoiList = traoDoiList.filter((_, i) => i !== index)
 
       await updateMutation.mutateAsync({
-        id: phanHoi.id!,
+        id: trucHat.id!,
         input: {
           trao_doi: newTraoDoiList,
         },
       })
 
-      queryClient.invalidateQueries({ queryKey: phanHoiKhachHangQueryKeys.all() })
+      queryClient.invalidateQueries({ queryKey: trucHatQueryKeys.all() })
 
       toast({
         title: "Thành công",
@@ -173,7 +166,7 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
   }
 
   // Check if user has admin permission for this module
-  const isModuleAdmin = checkModuleAdmin(phanHoiKhachHangConfig.moduleName, employee)
+  const isModuleAdmin = checkModuleAdmin(trucHatConfig.moduleName, employee)
 
   return (
     <>
@@ -190,14 +183,13 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Trao Đổi - Phản Hồi Khách Hàng #{phanHoi.id}</DialogTitle>
+            <DialogTitle>Trao Đổi - Trục Hạt #{trucHat.id}</DialogTitle>
             <DialogDescription>
-              Xem và thêm trao đổi về phản hồi khách hàng này
+              Xem và thêm trao đổi về trục hạt này
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-hidden flex flex-col gap-4">
-            {/* Lịch sử trao đổi */}
             {traoDoiList.length > 0 && (
               <div className="flex-1 min-h-0 flex flex-col">
                 <Label className="mb-2">Lịch Sử Trao Đổi</Label>
@@ -211,7 +203,6 @@ export function TraoDoiButton({ phanHoi, onSuccess, variant = "default" }: TraoD
               </div>
             )}
 
-            {/* Form thêm trao đổi mới */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="trao-doi-moi">Thêm Trao Đổi Mới</Label>
               <Textarea

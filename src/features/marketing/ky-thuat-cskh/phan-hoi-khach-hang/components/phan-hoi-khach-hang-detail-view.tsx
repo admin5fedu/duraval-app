@@ -5,7 +5,7 @@ import { GenericDetailViewSimple, type DetailSection } from "@/shared/components
 import { Button } from "@/components/ui/button"
 import { Edit } from "lucide-react"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
-import { usePhanHoiKhachHangById } from "../hooks"
+import { usePhanHoiKhachHangById, useUpdatePhanHoiKhachHang } from "../hooks"
 import { DeletePhanHoiKhachHangButton } from "./delete-phan-hoi-khach-hang-button"
 import { TraoDoiButton } from "./trao-doi-button"
 import { KyThuatPhanHoiButton } from "./ky-thuat-phan-hoi-button"
@@ -16,6 +16,11 @@ import { DetailErrorState } from "@/shared/components/data-display/detail/detail
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
+import { checkModuleAdmin } from "@/shared/utils/check-module-admin"
+import { useAuthStore } from "@/shared/stores/auth-store"
+import { useToast } from "@/hooks/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
+import { phanHoiKhachHangQueryKeys } from "@/lib/react-query/query-keys"
 
 interface PhanHoiKhachHangDetailViewProps {
   id: number
@@ -28,6 +33,48 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
   const navigate = useNavigate()
   const query = usePhanHoiKhachHangById(id, initialData)
   const { data: phanHoi, isLoading, isError } = query
+  const { employee } = useAuthStore()
+  const updateMutation = useUpdatePhanHoiKhachHang()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+
+  // Check if user has admin permission
+  const isModuleAdmin = checkModuleAdmin(phanHoiKhachHangConfig.moduleName, employee)
+
+  const handleDeleteTraoDoi = async (index: number) => {
+    if (!phanHoi?.trao_doi) return
+
+    try {
+      const traoDoiList = Array.isArray(phanHoi.trao_doi) 
+        ? phanHoi.trao_doi 
+        : [phanHoi.trao_doi]
+      
+      const newTraoDoiList = traoDoiList.filter((_, i) => i !== index)
+
+      await updateMutation.mutateAsync({
+        id: phanHoi.id!,
+        input: {
+          trao_doi: newTraoDoiList,
+        },
+      })
+
+      queryClient.invalidateQueries({ queryKey: phanHoiKhachHangQueryKeys.all() })
+
+      toast({
+        title: "Thành công",
+        description: "Xóa trao đổi thành công",
+      })
+
+      query.refetch()
+    } catch (error: any) {
+      toast({
+        title: "Lỗi",
+        description: error.message || "Không thể xóa trao đổi",
+        variant: "error",
+      })
+      throw error
+    }
+  }
 
   // ✅ Hiển thị loading state
   if (isLoading) {
@@ -438,7 +485,13 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           value: phanHoi.trao_doi ? JSON.stringify(phanHoi.trao_doi) : "-",
           colSpan: 3,
           format: () => {
-            return <TraoDoiHistory traoDoi={phanHoi.trao_doi} />
+            return (
+              <TraoDoiHistory 
+                traoDoi={phanHoi.trao_doi}
+                onDelete={handleDeleteTraoDoi}
+                canDelete={() => isModuleAdmin}
+              />
+            )
           }
         },
       ],

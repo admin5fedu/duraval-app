@@ -24,5 +24,6 @@ export { nhomLuong, nhomLuong as nhomLuongQueryKeys } from "./nhom-luong"
 export { diemCongTru, diemCongTru as diemCongTruQueryKeys } from "./diem-cong-tru"
 export { chamOle, chamOle as chamOleQueryKeys } from "./cham-ole"
 export { phanHoiKhachHang, phanHoiKhachHang as phanHoiKhachHangQueryKeys } from "./phan-hoi-khach-hang"
+export { trucHat, trucHat as trucHatQueryKeys } from "./truc-hat"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

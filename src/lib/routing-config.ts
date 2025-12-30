@@ -83,6 +83,10 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "de-xuat-tuyen-dung": "Đề Xuất Tuyển Dụng",
   "ung-vien": "Ứng Viên",
   
+  // Marketing sub-modules
+  "phan-hoi-khach-hang": "Phản Hồi Khách Hàng",
+  "truc-hat": "Trục Hạt",
+  
   // Form actions
   "them-moi": "Thêm Mới",
   "moi": "Thêm Mới",
