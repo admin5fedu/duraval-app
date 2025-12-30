@@ -124,10 +124,16 @@ const UngVienListRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-
 const UngVienDetailRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/ung-vien/routes/ung-vien-detail-route'))
 const UngVienFormRoute = lazy(() => import('@/features/hanh-chinh-nhan-su/tuyen-dung/ung-vien/routes/ung-vien-form-route'))
 
+// Marketing - Phản hồi khách hàng module routes
+const PhanHoiKhachHangListRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/phan-hoi-khach-hang/routes/phan-hoi-khach-hang-list-route'))
+const PhanHoiKhachHangDetailRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/phan-hoi-khach-hang/routes/phan-hoi-khach-hang-detail-route'))
+const PhanHoiKhachHangFormRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/phan-hoi-khach-hang/routes/phan-hoi-khach-hang-form-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
 const HanhChinhNhanSuPage = lazy(() => import('@/pages/hanh-chinh-nhan-su/HanhChinhNhanSuPage'))
+const MarketingPage = lazy(() => import('@/pages/marketing/MarketingPage'))
 
 import type { ScrollBehavior } from './shared/types/scroll-behavior'
 
@@ -255,6 +261,13 @@ export const routes: RouteConfig[] = [
   {
     path: '/hanh-chinh-nhan-su',
     element: HanhChinhNhanSuPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'auto',
+  },
+  {
+    path: '/marketing',
+    element: MarketingPage,
     protected: true,
     layout: true,
     scrollBehavior: 'auto',
@@ -926,6 +939,35 @@ export const routes: RouteConfig[] = [
   {
     path: '/hanh-chinh-nhan-su/ung-vien',
     element: UngVienListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Marketing - Phản hồi khách hàng module routes
+  {
+    path: '/marketing/phan-hoi-khach-hang/moi',
+    element: PhanHoiKhachHangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/marketing/phan-hoi-khach-hang/:id/sua',
+    element: PhanHoiKhachHangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/marketing/phan-hoi-khach-hang/:id',
+    element: PhanHoiKhachHangDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/marketing/phan-hoi-khach-hang',
+    element: PhanHoiKhachHangListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore',

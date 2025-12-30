@@ -23,6 +23,7 @@ export const BREADCRUMB_SKIP_SEGMENTS: Set<string> = new Set([
   "cong-luong",   // Công lương - cấp trung gian trong hành chính nhân sự
   "ole",          // OLE - cấp trung gian trong hành chính nhân sự
   "tuyen-dung",   // Tuyển dụng - cấp trung gian trong hành chính nhân sự
+  "ky-thuat-cskh", // Kỹ thuật & CSKH - cấp trung gian trong marketing, đã flatten
 ])
 
 /**

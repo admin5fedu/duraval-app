@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
-import { getEnumBadgeClass } from "@/shared/utils/enum-color-registry"
+import { Check } from "lucide-react"
 
 interface ToggleButtonFormFieldProps {
   value: string
@@ -13,6 +12,17 @@ interface ToggleButtonFormFieldProps {
   className?: string
 }
 
+/**
+ * Toggle Button Form Field Component
+ * 
+ * Quy chuẩn toggle button với:
+ * - Background màu primary khi được chọn
+ * - Border dày hơn khi được chọn
+ * - Icon check khi được chọn
+ * - Shadow để nổi bật
+ * 
+ * Tham khảo từ module phiếu hành chính (cột ca)
+ */
 export function ToggleButtonFormField({
   value,
   onChange,
@@ -30,46 +40,34 @@ export function ToggleButtonFormField({
   }, [value, options])
 
   return (
-    <ToggleGroup
-      type="single"
-      value={normalizedValue}
-      onValueChange={(newValue) => {
-        if (disabled) return
-        // ToggleGroup returns empty string when clicking selected item (deselect)
-        // For required fields, prevent deselection. For optional fields, allow it.
-        const stringValue = Array.isArray(newValue) ? newValue[0] || "" : (newValue || "")
-        if (stringValue === "" && normalizedValue !== "") {
-          // Prevent deselection - keep current value
-          return
-        }
-        // Only update if newValue is a valid option value
-        const isValidOption = options.some(opt => opt.value === stringValue)
-        if (isValidOption) {
-          onChange(stringValue)
-        }
-      }}
-      className={cn("w-full flex-wrap justify-start gap-2 bg-transparent", className)}
-    >
+    <div className={cn("flex flex-wrap gap-2", className)}>
       {options.map((option) => {
         const isSelected = normalizedValue === option.value
-        const colorClass = getEnumBadgeClass("moi_quan_he", option.value)
         
         return (
-          <ToggleGroupItem
+          <button
             key={option.value}
-            value={option.value}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(option.value)}
             className={cn(
-              "h-auto px-4 py-2 text-sm font-medium transition-all border",
-              isSelected && colorClass,
-              !isSelected && "hover:bg-muted/50 border-border"
+              "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+              "h-8 px-3 py-2",
+              "transition-all duration-200 relative",
+              isSelected
+                ? "bg-primary text-primary-foreground shadow-lg font-semibold border-2 border-primary hover:bg-primary/90"
+                : "bg-background text-foreground hover:bg-accent hover:text-accent-foreground border-2 border-input",
+              disabled && "opacity-50 cursor-not-allowed"
             )}
-            aria-label={option.label}
           >
-            {option.label}
-          </ToggleGroupItem>
+            {isSelected && (
+              <Check className="h-3.5 w-3.5" />
+            )}
+            <span>{option.label}</span>
+          </button>
         )
       })}
-    </ToggleGroup>
+    </div>
   )
 }
 
