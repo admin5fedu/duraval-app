@@ -115,6 +115,8 @@ export function VirtualizedTableBody<TData>({
                                         cell.column.getSize()
                                     )
 
+                                    const isActionsColumn = cell.column.id === "actions"
+                                    
                                     return (
                                         <StickyTableCell
                                             key={cell.id}
@@ -129,8 +131,12 @@ export function VirtualizedTableBody<TData>({
                                                 height: `${virtualRow.size}px`,
                                                 transform: `translateY(${virtualRow.start}px)`,
                                             }}
+                                            isActionsColumn={isActionsColumn}
                                         >
-                                            <div className="max-w-[360px] truncate">
+                                            <div 
+                                                className={isActionsColumn ? "overflow-visible" : "max-w-[360px] truncate"}
+                                                style={isActionsColumn ? { minWidth: '100%' } : undefined}
+                                            >
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
                                                     cell.getContext()

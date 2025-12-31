@@ -143,15 +143,31 @@ export function useViecHangNgayWidgetHandlers({
         currentDate: string,
         setSelectedDate: (date: string) => void
     ) => {
-        const date = new Date(currentDate + "T00:00:00")
+        // Parse date string thành Date object, đảm bảo dùng local time
+        const dateParts = currentDate.split('-')
+        const year = parseInt(dateParts[0], 10)
+        const month = parseInt(dateParts[1], 10) - 1 // Month is 0-indexed
+        const day = parseInt(dateParts[2], 10)
+        
+        const date = new Date(year, month, day)
         const newDate = new Date(date)
         newDate.setDate(date.getDate() + (direction === 'next' ? 1 : -1))
-        setSelectedDate(newDate.toISOString().split('T')[0])
+        
+        // Format lại thành YYYY-MM-DD, đảm bảo dùng local date (không dùng toISOString vì nó trả về UTC)
+        const newYear = newDate.getFullYear()
+        const newMonth = String(newDate.getMonth() + 1).padStart(2, '0')
+        const newDay = String(newDate.getDate()).padStart(2, '0')
+        setSelectedDate(`${newYear}-${newMonth}-${newDay}`)
     }, [])
 
     // Go to today
     const goToToday = React.useCallback((setSelectedDate: (date: string) => void) => {
-        setSelectedDate(new Date().toISOString().split('T')[0])
+        // Format lại thành YYYY-MM-DD, đảm bảo dùng local date (không dùng toISOString vì nó trả về UTC)
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = String(today.getMonth() + 1).padStart(2, '0')
+        const day = String(today.getDate()).padStart(2, '0')
+        setSelectedDate(`${year}-${month}-${day}`)
     }, [])
 
     return {

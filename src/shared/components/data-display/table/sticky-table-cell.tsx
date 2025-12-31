@@ -7,6 +7,7 @@ interface StickyTableCellProps {
     bgColor: string
     children: React.ReactNode
     style: React.CSSProperties
+    isActionsColumn?: boolean
 }
 
 /**
@@ -17,7 +18,8 @@ export function StickyTableCell({
     isSticky,
     bgColor,
     children,
-    style
+    style,
+    isActionsColumn = false
 }: StickyTableCellProps) {
     // Xử lý background rõ ràng
     const finalBgColor = bgColor && bgColor !== '' 
@@ -26,8 +28,13 @@ export function StickyTableCell({
     
     const hasHoverBg = bgColor && bgColor !== ''
     
+    // Với actions column, không nên clip nội dung
+    const cellStyle = isActionsColumn 
+        ? { ...style, overflow: 'visible' as const }
+        : style
+    
     return (
-        <TableCell style={style}>
+        <TableCell style={cellStyle}>
             {/* ✅ Sticky cells: Backdrop trắng + overlay hover */}
             {isSticky ? (
                 <>
@@ -82,7 +89,7 @@ export function StickyTableCell({
                 </>
             )}
             {/* Content - z-index cao nhất */}
-            <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ position: 'relative', zIndex: 2, overflow: isActionsColumn ? 'visible' : undefined }}>
                 {children}
             </div>
         </TableCell>

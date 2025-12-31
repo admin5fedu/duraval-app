@@ -72,14 +72,16 @@ export function useViecHangNgayWidgetData({
                 })
                 setCongViecList(newList)
                 
-                // Update previousDataRef
-                setTimeout(() => {
+                // Update previousDataRef và previousSelectedDateRef SAU khi đã load xong dữ liệu
+                // Sử dụng queueMicrotask thay vì setTimeout(0) để đảm bảo chạy sau khi state đã update
+                queueMicrotask(() => {
                     const filteredList = filterCongViecList(newList)
                     refs.previousDataRef.current = JSON.stringify(filteredList)
+                    refs.previousSelectedDateRef.current = selectedDate // ✅ Cập nhật SAU khi đã load xong
                     refs.hasUnsavedChangesRef.current = false
                     setHasUnsavedChanges(false)
                     setSaveStatus("idle")
-                }, 0)
+                })
             } else {
                 // Cùng ngày: Merge thông minh - giữ lại dữ liệu user đang gõ
                 setCongViecList(prev => {
@@ -113,7 +115,8 @@ export function useViecHangNgayWidgetData({
                 })
                 
                 // Update previousDataRef sau khi merge
-                setTimeout(() => {
+                // Sử dụng queueMicrotask thay vì setTimeout(0) để đảm bảo chạy sau khi state đã update
+                queueMicrotask(() => {
                     setCongViecList(currentList => {
                         const filteredList = filterCongViecList(currentList)
                         refs.previousDataRef.current = JSON.stringify(filteredList)
@@ -122,7 +125,7 @@ export function useViecHangNgayWidgetData({
                     refs.hasUnsavedChangesRef.current = false
                     setHasUnsavedChanges(false)
                     setSaveStatus("idle")
-                }, 0)
+                })
             }
         } else {
             // Khi không có data
@@ -132,6 +135,7 @@ export function useViecHangNgayWidgetData({
                 setCongViecList(defaultItems)
                 setCurrentRecord(null)
                 refs.previousDataRef.current = JSON.stringify([])
+                refs.previousSelectedDateRef.current = selectedDate // ✅ Cập nhật SAU khi đã reset xong
                 refs.hasUnsavedChangesRef.current = false
                 setHasUnsavedChanges(false)
                 setSaveStatus("idle")
@@ -175,7 +179,6 @@ export function useViecHangNgayWidgetData({
         employeeLoading,
         viecHangNgayData,
         isLoading,
-        refs,
         setCurrentRecord,
         setCongViecList,
         setHasUnsavedChanges,

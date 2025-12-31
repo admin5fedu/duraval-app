@@ -27,5 +27,6 @@ export { phanHoiKhachHang, phanHoiKhachHang as phanHoiKhachHangQueryKeys } from 
 export { trucHat, trucHat as trucHatQueryKeys } from "./truc-hat"
 export { loaiTaiLieu, loaiTaiLieu as loaiTaiLieuQueryKeys } from "./loai-tai-lieu"
 export { danhMucTaiLieu, danhMucTaiLieu as danhMucTaiLieuQueryKeys } from "./danh-muc-tai-lieu"
+export { taiLieuBieuMau, taiLieuBieuMau as taiLieuBieuMauQueryKeys } from "./tai-lieu-bieu-mau"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

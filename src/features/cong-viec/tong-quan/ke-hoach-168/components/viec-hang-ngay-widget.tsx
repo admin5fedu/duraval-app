@@ -10,6 +10,16 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { 
+    AlertDialog, 
+    AlertDialogAction, 
+    AlertDialogCancel, 
+    AlertDialogContent, 
+    AlertDialogDescription, 
+    AlertDialogFooter, 
+    AlertDialogHeader, 
+    AlertDialogTitle 
+} from "@/components/ui/alert-dialog"
+import { 
     Calendar, 
     Loader2, 
     ChevronDown, 
@@ -75,6 +85,39 @@ export function ViecHangNgayWidget() {
     
     const { setTypingFlags } = helpers
 
+    // State để track pending date change và loading
+    const [pendingDateChange, setPendingDateChange] = React.useState<{ direction: 'prev' | 'next' | 'today' | 'custom', newDate?: string } | null>(null)
+    const [isChangingDate, setIsChangingDate] = React.useState(false)
+
+    // Debounced resize function cho textarea để tối ưu performance
+    const resizeTextareaRef = React.useRef<Map<HTMLElement, NodeJS.Timeout>>(new Map())
+    const resizeTextarea = React.useCallback((target: HTMLTextAreaElement, minHeight: number = 40) => {
+        // Clear previous timeout
+        const existingTimeout = resizeTextareaRef.current.get(target)
+        if (existingTimeout) {
+            clearTimeout(existingTimeout)
+        }
+        
+        // Debounce resize để tránh lag khi gõ nhanh
+        const timeout = setTimeout(() => {
+            target.style.height = 'auto'
+            target.style.height = Math.max(minHeight, target.scrollHeight) + 'px'
+            resizeTextareaRef.current.delete(target)
+        }, 50) // 50ms debounce cho resize
+        
+        resizeTextareaRef.current.set(target, timeout)
+    }, [])
+    
+    // Cleanup resizeTextareaRef khi unmount để tránh memory leak
+    React.useEffect(() => {
+        return () => {
+            resizeTextareaRef.current.forEach((timeout) => {
+                clearTimeout(timeout)
+            })
+            resizeTextareaRef.current.clear()
+        }
+    }, [])
+
     // Data loading hook
     const { isLoading } = useViecHangNgayWidgetData({
         employee,
@@ -124,10 +167,14 @@ export function ViecHangNgayWidget() {
         setTypingFlags
     })
     
-    // Reset state on date change
+    // Reset state on date change và clear loading state
     React.useEffect(() => {
         helpers.resetStateOnDateChange()
-    }, [selectedDate, helpers])
+        // Clear loading state sau khi data đã load
+        if (isChangingDate && !isLoading) {
+            setIsChangingDate(false)
+        }
+    }, [selectedDate, helpers, isChangingDate, isLoading])
     
     // Save on navigation
     React.useEffect(() => {
@@ -157,51 +204,69 @@ export function ViecHangNgayWidget() {
     }, [toggleGlobalExpand, globalExpandAll, expandedItemId, setGlobalExpandAll, setExpandedItemId])
     
     const handleNavigateDate = React.useCallback((direction: 'prev' | 'next') => {
+        // Kiểm tra có unsaved changes không
+        if (hasUnsavedChanges || refs.hasUnsavedChangesRef.current) {
+            setPendingDateChange({ direction })
+            return
+        }
+        // Nếu không có unsaved changes, chuyển ngày ngay
+        setIsChangingDate(true)
         navigateDate(direction, selectedDate, setSelectedDate)
-    }, [navigateDate, selectedDate, setSelectedDate])
+    }, [navigateDate, selectedDate, setSelectedDate, hasUnsavedChanges, refs])
     
     const handleGoToToday = React.useCallback(() => {
+        // Kiểm tra có unsaved changes không
+        if (hasUnsavedChanges || refs.hasUnsavedChangesRef.current) {
+            setPendingDateChange({ direction: 'today' })
+            return
+        }
+        // Nếu không có unsaved changes, chuyển ngày ngay
+        setIsChangingDate(true)
         goToToday(setSelectedDate)
-    }, [goToToday, setSelectedDate])
+    }, [goToToday, setSelectedDate, hasUnsavedChanges, refs])
+    
+    const handleDateInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const newDate = e.target.value
+        // Kiểm tra có unsaved changes không
+        if (hasUnsavedChanges || refs.hasUnsavedChangesRef.current) {
+            setPendingDateChange({ direction: 'custom', newDate })
+            return
+        }
+        // Nếu không có unsaved changes, chuyển ngày ngay
+        setIsChangingDate(true)
+        setSelectedDate(newDate)
+    }, [setSelectedDate, hasUnsavedChanges, refs])
+    
+    const confirmDateChange = React.useCallback(async () => {
+        if (!pendingDateChange) return
+        
+        // Force save trước khi chuyển ngày
+        if (hasDataToSave()) {
+            const dataToSave = getDataToSave()
+            await performSave(dataToSave, true, true).catch(err => {
+                console.error("Error saving before date change:", err)
+            })
+        }
+        
+        setIsChangingDate(true)
+        
+        if (pendingDateChange.direction === 'today') {
+            goToToday(setSelectedDate)
+        } else if (pendingDateChange.direction === 'custom' && pendingDateChange.newDate) {
+            setSelectedDate(pendingDateChange.newDate)
+        } else if (pendingDateChange.direction === 'prev' || pendingDateChange.direction === 'next') {
+            navigateDate(pendingDateChange.direction, selectedDate, setSelectedDate)
+        }
+        
+        setPendingDateChange(null)
+    }, [pendingDateChange, hasDataToSave, getDataToSave, performSave, navigateDate, goToToday, selectedDate, setSelectedDate])
+    
+    const cancelDateChange = React.useCallback(() => {
+        setPendingDateChange(null)
+    }, [])
 
     // UI Logic - removed old implementations, now using hooks above
     
-    if (employeeLoading) {
-        return (
-            <Card className="h-full">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5" />
-                        Việc hàng ngày
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    if (!employee?.ma_nhan_vien) {
-        return (
-            <Card className="h-full">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5" />
-                        Việc hàng ngày
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center py-8 text-muted-foreground">
-                        Không tìm thấy thông tin nhân viên
-                    </div>
-                </CardContent>
-            </Card>
-        )
-    }
-
     if (employeeLoading) {
         return (
             <Card className="h-full">
@@ -252,7 +317,8 @@ export function ViecHangNgayWidget() {
                         <SaveStatusText 
                             saveStatus={saveStatus} 
                             lastSaved={lastSaved} 
-                            hasUnsavedChanges={hasUnsavedChanges} 
+                            hasUnsavedChanges={hasUnsavedChanges}
+                            isAutoSaving={isSaving && saveStatus === "saving"}
                         />
                         <TooltipProvider>
                             <Tooltip>
@@ -305,6 +371,7 @@ export function ViecHangNgayWidget() {
                                 onClick={() => handleNavigateDate('prev')}
                                 className="h-8 w-8"
                                 title="Ngày trước"
+                                disabled={isChangingDate}
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
@@ -313,8 +380,9 @@ export function ViecHangNgayWidget() {
                                     id="date-picker"
                                     type="date"
                                     value={selectedDate}
-                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    onChange={handleDateInputChange}
                                     className="flex-1"
+                                    disabled={isChangingDate}
                                 />
                                 <Button
                                     variant="ghost"
@@ -322,6 +390,7 @@ export function ViecHangNgayWidget() {
                                     onClick={handleGoToToday}
                                     className="h-8 w-8"
                                     title="Hôm nay"
+                                    disabled={isChangingDate}
                                 >
                                     <Calendar className="h-4 w-4" />
                                 </Button>
@@ -332,6 +401,7 @@ export function ViecHangNgayWidget() {
                                 onClick={() => handleNavigateDate('next')}
                                 className="h-8 w-8"
                                 title="Ngày sau"
+                                disabled={isChangingDate}
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
@@ -345,9 +415,12 @@ export function ViecHangNgayWidget() {
                 </div>
                 
                 <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3">
-                    {isLoading ? (
+                    {(isLoading || isChangingDate) ? (
                         <div className="flex items-center justify-center py-8">
                             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            <span className="ml-2 text-sm text-muted-foreground">
+                                {isChangingDate ? "Đang tải dữ liệu..." : "Đang tải..."}
+                            </span>
                         </div>
                     ) : congViecList.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -375,18 +448,15 @@ export function ViecHangNgayWidget() {
                                                 value={item.ke_hoach || ''}
                                                 onChange={(e) => {
                                                     updateItem(itemIndex, { ke_hoach: e.target.value })
-                                                    const target = e.target as HTMLTextAreaElement
-                                                    target.style.height = 'auto'
-                                                    target.style.height = Math.max(40, target.scrollHeight) + 'px'
+                                                    resizeTextarea(e.target as HTMLTextAreaElement, 40)
                                                 }}
                                                 onBlur={handleInputBlur}
                                                 onInput={(e) => {
-                                                    const target = e.target as HTMLTextAreaElement
-                                                    target.style.height = 'auto'
-                                                    target.style.height = Math.max(40, target.scrollHeight) + 'px'
+                                                    resizeTextarea(e.target as HTMLTextAreaElement, 40)
                                                 }}
                                                 ref={(el) => {
                                                     if (el && item.ke_hoach) {
+                                                        // Initial resize không debounce
                                                         el.style.height = 'auto'
                                                         el.style.height = Math.max(40, el.scrollHeight) + 'px'
                                                     }
@@ -477,18 +547,15 @@ export function ViecHangNgayWidget() {
                                                         value={item.ket_qua || ''}
                                                         onChange={(e) => {
                                                             updateItem(itemIndex, { ket_qua: e.target.value })
-                                                            const target = e.target as HTMLTextAreaElement
-                                                            target.style.height = 'auto'
-                                                            target.style.height = Math.max(80, target.scrollHeight) + 'px'
+                                                            resizeTextarea(e.target as HTMLTextAreaElement, 80)
                                                         }}
                                                         onBlur={handleInputBlur}
                                                         onInput={(e) => {
-                                                            const target = e.target as HTMLTextAreaElement
-                                                            target.style.height = 'auto'
-                                                            target.style.height = Math.max(80, target.scrollHeight) + 'px'
+                                                            resizeTextarea(e.target as HTMLTextAreaElement, 80)
                                                         }}
                                                         ref={(el) => {
                                                             if (el && item.ket_qua) {
+                                                                // Initial resize không debounce
                                                                 el.style.height = 'auto'
                                                                 el.style.height = Math.max(80, el.scrollHeight) + 'px'
                                                             }
@@ -673,9 +740,7 @@ export function ViecHangNgayWidget() {
                                                         value={item.ke_hoach || ''}
                                                         onChange={(e) => {
                                                             updateItem(itemIndex, { ke_hoach: e.target.value })
-                                                            const target = e.target as HTMLTextAreaElement
-                                                            target.style.height = 'auto'
-                                                            target.style.height = Math.max(50, target.scrollHeight) + 'px'
+                                                            resizeTextarea(e.target as HTMLTextAreaElement, 50)
                                                         }}
                                                         onBlur={handleInputBlur}
                                                         className="flex-1 resize-none text-sm border-0 shadow-none focus-visible:ring-1 bg-transparent"
@@ -691,9 +756,7 @@ export function ViecHangNgayWidget() {
                                                     value={item.ket_qua || ''}
                                                     onChange={(e) => {
                                                         updateItem(itemIndex, { ket_qua: e.target.value })
-                                                        const target = e.target as HTMLTextAreaElement
-                                                        target.style.height = 'auto'
-                                                        target.style.height = Math.max(50, target.scrollHeight) + 'px'
+                                                        resizeTextarea(e.target as HTMLTextAreaElement, 50)
                                                     }}
                                                     onBlur={handleInputBlur}
                                                     className="w-full resize-none text-sm border-0 shadow-none focus-visible:ring-1 bg-transparent"
@@ -873,6 +936,24 @@ export function ViecHangNgayWidget() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Alert Dialog for unsaved changes warning */}
+            <AlertDialog open={!!pendingDateChange} onOpenChange={(open) => !open && cancelDateChange()}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Bạn có thay đổi chưa lưu</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bạn có thay đổi chưa được lưu. Bạn có muốn lưu trước khi chuyển sang ngày khác không?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={cancelDateChange}>Hủy</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDateChange}>
+                            Lưu và chuyển ngày
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Card>
     )
 }

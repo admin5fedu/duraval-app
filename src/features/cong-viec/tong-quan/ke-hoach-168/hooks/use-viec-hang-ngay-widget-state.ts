@@ -5,12 +5,35 @@ import type { ViecHangNgay } from "../../viec-hang-ngay/schema"
 import type { CongViec, ViecHangNgayWidgetState, ViecHangNgayWidgetRefs } from "../types/viec-hang-ngay-widget.types"
 import { TYPING_TIMEOUT_MS } from "../constants/viec-hang-ngay-widget.constants"
 
+// LocalStorage key để lưu ngày đã chọn
+const SELECTED_DATE_STORAGE_KEY = 'viec-hang-ngay-widget-selected-date'
+
 /**
  * Hook quản lý state cho widget Việc hàng ngày
  */
 export function useViecHangNgayWidgetState() {
     const location = useLocation()
-    const [selectedDate, setSelectedDate] = React.useState<string>(format(new Date(), "yyyy-MM-dd"))
+    
+    // Khởi tạo selectedDate từ localStorage nếu có, nếu không thì dùng today
+    const [selectedDate, setSelectedDate] = React.useState<string>(() => {
+        try {
+            const savedDate = localStorage.getItem(SELECTED_DATE_STORAGE_KEY)
+            if (savedDate) {
+                // Validate date format (YYYY-MM-DD)
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+                if (dateRegex.test(savedDate)) {
+                    // Validate date là hợp lệ
+                    const date = new Date(savedDate + "T00:00:00")
+                    if (!isNaN(date.getTime())) {
+                        return savedDate
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error loading saved date from localStorage:', error)
+        }
+        return format(new Date(), "yyyy-MM-dd")
+    })
     const [currentRecord, setCurrentRecord] = React.useState<ViecHangNgay | null>(null)
     const [congViecList, setCongViecList] = React.useState<CongViec[]>([])
     const [expandedItemId, setExpandedItemId] = React.useState<number | null>(null)
@@ -36,7 +59,18 @@ export function useViecHangNgayWidgetState() {
     const savingDataRef = React.useRef<string | null>(null)
     const isBlurSavingRef = React.useRef(false)
     const consecutiveErrorCountRef = React.useRef(0)
-    const previousSelectedDateRef = React.useRef<string>(selectedDate)
+    // ✅ Khởi tạo với empty string để đảm bảo lần đầu mount luôn được coi là date changed
+    // Điều này đảm bảo dữ liệu được load đúng khi khôi phục từ localStorage
+    const previousSelectedDateRef = React.useRef<string>("")
+
+    // Lưu selectedDate vào localStorage mỗi khi thay đổi
+    React.useEffect(() => {
+        try {
+            localStorage.setItem(SELECTED_DATE_STORAGE_KEY, selectedDate)
+        } catch (error) {
+            console.error('Error saving date to localStorage:', error)
+        }
+    }, [selectedDate])
 
     // Clear typing timeout và set typing flags
     const clearTypingFlags = React.useCallback(() => {
@@ -84,7 +118,9 @@ export function useViecHangNgayWidgetState() {
     const resetStateOnDateChange = React.useCallback(() => {
         if (previousSelectedDateRef.current === selectedDate) return false
 
-        previousSelectedDateRef.current = selectedDate
+        // ✅ KHÔNG cập nhật previousSelectedDateRef ở đây nữa
+        // Nó sẽ được cập nhật trong useViecHangNgayWidgetData sau khi đã load xong dữ liệu
+        // Điều này đảm bảo isDateChanged trong data hook luôn đúng
         consecutiveErrorCountRef.current = 0
         hasUnsavedChangesRef.current = false
         setHasUnsavedChanges(false)

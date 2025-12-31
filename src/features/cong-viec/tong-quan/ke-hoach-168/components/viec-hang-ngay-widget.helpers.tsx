@@ -9,17 +9,20 @@ import type { SaveStatus } from "../types/viec-hang-ngay-widget.types"
 export function SaveStatusText({ 
     saveStatus, 
     lastSaved, 
-    hasUnsavedChanges 
+    hasUnsavedChanges,
+    isAutoSaving = false
 }: { 
     saveStatus: SaveStatus
     lastSaved: Date | null
     hasUnsavedChanges: boolean
+    isAutoSaving?: boolean
 }) {
     switch (saveStatus) {
         case "saving":
             return (
                 <span className="text-xs text-blue-500 flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" /> Đang lưu...
+                    <Loader2 className="h-3 w-3 animate-spin" /> 
+                    {isAutoSaving ? "Đang tự động lưu..." : "Đang lưu..."}
                 </span>
             )
         case "saved":

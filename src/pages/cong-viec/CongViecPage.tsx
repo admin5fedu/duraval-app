@@ -58,8 +58,8 @@ export default function CongViecPage() {
           description: "Quản lý danh mục và phân loại tài liệu trong hệ thống.",
         },
         {
-          title: "Tài liệu / Biểu mẫu",
-          href: "/cong-viec/tai-lieu/tai-lieu-bieu-mau",
+          title: "Tài liệu & Biểu mẫu",
+          href: "/cong-viec/tai-lieu-bieu-mau",
           icon: FileText,
           description: "Lưu trữ và quản lý tài liệu, biểu mẫu, văn bản công việc.",
         },

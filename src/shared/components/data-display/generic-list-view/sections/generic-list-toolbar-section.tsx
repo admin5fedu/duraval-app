@@ -1,5 +1,6 @@
 "use client"
 import { GenericListToolbar } from "../../generic-list-toolbar"
+import { FilterChips } from "../../filters/filter-chips"
 import type { GenericListToolbarSectionProps } from "../types"
 
 /**
@@ -75,6 +76,11 @@ export function GenericListToolbarSection<TData>({
                         : undefined
                 }
             />
+            
+            {/* Filter Chips */}
+            <div className="px-2 py-1.5">
+                <FilterChips table={table} />
+            </div>
             
             {isSearchActive && (
                 <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">

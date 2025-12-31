@@ -372,12 +372,12 @@ export const danhMucTaiLieuColumns: ColumnDef<DanhMucTaiLieu>[] = [
         },
         enableSorting: false,
         enableHiding: false,
-        size: 120,
-        minSize: 100,
+        size: 150,
+        minSize: 140,
         meta: {
             title: "Thao tác",
             stickyRight: true,
-            minWidth: 100
+            minWidth: 140
         }
     }
 ]

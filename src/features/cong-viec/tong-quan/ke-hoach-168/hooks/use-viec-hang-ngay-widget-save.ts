@@ -9,7 +9,7 @@ import type { ViecHangNgay } from "../../viec-hang-ngay/schema"
 import type { CongViec, ViecHangNgayWidgetState, ViecHangNgayWidgetRefs } from "../types/viec-hang-ngay-widget.types"
 import { isValidUrl, filterCongViecList } from "../utils/viec-hang-ngay-widget.utils"
 import { saveWithKeepalive } from "../utils/viec-hang-ngay-widget-save.utils"
-import { MAX_CONSECUTIVE_ERRORS, DEBOUNCE_DELAY_MS, STATUS_UPDATE_DELAY_MS } from "../constants/viec-hang-ngay-widget.constants"
+import { MAX_CONSECUTIVE_ERRORS, DEBOUNCE_DELAY_MS, STATUS_UPDATE_DELAY_MS, RETRY_DELAY_MS, MAX_RETRY_ATTEMPTS } from "../constants/viec-hang-ngay-widget.constants"
 
 interface UseViecHangNgayWidgetSaveParams {
     employee: { ma_nhan_vien: number } | null | undefined
@@ -39,6 +39,17 @@ export function useViecHangNgayWidgetSave({
 }: UseViecHangNgayWidgetSaveParams) {
     const { selectedDate, currentRecord, congViecList, linkErrors, isSaving } = state
     const queryClient = useQueryClient()
+    
+    // AbortController để cancel request cũ khi có request mới
+    const abortControllerRef = React.useRef<AbortController | null>(null)
+    
+    // Metrics tracking
+    const saveMetricsRef = React.useRef({
+        totalSaves: 0,
+        successfulSaves: 0,
+        failedSaves: 0,
+        retryCount: 0
+    })
 
     // Mutations
     const createMutation = useMutation({
@@ -111,21 +122,27 @@ export function useViecHangNgayWidgetSave({
         return !hasError
     }, [setLinkErrors])
 
-    // Perform save
+    // Perform save với retry logic
     const performSave = React.useCallback(async (
         dataToSave: CongViec[],
         silent = false,
-        force = false
+        force = false,
+        retryCount = 0
     ): Promise<boolean> => {
         if (!employee?.ma_nhan_vien || !selectedDate || refs.isInitialLoadRef.current) return false
+
+        // Cancel request cũ nếu có
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
+        abortControllerRef.current = new AbortController()
 
         // Xử lý race condition
         if (!force) {
             if (refs.isSavingRef.current || isSaving) {
-                let waitCount = 0
-                while ((refs.isSavingRef.current || isSaving) && waitCount < 50) {
-                    await new Promise(resolve => setTimeout(resolve, 100))
-                    waitCount++
+                // Nếu đang save, cancel request cũ và dùng data mới nhất
+                if (abortControllerRef.current) {
+                    abortControllerRef.current.abort()
                 }
                 
                 const latestDataToSave = getDataToSave()
@@ -135,6 +152,9 @@ export function useViecHangNgayWidgetSave({
                 if (latestDataString !== currentDataString) {
                     dataToSave = latestDataToSave
                 }
+                
+                // Đợi một chút để request cũ hoàn thành hoặc bị cancel
+                await new Promise(resolve => setTimeout(resolve, 50))
                 
                 if (refs.isSavingRef.current || isSaving) {
                     console.warn("Save request still in progress, skipping duplicate save")
@@ -162,11 +182,39 @@ export function useViecHangNgayWidgetSave({
         // Set flags
         refs.isSavingRef.current = true
         setIsSaving(true)
+        saveMetricsRef.current.totalSaves++
+        
         if (!silent) {
             setSaveStatus("saving")
         }
         
+        // Optimistic update: Update query cache trước khi server confirm
+        const optimisticRecord: ViecHangNgay | null = currentRecord?.id 
+            ? { ...currentRecord, chi_tiet_cong_viec: dataToSave } as ViecHangNgay
+            : dataToSave.length > 0 
+                ? {
+                    id: currentRecord?.id || 0,
+                    ma_nhan_vien: employee.ma_nhan_vien,
+                    ngay_bao_cao: selectedDate,
+                    chi_tiet_cong_viec: dataToSave,
+                    tg_tao: currentRecord?.tg_tao || new Date().toISOString(),
+                    tg_cap_nhat: new Date().toISOString()
+                } as ViecHangNgay
+                : null
+        
+        if (optimisticRecord && employee?.ma_nhan_vien && selectedDate && viecHangNgayQueryKeys?.byDateAndEmployee) {
+            queryClient.setQueryData(
+                viecHangNgayQueryKeys.byDateAndEmployee(employee.ma_nhan_vien, selectedDate),
+                optimisticRecord
+            )
+        }
+        
         try {
+            // Check if aborted
+            if (abortControllerRef.current?.signal.aborted) {
+                return false
+            }
+            
             let savedRecord: ViecHangNgay | null = null
 
             // Kiểm tra currentRecord có khớp với selectedDate không
@@ -182,6 +230,11 @@ export function useViecHangNgayWidgetSave({
                 } catch (queryError) {
                     console.error("Error querying record for current date:", queryError)
                 }
+            }
+
+            // Check if aborted
+            if (abortControllerRef.current?.signal.aborted) {
+                return false
             }
 
             if (recordToUpdate?.id) {
@@ -207,7 +260,7 @@ export function useViecHangNgayWidgetSave({
                 }
             }
 
-            // Update query cache
+            // Update query cache với data thực từ server
             if (savedRecord && employee?.ma_nhan_vien && selectedDate && viecHangNgayQueryKeys?.byDateAndEmployee) {
                 queryClient.setQueryData(
                     viecHangNgayQueryKeys.byDateAndEmployee(employee.ma_nhan_vien, selectedDate),
@@ -222,6 +275,9 @@ export function useViecHangNgayWidgetSave({
             refs.savingDataRef.current = null
             refs.isUserTypingRef.current = false
             
+            // Metrics tracking - success
+            saveMetricsRef.current.successfulSaves++
+            
             if (!silent) {
                 setSaveStatus("saved")
                 setLastSaved(new Date())
@@ -233,9 +289,30 @@ export function useViecHangNgayWidgetSave({
             
             return true
         } catch (error: any) {
+            // Check if aborted
+            if (abortControllerRef.current?.signal.aborted) {
+                return false
+            }
+            
             console.error("Lỗi khi lưu:", error)
             
+            // Metrics tracking - failure
+            saveMetricsRef.current.failedSaves++
+            
             refs.consecutiveErrorCountRef.current += 1
+            
+            // Retry logic nếu chưa vượt quá số lần retry
+            if (retryCount < MAX_RETRY_ATTEMPTS && !error.message?.includes("406")) {
+                saveMetricsRef.current.retryCount++
+                console.log(`Retrying save (attempt ${retryCount + 1}/${MAX_RETRY_ATTEMPTS})...`)
+                
+                // Đợi một chút trước khi retry
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS))
+                
+                // Retry với data mới nhất
+                const latestDataToSave = getDataToSave()
+                return await performSave(latestDataToSave, silent, force, retryCount + 1)
+            }
             
             // Xử lý lỗi PGRST116 (record không tồn tại)
             if (error.message?.includes("PGRST116") || error.message?.includes("0 rows") || error.message?.includes("Cannot coerce")) {
@@ -261,6 +338,9 @@ export function useViecHangNgayWidgetSave({
                         setHasUnsavedChanges(false)
                         refs.previousDataRef.current = JSON.stringify(dataToSave)
                         refs.savingDataRef.current = null
+                        
+                        // Metrics tracking - success after retry
+                        saveMetricsRef.current.successfulSaves++
                         
                         if (!silent) {
                             setSaveStatus("saved")
@@ -306,12 +386,11 @@ export function useViecHangNgayWidgetSave({
             refs.isSavingRef.current = false
         }
     }, [
-        employee,
+        employee?.ma_nhan_vien,
         selectedDate,
-        currentRecord,
+        currentRecord?.id,
         isSaving,
         linkErrors,
-        refs,
         createMutation,
         updateMutation,
         validateAllLinks,
@@ -324,6 +403,21 @@ export function useViecHangNgayWidgetSave({
         setIsSaving,
         setHasUnsavedChanges
     ])
+    
+    // Cleanup AbortController khi unmount
+    React.useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+                abortControllerRef.current = null
+            }
+        }
+    }, [])
+    
+    // Expose metrics (có thể dùng để debug hoặc analytics)
+    const getSaveMetrics = React.useCallback(() => {
+        return { ...saveMetricsRef.current }
+    }, [])
 
     // Auto-save effect
     React.useEffect(() => {
@@ -501,7 +595,8 @@ export function useViecHangNgayWidgetSave({
         handleInputBlur,
         getDataToSave,
         hasDataToSave,
-        validateAllLinks
+        validateAllLinks,
+        getSaveMetrics
     }
 }
 
