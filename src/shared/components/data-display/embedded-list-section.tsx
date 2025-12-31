@@ -203,6 +203,9 @@ export function EmbeddedListSection<T>({
         return sortDirection
     }
 
+    // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
+    // để đảm bảo thứ tự hooks nhất quán giữa các lần render
+
     // Sort data
     const sortedData = useMemo(() => {
         if (!data || data.length === 0) return data
@@ -259,32 +262,6 @@ export function EmbeddedListSection<T>({
         })
     }, [data, sortField, sortDirection, defaultSortField, defaultSortDirection, customSort])
 
-    if (isLoading) {
-        return (
-            <Card className={className}>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                            <Skeleton className="h-6 w-48" />
-                            {description && <Skeleton className="h-4 w-96" />}
-                        </div>
-                        {onAdd && <Skeleton className="h-9 w-32" />}
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                        {[1, 2, 3].map((i) => (
-                            <Skeleton key={i} className="h-12 w-full" />
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    const hasActions = showActions && (onView || onEdit || onDelete)
-    void getItemName
-
     // Filter columns based on compact mode
     const visibleColumns = useMemo(() => {
         if (!compactMode) return columns
@@ -326,6 +303,33 @@ export function EmbeddedListSection<T>({
         }
         return total > visible ? `Hiển thị ${visible} / ${total} mục` : `${total} mục`
     }, [showItemCount, totalCount, sortedData.length, displayData.length, countFormat])
+
+    // Early return AFTER all hooks
+    if (isLoading) {
+        return (
+            <Card className={className}>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-2">
+                            <Skeleton className="h-6 w-48" />
+                            {description && <Skeleton className="h-4 w-96" />}
+                        </div>
+                        {onAdd && <Skeleton className="h-9 w-32" />}
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                            <Skeleton key={i} className="h-12 w-full" />
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    const hasActions = showActions && (onView || onEdit || onDelete)
+    void getItemName
 
     // Handle expand
     const handleExpand = () => {
