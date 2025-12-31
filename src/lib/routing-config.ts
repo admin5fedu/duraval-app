@@ -24,6 +24,8 @@ export const BREADCRUMB_SKIP_SEGMENTS: Set<string> = new Set([
   "ole",          // OLE - cấp trung gian trong hành chính nhân sự
   "tuyen-dung",   // Tuyển dụng - cấp trung gian trong hành chính nhân sự
   "ky-thuat-cskh", // Kỹ thuật & CSKH - cấp trung gian trong marketing, đã flatten
+  "quy-ho-tro-ban-hang", // Quỹ hỗ trợ bán hàng - cấp trung gian trong kinh doanh, đã flatten
+  "loai-phieu-hang-muc", // Loại phiếu & Hạng mục - cấp trung gian, bỏ trong breadcrumb
 ])
 
 /**
@@ -88,6 +90,11 @@ const BASE_PATH_LABELS: Record<string, string> = {
   // Marketing sub-modules
   "phan-hoi-khach-hang": "Phản Hồi Khách Hàng",
   "truc-hat": "Trục Hạt",
+  
+  // Kinh doanh sub-modules
+  "loai-phieu": "Loại Phiếu",
+  "hang-muc": "Hạng Mục",
+  "loai-doanh-thu": "Loại Doanh Thu",
   
   // Form actions
   "them-moi": "Thêm Mới",

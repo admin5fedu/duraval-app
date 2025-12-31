@@ -5,8 +5,8 @@ import { useChucVu } from "@/features/he-thong/so-do/chuc-vu/hooks"
 import { usePhongBan } from "@/features/he-thong/so-do/phong-ban/hooks"
 import { usePhanQuyen, useBatchUpsertPhanQuyen } from "../hooks"
 import type { ChucVu } from "@/features/he-thong/so-do/chuc-vu/schema"
-import { MODULES, getModulesByGroup } from "../modules-config"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { MODULES, getModulesByCategoryAndGroup } from "../modules-config"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -36,6 +36,8 @@ const QUYEN_LABELS: Array<{ key: keyof Quyen; label: string }> = [
   { key: "them", label: "Thêm" },
   { key: "sua", label: "Sửa" },
   { key: "xoa", label: "Xóa" },
+  { key: "import", label: "Import" },
+  { key: "export", label: "Export" },
   { key: "quan_tri", label: "Quản trị" },
 ]
 
@@ -59,16 +61,30 @@ export function PhanQuyenMatrixView() {
 
   const [selectedModuleId, setSelectedModuleId] = React.useState<string | null>(null)
   const [moduleSearch, setModuleSearch] = React.useState("")
-  const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(
-    new Set(Object.keys(getModulesByGroup()))
-  )
+  const [expandedCategories, setExpandedCategories] = React.useState<Set<string>>(new Set())
+  const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set())
   const [hasChanges, setHasChanges] = React.useState(false)
   const [selectedPhongFilter, setSelectedPhongFilter] = React.useState<string>("all")
 
-  // Group modules by group
-  const modulesByGroup = React.useMemo(() => {
-    return getModulesByGroup()
+  // Group modules by category and group (2-level hierarchy)
+  const modulesByCategoryAndGroup = React.useMemo(() => {
+    return getModulesByCategoryAndGroup()
   }, [])
+
+  // Initialize expanded categories and groups
+  React.useEffect(() => {
+    const categories = Object.keys(modulesByCategoryAndGroup)
+    setExpandedCategories(new Set(categories))
+    
+    // Expand all groups in all categories
+    const allGroups = new Set<string>()
+    categories.forEach(category => {
+      Object.keys(modulesByCategoryAndGroup[category]).forEach(group => {
+        allGroups.add(`${category}::${group}`)
+      })
+    })
+    setExpandedGroups(allGroups)
+  }, [modulesByCategoryAndGroup])
 
   // Create permission map from server data: chuc_vu_id -> module_id -> quyen
   const serverPermissionMap = React.useMemo(() => {
@@ -100,26 +116,63 @@ export function PhanQuyenMatrixView() {
     }
   }, [selectedModuleId])
 
-  // Filter modules by search
-  const filteredModulesByGroup = React.useMemo(() => {
-    if (!moduleSearch.trim()) return modulesByGroup
+  // Filter modules by search (2-level structure)
+  const filteredModulesByCategoryAndGroup = React.useMemo(() => {
+    if (!moduleSearch.trim()) return modulesByCategoryAndGroup
     
     const searchLower = moduleSearch.toLowerCase()
-    const filtered: Record<string, typeof MODULES> = {}
+    const filtered: Record<string, Record<string, typeof MODULES>> = {}
     
-    Object.entries(modulesByGroup).forEach(([groupName, modules]) => {
+    Object.entries(modulesByCategoryAndGroup).forEach(([category, groups]) => {
+      const filteredGroups: Record<string, typeof MODULES> = {}
+      
+      Object.entries(groups).forEach(([group, modules]) => {
       const filteredModules = modules.filter(m => 
         m.name.toLowerCase().includes(searchLower) ||
         m.description?.toLowerCase().includes(searchLower) ||
-        m.id.toLowerCase().includes(searchLower)
+          m.id.toLowerCase().includes(searchLower) ||
+          category.toLowerCase().includes(searchLower) ||
+          group.toLowerCase().includes(searchLower)
       )
       if (filteredModules.length > 0) {
-        filtered[groupName] = filteredModules
+          filteredGroups[group] = filteredModules
+        }
+      })
+      
+      if (Object.keys(filteredGroups).length > 0) {
+        filtered[category] = filteredGroups
       }
     })
     
     return filtered
-  }, [modulesByGroup, moduleSearch])
+  }, [modulesByCategoryAndGroup, moduleSearch])
+
+  // Toggle category expansion
+  const toggleCategory = React.useCallback((category: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(category)) {
+        newSet.delete(category)
+      } else {
+        newSet.add(category)
+      }
+      return newSet
+    })
+  }, [])
+
+  // Toggle group expansion
+  const toggleGroup = React.useCallback((category: string, group: string) => {
+    const groupKey = `${category}::${group}`
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey)
+      } else {
+        newSet.add(groupKey)
+      }
+      return newSet
+    })
+  }, [])
 
   // Get effective permission (server + local changes)
   const getPermission = React.useCallback((chucVuId: number, moduleId: string): Quyen => {
@@ -128,6 +181,8 @@ export function PhanQuyenMatrixView() {
       them: false,
       sua: false,
       xoa: false,
+      import: false,
+      export: false,
       quan_tri: false,
     }
     
@@ -207,6 +262,8 @@ export function PhanQuyenMatrixView() {
         them: shouldSelect,
         sua: shouldSelect,
         xoa: shouldSelect,
+        import: shouldSelect,
+        export: shouldSelect,
         quan_tri: shouldSelect,
       }
       
@@ -228,7 +285,7 @@ export function PhanQuyenMatrixView() {
       MODULES.forEach((module) => {
         const quyen = getPermission(chucVu.id!, module.id)
         // Only save if at least one permission is true
-        if (quyen.xem || quyen.them || quyen.sua || quyen.xoa || quyen.quan_tri) {
+        if (quyen.xem || quyen.them || quyen.sua || quyen.xoa || quyen.import || quyen.export || quyen.quan_tri) {
           permissionsToSave.push({
             chuc_vu_id: chucVu.id!,
             module_id: module.id,
@@ -251,18 +308,6 @@ export function PhanQuyenMatrixView() {
   const handleReset = React.useCallback(() => {
     setLocalChanges(new Map())
     setHasChanges(false)
-  }, [])
-
-  const toggleGroup = React.useCallback((groupName: string) => {
-    setExpandedGroups((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(groupName)) {
-        newSet.delete(groupName)
-      } else {
-        newSet.add(groupName)
-      }
-      return newSet
-    })
   }, [])
 
   const selectedModule = MODULES.find(m => m.id === selectedModuleId)
@@ -438,7 +483,7 @@ export function PhanQuyenMatrixView() {
   return (
     <div className="space-y-4">
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 min-w-0">
         {/* Left Column: Module List with Search */}
         <Card className="lg:sticky lg:top-4 lg:h-[calc(100vh-8rem)]">
           <CardHeader className="pb-3">
@@ -453,24 +498,44 @@ export function PhanQuyenMatrixView() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="h-[calc(100vh-16rem)] lg:h-[calc(100vh-20rem)]">
+            <ScrollArea className="h-[calc(100vh-14rem)] sm:h-[calc(100vh-16rem)] lg:h-[calc(100vh-20rem)]">
               <div className="p-2 space-y-1">
-                {Object.entries(filteredModulesByGroup).map(([groupName, modules]) => {
-                  const isExpanded = expandedGroups.has(groupName)
+                {Object.entries(filteredModulesByCategoryAndGroup).map(([category, groups]) => {
+                  const isCategoryExpanded = expandedCategories.has(category)
                   return (
-                    <div key={groupName} className="space-y-1">
+                    <div key={category} className="space-y-1">
+                      {/* Category Level (Cấp 1) */}
                       <button
-                        onClick={() => toggleGroup(groupName)}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
+                        onClick={() => toggleCategory(category)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-bold text-foreground hover:bg-accent rounded-md transition-colors"
                       >
-                        {isExpanded ? (
+                        {isCategoryExpanded ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <ChevronRight className="h-4 w-4" />
                         )}
-                        <span>{groupName}</span>
+                        <span>{category}</span>
                       </button>
-                      {isExpanded && (
+                      {isCategoryExpanded && (
+                        <div className="ml-4 space-y-1">
+                          {Object.entries(groups).map(([group, modules]) => {
+                            const groupKey = `${category}::${group}`
+                            const isGroupExpanded = expandedGroups.has(groupKey)
+                            return (
+                              <div key={groupKey} className="space-y-1">
+                                {/* Group Level (Cấp 2) */}
+                                <button
+                                  onClick={() => toggleGroup(category, group)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
+                      >
+                                  {isGroupExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                                  <span>{group}</span>
+                      </button>
+                                {isGroupExpanded && (
                         <div className="ml-6 space-y-0.5">
                           {modules.map(module => {
                             const isSelected = selectedModuleId === module.id
@@ -479,7 +544,7 @@ export function PhanQuyenMatrixView() {
                             const hasAnyPermission = chucVuList.some((cv) => {
                               if (!cv.id) return false
                               const quyen = getPermission(cv.id, module.id)
-                              return quyen.xem || quyen.them || quyen.sua || quyen.xoa || quyen.quan_tri
+                                        return quyen.xem || quyen.them || quyen.sua || quyen.xoa || quyen.import || quyen.export || quyen.quan_tri
                             })
                             
                             return (
@@ -497,6 +562,11 @@ export function PhanQuyenMatrixView() {
                               >
                                 {module.name}
                               </button>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                              </div>
                             )
                           })}
                         </div>
@@ -510,76 +580,163 @@ export function PhanQuyenMatrixView() {
         </Card>
 
         {/* Right Column: Permission Matrix */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-semibold">PHÒNG BAN</CardTitle>
-                <CardDescription className="mt-1 text-sm">
-                  Quản lý cơ cấu phòng ban và đơn vị trực thuộc
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-4">
-                {hasChanges && (
-                  <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
-                    <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                    <span className="hidden sm:inline">Có thay đổi chưa lưu</span>
+        <Card className="min-w-0 flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 8rem)' }}>
+          <CardContent className="p-0 flex-1 min-h-0 min-w-0 flex flex-col">
+            {/* Sticky Toolbar - Không scroll ngang */}
+            <div 
+              className="flex-shrink-0 sticky top-0 z-30 bg-background border-b px-6 py-4"
+              style={{
+                boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+              }}
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold truncate">PHÒNG BAN</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedModule?.name || "Quản lý cơ cấu phòng ban và đơn vị trực thuộc"}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                  {hasChanges && (
+                    <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                      <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="hidden sm:inline">Có thay đổi chưa lưu</span>
+                      <span className="sm:hidden">Có thay đổi</span>
+                    </div>
+                  )}
+                  <Select value={selectedPhongFilter} onValueChange={setSelectedPhongFilter}>
+                    <SelectTrigger className="w-full sm:w-[250px]">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Lọc theo phòng" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[120]">
+                      <SelectItem value="all">Tất cả phòng</SelectItem>
+                      {phongBanFilterOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleReset}
+                      disabled={!hasChanges || batchUpsertMutation.isPending}
+                      className="flex-1 sm:flex-initial"
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Đặt lại</span>
+                      <span className="sm:hidden">Reset</span>
+                    </Button>
+                    <Button
+                      onClick={handleSave}
+                      disabled={!hasChanges || batchUpsertMutation.isPending}
+                      className="flex-1 sm:flex-initial"
+                    >
+                      {batchUpsertMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <span className="hidden sm:inline">Đang lưu...</span>
+                          <span className="sm:hidden">Lưu...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          <span className="hidden sm:inline">Lưu thay đổi</span>
+                          <span className="sm:hidden">Lưu</span>
+                        </>
+                      )}
+                    </Button>
                   </div>
-                )}
-                <Select value={selectedPhongFilter} onValueChange={setSelectedPhongFilter}>
-                  <SelectTrigger className="w-[250px]">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Lọc theo phòng" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả phòng</SelectItem>
-                    {phongBanFilterOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleReset}
-                    disabled={!hasChanges || batchUpsertMutation.isPending}
-                  >
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Đặt lại
-                  </Button>
-                  <Button
-                    onClick={handleSave}
-                    disabled={!hasChanges || batchUpsertMutation.isPending}
-                  >
-                    {batchUpsertMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Đang lưu...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Lưu thay đổi
-                      </>
-                    )}
-                  </Button>
                 </div>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
+            {/* Table Container - Scroll ngang và dọc */}
             {selectedModule ? (
-              <ScrollArea className="h-[calc(100vh-24rem)] [&>[data-radix-scroll-area-viewport]]:pb-0">
-                <div className="min-w-[800px]">
-                  <table className="w-full border-collapse">
-                    <thead className="sticky top-0 z-20 bg-background border-b">
+              <div 
+                className="flex-1 min-h-0 overflow-y-auto overflow-x-auto"
+                style={{
+                  scrollBehavior: 'smooth',
+                }}
+              >
+                <style>{`
+                  @media (min-width: 640px) {
+                    th[data-sticky-left="50"],
+                    td[data-sticky-left="50"] {
+                      left: 60px !important;
+                    }
+                  }
+                `}</style>
+                <table className="w-full border-collapse" style={{ minWidth: '800px' }}>
+                  <thead 
+                    className="bg-background border-b"
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 30,
+                      backgroundColor: 'hsl(var(--background))',
+                      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                    }}
+                  >
                       <tr>
-                        <th className="sticky left-0 top-0 z-30 bg-background border-r p-3 text-center font-semibold text-sm min-w-[60px]">
+                        <th 
+                          className="border-r p-2 sm:p-3 text-center font-semibold text-xs sm:text-sm min-w-[50px] sm:min-w-[60px]"
+                          style={{
+                            position: 'sticky',
+                            left: 0,
+                            top: 0,
+                            zIndex: 25,
+                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                            borderRight: '1px solid hsl(var(--border) / 0.5)',
+                            isolation: 'isolate',
+                            transform: 'translateZ(0)',
+                            willChange: 'transform',
+                            backgroundClip: 'padding-box',
+                            backgroundColor: 'hsl(var(--background))',
+                          }}
+                        >
+                          <div 
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              backgroundColor: 'white',
+                              zIndex: 0,
+                              pointerEvents: 'none',
+                            }}
+                          />
+                          <div style={{ position: 'relative', zIndex: 1 }}>
+                          </div>
                         </th>
-                        <th className="sticky left-[60px] top-0 z-30 bg-background border-r p-3 text-left font-semibold text-sm min-w-[250px]">
-                          Chức vụ
+                        <th 
+                          className="border-r p-2 sm:p-3 text-left font-semibold text-xs sm:text-sm min-w-[150px] sm:min-w-[250px]"
+                          data-sticky-left="50"
+                          style={{
+                            position: 'sticky',
+                            left: '50px',
+                            top: 0,
+                            zIndex: 25,
+                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                            borderRight: '1px solid hsl(var(--border) / 0.5)',
+                            isolation: 'isolate',
+                            transform: 'translateZ(0)',
+                            willChange: 'transform',
+                            backgroundClip: 'padding-box',
+                            backgroundColor: 'hsl(var(--background))',
+                          }}
+                        >
+                          <div 
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              backgroundColor: 'white',
+                              zIndex: 0,
+                              pointerEvents: 'none',
+                            }}
+                          />
+                          <div style={{ position: 'relative', zIndex: 1 }}>
+                            Chức vụ
+                          </div>
                         </th>
                         {selectedModule && QUYEN_LABELS.map(({ key, label }) => {
                           // Check if all chức vụ have this permission
@@ -591,17 +748,17 @@ export function PhanQuyenMatrixView() {
                           return (
                             <th
                               key={key}
-                              className="p-3 text-center font-semibold text-sm min-w-[120px] border-r last:border-r-0"
+                              className="p-1.5 sm:p-2 md:p-3 text-center font-semibold text-[10px] sm:text-xs md:text-sm min-w-[80px] sm:min-w-[100px] md:min-w-[120px] border-r last:border-r-0"
                             >
-                              <div className="flex flex-col items-center gap-2">
-                                <span className="text-sm">{label}</span>
+                              <div className="flex flex-col items-center gap-0.5 sm:gap-1 md:gap-2">
+                                <span className="text-[10px] sm:text-xs md:text-sm leading-tight">{label}</span>
                                 <Checkbox
                                   checked={allChecked}
                                   onCheckedChange={(checked) => {
                                     batchTogglePermission(allChucVuIds, selectedModule.id, key, !!checked)
                                   }}
                                   disabled={batchUpsertMutation.isPending}
-                                  className="h-4 w-4 border-primary"
+                                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
                                 />
                               </div>
                             </th>
@@ -615,9 +772,42 @@ export function PhanQuyenMatrixView() {
                           <React.Fragment key={phongGroup.maPhong ?? `phong-${phongIndex}`}>
                             {/* Phòng Header Row */}
                             <tr className="bg-muted/40 border-b">
-                              <td className="sticky left-0 z-10 bg-muted/40 border-r p-2.5" colSpan={2}>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-sm text-foreground">{phongGroup.tenPhong}</span>
+                              <td 
+                                className="border-r p-2 sm:p-2.5" 
+                                colSpan={2}
+                                style={{
+                                  position: 'sticky',
+                                  left: 0,
+                                  zIndex: 20,
+                                  boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                  borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                  isolation: 'isolate',
+                                  transform: 'translateZ(0)',
+                                  willChange: 'transform',
+                                  backgroundClip: 'padding-box',
+                                  backgroundColor: 'hsl(var(--muted) / 0.4)',
+                                }}
+                              >
+                                <div 
+                                  style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundColor: 'white',
+                                    zIndex: 0,
+                                    pointerEvents: 'none',
+                                  }}
+                                />
+                                <div 
+                                  style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundColor: 'hsl(var(--muted) / 0.4)',
+                                    zIndex: 1,
+                                    pointerEvents: 'none',
+                                  }}
+                                />
+                                <div className="flex items-center gap-2" style={{ position: 'relative', zIndex: 2 }}>
+                                  <span className="font-semibold text-xs sm:text-sm text-foreground">{phongGroup.tenPhong}</span>
                                 </div>
                               </td>
                               {QUYEN_LABELS.map(({ key }) => {
@@ -636,7 +826,7 @@ export function PhanQuyenMatrixView() {
                                 return (
                                   <td
                                     key={key}
-                                    className="bg-muted/40 p-2.5 text-center text-sm border-r last:border-r-0"
+                                    className="bg-muted/40 p-1.5 sm:p-2 md:p-2.5 text-center border-r last:border-r-0"
                                   >
                                     <div className="flex justify-center">
                                       <Checkbox
@@ -645,7 +835,7 @@ export function PhanQuyenMatrixView() {
                                           handleTogglePhongPermissions(phongGroup.maPhong, selectedModule.id, key, !!checked)
                                         }
                                         disabled={batchUpsertMutation.isPending}
-                                        className="h-4 w-4 border-primary"
+                                        className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
                                       />
                                     </div>
                                   </td>
@@ -666,8 +856,41 @@ export function PhanQuyenMatrixView() {
                                 <React.Fragment key={phongBanGroup.phongBanId ?? `pb-${pbIndex}`}>
                                   {showPhongBanHeader && (
                                     <tr className="bg-muted/20 border-b">
-                                      <td className="sticky left-0 z-10 bg-muted/20 border-r p-2 pl-5" colSpan={2}>
-                                        <div className="flex items-center gap-2">
+                                      <td 
+                                        className="border-r p-2 sm:p-2 pl-3 sm:pl-5" 
+                                        colSpan={2}
+                                        style={{
+                                          position: 'sticky',
+                                          left: 0,
+                                          zIndex: 20,
+                                          boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                          borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                          isolation: 'isolate',
+                                          transform: 'translateZ(0)',
+                                          willChange: 'transform',
+                                          backgroundClip: 'padding-box',
+                                          backgroundColor: 'hsl(var(--muted) / 0.2)',
+                                        }}
+                                      >
+                                        <div 
+                                          style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            backgroundColor: 'white',
+                                            zIndex: 0,
+                                            pointerEvents: 'none',
+                                          }}
+                                        />
+                                        <div 
+                                          style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            backgroundColor: 'hsl(var(--muted) / 0.2)',
+                                            zIndex: 1,
+                                            pointerEvents: 'none',
+                                          }}
+                                        />
+                                        <div className="flex items-center gap-2" style={{ position: 'relative', zIndex: 2 }}>
                                           <span className="font-medium text-xs text-muted-foreground">{phongBanGroup.tenPhongBan}</span>
                                         </div>
                                       </td>
@@ -680,7 +903,7 @@ export function PhanQuyenMatrixView() {
                                         return (
                                           <td
                                             key={key}
-                                            className="bg-muted/20 p-2 text-center text-sm border-r last:border-r-0"
+                                            className="bg-muted/20 p-1.5 sm:p-2 md:p-2 text-center border-r last:border-r-0"
                                           >
                                             <div className="flex justify-center">
                                               <Checkbox
@@ -695,7 +918,7 @@ export function PhanQuyenMatrixView() {
                                                   )
                                                 }
                                                 disabled={batchUpsertMutation.isPending}
-                                                className="h-4 w-4 border-primary"
+                                                className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
                                               />
                                             </div>
                                           </td>
@@ -716,22 +939,69 @@ export function PhanQuyenMatrixView() {
                                         key={chucVu.id}
                                         className="border-b hover:bg-muted/30 transition-colors"
                                       >
-                                        <td className="sticky left-0 z-10 bg-background border-r p-2.5">
-                                          <div className="flex justify-center">
+                                        <td 
+                                          className="border-r p-2 sm:p-2.5"
+                                          style={{
+                                            position: 'sticky',
+                                            left: 0,
+                                            zIndex: 20,
+                                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                            borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                            isolation: 'isolate',
+                                            transform: 'translateZ(0)',
+                                            willChange: 'transform',
+                                            backgroundClip: 'padding-box',
+                                            backgroundColor: 'hsl(var(--background))',
+                                          }}
+                                        >
+                                          <div 
+                                            style={{
+                                              position: 'absolute',
+                                              inset: 0,
+                                              backgroundColor: 'hsl(var(--background))',
+                                              zIndex: 0,
+                                              pointerEvents: 'none',
+                                            }}
+                                          />
+                                          <div className="flex justify-center" style={{ position: 'relative', zIndex: 10 }}>
                                             <Checkbox
                                               checked={allPermissionsSelected}
                                               onCheckedChange={(checked) =>
                                                 handleToggleAllPermissions(chucVu.id!, selectedModule.id, !!checked)
                                               }
                                               disabled={batchUpsertMutation.isPending}
-                                              className="h-4 w-4 border-primary"
+                                              className="h-3.5 w-3.5 sm:h-4 sm:w-4 border-primary"
                                             />
                                           </div>
                                         </td>
-                                        <td className="sticky left-[60px] z-10 bg-background border-r p-2.5">
-                                          <div className="flex items-center gap-2">
-                                            <BriefcaseBusiness className="h-4 w-4 text-muted-foreground shrink-0" />
-                                            <div className="font-medium text-sm">{chucVu.ten_chuc_vu}</div>
+                                        <td 
+                                          className="border-r p-2 sm:p-2.5"
+                                          data-sticky-left="50"
+                                          style={{
+                                            position: 'sticky',
+                                            left: '50px',
+                                            zIndex: 20,
+                                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                            borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                            isolation: 'isolate',
+                                            transform: 'translateZ(0)',
+                                            willChange: 'transform',
+                                            backgroundClip: 'padding-box',
+                                            backgroundColor: 'hsl(var(--background))',
+                                          }}
+                                        >
+                                          <div 
+                                            style={{
+                                              position: 'absolute',
+                                              inset: 0,
+                                              backgroundColor: 'hsl(var(--background))',
+                                              zIndex: 0,
+                                              pointerEvents: 'none',
+                                            }}
+                                          />
+                                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0" style={{ position: 'relative', zIndex: 10 }}>
+                                            <BriefcaseBusiness className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
+                                            <div className="font-medium text-xs sm:text-sm truncate">{chucVu.ten_chuc_vu}</div>
                                           </div>
                                         </td>
                                         {QUYEN_LABELS.map(({ key, label: _label }) => {
@@ -739,16 +1009,16 @@ export function PhanQuyenMatrixView() {
                                           return (
                                             <td
                                               key={key}
-                                              className="p-2.5 text-center text-sm border-r last:border-r-0"
+                                              className="p-1.5 sm:p-2 md:p-2.5 text-center border-r last:border-r-0"
                                             >
-                                              <div className="flex justify-center">
+                                              <div className="flex justify-center" style={{ position: 'relative', zIndex: 10 }}>
                                                 <Checkbox
                                                   checked={hasPerm}
                                                   onCheckedChange={(checked) =>
                                                     handlePermissionChange(chucVu.id!, selectedModule.id, key, !!checked)
                                                   }
                                                   disabled={batchUpsertMutation.isPending}
-                                                  className="h-4 w-4 border-primary"
+                                                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
                                                 />
                                               </div>
                                             </td>
@@ -765,8 +1035,7 @@ export function PhanQuyenMatrixView() {
                       })}
                     </tbody>
                   </table>
-                </div>
-              </ScrollArea>
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <BriefcaseBusiness className="h-12 w-12 text-muted-foreground mb-4" />

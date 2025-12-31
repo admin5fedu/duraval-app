@@ -20,6 +20,7 @@ import { MultipleImageUploadFormField } from "./multiple-image-upload-form-field
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
 import { PhongBanSelect } from "@/components/ui/phong-ban-select"
 import { CapBacSelectFormField } from "@/components/ui/cap-bac-select-form-field"
+import { LoaiPhieuSelect } from "@/components/ui/loai-phieu-select"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -179,6 +180,18 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         field={formField}
                                         placeholder={field.placeholder || "Chọn cấp bậc..."}
                                         description={field.description || "Tìm kiếm theo tên hoặc mã cấp bậc..."}
+                                        disabled={field.disabled}
+                                        excludeIds={field.excludeIds || []}
+                                    />
+                                ) : field.type === "loai-phieu-select" ? (
+                                    <LoaiPhieuSelect
+                                        value={formField.value ? Number(formField.value) : null}
+                                        onChange={(id) => {
+                                            if (field.disabled) return
+                                            formField.onChange(id)
+                                        }}
+                                        placeholder={field.placeholder || "Chọn loại phiếu..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên loại phiếu..."}
                                         disabled={field.disabled}
                                         excludeIds={field.excludeIds || []}
                                     />

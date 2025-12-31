@@ -8,12 +8,16 @@ export const quyenSchema = z.object({
   them: z.boolean().default(false),
   sua: z.boolean().default(false),
   xoa: z.boolean().default(false),
+  import: z.boolean().default(false),
+  export: z.boolean().default(false),
   quan_tri: z.boolean().default(false),
 }).default({
   xem: false,
   them: false,
   sua: false,
   xoa: false,
+  import: false,
+  export: false,
   quan_tri: false,
 })
 

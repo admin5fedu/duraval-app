@@ -149,11 +149,31 @@ const TrucHatListRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/t
 const TrucHatDetailRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/truc-hat/routes/truc-hat-detail-route'))
 const TrucHatFormRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/truc-hat/routes/truc-hat-form-route'))
 
+// Kinh doanh - Quỹ hỗ trợ bán hàng module pages
+const PhieuDeXuatChietKhauPage = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-chiet-khau'))
+const QuyDeXuatChietKhauPage = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-de-xuat-chiet-khau'))
+
+// Loại phiếu module routes
+const LoaiPhieuListRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-phieu/routes/loai-phieu-list-route'))
+const LoaiPhieuDetailRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-phieu/routes/loai-phieu-detail-route'))
+const LoaiPhieuFormRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-phieu/routes/loai-phieu-form-route'))
+const HangMucListRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/hang-muc/routes/hang-muc-list-route'))
+const HangMucDetailRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/hang-muc/routes/hang-muc-detail-route'))
+const HangMucFormRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/hang-muc/routes/hang-muc-form-route'))
+const LoaiDoanhThuListRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-doanh-thu/routes/loai-doanh-thu-list-route'))
+const LoaiDoanhThuDetailRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-doanh-thu/routes/loai-doanh-thu-detail-route'))
+const LoaiDoanhThuFormRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-doanh-thu/routes/loai-doanh-thu-form-route'))
+
+// Kinh doanh - Sale Ads module pages
+const BangChiaDataPage = lazy(() => import('@/features/kinh-doanh/sale-ads/bang-chia-data'))
+const QuyDinhTyLePage = lazy(() => import('@/features/kinh-doanh/sale-ads/quy-dinh-ty-le'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
 const HanhChinhNhanSuPage = lazy(() => import('@/pages/hanh-chinh-nhan-su/HanhChinhNhanSuPage'))
 const MarketingPage = lazy(() => import('@/pages/marketing/MarketingPage'))
+const KinhDoanhPage = lazy(() => import('@/pages/kinh-doanh/KinhDoanhPage'))
 
 import type { ScrollBehavior } from './shared/types/scroll-behavior'
 
@@ -288,6 +308,13 @@ export const routes: RouteConfig[] = [
   {
     path: '/marketing',
     element: MarketingPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'auto',
+  },
+  {
+    path: '/kinh-doanh',
+    element: KinhDoanhPage,
     protected: true,
     layout: true,
     scrollBehavior: 'auto',
@@ -1111,6 +1138,125 @@ export const routes: RouteConfig[] = [
     protected: true,
     layout: true,
     scrollBehavior: 'restore',
+  },
+  // Kinh doanh - Quỹ hỗ trợ bán hàng module routes
+  {
+    path: '/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-chiet-khau',
+    element: PhieuDeXuatChietKhauPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/kinh-doanh/quy-ho-tro-ban-hang/quy-de-xuat-chiet-khau',
+    element: QuyDeXuatChietKhauPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  // Loại phiếu module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/kinh-doanh/loai-phieu/moi',
+    element: LoaiPhieuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/loai-phieu/:id/sua',
+    element: LoaiPhieuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/loai-phieu/:id',
+    element: LoaiPhieuDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/kinh-doanh/loai-phieu',
+    element: LoaiPhieuListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Hạng mục routes
+  {
+    path: '/kinh-doanh/hang-muc/moi',
+    element: HangMucFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/hang-muc/:id/sua',
+    element: HangMucFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/hang-muc/:id',
+    element: HangMucDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/kinh-doanh/hang-muc',
+    element: HangMucListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Loại doanh thu routes
+  {
+    path: '/kinh-doanh/loai-doanh-thu/moi',
+    element: LoaiDoanhThuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/loai-doanh-thu/:id/sua',
+    element: LoaiDoanhThuFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/loai-doanh-thu/:id',
+    element: LoaiDoanhThuDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/kinh-doanh/loai-doanh-thu',
+    element: LoaiDoanhThuListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Kinh doanh - Sale Ads module routes
+  {
+    path: '/kinh-doanh/sale-ads/bang-chia-data',
+    element: BangChiaDataPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/kinh-doanh/sale-ads/quy-dinh-ty-le',
+    element: QuyDinhTyLePage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
   },
   // Add more module routes here or use generateRoutesFromConfig()
   {
