@@ -84,38 +84,6 @@ const data: { navMain: NavGroup[] } = {
           title: 'Kinh doanh',
           url: '/kinh-doanh',
           icon: PieChart,
-          subGroups: [
-            {
-              title: 'Quỹ hỗ trợ bán hàng',
-              items: [
-                {
-                  title: 'Phiếu đề xuất chiết khấu',
-                  url: '/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-chiet-khau',
-                },
-                {
-                  title: 'Quỹ đề xuất chiết khấu',
-                  url: '/kinh-doanh/quy-ho-tro-ban-hang/quy-de-xuat-chiet-khau',
-                },
-                {
-                  title: 'Loại phiếu & Hạng mục',
-                  url: '/kinh-doanh/loai-phieu',
-                },
-              ],
-            },
-            {
-              title: 'Sale Ads',
-              items: [
-                {
-                  title: 'Bảng chia data',
-                  url: '/kinh-doanh/sale-ads/bang-chia-data',
-                },
-                {
-                  title: 'Quy định tỷ lệ',
-                  url: '/kinh-doanh/sale-ads/quy-dinh-ty-le',
-                },
-              ],
-            },
-          ],
         },
         {
           title: 'Marketing',

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import type { ColumnDef } from "@tanstack/react-table"
 import type { GenericListViewProps } from "./types"
 import { useGenericListTableState } from "./hooks/use-generic-list-table-state"
 import { useGenericListSelection } from "./hooks/use-generic-list-selection"
@@ -206,7 +207,7 @@ export function GenericListView<TData = any, TValue = unknown>({
                     filteredRows={filteredRows}
                     isSearchActive={isSearchActive}
                     totalDataCount={totalDataCount}
-                    columns={columns}
+                    columns={columns as ColumnDef<TData>[]}
                     exportOptions={exportOptions}
                 />
             </div>
