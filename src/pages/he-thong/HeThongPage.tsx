@@ -7,12 +7,18 @@ import {
   Building2,
   Medal,
   BriefcaseBusiness,
+  Target,
   UserRound,
   Building,
   MapPin,
   Shield,
   UserCog,
   Settings2,
+  FileEdit,
+  TrendingUp,
+  Utensils,
+  ShieldCheck,
+  Baby,
 } from "lucide-react"
 
 export default function HeThongPage() {
@@ -39,6 +45,12 @@ export default function HeThongPage() {
           icon: BriefcaseBusiness,
           description: "Quản lý danh mục chức vụ và mô tả công việc.",
         },
+        {
+          title: "Nhóm áp doanh số",
+          href: "/he-thong/nhom-ap-doanh-so",
+          icon: Target,
+          description: "Quản lý nhóm áp dụng doanh số.",
+        },
       ]
     },
     {
@@ -56,6 +68,36 @@ export default function HeThongPage() {
           href: "/he-thong/nguoi-than",
           icon: UserRound,
           description: "Quản lý dữ liệu người thân và liên hệ khẩn cấp.",
+        },
+      ]
+    },
+    {
+      title: "Đăng ký",
+      icon: FileEdit,
+      items: [
+        {
+          title: "Đăng ký Doanh số",
+          href: "/he-thong/dang-ky-doanh-so",
+          icon: TrendingUp,
+          description: "Quản lý đăng ký doanh số.",
+        },
+        {
+          title: "Đăng ký Cơm ca",
+          href: "/he-thong/dang-ky-com-ca",
+          icon: Utensils,
+          description: "Quản lý đăng ký cơm ca.",
+        },
+        {
+          title: "Đăng ký Bảo hiểm",
+          href: "/he-thong/dang-ky-bao-hiem",
+          icon: ShieldCheck,
+          description: "Quản lý đăng ký bảo hiểm.",
+        },
+        {
+          title: "Đăng ký Thai sản",
+          href: "/he-thong/dang-ky-thai-san",
+          icon: Baby,
+          description: "Quản lý đăng ký thai sản.",
         },
       ]
     },

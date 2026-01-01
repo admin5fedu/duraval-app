@@ -18,6 +18,7 @@ import { moduleRegistry } from "@/shared/config/module-registry"
 export const BREADCRUMB_SKIP_SEGMENTS: Set<string> = new Set([
   "nhan-su",      // Nhân sự - cấp trung gian, đã flatten
   "so-do",        // Sơ đồ - cấp trung gian, có thể flatten sau
+  "dang-ky",      // Đăng ký - cấp trung gian
   "thiet-lap",    // Thiết lập - cấp trung gian, có thể flatten sau
   "cau-hoi-hang-ngay", // Câu hỏi hàng ngày - cấp trung gian, đã flatten
   "cong-luong",   // Công lương - cấp trung gian trong hành chính nhân sự
@@ -52,6 +53,8 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "phong-ban": "Phòng Ban",
   "cap-bac": "Cấp Bậc",
   "chuc-vu": "Chức Vụ",
+  "nhom-ap-doanh-so": "Nhóm Áp Doanh Số",
+  "dang-ky-doanh-so": "Đăng Ký Doanh Số",
   "thong-tin-cong-ty": "Thông Tin Công Ty",
   "chi-nhanh": "Chi Nhánh",
   "phan-quyen": "Phân Quyền",

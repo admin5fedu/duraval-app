@@ -18,6 +18,8 @@ import { phanHoiKhachHangConfig } from "@/features/marketing/ky-thuat-cskh/phan-
 import { loaiPhieuConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-phieu/config"
 import { hangMucConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/hang-muc/config"
 import { loaiDoanhThuConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-doanh-thu/config"
+import { nhomApDoanhSoConfig } from "@/features/he-thong/so-do/nhom-ap-doanh-so/config"
+import { dangKyDoanhSoConfig } from "@/features/he-thong/dang-ky/dang-ky-doanh-so/config"
 
 /**
  * Registry class for managing module configurations
@@ -114,6 +116,8 @@ moduleRegistry.register(phanHoiKhachHangConfig)
 moduleRegistry.register(loaiPhieuConfig)
 moduleRegistry.register(hangMucConfig)
 moduleRegistry.register(loaiDoanhThuConfig)
+moduleRegistry.register(nhomApDoanhSoConfig)
+moduleRegistry.register(dangKyDoanhSoConfig)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {

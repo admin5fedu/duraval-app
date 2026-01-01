@@ -78,6 +78,24 @@ const COLUMN_NAME_MAP: Record<string, string> = {
   ten_chuc_vu: 'Tên chức vụ',
   ten_bo_phan: 'Tên bộ phận',
   ten_nhom: 'Tên nhóm',
+  ma_nhom_ap: 'Mã nhóm áp',
+  ten_nhom_ap: 'Tên nhóm áp',
+  nguoi_tao_id: 'ID người tạo',
+  
+  // Đăng ký doanh số
+  nam: 'Năm',
+  thang: 'Tháng',
+  nhan_vien_id: 'ID nhân viên',
+  ten_nhan_vien: 'Tên nhân viên',
+  bac_dt: 'Bậc DT',
+  doanh_thu: 'Doanh thu',
+  nhom_ap_doanh_thu_id: 'ID nhóm áp doanh thu',
+  ten_nhom_ap_doanh_thu: 'Tên nhóm áp doanh thu',
+  trao_doi: 'Trao đổi',
+  phong_id: 'ID phòng',
+  ma_phong: 'Mã phòng',
+  nhom_id: 'ID nhóm',
+  ma_nhom: 'Mã nhóm',
 }
 
 /**

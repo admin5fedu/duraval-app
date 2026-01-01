@@ -55,6 +55,16 @@ const ChucVuListRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/rou
 const ChucVuDetailRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-detail-route'))
 const ChucVuFormRoute = lazy(() => import('@/features/he-thong/so-do/chuc-vu/routes/chuc-vu-form-route'))
 
+// Nhóm áp doanh số module routes
+const NhomApDoanhSoListRoute = lazy(() => import('@/features/he-thong/so-do/nhom-ap-doanh-so/routes/nhom-ap-doanh-so-list-route'))
+const NhomApDoanhSoDetailRoute = lazy(() => import('@/features/he-thong/so-do/nhom-ap-doanh-so/routes/nhom-ap-doanh-so-detail-route'))
+const NhomApDoanhSoFormRoute = lazy(() => import('@/features/he-thong/so-do/nhom-ap-doanh-so/routes/nhom-ap-doanh-so-form-route'))
+
+// Đăng ký doanh số module routes
+const DangKyDoanhSoListRoute = lazy(() => import('@/features/he-thong/dang-ky/dang-ky-doanh-so/routes/dang-ky-doanh-so-list-route'))
+const DangKyDoanhSoDetailRoute = lazy(() => import('@/features/he-thong/dang-ky/dang-ky-doanh-so/routes/dang-ky-doanh-so-detail-route'))
+const DangKyDoanhSoFormRoute = lazy(() => import('@/features/he-thong/dang-ky/dang-ky-doanh-so/routes/dang-ky-doanh-so-form-route'))
+
 // Phân quyền module routes
 const PhanQuyenListRoute = lazy(() => import('@/features/he-thong/thiet-lap/phan-quyen/routes/phan-quyen-list-route'))
 
@@ -532,6 +542,68 @@ export const routes: RouteConfig[] = [
   {
     path: '/he-thong/chuc-vu',
     element: ChucVuListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Nhóm áp doanh số module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/he-thong/nhom-ap-doanh-so/moi',
+    element: NhomApDoanhSoFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/nhom-ap-doanh-so/:id/sua',
+    element: NhomApDoanhSoFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/nhom-ap-doanh-so/:id',
+    element: NhomApDoanhSoDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/he-thong/nhom-ap-doanh-so',
+    element: NhomApDoanhSoListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Đăng ký doanh số module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/he-thong/dang-ky-doanh-so/moi',
+    element: DangKyDoanhSoFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/dang-ky-doanh-so/:id/sua',
+    element: DangKyDoanhSoFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/dang-ky-doanh-so/:id',
+    element: DangKyDoanhSoDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/he-thong/dang-ky-doanh-so',
+    element: DangKyDoanhSoListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
