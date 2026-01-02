@@ -160,8 +160,15 @@ const TrucHatDetailRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh
 const TrucHatFormRoute = lazy(() => import('@/features/marketing/ky-thuat-cskh/truc-hat/routes/truc-hat-form-route'))
 
 // Kinh doanh - Quỹ hỗ trợ bán hàng module pages
-const PhieuDeXuatChietKhauPage = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-chiet-khau'))
-const QuyDeXuatChietKhauPage = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-de-xuat-chiet-khau'))
+const PhieuDeXuatBanHangListRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-ban-hang/routes/phieu-de-xuat-ban-hang-list-route'))
+const PhieuDeXuatBanHangDetailRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-ban-hang/routes/phieu-de-xuat-ban-hang-detail-route'))
+const PhieuDeXuatBanHangFormRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-ban-hang/routes/phieu-de-xuat-ban-hang-form-route'))
+const QuyHoTroBanHangPage = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-ho-tro-ban-hang'))
+
+// Quỹ HTBH theo tháng module routes
+const QuyHTBHTheoThangListRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-htbh-theo-thang/routes/quy-htbh-theo-thang-list-route'))
+const QuyHTBHTheoThangDetailRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-htbh-theo-thang/routes/quy-htbh-theo-thang-detail-route'))
+const QuyHTBHTheoThangFormRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-htbh-theo-thang/routes/quy-htbh-theo-thang-form-route'))
 
 // Loại phiếu module routes
 const LoaiPhieuListRoute = lazy(() => import('@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-phieu/routes/loai-phieu-list-route'))
@@ -1213,18 +1220,70 @@ export const routes: RouteConfig[] = [
   },
   // Kinh doanh - Quỹ hỗ trợ bán hàng module routes
   {
-    path: '/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-chiet-khau',
-    element: PhieuDeXuatChietKhauPage,
+    path: '/kinh-doanh/phieu-de-xuat-ban-hang',
+    element: PhieuDeXuatBanHangListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  {
+    path: '/kinh-doanh/phieu-de-xuat-ban-hang/moi',
+    element: PhieuDeXuatBanHangFormRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'top',
   },
   {
-    path: '/kinh-doanh/quy-ho-tro-ban-hang/quy-de-xuat-chiet-khau',
-    element: QuyDeXuatChietKhauPage,
+    path: '/kinh-doanh/phieu-de-xuat-ban-hang/:id',
+    element: PhieuDeXuatBanHangDetailRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'top',
+  },
+  {
+    path: '/kinh-doanh/phieu-de-xuat-ban-hang/:id/sua',
+    element: PhieuDeXuatBanHangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/kinh-doanh/tong-quan-quy-htbh',
+    element: QuyHoTroBanHangPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  // Quỹ HTBH theo tháng module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/kinh-doanh/quy-htbh-theo-thang/moi',
+    element: QuyHTBHTheoThangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/quy-htbh-theo-thang/:id/sua',
+    element: QuyHTBHTheoThangFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/kinh-doanh/quy-htbh-theo-thang/:id',
+    element: QuyHTBHTheoThangDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/kinh-doanh/quy-htbh-theo-thang',
+    element: QuyHTBHTheoThangListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // ListView
   },
   // Loại phiếu module routes - explicit routes (no splat pattern)
   // Order matters: more specific routes must come before generic ones

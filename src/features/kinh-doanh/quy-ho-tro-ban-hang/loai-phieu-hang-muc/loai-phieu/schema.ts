@@ -7,6 +7,55 @@ export const loaiPhieuSchema = z.object({
   id: z.number().optional(), // Auto-generated, optional for create
   ten_loai_phieu: z.string().min(1, "Tên loại phiếu là bắt buộc"),
   mo_ta: z.string().optional().nullable(),
+  check_quy: z.string().optional().nullable(), // "có" hoặc "không"
+  tien_max: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined || val === "") return null
+      if (typeof val === 'string') {
+        const cleaned = val.replace(/[,\s]/g, '')
+        const num = parseFloat(cleaned)
+        return isNaN(num) ? null : num
+      }
+      return typeof val === 'number' ? val : null
+    },
+    z.number().nullable().optional()
+  ),
+  ty_le_quan_ly_duoc_duyet: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined || val === "") return null
+      if (typeof val === 'string') {
+        const cleaned = val.replace(/[,\s]/g, '')
+        const num = parseFloat(cleaned)
+        return isNaN(num) ? null : num
+      }
+      return typeof val === 'number' ? val : null
+    },
+    z.number().nullable().optional()
+  ),
+  ty_le_max: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined || val === "") return null
+      if (typeof val === 'string') {
+        const cleaned = val.replace(/[,\s]/g, '')
+        const num = parseFloat(cleaned)
+        return isNaN(num) ? null : num
+      }
+      return typeof val === 'number' ? val : null
+    },
+    z.number().nullable().optional()
+  ),
+  ty_le_duyet_tu_dong: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined || val === "") return null
+      if (typeof val === 'string') {
+        const cleaned = val.replace(/[,\s]/g, '')
+        const num = parseFloat(cleaned)
+        return isNaN(num) ? null : num
+      }
+      return typeof val === 'number' ? val : null
+    },
+    z.number().nullable().optional()
+  ),
   nguoi_tao_id: z.number().optional().nullable(),
   nguoi_tao_ten: z.string().optional().nullable(), // Joined from var_nhan_su
   tg_tao: z.string().optional().nullable(),

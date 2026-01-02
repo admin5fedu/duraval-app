@@ -1,12 +1,11 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { LoadingButton } from "@/components/ui/loading-button"
 import { ArrowLeft } from "lucide-react"
 import { pageTitleClass, bodyTextClass } from "@/shared/utils/text-styles"
-import { toolbarGapClass, actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { ActionGroup } from "@/shared/components/actions"
 
 interface FormHeaderProps {
     title: string
@@ -75,30 +74,29 @@ export function FormHeader({
                 "flex items-center",
                 "w-full sm:w-auto",
                 "justify-end sm:justify-end",
-                toolbarGapClass()
+                "gap-2"
             )}>
-                <Button 
-                    variant="outline" 
-                    type="button" 
+                <ActionGroup
+                    actions={[
+                        {
+                            label: "Hủy bỏ",
+                            onClick: onCancel,
+                            level: "secondary",
+                            type: "button",
+                        },
+                        {
+                            label: submitLabel,
+                            level: "primary",
+                            loading: isSubmitting,
+                            disabled: isSubmitting,
+                            type: "submit",
+                        },
+                    ]}
+                    sortByLevel={false}
                     className={cn(
-                        actionButtonClass(),
-                        isMobile && "flex-1 sm:flex-initial h-10"
-                    )} 
-                    onClick={onCancel}
-                >
-                    Hủy bỏ
-                </Button>
-                <LoadingButton
-                    type="submit"
-                    isLoading={isSubmitting}
-                    loadingText="Đang lưu..."
-                    className={cn(
-                        actionButtonClass(),
-                        isMobile && "flex-1 sm:flex-initial h-10"
+                        isMobile && "[&_button]:flex-1 sm:[&_button]:flex-initial [&_button]:h-10"
                     )}
-                >
-                    {submitLabel}
-                </LoadingButton>
+                />
             </div>
         </div>
     )

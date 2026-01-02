@@ -9,6 +9,8 @@ export const hangMucSchema = z.object({
   ten_loai_phieu: z.string().optional().nullable(), // Denormalized from htbh_loai_phieu
   ten_hang_muc: z.string().min(1, "Tên hạng mục là bắt buộc"),
   mo_ta: z.string().optional().nullable(),
+  quan_ly_duyet: z.string().optional().nullable(), // "có" hoặc "không"
+  bgd_duyet: z.string().optional().nullable(), // "có" hoặc "không"
   nguoi_tao_id: z.number().optional().nullable(),
   tg_tao: z.string().optional().nullable(),
   tg_cap_nhat: z.string().optional().nullable(),

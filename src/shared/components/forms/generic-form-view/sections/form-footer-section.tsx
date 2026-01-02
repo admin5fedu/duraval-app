@@ -1,7 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { LoadingButton } from "@/components/ui/loading-button"
+import { ActionGroup } from "@/shared/components/actions"
 import type { FormFooterSectionProps } from "../types"
 
 /**
@@ -15,16 +14,24 @@ export function FormFooterSection({
 }: FormFooterSectionProps) {
     return (
         <div className="flex items-center justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" type="button" onClick={onCancel}>
-                Hủy bỏ
-            </Button>
-            <LoadingButton
-                type="submit"
-                isLoading={isSubmitting}
-                loadingText="Đang lưu..."
-            >
-                {submitLabel}
-            </LoadingButton>
+            <ActionGroup
+                actions={[
+                    {
+                        label: "Hủy bỏ",
+                        onClick: onCancel,
+                        level: "secondary",
+                        type: "button",
+                    },
+                    {
+                        label: submitLabel,
+                        level: "primary",
+                        loading: isSubmitting,
+                        disabled: isSubmitting,
+                        type: "submit",
+                    },
+                ]}
+                sortByLevel={false}
+            />
         </div>
     )
 }

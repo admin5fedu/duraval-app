@@ -20,6 +20,50 @@ const getSections = (): FormSection[] => [
         label: "Mô Tả", 
         type: "textarea",
       },
+      {
+        name: "check_quy",
+        label: "Check quỹ",
+        type: "toggle",
+        options: [
+          { label: "Có", value: "có" },
+          { label: "Không", value: "không" },
+        ],
+      },
+    ]
+  },
+  {
+    title: "Thông Tin Tài Chính",
+    fields: [
+      {
+        name: "tien_max",
+        label: "Tiền max",
+        type: "number",
+        formatThousands: true,
+      },
+      {
+        name: "ty_le_quan_ly_duoc_duyet",
+        label: "Tỷ lệ quản lý được duyệt",
+        type: "number",
+        allowDecimals: true,
+        formatThousands: true,
+        suffix: "%",
+      },
+      {
+        name: "ty_le_max",
+        label: "Tỷ lệ max",
+        type: "number",
+        allowDecimals: true,
+        formatThousands: true,
+        suffix: "%",
+      },
+      {
+        name: "ty_le_duyet_tu_dong",
+        label: "Tỷ lệ duyệt tự động",
+        type: "number",
+        allowDecimals: true,
+        formatThousands: true,
+        suffix: "%",
+      },
     ]
   },
 ]
@@ -67,10 +111,17 @@ export function LoaiPhieuFormView({ id, onComplete, onCancel }: LoaiPhieuFormVie
       return {
         ten_loai_phieu: String(existingData.ten_loai_phieu || ""),
         mo_ta: existingData.mo_ta ? String(existingData.mo_ta) : "",
+        check_quy: existingData.check_quy ? String(existingData.check_quy) : null,
+        tien_max: existingData.tien_max ?? undefined,
+        ty_le_quan_ly_duoc_duyet: existingData.ty_le_quan_ly_duoc_duyet ?? undefined,
+        ty_le_max: existingData.ty_le_max ?? undefined,
+        ty_le_duyet_tu_dong: existingData.ty_le_duyet_tu_dong ?? undefined,
       }
     }
-    // For new records or when data is not yet loaded - return undefined (GenericFormView will handle it)
-    return undefined
+    // For new records - set default values
+    return {
+      tien_max: 50000,
+    }
   }, [id, existingData])
 
   // ✅ QUAN TRỌNG: Early return PHẢI ở sau tất cả hooks
@@ -138,4 +189,5 @@ export function LoaiPhieuFormView({ id, onComplete, onCancel }: LoaiPhieuFormVie
     />
   )
 }
+
 

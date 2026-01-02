@@ -192,6 +192,11 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth() + 1 // getMonth() returns 0-11
 
+  // Get query params for pre-filling form (from year view)
+  const namFromQuery = searchParams.get('nam') ? Number(searchParams.get('nam')) : null
+  const thangFromQuery = searchParams.get('thang') ? Number(searchParams.get('thang')) : null
+  const nhanVienIdFromQuery = searchParams.get('nhan_vien_id') ? Number(searchParams.get('nhan_vien_id')) : null
+
   // Prepare default values
   // Phải được tạo TRƯỚC early return
   const defaultValues = useMemo(() => {
@@ -205,14 +210,18 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
       }
     }
     return {
-      nhan_vien_id: null,
+      nhan_vien_id: nhanVienIdFromQuery || null,
       nhom_ap_doanh_thu_id: null,
-      nam: currentYear,
-      thang: currentMonth,
+      nam: namFromQuery || currentYear,
+      thang: thangFromQuery || currentMonth,
       bac_dt: null,
       doanh_thu: null,
+      phong_id: null,
+      ma_phong: null,
+      nhom_id: null,
+      ma_nhom: null,
     }
-  }, [id, existingData, currentYear, currentMonth])
+  }, [id, existingData, currentYear, currentMonth, namFromQuery, thangFromQuery, nhanVienIdFromQuery])
 
   // ✅ QUAN TRỌNG: Early return PHẢI ở sau tất cả hooks
   if (id && isLoading) {

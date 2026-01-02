@@ -74,6 +74,52 @@ export function LoaiPhieuDetailView({ id, initialData, onEdit, onBack }: LoaiPhi
       fields: [
         { label: "Tên Loại Phiếu", key: "ten_loai_phieu", value: loaiPhieu.ten_loai_phieu },
         { label: "Mô Tả", key: "mo_ta", value: loaiPhieu.mo_ta || "-", colSpan: 2 },
+        { 
+          label: "Check quỹ", 
+          key: "check_quy", 
+          value: loaiPhieu.check_quy || null,
+          type: "badge",
+          enumConfig: {
+            "có": "bg-green-50 text-green-700 border-green-200",
+            "không": "bg-gray-50 text-gray-700 border-gray-200",
+          }
+        },
+      ]
+    },
+    {
+      title: "Thông Tin Tài Chính",
+      fields: [
+        { label: "Tiền max", key: "tien_max", value: loaiPhieu.tien_max, type: "currency" },
+        { 
+          label: "Tỷ lệ quản lý được duyệt", 
+          key: "ty_le_quan_ly_duoc_duyet", 
+          value: loaiPhieu.ty_le_quan_ly_duoc_duyet, 
+          type: "number",
+          format: (val: number | null | undefined) => {
+            if (val === null || val === undefined) return "-"
+            return `${Number(val).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+          }
+        },
+        { 
+          label: "Tỷ lệ max", 
+          key: "ty_le_max", 
+          value: loaiPhieu.ty_le_max, 
+          type: "number",
+          format: (val: number | null | undefined) => {
+            if (val === null || val === undefined) return "-"
+            return `${Number(val).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+          }
+        },
+        { 
+          label: "Tỷ lệ duyệt tự động", 
+          key: "ty_le_duyet_tu_dong", 
+          value: loaiPhieu.ty_le_duyet_tu_dong, 
+          type: "number",
+          format: (val: number | null | undefined) => {
+            if (val === null || val === undefined) return "-"
+            return `${Number(val).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+          }
+        },
       ]
     },
     {

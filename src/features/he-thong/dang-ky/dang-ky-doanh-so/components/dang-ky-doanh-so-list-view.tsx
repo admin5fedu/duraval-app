@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { GenericListView } from "@/shared/components/data-display/generic-list-view/generic-list-view"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
+import { TabGroup } from "@/shared/components"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { DangKyDoanhSo } from "../schema"
@@ -15,6 +16,7 @@ import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
 import { useNhanSu } from "../../../nhan-su/danh-sach-nhan-su/hooks"
 import { useBatchUpsertDangKyDoanhSo } from "../actions/dang-ky-doanh-so-excel-actions"
 import { DangKyDoanhSoImportDialog } from "./dang-ky-doanh-so-import-dialog"
+import { DangKyDoanhSoYearView } from "./dang-ky-doanh-so-year-view"
 
 interface DangKyDoanhSoListViewProps {
     initialData?: DangKyDoanhSo[]
@@ -34,6 +36,8 @@ export function DangKyDoanhSoListView({
     const batchImportMutation = useBatchUpsertDangKyDoanhSo()
     const module = dangKyDoanhSoConfig.moduleName
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
+    const [selectedYear, setSelectedYear] = React.useState(new Date().getFullYear())
+    const [activeTab, setActiveTab] = React.useState("month")
 
     // Create columns with nhanSuList for mapping nguoi_tao_id
     const columns = React.useMemo(() => {
@@ -188,100 +192,138 @@ export function DangKyDoanhSoListView({
 
     return (
         <>
-        <GenericListView
-            columns={columns}
-            data={dangKyDoanhSoList || []}
-            filterColumn="ten_nhan_vien"
-            initialSorting={initialSorting}
-            initialFilters={initialFilters}
-            initialSearch={initialSearch}
-            onFiltersChange={handleFiltersChange}
-            onSearchChange={handleSearchChange}
-            onSortChange={handleSortChange}
-            onRowClick={(row) => {
-                if (onView) {
-                    onView(row.id!)
-                } else {
-                    navigate(`${dangKyDoanhSoConfig.routePath}/${row.id}`)
-                }
-            }}
-            onAdd={() => {
-                if (onAddNew) {
-                    onAddNew()
-                } else {
-                    navigate(`${dangKyDoanhSoConfig.routePath}/moi`)
-                }
-            }}
-            addHref={`${dangKyDoanhSoConfig.routePath}/moi`}
-            onBack={() => {
-                navigate(dangKyDoanhSoConfig.parentPath)
-            }}
-            onDeleteSelected={async (selectedRows) => {
-                const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
-                await batchDeleteMutation.mutateAsync(ids)
-            }}
-            batchDeleteConfig={{
-                itemName: "đăng ký doanh số",
-                moduleName: dangKyDoanhSoConfig.moduleTitle,
-                isLoading: batchDeleteMutation.isPending,
-                getItemLabel: (item: DangKyDoanhSo) => item.ten_nhan_vien || String(item.id),
-            }}
-            filters={[
+        <TabGroup
+            mode="internal"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            tabs={[
                 {
-                    columnId: "nam",
-                    title: "Năm",
-                    options: namOptions,
+                    value: "month",
+                    label: "Theo tháng",
+                    content: (
+                        <GenericListView
+                    columns={columns}
+                    data={dangKyDoanhSoList || []}
+                    filterColumn="ten_nhan_vien"
+                    initialSorting={initialSorting}
+                    initialFilters={initialFilters}
+                    initialSearch={initialSearch}
+                    onFiltersChange={handleFiltersChange}
+                    onSearchChange={handleSearchChange}
+                    onSortChange={handleSortChange}
+                    onRowClick={(row) => {
+                        if (onView) {
+                            onView(row.id!)
+                        } else {
+                            navigate(`${dangKyDoanhSoConfig.routePath}/${row.id}`)
+                        }
+                    }}
+                    onAdd={() => {
+                        if (onAddNew) {
+                            onAddNew()
+                        } else {
+                            navigate(`${dangKyDoanhSoConfig.routePath}/moi`)
+                        }
+                    }}
+                    addHref={`${dangKyDoanhSoConfig.routePath}/moi`}
+                    onBack={() => {
+                        navigate(dangKyDoanhSoConfig.parentPath)
+                    }}
+                    onDeleteSelected={async (selectedRows) => {
+                        const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
+                        await batchDeleteMutation.mutateAsync(ids)
+                    }}
+                    batchDeleteConfig={{
+                        itemName: "đăng ký doanh số",
+                        moduleName: dangKyDoanhSoConfig.moduleTitle,
+                        isLoading: batchDeleteMutation.isPending,
+                        getItemLabel: (item: DangKyDoanhSo) => item.ten_nhan_vien || String(item.id),
+                    }}
+                    filters={[
+                        {
+                            columnId: "nam",
+                            title: "Năm",
+                            options: namOptions,
+                        },
+                        {
+                            columnId: "thang",
+                            title: "Tháng",
+                            options: thangOptions,
+                        },
+                        {
+                            columnId: "ma_phong",
+                            title: "Phòng",
+                            options: phongOptions,
+                        },
+                        {
+                            columnId: "ma_nhom",
+                            title: "Nhóm",
+                            options: nhomOptions,
+                        },
+                        {
+                            columnId: "bac_dt",
+                            title: "Bậc DT",
+                            options: bacDtOptions,
+                        },
+                        {
+                            columnId: "ten_nhom_ap_doanh_thu",
+                            title: "Nhóm Áp Doanh Thu",
+                            options: nhomApDoanhThuOptions,
+                        },
+                    ]}
+                    searchFields={dangKyDoanhSoConfig.searchFields as (keyof DangKyDoanhSo)[]}
+                    module={module}
+                    enableSuggestions={true}
+                    enableRangeSelection={true}
+                    enableLongPress={true}
+                    persistSelection={false}
+                    renderMobileCard={renderMobileCard}
+                    enableVirtualization={(dangKyDoanhSoList?.length || 0) > 100}
+                    exportOptions={{
+                        columns: columns,
+                        totalCount: dangKyDoanhSoList?.length || 0,
+                        moduleName: dangKyDoanhSoConfig.moduleTitle,
+                        getColumnTitle,
+                        getCellValue,
+                    }}
+                    onImport={() => setImportDialogOpen(true)}
+                    isImporting={batchImportMutation.isPending}
+                        />
+                    ),
                 },
                 {
-                    columnId: "thang",
-                    title: "Tháng",
-                    options: thangOptions,
-                },
-                {
-                    columnId: "ma_phong",
-                    title: "Phòng",
-                    options: phongOptions,
-                },
-                {
-                    columnId: "ma_nhom",
-                    title: "Nhóm",
-                    options: nhomOptions,
-                },
-                {
-                    columnId: "bac_dt",
-                    title: "Bậc DT",
-                    options: bacDtOptions,
-                },
-                {
-                    columnId: "ten_nhom_ap_doanh_thu",
-                    title: "Nhóm Áp Doanh Thu",
-                    options: nhomApDoanhThuOptions,
+                    value: "year",
+                    label: "Theo năm",
+                    content: (
+                        <DangKyDoanhSoYearView
+                            data={dangKyDoanhSoList || []}
+                            nhanSuList={nhanSuList}
+                            selectedYear={selectedYear}
+                            onYearChange={setSelectedYear}
+                            onCellClick={(nhanVienId, thang, recordId) => {
+                                if (recordId) {
+                                    navigate(`${dangKyDoanhSoConfig.routePath}/${recordId}`)
+                                } else {
+                                    const params = new URLSearchParams({
+                                        nam: selectedYear.toString(),
+                                        thang: thang.toString(),
+                                        nhan_vien_id: nhanVienId.toString(),
+                                    })
+                                    navigate(`${dangKyDoanhSoConfig.routePath}/moi?${params.toString()}`)
+                                }
+                            }}
+                        />
+                    ),
                 },
             ]}
-            searchFields={dangKyDoanhSoConfig.searchFields as (keyof DangKyDoanhSo)[]}
-            module={module}
-            enableSuggestions={true}
-            enableRangeSelection={true}
-            enableLongPress={true}
-            persistSelection={false}
-            renderMobileCard={renderMobileCard}
-            enableVirtualization={(dangKyDoanhSoList?.length || 0) > 100}
-            exportOptions={{
-                columns: columns,
-                totalCount: dangKyDoanhSoList?.length || 0,
-                moduleName: dangKyDoanhSoConfig.moduleTitle,
-                getColumnTitle,
-                getCellValue,
-            }}
-            onImport={() => setImportDialogOpen(true)}
-            isImporting={batchImportMutation.isPending}
         />
-            {/* Import Dialog */}
-            <DangKyDoanhSoImportDialog
-                open={importDialogOpen}
-                onOpenChange={setImportDialogOpen}
-                mutation={batchImportMutation}
-            />
+
+        {/* Import Dialog */}
+        <DangKyDoanhSoImportDialog
+            open={importDialogOpen}
+            onOpenChange={setImportDialogOpen}
+            mutation={batchImportMutation}
+        />
         </>
     )
 }

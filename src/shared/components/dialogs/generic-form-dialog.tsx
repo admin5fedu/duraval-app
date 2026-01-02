@@ -10,8 +10,7 @@ import {
 import { GenericFormView, FormSection } from "@/shared/components/forms/generic-form-view"
 import { z } from "zod"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
-import { LoadingButton } from "@/components/ui/loading-button"
+import { ActionGroup } from "@/shared/components/actions"
 import { useState, useRef, useEffect } from "react"
 
 interface GenericFormDialogProps<T extends z.ZodType<any, any>> {
@@ -149,19 +148,17 @@ export function GenericFormDialog<T extends z.ZodType<any, any>>({
                 </div>
 
                 <DialogFooter className="px-6 py-4 border-t flex-shrink-0 bg-background">
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={handleCancel}
-                        disabled={isSubmitting || isLoading}
-                    >
-                        Hủy bỏ
-                    </Button>
-                    <LoadingButton 
-                        type="button"
-                        isLoading={isSubmitting || isLoading}
-                        loadingText={submitLabel}
-                        onClick={() => {
+                    <ActionGroup
+                        actions={[
+                            {
+                                label: "Hủy bỏ",
+                                onClick: handleCancel,
+                                level: "secondary",
+                                disabled: isSubmitting || isLoading,
+                            },
+                            {
+                                label: submitLabel,
+                                onClick: () => {
                             if (formRef.current) {
                                 const form = formRef.current.querySelector('form') as HTMLFormElement
                                 if (form) {
@@ -169,10 +166,14 @@ export function GenericFormDialog<T extends z.ZodType<any, any>>({
                                     form.requestSubmit()
                                 }
                             }
-                        }}
-                    >
-                        {submitLabel}
-                    </LoadingButton>
+                                },
+                                level: "primary",
+                                loading: isSubmitting || isLoading,
+                                disabled: isSubmitting || isLoading,
+                            },
+                        ]}
+                        sortByLevel={false}
+                    />
                 </DialogFooter>
             </DialogContent>
         </Dialog>

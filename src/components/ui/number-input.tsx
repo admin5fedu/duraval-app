@@ -13,9 +13,11 @@ interface NumberInputProps extends Omit<React.ComponentProps<typeof Input>, "typ
     allowDecimals?: boolean
     formatOnBlur?: boolean
     formatThousands?: boolean // Format với dấu phẩy phân tách hàng nghìn
+    suffix?: string // Suffix text to display after the number (e.g., "%")
 }
 
-export function NumberInput({
+export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
+function NumberInput({
     value = "",
     onChange,
     min,
@@ -24,13 +26,21 @@ export function NumberInput({
     allowDecimals = true,
     formatOnBlur = true,
     formatThousands = false,
+    suffix,
     className,
     ...props
-}: NumberInputProps) {
+}, ref) {
     // Helper function để format số với dấu phẩy phân tách hàng nghìn
     const formatWithThousands = (num: number): string => {
         if (isNaN(num)) return ""
         if (allowDecimals) {
+            // Nếu có suffix (như %), luôn hiển thị 2 chữ số thập phân với dấu phẩy
+            if (suffix) {
+                return num.toLocaleString('vi-VN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })
+            }
             return num.toLocaleString('vi-VN', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: step < 1 ? 2 : 0
@@ -41,7 +51,15 @@ export function NumberInput({
 
     // Helper function để parse số từ string có dấu phẩy
     const parseFormattedNumber = (str: string): number => {
-        // Remove all commas and spaces
+        // If suffix exists (like %), comma is decimal separator in Vietnamese locale
+        // For example: "6,00" should become "6.00"
+        if (suffix && str.includes(',')) {
+            // Replace comma with dot for decimal parsing
+            // In Vietnamese locale with percentage, comma is always decimal separator
+            const cleaned = str.replace(/,/g, '.')
+            return parseFloat(cleaned)
+        }
+        // Otherwise, remove commas (thousand separators) and spaces
         const cleaned = str.replace(/[,\s]/g, '')
         return parseFloat(cleaned)
     }
@@ -63,6 +81,12 @@ export function NumberInput({
             if (!isNaN(num)) {
                 if (formatThousands) {
                     setDisplayValue(formatWithThousands(num))
+                } else if (allowDecimals && suffix) {
+                    // Format với dấu phẩy cho phần thập phân khi có suffix (như %)
+                    setDisplayValue(num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }))
                 } else {
                     setDisplayValue(String(value))
                 }
@@ -72,7 +96,7 @@ export function NumberInput({
         } else {
             setDisplayValue("")
         }
-    }, [value, formatThousands])
+    }, [value, formatThousands, allowDecimals, suffix])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let inputValue = e.target.value
@@ -116,6 +140,12 @@ export function NumberInput({
             // Format display value với thousand separator nếu cần
             if (formatThousands) {
                 setDisplayValue(formatWithThousands(finalValue))
+            } else if (allowDecimals && suffix) {
+                // Format với dấu phẩy cho phần thập phân khi có suffix (như %)
+                setDisplayValue(finalValue.toLocaleString('vi-VN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }))
             } else {
                 setDisplayValue(inputValue)
             }
@@ -130,6 +160,12 @@ export function NumberInput({
             if (!isNaN(numValue)) {
                 if (formatThousands) {
                     setDisplayValue(formatWithThousands(numValue))
+                } else if (allowDecimals && suffix) {
+                    // Format với dấu phẩy cho phần thập phân khi có suffix (như %)
+                    setDisplayValue(numValue.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }))
                 } else {
                     // Format with appropriate decimal places
                     const formatted = allowDecimals
@@ -137,12 +173,35 @@ export function NumberInput({
                         : Math.round(numValue).toString()
                     setDisplayValue(formatted)
                 }
+                // Ensure onChange is called with the parsed number value on blur
+                onChange?.(numValue)
             }
         }
     }
 
+    if (suffix) {
+        return (
+            <div className="relative">
+                <Input
+                    ref={ref}
+                    type="text"
+                    inputMode="numeric"
+                    value={displayValue}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={cn("pr-8", className)}
+                    {...props}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                    {suffix}
+                </span>
+            </div>
+        )
+    }
+
     return (
         <Input
+            ref={ref}
             type="text"
             inputMode="numeric"
             value={displayValue}
@@ -152,5 +211,7 @@ export function NumberInput({
             {...props}
         />
     )
-}
+})
+
+NumberInput.displayName = "NumberInput"
 

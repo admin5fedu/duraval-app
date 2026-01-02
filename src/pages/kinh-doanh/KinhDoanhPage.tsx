@@ -18,16 +18,16 @@ export default function KinhDoanhPage() {
       icon: Wallet,
       items: [
         {
-          title: "Phiếu đề xuất chiết khấu",
-          href: "/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-chiet-khau",
+          title: "Phiếu đề xuất bán hàng",
+          href: "/kinh-doanh/phieu-de-xuat-ban-hang",
           icon: FileText,
-          description: "Quản lý phiếu đề xuất chiết khấu.",
+          description: "Quản lý phiếu đề xuất bán hàng.",
         },
         {
-          title: "Quỹ đề xuất chiết khấu",
-          href: "/kinh-doanh/quy-ho-tro-ban-hang/quy-de-xuat-chiet-khau",
+          title: "Quỹ hỗ trợ bán hàng",
+          href: "/kinh-doanh/tong-quan-quy-htbh",
           icon: Wallet,
-          description: "Quản lý quỹ đề xuất chiết khấu.",
+          description: "Quản lý và theo dõi quỹ hỗ trợ bán hàng.",
         },
         {
           title: "Loại phiếu & Hạng mục",

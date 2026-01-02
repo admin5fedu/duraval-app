@@ -18,6 +18,9 @@ import { phanHoiKhachHangConfig } from "@/features/marketing/ky-thuat-cskh/phan-
 import { loaiPhieuConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-phieu/config"
 import { hangMucConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/hang-muc/config"
 import { loaiDoanhThuConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/loai-phieu-hang-muc/loai-doanh-thu/config"
+import { tongQuanQuyHTBHConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/tong-quan-quy-htbh/config"
+import { quyHTBHTheoThangConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/quy-htbh-theo-thang/config"
+import { phieuDeXuatBanHangConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-ban-hang/config"
 import { nhomApDoanhSoConfig } from "@/features/he-thong/so-do/nhom-ap-doanh-so/config"
 import { dangKyDoanhSoConfig } from "@/features/he-thong/dang-ky/dang-ky-doanh-so/config"
 
@@ -116,6 +119,9 @@ moduleRegistry.register(phanHoiKhachHangConfig)
 moduleRegistry.register(loaiPhieuConfig)
 moduleRegistry.register(hangMucConfig)
 moduleRegistry.register(loaiDoanhThuConfig)
+moduleRegistry.register(tongQuanQuyHTBHConfig)
+moduleRegistry.register(quyHTBHTheoThangConfig)
+moduleRegistry.register(phieuDeXuatBanHangConfig)
 moduleRegistry.register(nhomApDoanhSoConfig)
 moduleRegistry.register(dangKyDoanhSoConfig)
 

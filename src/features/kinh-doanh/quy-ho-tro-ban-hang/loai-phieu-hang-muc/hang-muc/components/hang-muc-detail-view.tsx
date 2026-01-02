@@ -72,6 +72,26 @@ export function HangMucDetailView({ id, initialData, onEdit, onBack }: HangMucDe
         { label: "Loại Phiếu", key: "ten_loai_phieu", value: hangMuc.ten_loai_phieu || "-" },
         { label: "Tên Hạng Mục", key: "ten_hang_muc", value: hangMuc.ten_hang_muc },
         { label: "Mô Tả", key: "mo_ta", value: hangMuc.mo_ta || "-", colSpan: 2 },
+        { 
+          label: "Quản lý duyệt", 
+          key: "quan_ly_duyet", 
+          value: hangMuc.quan_ly_duyet || null,
+          type: "badge",
+          enumConfig: {
+            "có": "bg-green-50 text-green-700 border-green-200",
+            "không": "bg-gray-50 text-gray-700 border-gray-200",
+          }
+        },
+        { 
+          label: "BGD duyệt", 
+          key: "bgd_duyet", 
+          value: hangMuc.bgd_duyet || null,
+          type: "badge",
+          enumConfig: {
+            "có": "bg-green-50 text-green-700 border-green-200",
+            "không": "bg-gray-50 text-gray-700 border-gray-200",
+          }
+        },
       ]
     },
     {

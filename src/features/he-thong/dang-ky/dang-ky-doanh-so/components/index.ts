@@ -1,4 +1,5 @@
 export * from "./dang-ky-doanh-so-list-view"
+export * from "./dang-ky-doanh-so-year-view"
 export * from "./dang-ky-doanh-so-detail-view"
 export * from "./dang-ky-doanh-so-form-view"
 export * from "./dang-ky-doanh-so-columns"

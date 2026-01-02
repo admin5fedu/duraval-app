@@ -99,6 +99,11 @@ export class LoaiPhieuAPI {
             ...input,
             mo_ta: input.mo_ta && input.mo_ta.trim() !== "" ? input.mo_ta : null,
             nguoi_tao_id: input.nguoi_tao_id || null,
+            check_quy: input.check_quy || null,
+            tien_max: input.tien_max ?? null,
+            ty_le_quan_ly_duoc_duyet: input.ty_le_quan_ly_duoc_duyet ?? null,
+            ty_le_max: input.ty_le_max ?? null,
+            ty_le_duyet_tu_dong: input.ty_le_duyet_tu_dong ?? null,
         }
 
         const { data, error } = await supabase
@@ -149,6 +154,11 @@ export class LoaiPhieuAPI {
         if (input.mo_ta !== undefined) {
             sanitizedInput.mo_ta = input.mo_ta && input.mo_ta.trim() !== "" ? input.mo_ta : null
         }
+        if (input.check_quy !== undefined) sanitizedInput.check_quy = input.check_quy || null
+        if (input.tien_max !== undefined) sanitizedInput.tien_max = input.tien_max ?? null
+        if (input.ty_le_quan_ly_duoc_duyet !== undefined) sanitizedInput.ty_le_quan_ly_duoc_duyet = input.ty_le_quan_ly_duoc_duyet ?? null
+        if (input.ty_le_max !== undefined) sanitizedInput.ty_le_max = input.ty_le_max ?? null
+        if (input.ty_le_duyet_tu_dong !== undefined) sanitizedInput.ty_le_duyet_tu_dong = input.ty_le_duyet_tu_dong ?? null
         if (input.tg_cap_nhat !== undefined) sanitizedInput.tg_cap_nhat = input.tg_cap_nhat
 
         const { data, error } = await supabase

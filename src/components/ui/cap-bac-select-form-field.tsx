@@ -38,7 +38,6 @@ export function CapBacSelectFormField<TFieldValues extends FieldValues = FieldVa
             searchPlaceholder={description}
             disabled={disabled}
             excludeIds={excludeIds || []}
-            id={field.name} // FormControl sẽ override id này
             name={field.name}
             onBlur={field.onBlur}
         />

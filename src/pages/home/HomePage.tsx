@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Calculator,
   Truck,
+  Store,
 } from 'lucide-react'
 
 // Feature modules configuration
@@ -38,6 +39,14 @@ const features = [
     href: '/kinh-doanh',
     color: 'text-orange-600',
     bgColor: 'bg-orange-100',
+  },
+  {
+    title: 'Bán buôn',
+    description: 'Quản lý bán buôn, đơn hàng số lượng lớn.',
+    icon: Store,
+    href: '/ban-buon',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
   },
   {
     title: 'Marketing',

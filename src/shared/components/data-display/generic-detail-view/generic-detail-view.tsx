@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "@/components/ui/button"
 import { Edit, Trash2 } from "lucide-react"
 import type { GenericDetailViewProps } from "./types"
 import { useGenericDetailState } from "./hooks/use-generic-detail-state"
@@ -12,6 +11,7 @@ import { DetailLoadingState } from "./sections/detail-loading-state"
 import { DetailEmptyState } from "./sections/detail-empty-state"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { ActionGroup } from "@/shared/components/actions"
 
 /**
  * GenericDetailView Component
@@ -64,37 +64,34 @@ export function GenericDetailView<T extends Record<string, any>>({
             return config.renderActions(data, id)
         }
 
-        const actions: React.ReactNode[] = []
+        const actions = []
 
         if (config.editPath) {
-            actions.push(
-                <Button 
-                    key="edit" 
-                    variant="outline" 
-                    size={isMobile ? "default" : "sm"} 
-                    onClick={handleEdit}
-                    className={cn(isMobile && "h-10 text-base")}
-                >
-                    <Edit className={cn("mr-2", isMobile ? "h-4 w-4" : "h-4 w-4")} /> Sửa
-                </Button>
-            )
+            actions.push({
+                label: "Sửa",
+                onClick: handleEdit,
+                level: "primary" as const,
+                icon: Edit,
+            })
         }
 
         if (config.onDelete) {
-            actions.push(
-                <Button
-                    key="delete"
-                    variant="destructive"
-                    size={isMobile ? "default" : "sm"}
-                    onClick={() => setDeleteConfirmOpen(true)}
-                    className={cn(isMobile && "h-10 text-base")}
-                >
-                    <Trash2 className={cn("mr-2", isMobile ? "h-4 w-4" : "h-4 w-4")} /> Xóa
-                </Button>
-            )
+            actions.push({
+                label: "Xóa",
+                onClick: () => setDeleteConfirmOpen(true),
+                variant: "destructive" as const,
+                icon: Trash2,
+            })
         }
 
-        return actions.length > 0 ? <div className="flex items-center gap-2">{actions}</div> : null
+        if (actions.length === 0) return null
+
+        return (
+            <ActionGroup
+                actions={actions}
+                className={cn(isMobile && "[&_button]:h-10 [&_button]:text-base")}
+            />
+        )
     }, [config.renderActions, config.editPath, config.onDelete, data, id, handleEdit, setDeleteConfirmOpen, isMobile])
 
     // 3. Render loading state

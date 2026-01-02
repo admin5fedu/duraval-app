@@ -11,6 +11,7 @@ import {
   Truck,
   Megaphone,
   ChevronRight,
+  Store,
 } from 'lucide-react'
 
 import {
@@ -84,6 +85,11 @@ const data: { navMain: NavGroup[] } = {
           title: 'Kinh doanh',
           url: '/kinh-doanh',
           icon: PieChart,
+        },
+        {
+          title: 'Bán buôn',
+          url: '/ban-buon',
+          icon: Store,
         },
         {
           title: 'Marketing',

@@ -33,5 +33,7 @@ export { taiLieuBieuMau, taiLieuBieuMau as taiLieuBieuMauQueryKeys } from "./tai
 export { loaiPhieu, loaiPhieu as loaiPhieuQueryKeys } from "./loai-phieu"
 export { hangMuc, hangMuc as hangMucQueryKeys } from "./hang-muc"
 export { loaiDoanhThu, loaiDoanhThu as loaiDoanhThuQueryKeys } from "./loai-doanh-thu"
+export { quyHTBHTheoThang, quyHTBHTheoThang as quyHTBHTheoThangQueryKeys } from "./quy-htbh-theo-thang"
+export { phieuDeXuatBanHang, phieuDeXuatBanHang as phieuDeXuatBanHangQueryKeys } from "./phieu-de-xuat-ban-hang"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

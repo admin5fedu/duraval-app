@@ -7,6 +7,7 @@ import {
     FormControl,
     FormDescription,
     FormMessage,
+    useFormField,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { NumberInput } from "@/components/ui/number-input"
@@ -28,6 +29,57 @@ import { useIsMobile } from "@/hooks/use-mobile"
 interface FormFieldRendererProps {
     field: FormFieldConfig
     form: UseFormReturn<any>
+}
+
+// Wrapper component để lấy formItemId từ useFormField và truyền vào ToggleButtonFormField
+function ToggleButtonFormFieldWithId({
+    value,
+    onChange,
+    options,
+    disabled,
+    onBlur,
+}: {
+    value: string
+    onChange: (value: string) => void
+    options: Array<{ label: string; value: string }>
+    disabled?: boolean
+    onBlur?: () => void
+}) {
+    const { formItemId } = useFormField()
+    return (
+        <ToggleButtonFormField
+            id={formItemId}
+            value={value}
+            onChange={onChange}
+            options={options}
+            disabled={disabled}
+            onBlur={onBlur}
+        />
+    )
+}
+
+// Wrapper component để lấy formItemId từ useFormField và truyền vào custom component
+function CustomFormFieldWithId({
+    component: Component,
+    formField,
+    field,
+}: {
+    component: React.ComponentType<any>
+    formField: any
+    field: FormFieldConfig
+}) {
+    const { formItemId } = useFormField()
+    return (
+        <Component
+            {...formField}
+            id={formItemId} // Override id với formItemId
+            name={field.name}
+            label={field.label}
+            disabled={field.disabled}
+            placeholder={field.placeholder}
+            description={field.description}
+        />
+    )
 }
 
 /**
@@ -72,30 +124,35 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                             </FormLabel>
                             <FormControl>
                                 {field.type === "image" ? (
-                                    <InlineImageUpload
-                                        value={formField.value}
-                                        onChange={(url) => {
-                                            if (field.disabled) return
-                                            formField.onChange(url)
-                                        }}
-                                        disabled={field.disabled}
-                                        folder={field.imageFolder}
-                                        displayName={field.displayName || field.label}
-                                        maxSize={field.imageMaxSize}
-                                    />
+                                    <div>
+                                        <InlineImageUpload
+                                            value={formField.value}
+                                            onChange={(url) => {
+                                                if (field.disabled) return
+                                                formField.onChange(url)
+                                            }}
+                                            disabled={field.disabled}
+                                            folder={field.imageFolder}
+                                            displayName={field.displayName || field.label}
+                                            maxSize={field.imageMaxSize}
+                                        />
+                                    </div>
                                 ) : field.type === "multiple-image" ? (
-                                    <MultipleImageUploadFormField
-                                        value={formField.value}
-                                        onChange={(urls: string[]) => {
-                                            if (field.disabled) return
-                                            formField.onChange(urls)
-                                        }}
-                                        disabled={field.disabled}
-                                        folder={field.imageFolder || "uploads"}
-                                        maxSize={field.imageMaxSize || 10}
-                                    />
+                                    <div>
+                                        <MultipleImageUploadFormField
+                                            value={formField.value}
+                                            onChange={(urls: string[]) => {
+                                                if (field.disabled) return
+                                                formField.onChange(urls)
+                                            }}
+                                            disabled={field.disabled}
+                                            folder={field.imageFolder || "uploads"}
+                                            maxSize={field.imageMaxSize || 10}
+                                        />
+                                    </div>
                                 ) : field.type === "combobox" ? (
                                     <ComboboxFormField
+                                        {...formField}
                                         value={String(formField.value || '')}
                                         onChange={(value) => {
                                             if (field.disabled) return
@@ -107,7 +164,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "toggle" ? (
-                                    <ToggleButtonFormField
+                                    <ToggleButtonFormFieldWithId
                                         value={formField.value ? String(formField.value) : ""}
                                         onChange={(value) => {
                                             if (field.disabled) return
@@ -115,6 +172,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         }}
                                         options={field.options || []}
                                         disabled={field.disabled}
+                                        onBlur={formField.onBlur}
                                     />
                                 ) : field.type === "select" ? (
                                     <Select 
@@ -130,6 +188,8 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                     >
                                         <SelectTrigger 
+                                            name={formField.name}
+                                            onBlur={formField.onBlur}
                                             className={cn(
                                                 "w-full",
                                                 isMobile && "h-11 text-base"
@@ -165,6 +225,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     />
                                 ) : field.type === "phong-ban-select" ? (
                                     <PhongBanSelect
+                                        {...formField}
                                         value={formField.value ? Number(formField.value) : null}
                                         onChange={(id) => {
                                             if (field.disabled) return
@@ -185,6 +246,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     />
                                 ) : field.type === "loai-phieu-select" ? (
                                     <LoaiPhieuSelect
+                                        {...formField}
                                         value={formField.value ? Number(formField.value) : null}
                                         onChange={(id) => {
                                             if (field.disabled) return
@@ -196,15 +258,12 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         excludeIds={field.excludeIds || []}
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
-                                    <field.customComponent
-                                        {...formField} // Truyền toàn bộ formField object (bao gồm ref, id, name, value, onChange, onBlur)
-                                        name={field.name}
-                                        label={field.label}
-                                        disabled={field.disabled}
-                                        placeholder={field.placeholder}
-                                        description={field.description}
+                                    <CustomFormFieldWithId
+                                        component={field.customComponent}
+                                        formField={formField}
+                                        field={field}
                                     />
-                                ) : field.type === "number" && (field.name === "diem" || field.name === "tien") ? (
+                                ) : field.type === "number" && ((field.name === "diem" || field.name === "tien") || field.formatThousands || field.suffix) ? (
                                     <NumberInput
                                         {...formField}
                                         value={formField.value !== null && formField.value !== undefined ? formField.value : undefined}
@@ -214,10 +273,11 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         }}
                                         placeholder={field.placeholder}
                                         disabled={field.disabled}
-                                        min={0}
-                                        allowDecimals={false}
-                                        formatThousands={true}
+                                        min={field.min !== undefined ? field.min : 0}
+                                        allowDecimals={field.allowDecimals !== undefined ? field.allowDecimals : false}
+                                        formatThousands={field.formatThousands || true}
                                         formatOnBlur={true}
+                                        suffix={field.suffix}
                                         className={cn(
                                             isMobile && "h-11 text-base"
                                         )}

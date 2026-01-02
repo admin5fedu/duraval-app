@@ -30,6 +30,9 @@ export interface FormFieldConfig {
     // For number type
     min?: number // Minimum value
     max?: number // Maximum value
+    formatThousands?: boolean // Format number with thousands separator
+    allowDecimals?: boolean // Allow decimal values
+    suffix?: string // Suffix text to display after the number (e.g., "%")
 }
 
 /**

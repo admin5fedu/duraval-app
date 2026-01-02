@@ -31,6 +31,8 @@ export { DataTableViewOptions } from './data-display/column-visibility'
 export * from './data-display/search-suggestions'
 export * from './data-display/selection/selection-toolbar'
 export * from './data-display/selection/bulk-actions-menu'
+export * from './data-display/tab-group'
 export * from './placeholder-page'
 export { ScrollRestoration } from './scroll-restoration'
+export * from './actions'
 

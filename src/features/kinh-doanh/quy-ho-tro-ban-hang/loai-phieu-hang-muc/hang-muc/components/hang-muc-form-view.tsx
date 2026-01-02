@@ -27,6 +27,24 @@ const getSections = (): FormSection[] => [
         label: "Mô Tả", 
         type: "textarea",
       },
+      {
+        name: "quan_ly_duyet",
+        label: "Quản lý duyệt",
+        type: "toggle",
+        options: [
+          { label: "Có", value: "có" },
+          { label: "Không", value: "không" },
+        ],
+      },
+      {
+        name: "bgd_duyet",
+        label: "BGD duyệt",
+        type: "toggle",
+        options: [
+          { label: "Có", value: "có" },
+          { label: "Không", value: "không" },
+        ],
+      },
     ]
   },
 ]
@@ -75,6 +93,8 @@ export function HangMucFormView({ id, onComplete, onCancel }: HangMucFormViewPro
         loai_phieu_id: existingData.loai_phieu_id || null,
         ten_hang_muc: String(existingData.ten_hang_muc || ""),
         mo_ta: existingData.mo_ta ? String(existingData.mo_ta) : "",
+        quan_ly_duyet: existingData.quan_ly_duyet ? String(existingData.quan_ly_duyet) : null,
+        bgd_duyet: existingData.bgd_duyet ? String(existingData.bgd_duyet) : null,
       }
     }
     // For new records or when data is not yet loaded - return undefined (GenericFormView will handle it)

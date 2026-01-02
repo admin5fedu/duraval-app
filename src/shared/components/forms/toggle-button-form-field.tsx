@@ -10,6 +10,9 @@ interface ToggleButtonFormFieldProps {
   options: Array<{ label: string; value: string }>
   disabled?: boolean
   className?: string
+  id?: string
+  name?: string
+  onBlur?: () => void
 }
 
 /**
@@ -23,13 +26,16 @@ interface ToggleButtonFormFieldProps {
  * 
  * Tham khảo từ module phiếu hành chính (cột ca)
  */
-export function ToggleButtonFormField({
+export const ToggleButtonFormField = React.forwardRef<HTMLDivElement, ToggleButtonFormFieldProps>(
+function ToggleButtonFormField({
   value,
   onChange,
   options,
   disabled = false,
   className,
-}: ToggleButtonFormFieldProps) {
+  id,
+  onBlur,
+}, ref) {
   // Normalize value to ensure it matches option values exactly
   const normalizedValue = React.useMemo(() => {
     const stringValue = value ? String(value) : ""
@@ -40,7 +46,14 @@ export function ToggleButtonFormField({
   }, [value, options])
 
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
+    <div 
+      ref={ref}
+      id={id}
+      onBlur={onBlur}
+      role="group"
+      aria-labelledby={id ? `${id}-label` : undefined}
+      className={cn("flex flex-wrap gap-2", className)}
+    >
       {options.map((option) => {
         const isSelected = normalizedValue === option.value
         
@@ -49,7 +62,13 @@ export function ToggleButtonFormField({
             key={option.value}
             type="button"
             disabled={disabled}
-            onClick={() => onChange(option.value)}
+            onClick={() => {
+              onChange(option.value)
+              // Trigger onBlur after selection
+              if (onBlur) {
+                setTimeout(() => onBlur(), 0)
+              }
+            }}
             className={cn(
               "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
               "h-8 px-3 py-2",
@@ -69,5 +88,7 @@ export function ToggleButtonFormField({
       })}
     </div>
   )
-}
+})
+
+ToggleButtonFormField.displayName = "ToggleButtonFormField"
 
