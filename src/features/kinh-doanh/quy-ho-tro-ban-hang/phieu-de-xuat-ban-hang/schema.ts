@@ -90,6 +90,7 @@ export const phieuDeXuatBanHangSchema = z.object({
   ten_loai_doanh_thu: z.string().nullable().optional(),
   trang_thai_chi_tien: z.string().nullable().optional(),
   ma_com_bo: z.string().nullable().optional(),
+  loai_quy: z.string().nullable().optional(),
   trao_doi: z.any().nullable().optional(), // jsonb
   nguoi_tao_id: z.number().nullable().optional(),
   tg_tao: z.string().nullable().optional(),

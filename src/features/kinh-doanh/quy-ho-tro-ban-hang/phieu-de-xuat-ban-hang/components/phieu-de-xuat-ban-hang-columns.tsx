@@ -153,6 +153,19 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     },
   },
   {
+    accessorKey: "loai_quy",
+    header: ({ column }) => <SortableHeader column={column} title="Loại quỹ" />,
+    cell: ({ row }) => {
+      const loaiQuy = row.getValue("loai_quy") as string | null
+      return <div className="min-w-[120px]">{loaiQuy ?? "-"}</div>
+    },
+    size: 150,
+    meta: {
+      title: "Loại quỹ",
+      order: 6,
+    },
+  },
+  {
     accessorKey: "ten_loai_phieu",
     header: ({ column }) => <SortableHeader column={column} title="Loại phiếu" />,
     cell: ({ row }) => {
@@ -162,7 +175,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 150,
     meta: {
       title: "Loại phiếu",
-      order: 6,
+      order: 7,
     },
   },
   {
@@ -175,7 +188,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 150,
     meta: {
       title: "Hạng mục",
-      order: 7,
+      order: 8,
     },
   },
   {
@@ -188,7 +201,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 150,
     meta: {
       title: "Số hóa đơn",
-      order: 8,
+      order: 9,
     },
   },
   {
@@ -201,7 +214,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 150,
     meta: {
       title: "Tiền đơn hàng",
-      order: 9,
+      order: 10,
     },
   },
   {
@@ -214,7 +227,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 150,
     meta: {
       title: "Tổng CK",
-      order: 10,
+      order: 11,
     },
   },
   {
@@ -227,7 +240,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 120,
     meta: {
       title: "Trạng thái",
-      order: 11,
+      order: 12,
     },
   },
   {
@@ -249,7 +262,7 @@ export const phieuDeXuatBanHangColumns: ColumnDef<PhieuDeXuatBanHang>[] = [
     size: 150,
     meta: {
       title: "Ngày tạo",
-      order: 12,
+      order: 13,
     },
   },
   {

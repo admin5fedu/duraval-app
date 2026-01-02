@@ -111,6 +111,14 @@ const getToday = () => {
   return `${year}-${month}-${day}`
 }
 
+// Generate loại quỹ toggle options (giống như trong quy-htbh-theo-thang)
+const generateLoaiQuyToggleOptions = () => {
+  return [
+    { label: "Chiết khấu", value: "Chiết khấu" },
+    { label: "Hàng thanh lý", value: "Hàng thanh lý" }
+  ]
+}
+
 interface PhieuDeXuatBanHangFormViewProps {
   id?: number
   onComplete?: () => void
@@ -219,6 +227,13 @@ export function PhieuDeXuatBanHangFormView({
     {
       title: "Thông Tin Phiếu",
       fields: [
+        { 
+          name: "loai_quy", 
+          label: "Loại quỹ", 
+          type: "toggle",
+          options: generateLoaiQuyToggleOptions(),
+          required: true
+        },
         { 
           name: "loai_phieu_id", 
           label: "Loại phiếu", 

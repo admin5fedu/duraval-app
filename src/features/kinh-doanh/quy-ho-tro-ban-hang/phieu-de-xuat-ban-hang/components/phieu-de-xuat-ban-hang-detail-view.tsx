@@ -82,6 +82,7 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
     {
       title: "Thông Tin Phiếu",
       fields: [
+        { label: "Loại quỹ", key: "loai_quy", value: phieu.loai_quy || "-" },
         { label: "Loại phiếu", key: "ten_loai_phieu", value: phieu.ten_loai_phieu || "-" },
         { label: "Hạng mục", key: "ten_hang_muc", value: phieu.ten_hang_muc || "-" },
         { label: "Số hóa đơn", key: "so_hoa_don", value: phieu.so_hoa_don || "-" },
