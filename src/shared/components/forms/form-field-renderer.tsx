@@ -22,6 +22,9 @@ import { InlineImageUpload } from "@/components/ui/inline-image-upload"
 import { PhongBanSelect } from "@/components/ui/phong-ban-select"
 import { CapBacSelectFormField } from "@/components/ui/cap-bac-select-form-field"
 import { LoaiPhieuSelect } from "@/components/ui/loai-phieu-select"
+import { TinhThanhTSNSelect } from "@/components/ui/tinh-thanh-tsn-select"
+import { QuanHuyenTSNSelect } from "@/components/ui/quan-huyen-tsn-select"
+import { TinhThanhSSNSelect } from "@/components/ui/tinh-thanh-ssn-select"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -257,6 +260,82 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                         excludeIds={field.excludeIds || []}
                                     />
+                                ) : field.type === "tinh-thanh-tsn-select" ? (
+                                    <TinhThanhTSNSelect
+                                        {...formField}
+                                        value={formField.value?.tinh_thanh_id ? Number(formField.value.tinh_thanh_id) : null}
+                                        onChange={(id, data) => {
+                                            if (field.disabled) return
+                                            if (id && data) {
+                                                formField.onChange({
+                                                    tinh_thanh_id: id,
+                                                    ma_tinh_thanh: data.ma_tinh_thanh,
+                                                    ten_tinh_thanh: data.ten_tinh_thanh,
+                                                })
+                                                // Auto-fill ma_tinh_thanh field with format "Mã - Tên"
+                                                form.setValue("ma_tinh_thanh", `${data.ma_tinh_thanh} - ${data.ten_tinh_thanh}`, { shouldValidate: true })
+                                            } else {
+                                                formField.onChange(null)
+                                                form.setValue("ma_tinh_thanh", "", { shouldValidate: true })
+                                            }
+                                        }}
+                                        placeholder={field.placeholder || "Chọn tỉnh thành..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã tỉnh thành..."}
+                                        disabled={field.disabled}
+                                    />
+                                ) : field.type === "tinh-thanh-ssn-select" ? (
+                                    <TinhThanhSSNSelect
+                                        {...formField}
+                                        value={formField.value?.tinh_thanh_id ? Number(formField.value.tinh_thanh_id) : null}
+                                        onChange={(id, data) => {
+                                            if (field.disabled) return
+                                            if (id && data) {
+                                                formField.onChange({
+                                                    tinh_thanh_id: id,
+                                                    ma_tinh_thanh: data.ma_tinh_thanh,
+                                                    ten_tinh_thanh: data.ten_tinh_thanh,
+                                                })
+                                                // Auto-fill ma_tinh_thanh field with format "Mã - Tên"
+                                                form.setValue("ma_tinh_thanh", `${data.ma_tinh_thanh} - ${data.ten_tinh_thanh}`, { shouldValidate: true })
+                                            } else {
+                                                formField.onChange(null)
+                                                form.setValue("ma_tinh_thanh", "", { shouldValidate: true })
+                                            }
+                                        }}
+                                        placeholder={field.placeholder || "Chọn tỉnh thành..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã tỉnh thành..."}
+                                        disabled={field.disabled}
+                                    />
+                                ) : field.type === "quan-huyen-tsn-select" ? (
+                                    <QuanHuyenTSNSelect
+                                        {...formField}
+                                        value={formField.value?.quan_huyen_id ? Number(formField.value.quan_huyen_id) : null}
+                                        onChange={(id, data) => {
+                                            if (field.disabled) return
+                                            if (id && data) {
+                                                formField.onChange({
+                                                    quan_huyen_id: id,
+                                                    ma_quan_huyen: data.ma_quan_huyen,
+                                                    ten_quan_huyen: data.ten_quan_huyen,
+                                                    ma_tinh_thanh: data.ma_tinh_thanh,
+                                                    ten_tinh_thanh: data.ten_tinh_thanh,
+                                                    tinh_thanh_id: data.tinh_thanh_id || null,
+                                                })
+                                                // Auto-fill fields
+                                                form.setValue("ma_quan_huyen", `${data.ma_quan_huyen} - ${data.ten_quan_huyen}`, { shouldValidate: true })
+                                                if (data.ma_tinh_thanh && data.ten_tinh_thanh) {
+                                                    form.setValue("ma_tinh_thanh", `${data.ma_tinh_thanh} - ${data.ten_tinh_thanh}`, { shouldValidate: true })
+                                                }
+                                            } else {
+                                                formField.onChange(null)
+                                                form.setValue("ma_quan_huyen", "", { shouldValidate: true })
+                                                form.setValue("ma_tinh_thanh", "", { shouldValidate: true })
+                                            }
+                                        }}
+                                        placeholder={field.placeholder || "Chọn quận huyện..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã quận huyện..."}
+                                        disabled={field.disabled}
+                                    />
                                 ) : field.type === "custom" && field.customComponent ? (
                                     <CustomFormFieldWithId
                                         component={field.customComponent}
@@ -289,10 +368,12 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         value={formField.value !== null && formField.value !== undefined ? formField.value : ''}
                                         placeholder={field.placeholder}
                                         disabled={field.disabled}
+                                        readOnly={field.disabled}
                                         min={field.type === "number" ? (field.min !== undefined ? field.min : (field.name === "so_luong_cho_phep_thang" || field.name === "diem" || field.name === "tien") ? 0 : undefined) : undefined}
                                         max={field.type === "number" ? field.max : undefined}
                                         className={cn(
-                                            isMobile && "h-11 text-base"
+                                            isMobile && "h-11 text-base",
+                                            field.disabled && "bg-muted cursor-not-allowed"
                                         )}
                                         onChange={e => {
                                             if (field.disabled) return

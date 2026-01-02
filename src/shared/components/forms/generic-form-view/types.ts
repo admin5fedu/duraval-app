@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "tinh-thanh-ssn-select"
 
 /**
  * Form field configuration

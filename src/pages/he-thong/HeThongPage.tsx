@@ -19,6 +19,9 @@ import {
   Utensils,
   ShieldCheck,
   Baby,
+  MoreHorizontal,
+  Map,
+  Globe,
 } from "lucide-react"
 
 export default function HeThongPage() {
@@ -122,6 +125,24 @@ export default function HeThongPage() {
           href: "/he-thong/phan-quyen",
           icon: Shield,
           description: "Quản lý và phân quyền cho các chức vụ trong hệ thống.",
+        },
+      ]
+    },
+    {
+      title: "Khác",
+      icon: MoreHorizontal,
+      items: [
+        {
+          title: "Tỉnh thành trước sát nhập",
+          href: "/he-thong/tinh-thanh-tsn",
+          icon: Map,
+          description: "Quản lý tỉnh thành trước sát nhập.",
+        },
+        {
+          title: "Tỉnh thành sau sát nhập",
+          href: "/he-thong/tinh-thanh-ssn",
+          icon: Globe,
+          description: "Quản lý tỉnh thành sau sát nhập.",
         },
       ]
     }

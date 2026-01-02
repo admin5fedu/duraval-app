@@ -68,6 +68,31 @@ const DangKyDoanhSoFormRoute = lazy(() => import('@/features/he-thong/dang-ky/da
 // Phân quyền module routes
 const PhanQuyenListRoute = lazy(() => import('@/features/he-thong/thiet-lap/phan-quyen/routes/phan-quyen-list-route'))
 
+// Tỉnh thành trước sát nhập - Tỉnh thành TSN module routes
+const TinhThanhTSNListRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/tinh-thanh-tsn/routes/tinh-thanh-tsn-list-route'))
+const TinhThanhTSNDetailRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/tinh-thanh-tsn/routes/tinh-thanh-tsn-detail-route'))
+const TinhThanhTSNFormRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/tinh-thanh-tsn/routes/tinh-thanh-tsn-form-route'))
+
+// Quận huyện TSN module routes
+const QuanHuyenTSNListRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/quan-huyen-tsn/routes/quan-huyen-tsn-list-route'))
+const QuanHuyenTSNDetailRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/quan-huyen-tsn/routes/quan-huyen-tsn-detail-route'))
+const QuanHuyenTSNFormRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/quan-huyen-tsn/routes/quan-huyen-tsn-form-route'))
+
+// Phường Xã TSN module routes
+const PhuongXaTSNListRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/phuong-xa-tsn/routes/phuong-xa-tsn-list-route'))
+const PhuongXaTSNDetailRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/phuong-xa-tsn/routes/phuong-xa-tsn-detail-route'))
+const PhuongXaTSNFormRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/phuong-xa-tsn/routes/phuong-xa-tsn-form-route'))
+
+// Tỉnh thành sau sát nhập - Tỉnh thành SSN module routes
+const TinhThanhSSNListRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/tinh-thanh-ssn/routes/tinh-thanh-ssn-list-route'))
+const TinhThanhSSNDetailRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/tinh-thanh-ssn/routes/tinh-thanh-ssn-detail-route'))
+const TinhThanhSSNFormRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/tinh-thanh-ssn/routes/tinh-thanh-ssn-form-route'))
+
+// Phường xã SNN module routes
+const PhuongXaSNNListRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/phuong-xa-snn/routes/phuong-xa-snn-list-route'))
+const PhuongXaSNNDetailRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/phuong-xa-snn/routes/phuong-xa-snn-detail-route'))
+const PhuongXaSNNFormRoute = lazy(() => import('@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/phuong-xa-snn/routes/phuong-xa-snn-form-route'))
+
 // Kế hoạch 168 module routes - Dashboard
 const KeHoach168DashboardRoute = lazy(() => import('@/features/cong-viec/tong-quan/ke-hoach-168/routes/ke-hoach-168-dashboard-route'))
 
@@ -619,6 +644,152 @@ export const routes: RouteConfig[] = [
   {
     path: '/he-thong/phan-quyen',
     element: PhanQuyenListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Tỉnh thành trước sát nhập - Tỉnh thành TSN routes
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/he-thong/tinh-thanh-tsn/moi',
+    element: TinhThanhTSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/tinh-thanh-tsn/:id/sua',
+    element: TinhThanhTSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/he-thong/tinh-thanh-tsn/:id',
+    element: TinhThanhTSNDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/he-thong/tinh-thanh-tsn',
+    element: TinhThanhTSNListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Quận huyện TSN routes
+  {
+    path: '/he-thong/quan-huyen-tsn/moi',
+    element: QuanHuyenTSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/quan-huyen-tsn/:id/sua',
+    element: QuanHuyenTSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/quan-huyen-tsn/:id',
+    element: QuanHuyenTSNDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/quan-huyen-tsn',
+    element: QuanHuyenTSNListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Phường Xã TSN routes
+  {
+    path: '/he-thong/phuong-xa-tsn/moi',
+    element: PhuongXaTSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/phuong-xa-tsn/:id/sua',
+    element: PhuongXaTSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/phuong-xa-tsn/:id',
+    element: PhuongXaTSNDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/phuong-xa-tsn',
+    element: PhuongXaTSNListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Tỉnh thành sau sát nhập - Tỉnh thành SSN module routes
+  {
+    path: '/he-thong/tinh-thanh-ssn/:id/sua',
+    element: TinhThanhSSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/tinh-thanh-ssn/moi',
+    element: TinhThanhSSNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/tinh-thanh-ssn/:id',
+    element: TinhThanhSSNDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/tinh-thanh-ssn',
+    element: TinhThanhSSNListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  // Phường xã SNN module routes
+  {
+    path: '/he-thong/phuong-xa-snn/:id/sua',
+    element: PhuongXaSNNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/phuong-xa-snn/moi',
+    element: PhuongXaSNNFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/phuong-xa-snn/:id',
+    element: PhuongXaSNNDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  {
+    path: '/he-thong/phuong-xa-snn',
+    element: PhuongXaSNNListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore',

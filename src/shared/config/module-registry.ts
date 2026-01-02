@@ -23,6 +23,11 @@ import { quyHTBHTheoThangConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-han
 import { phieuDeXuatBanHangConfig } from "@/features/kinh-doanh/quy-ho-tro-ban-hang/phieu-de-xuat-ban-hang/config"
 import { nhomApDoanhSoConfig } from "@/features/he-thong/so-do/nhom-ap-doanh-so/config"
 import { dangKyDoanhSoConfig } from "@/features/he-thong/dang-ky/dang-ky-doanh-so/config"
+import { tinhThanhTSNConfig } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/tinh-thanh-tsn/config"
+import { quanHuyenTSNConfig } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/quan-huyen-tsn/config"
+import { phuongXaTSNConfig } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/phuong-xa-tsn/config"
+import { tinhThanhSSNConfig } from "@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/tinh-thanh-ssn/config"
+import { phuongXaSNNConfig } from "@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/phuong-xa-snn/config"
 
 /**
  * Registry class for managing module configurations
@@ -124,6 +129,11 @@ moduleRegistry.register(quyHTBHTheoThangConfig)
 moduleRegistry.register(phieuDeXuatBanHangConfig)
 moduleRegistry.register(nhomApDoanhSoConfig)
 moduleRegistry.register(dangKyDoanhSoConfig)
+moduleRegistry.register(tinhThanhTSNConfig)
+moduleRegistry.register(quanHuyenTSNConfig)
+moduleRegistry.register(phuongXaTSNConfig)
+moduleRegistry.register(tinhThanhSSNConfig)
+moduleRegistry.register(phuongXaSNNConfig)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {
