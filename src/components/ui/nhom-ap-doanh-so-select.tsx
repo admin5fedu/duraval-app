@@ -111,7 +111,7 @@ export function NhomApDoanhSoSelect({
                     aria-expanded={open}
                     disabled={disabled}
                     className={cn(
-                        "w-full justify-between font-normal",
+                        "w-full justify-between",
                         !value && "text-muted-foreground",
                         className
                     )}

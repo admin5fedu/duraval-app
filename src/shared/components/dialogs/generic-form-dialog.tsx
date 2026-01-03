@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog"
 import { GenericFormView, FormSection } from "@/shared/components/forms/generic-form-view"
 import { z } from "zod"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { ActionGroup } from "@/shared/components/actions"
 import { useState, useRef, useEffect } from "react"
 
@@ -113,7 +112,7 @@ export function GenericFormDialog<T extends z.ZodType<any, any>>({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent 
-                className="!max-w-[1200px] !w-[90vw] max-w-[90vw] max-h-[95vh] p-0 flex flex-col"
+                className="!max-w-[1200px] !w-[90vw] max-w-[90vw] h-[90vh] max-h-[95vh] p-0 flex flex-col overflow-hidden"
                 onInteractOutside={(e) => e.preventDefault()}
             >
                 <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
@@ -123,28 +122,27 @@ export function GenericFormDialog<T extends z.ZodType<any, any>>({
                     )}
                 </DialogHeader>
                 
-                <div className="flex-1 overflow-hidden min-h-0">
-                    <ScrollArea className="h-full">
-                        <div className="px-6 py-4">
-                            <div ref={formRef}>
-                                <GenericFormView
-                                    title=""
-                                    subtitle=""
-                                    schema={schema}
-                                    defaultValues={defaultValues}
-                                    sections={sections}
-                                    onSubmit={handleSubmit}
-                                    onSuccess={handleSuccess}
-                                    onCancel={handleCancel}
-                                    submitLabel={submitLabel}
-                                    successMessage={successMessage}
-                                    errorMessage={errorMessage}
-                                    hideHeader={true}
-                                    hideFooter={true}
-                                />
-                            </div>
+                {/* Scrollable Form Body */}
+                <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 px-6 py-4">
+                        <div ref={formRef}>
+                            <GenericFormView
+                                title=""
+                                subtitle=""
+                                schema={schema}
+                                defaultValues={defaultValues}
+                                sections={sections}
+                                onSubmit={handleSubmit}
+                                onSuccess={handleSuccess}
+                                onCancel={handleCancel}
+                                submitLabel={submitLabel}
+                                successMessage={successMessage}
+                                errorMessage={errorMessage}
+                                hideHeader={true}
+                                hideFooter={true}
+                            />
                         </div>
-                    </ScrollArea>
+                    </div>
                 </div>
 
                 <DialogFooter className="px-6 py-4 border-t flex-shrink-0 bg-background">

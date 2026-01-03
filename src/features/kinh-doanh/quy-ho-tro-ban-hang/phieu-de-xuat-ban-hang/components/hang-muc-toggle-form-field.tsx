@@ -23,8 +23,9 @@ function HangMucToggleFormField({
   onChange,
   disabled,
   id,
+  name,
   onBlur,
-}) {
+}: HangMucToggleFormFieldProps) {
   const { watch } = useFormContext()
   const loaiPhieuIdStr = watch("loai_phieu_id")
   const loaiPhieuId = loaiPhieuIdStr ? Number(loaiPhieuIdStr) : null
@@ -50,11 +51,12 @@ function HangMucToggleFormField({
 
   return (
     <ToggleButtonFormField
+      id={id}
+      name={name}
       value={value || ""}
       onChange={(val) => onChange(val || null)}
       options={options}
       disabled={disabled || !loaiPhieuId}
-      id={id}
       onBlur={onBlur}
     />
   )

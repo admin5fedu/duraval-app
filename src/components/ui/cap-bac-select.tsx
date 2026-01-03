@@ -127,7 +127,7 @@ function CapBacSelect({
                     disabled={disabled}
                     onBlur={onBlur}
                     className={cn(
-                        "w-full justify-between font-normal",
+                        "w-full justify-between",
                         !value && "text-muted-foreground",
                         className
                     )}

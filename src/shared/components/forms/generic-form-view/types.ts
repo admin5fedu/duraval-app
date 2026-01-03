@@ -14,7 +14,7 @@ export interface FormFieldConfig {
     type?: FieldType
     placeholder?: string
     description?: string
-    options?: { label: string; value: string }[] // For select
+    options?: Array<{ label: string; value: string; disabled?: boolean }> // For select/toggle
     colSpan?: number // 1, 2, 3
     required?: boolean
     disabled?: boolean
@@ -23,6 +23,7 @@ export interface FormFieldConfig {
     imageFolder?: string // Cloudinary folder
     imageMaxSize?: number // Max size in MB
     displayName?: string // For avatar fallback initials
+    multiple?: boolean // For image type - allow multiple images
     // For multiple-image type
     // Uses same imageFolder and imageMaxSize as image type
     // For phong-ban-select and cap-bac-select type

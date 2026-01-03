@@ -76,22 +76,22 @@ export default function CongViecPage() {
       icon: School,
       items: [
         {
-          title: "Danh mục",
-          href: "/cong-viec/dao-tao/danh-muc",
+          title: "Các chuyên đề",
+          href: "/cong-viec/nhom-chuyen-de",
           icon: FolderOpen,
           description: "Quản lý danh mục các khóa đào tạo và chương trình học tập.",
         },
         {
           title: "Kỳ thi",
-          href: "/cong-viec/dao-tao/ky-thi",
+          href: "/cong-viec/ky-thi",
           icon: ClipboardList,
           description: "Tổ chức và quản lý các kỳ thi, đánh giá năng lực nhân viên.",
         },
         {
           title: "Bài thi",
-          href: "/cong-viec/dao-tao/bai-thi",
+          href: "/cong-viec/bai-thi",
           icon: FileCheck,
-          description: "Tạo và quản lý đề thi, câu hỏi và kết quả bài thi.",
+          description: "Xem và quản lý kết quả bài thi của nhân viên.",
         },
       ]
     },

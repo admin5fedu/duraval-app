@@ -35,7 +35,8 @@ function HangMucToggleButtons({ value, onChange, disabled }: { value?: string; o
     onChange(String(val))
   }
   
-  return <ToggleButtonGroup id={formItemId} value={value} onChange={handleChange} options={options} disabled={disabled} />
+  const { name } = useFormField()
+  return <ToggleButtonGroup id={formItemId} name={name} value={value} onChange={handleChange} options={options} disabled={disabled} />
 }
 
 const getSections = (): FormSection[] => [

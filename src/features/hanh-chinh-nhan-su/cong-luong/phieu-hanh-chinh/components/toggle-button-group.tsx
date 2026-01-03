@@ -10,6 +10,8 @@ interface ToggleButtonGroupProps {
     options: Array<{ label: string; value: string | number }>
     disabled?: boolean
     className?: string
+    id?: string
+    name?: string
 }
 
 /**
@@ -26,6 +28,8 @@ export function ToggleButtonGroup({
     options,
     disabled = false,
     className,
+    id,
+    name,
 }: ToggleButtonGroupProps) {
     // Normalize value for comparison (handle both string and number)
     const normalizedValue = React.useMemo(() => {
@@ -35,6 +39,17 @@ export function ToggleButtonGroup({
 
     return (
         <div className={cn("flex flex-wrap gap-2", className)}>
+            {/* Hidden input để browser có thể associate với label và form autofill */}
+            <input
+                type="hidden"
+                id={id}
+                name={name}
+                value={normalizedValue !== undefined ? String(normalizedValue) : ""}
+                aria-hidden="true"
+                tabIndex={-1}
+                readOnly
+            />
+            
             {options.map((option) => {
                 // Compare values (handle number vs string)
                 const isSelected = normalizedValue !== undefined && (

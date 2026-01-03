@@ -18,6 +18,7 @@ import { useState, useImperativeHandle, forwardRef, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useHangMucByLoaiPhieuId } from "../../hang-muc/hooks/use-hang-muc"
 import { EmbeddedListSection, type EmbeddedListColumn } from "@/shared/components/data-display/embedded-list-section"
+import { EmbeddedListFullViewDialog } from "@/shared/components/data-display/embedded-list-full-view-dialog"
 import { GenericDetailDialog } from "@/shared/components/dialogs/generic-detail-dialog"
 import { GenericFormDialog } from "@/shared/components/dialogs/generic-form-dialog"
 import { GenericDeleteDialog } from "@/shared/components/dialogs/generic-delete-dialog"
@@ -27,7 +28,8 @@ import type { DetailSection } from "@/shared/components"
 import type { FormSection } from "@/shared/components/forms/generic-form-view"
 import { useCreateHangMuc, useUpdateHangMuc, useDeleteHangMuc } from "../../hang-muc/hooks/use-hang-muc-mutations"
 import { Button } from "@/components/ui/button"
-import { Tag } from "lucide-react"
+import { Tag, Maximize2 } from "lucide-react"
+import { sectionTitleClass } from "@/shared/utils/section-styles"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { hangMucConfig } from "../../hang-muc/config"
@@ -56,6 +58,7 @@ function HangMucSection({ loaiPhieuId }, ref) {
     const [selectedHangMuc, setSelectedHangMuc] = useState<HangMuc | null>(null)
     const [isEditMode, setIsEditMode] = useState(false)
     const [hangMucToView, setHangMucToView] = useState<HangMuc | null>(null)
+    const [expandDialogOpen, setExpandDialogOpen] = useState(false)
 
     const createMutation = useCreateHangMuc()
     const updateMutation = useUpdateHangMuc()
@@ -245,33 +248,79 @@ function HangMucSection({ loaiPhieuId }, ref) {
 
     return (
         <>
-            <EmbeddedListSection
-                title="Danh Sách Hạng Mục"
-                titleIcon={Tag}
-                titleClassName="text-primary"
-                data={hangMucList || []}
-                columns={columns}
-                isLoading={isLoading}
-                emptyMessage="Chưa có hạng mục nào"
-                onAdd={handleAdd}
-                addLabel="Thêm Hạng Mục"
-                onRowClick={handleRowClick}
-                onView={handleEyeClick}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                getItemId={(item) => item.id!}
-                getItemName={(item) => item.ten_hang_muc}
-                compactMode={true}
-                compactRowCount={5}
-                showMoreIndicator={true}
-                enableExpandView={true}
-                expandDialogTitle="Danh Sách Đầy Đủ Hạng Mục"
-                showItemCount={true}
-                totalCount={hangMucList?.length || 0}
-                enableSearch={true}
-                searchPlaceholder="Tìm kiếm hạng mục..."
-                searchFields={["ten_hang_muc", "mo_ta"]}
-            />
+            {/* Custom Header for "Danh Sách Hạng Mục" */}
+            <div className="space-y-3 sm:space-y-4 print:space-y-2 print:break-inside-avoid scroll-mt-28">
+                <div className="flex items-center justify-between gap-2 sm:gap-2.5 px-1">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                        <div className="p-1.5 rounded-md bg-primary/10 print:bg-transparent print:border print:border-primary">
+                            <Tag className="h-4 w-4 text-primary shrink-0" />
+                        </div>
+                        <h3 className={sectionTitleClass("font-semibold tracking-tight text-primary")}>
+                            Danh Sách Hạng Mục
+                        </h3>
+                    </div>
+                    <div className="flex items-center gap-2 print:hidden">
+                        {(hangMucList || []).length > 0 && (
+                            <Button
+                                onClick={() => setExpandDialogOpen(true)}
+                                size="sm"
+                                variant="outline"
+                            >
+                                <Maximize2 className="mr-2 h-4 w-4" />
+                                Xem tất cả
+                            </Button>
+                        )}
+                        <Button onClick={handleAdd} size="sm">
+                            Thêm Hạng Mục
+                        </Button>
+                    </div>
+                </div>
+                {/* Embedded List Section (without its own header) */}
+                <div className="mt-4">
+                    <EmbeddedListSection
+                        title=""
+                        data={hangMucList || []}
+                        columns={columns}
+                        isLoading={isLoading}
+                        emptyMessage="Chưa có hạng mục nào"
+                        onRowClick={handleRowClick}
+                        onView={handleEyeClick}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        showActions={true}
+                        getItemId={(item) => item.id!}
+                        getItemName={(item) => item.ten_hang_muc}
+                        compactMode={true}
+                        compactRowCount={5}
+                        showMoreIndicator={false}
+                        enableExpandView={false}
+                        defaultSortField="tg_tao"
+                        defaultSortDirection="desc"
+                    />
+                </div>
+            </div>
+
+            {/* Custom Expand Dialog */}
+            {expandDialogOpen && (
+                <EmbeddedListFullViewDialog
+                    open={expandDialogOpen}
+                    onOpenChange={setExpandDialogOpen}
+                    title="Danh Sách Đầy Đủ Hạng Mục"
+                    data={hangMucList || []}
+                    columns={columns}
+                    onRowClick={handleRowClick}
+                    onView={handleEyeClick}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    showActions={true}
+                    getItemId={(item) => item.id!}
+                    defaultSortField="tg_tao"
+                    defaultSortDirection="desc"
+                    enableSearch={true}
+                    searchPlaceholder="Tìm kiếm hạng mục..."
+                    searchFields={["ten_hang_muc", "mo_ta"]}
+                />
+            )}
 
             {/* Detail Dialog */}
             {selectedHangMuc && (

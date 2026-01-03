@@ -34,7 +34,8 @@ function CanHcnsDuyetToggleButtons({ value, onChange, disabled }: { value?: stri
     onChange(String(val))
   }
   
-  return <ToggleButtonGroup id={formItemId} value={value} onChange={handleChange} options={options} disabled={disabled} />
+  const { name } = useFormField()
+  return <ToggleButtonGroup id={formItemId} name={name} value={value} onChange={handleChange} options={options} disabled={disabled} />
 }
 
 // Custom component for Ca Tối toggle buttons
@@ -58,7 +59,8 @@ function CaToiToggleButtons({ value, onChange, disabled }: { value?: string; onC
     onChange(String(val))
   }
   
-  return <ToggleButtonGroup id={formItemId} value={value} onChange={handleChange} options={options} disabled={disabled} />
+  const { name } = useFormField()
+  return <ToggleButtonGroup id={formItemId} name={name} value={value} onChange={handleChange} options={options} disabled={disabled} />
 }
 
 const getSections = (): FormSection[] => [

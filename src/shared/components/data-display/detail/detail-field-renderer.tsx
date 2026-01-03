@@ -72,6 +72,11 @@ export function DetailFieldRenderer({ field }: { field: DetailField }) {
     return <span className={cn("text-base text-foreground", bodyTextClass())}>{formatted}</span>
   }
 
+  // ✅ Nếu value là ReactElement, render trực tiếp
+  if (React.isValidElement(field.value)) {
+    return field.value
+  }
+
   // ✅ Empty State Handling: Hiển thị "-" cho giá trị rỗng
   if (field.value === null || field.value === undefined || field.value === '') {
     return <span className={cn("text-muted-foreground", bodyTextClass())}>-</span>

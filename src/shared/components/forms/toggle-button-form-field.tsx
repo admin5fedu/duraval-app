@@ -34,6 +34,7 @@ function ToggleButtonFormField({
   disabled = false,
   className,
   id,
+  name,
   onBlur,
 }, ref) {
   // Normalize value to ensure it matches option values exactly
@@ -48,12 +49,19 @@ function ToggleButtonFormField({
   return (
     <div 
       ref={ref}
-      id={id}
-      onBlur={onBlur}
-      role="group"
-      aria-labelledby={id ? `${id}-label` : undefined}
       className={cn("flex flex-wrap gap-2", className)}
     >
+      {/* Hidden input để browser có thể associate với label và form autofill */}
+      <input
+        type="hidden"
+        id={id}
+        name={name}
+        value={normalizedValue}
+        aria-hidden="true"
+        tabIndex={-1}
+        readOnly
+      />
+      
       {options.map((option) => {
         const isSelected = normalizedValue === option.value
         
@@ -78,6 +86,8 @@ function ToggleButtonFormField({
                 : "bg-background text-foreground hover:bg-accent hover:text-accent-foreground border-2 border-input",
               disabled && "opacity-50 cursor-not-allowed"
             )}
+            aria-pressed={isSelected}
+            aria-label={`${option.label}${isSelected ? ' (đã chọn)' : ''}`}
           >
             {isSelected && (
               <Check className="h-3.5 w-3.5" />

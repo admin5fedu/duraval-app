@@ -28,6 +28,9 @@ import { quanHuyenTSNConfig } from "@/features/he-thong/khac/tinh-thanh-truoc-sa
 import { phuongXaTSNConfig } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/phuong-xa-tsn/config"
 import { tinhThanhSSNConfig } from "@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/tinh-thanh-ssn/config"
 import { phuongXaSNNConfig } from "@/features/he-thong/khac/tinh-thanh-sau-sat-nhap/phuong-xa-snn/config"
+import { nhomChuyenDeConfig } from "@/features/cong-viec/dao-tao/nhom-chuyen-de/config"
+import { chuyenDeConfig } from "@/features/cong-viec/dao-tao/chuyen-de/config"
+import { cauHoiConfig } from "@/features/cong-viec/dao-tao/cau-hoi/config"
 
 /**
  * Registry class for managing module configurations
@@ -134,6 +137,9 @@ moduleRegistry.register(quanHuyenTSNConfig)
 moduleRegistry.register(phuongXaTSNConfig)
 moduleRegistry.register(tinhThanhSSNConfig)
 moduleRegistry.register(phuongXaSNNConfig)
+moduleRegistry.register(nhomChuyenDeConfig)
+moduleRegistry.register(chuyenDeConfig)
+moduleRegistry.register(cauHoiConfig)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {

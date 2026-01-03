@@ -17,11 +17,13 @@
 import { useMemo, useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { EmbeddedListSection, type EmbeddedListColumn } from "@/shared/components/data-display/embedded-list-section"
+import { EmbeddedListFullViewDialog } from "@/shared/components/data-display/embedded-list-full-view-dialog"
 import { GenericDetailDialog } from "@/shared/components/dialogs/generic-detail-dialog"
 import { GenericFormDialog } from "@/shared/components/dialogs/generic-form-dialog"
 import { GenericDeleteDialog } from "@/shared/components/dialogs/generic-delete-dialog"
 import { ConfirmDialog } from "@/shared/components/dialogs/confirm-dialog"
-import { FileText } from "lucide-react"
+import { FileText, Maximize2 } from "lucide-react"
+import { sectionTitleClass } from "@/shared/utils/section-styles"
 import { TaiLieuBieuMau, taiLieuBieuMauSchema } from "../schema"
 import { taiLieuBieuMauConfig } from "../config"
 import { useCreateTaiLieuBieuMau, useUpdateTaiLieuBieuMau, useDeleteTaiLieuBieuMau } from "../hooks"
@@ -72,6 +74,7 @@ export function ChildrenTaiLieuSection({
     const [selectedChild, setSelectedChild] = useState<TaiLieuBieuMau | null>(null)
     const [isEditMode, setIsEditMode] = useState(false)
     const [childToView, setChildToView] = useState<TaiLieuBieuMau | null>(null)
+    const [expandDialogOpen, setExpandDialogOpen] = useState(false)
 
     // State for form field dependencies
     const [selectedHangMuc, setSelectedHangMuc] = useState<string | null>(parentHangMuc)
@@ -471,39 +474,80 @@ export function ChildrenTaiLieuSection({
 
     return (
         <>
-            <EmbeddedListSection
-                title="Tài Liệu Con"
-                titleIcon={FileText}
-                titleClassName="text-primary"
-                data={children}
-                columns={columns}
-                isLoading={isLoading}
-                emptyMessage="Chưa có tài liệu con nào"
-                emptyStateIcon={FileText}
-                onAdd={handleAdd}
-                addLabel="Thêm tài liệu con"
-                addButtonVariant="default"
-                onRowClick={handleRowClick}
-                onView={handleEyeClick}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                showActions={true}
-                getItemId={(item) => item.id!}
-                getItemName={(item) => item.ten_tai_lieu || item.ma_tai_lieu || `ID: ${item.id}`}
-                defaultSortField="tg_tao"
-                defaultSortDirection="desc"
-                maxHeight="500px"
-                compactMode={true}
-                compactRowCount={5}
-                showMoreIndicator={true}
-                enableExpandView={true}
-                expandDialogTitle="Danh Sách Đầy Đủ Tài Liệu Con"
-                showItemCount={true}
-                totalCount={children.length}
-                enableSearch={true}
-                searchPlaceholder="Tìm kiếm tài liệu con..."
-                searchFields={["ten_tai_lieu", "ma_tai_lieu", "mo_ta"]}
-            />
+            {/* Custom Header for "Tài Liệu Con" */}
+            <div className="space-y-3 sm:space-y-4 print:space-y-2 print:break-inside-avoid scroll-mt-28">
+                <div className="flex items-center justify-between gap-2 sm:gap-2.5 px-1">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                        <div className="p-1.5 rounded-md bg-primary/10 print:bg-transparent print:border print:border-primary">
+                            <FileText className="h-4 w-4 text-primary shrink-0" />
+                        </div>
+                        <h3 className={sectionTitleClass("font-semibold tracking-tight text-primary")}>
+                            Tài Liệu Con
+                        </h3>
+                    </div>
+                    <div className="flex items-center gap-2 print:hidden">
+                        {children.length > 0 && (
+                            <Button
+                                onClick={() => setExpandDialogOpen(true)}
+                                size="sm"
+                                variant="outline"
+                            >
+                                <Maximize2 className="mr-2 h-4 w-4" />
+                                Xem tất cả
+                            </Button>
+                        )}
+                        <Button onClick={handleAdd} size="sm">
+                            Thêm tài liệu con
+                        </Button>
+                    </div>
+                </div>
+                {/* Embedded List Section (without its own header) */}
+                <div className="mt-4">
+                    <EmbeddedListSection
+                        title=""
+                        data={children}
+                        columns={columns}
+                        isLoading={isLoading}
+                        emptyMessage="Chưa có tài liệu con nào"
+                        emptyStateIcon={FileText}
+                        onRowClick={handleRowClick}
+                        onView={handleEyeClick}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        showActions={true}
+                        getItemId={(item) => item.id!}
+                        getItemName={(item) => item.ten_tai_lieu || item.ma_tai_lieu || `ID: ${item.id}`}
+                        compactMode={true}
+                        compactRowCount={5}
+                        showMoreIndicator={false}
+                        enableExpandView={false}
+                        defaultSortField="tg_tao"
+                        defaultSortDirection="desc"
+                    />
+                </div>
+            </div>
+
+            {/* Custom Expand Dialog */}
+            {expandDialogOpen && (
+                <EmbeddedListFullViewDialog
+                    open={expandDialogOpen}
+                    onOpenChange={setExpandDialogOpen}
+                    title="Danh Sách Đầy Đủ Tài Liệu Con"
+                    data={children}
+                    columns={columns}
+                    onRowClick={handleRowClick}
+                    onView={handleEyeClick}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    showActions={true}
+                    getItemId={(item) => item.id!}
+                    defaultSortField="tg_tao"
+                    defaultSortDirection="desc"
+                    enableSearch={true}
+                    searchPlaceholder="Tìm kiếm tài liệu con..."
+                    searchFields={["ten_tai_lieu", "ma_tai_lieu", "mo_ta"]}
+                />
+            )}
 
             {/* Detail Dialog - Click dòng */}
             {selectedChild && (

@@ -18,6 +18,7 @@ import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useNguoiThanByMaNhanVien } from "../../nguoi-than/hooks/use-nguoi-than"
 import { EmbeddedListSection, type EmbeddedListColumn } from "@/shared/components/data-display/embedded-list-section"
+import { EmbeddedListFullViewDialog } from "@/shared/components/data-display/embedded-list-full-view-dialog"
 import { GenericDetailDialog } from "@/shared/components/dialogs/generic-detail-dialog"
 import { GenericFormDialog } from "@/shared/components/dialogs/generic-form-dialog"
 import { GenericDeleteDialog } from "@/shared/components/dialogs/generic-delete-dialog"
@@ -25,11 +26,13 @@ import { ConfirmDialog } from "@/shared/components/dialogs/confirm-dialog"
 import { NguoiThan, nguoiThanSchema } from "../../nguoi-than/schema"
 import type { DetailSection } from "@/shared/components"
 import type { FormSection } from "@/shared/components/forms/generic-form-view"
+import { z } from "zod"
 import { useCreateNguoiThan, useUpdateNguoiThan, useDeleteNguoiThan } from "../../nguoi-than/hooks/use-nguoi-than-mutations"
 import { useNhanSu } from "../hooks/use-nhan-su"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { UserRound } from "lucide-react"
+import { UserRound, Maximize2 } from "lucide-react"
+import { sectionTitleClass } from "@/shared/utils/section-styles"
 import { getEnumBadgeClass } from "@/shared/utils/enum-color-registry"
 import { nguoiThanConfig } from "../../nguoi-than/config"
 
@@ -51,6 +54,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
     const [selectedRelative, setSelectedRelative] = useState<NguoiThan | null>(null)
     const [isEditMode, setIsEditMode] = useState(false)
     const [relativeToView, setRelativeToView] = useState<NguoiThan | null>(null)
+    const [expandDialogOpen, setExpandDialogOpen] = useState(false)
 
     const createMutation = useCreateNguoiThan()
     const updateMutation = useUpdateNguoiThan()
@@ -106,34 +110,35 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         setDeleteDialogOpen(true)
     }
 
-    const handleFormSubmit = async (data: Partial<NguoiThan> & { ho_va_ten: string; moi_quan_he: string }) => {
+    // Handle form submit - Đồng nhất với nguoi-than-form-view.tsx
+    const handleFormSubmit = async (data: any) => {
+        // Convert ma_nhan_vien from string to number
+        const maNhanVienValue = data.ma_nhan_vien
+        if (!maNhanVienValue || maNhanVienValue === '') {
+            throw new Error("Mã nhân viên là bắt buộc")
+        }
+        
+        const maNhanVienNumber = Number(maNhanVienValue)
+        if (isNaN(maNhanVienNumber) || maNhanVienNumber <= 0) {
+            throw new Error("Mã nhân viên phải là số nguyên dương")
+        }
+        
         // Sanitize data: convert empty strings to null for optional fields
-        const sanitizedData = {
+        const submitData = {
             ...data,
+            ma_nhan_vien: maNhanVienNumber,
             ngay_sinh: data.ngay_sinh && data.ngay_sinh.trim() !== "" ? data.ngay_sinh : null,
             so_dien_thoai: data.so_dien_thoai && data.so_dien_thoai.trim() !== "" ? data.so_dien_thoai : null,
             ghi_chu: data.ghi_chu && data.ghi_chu.trim() !== "" ? data.ghi_chu : null,
         }
 
         if (isEditMode && selectedRelative) {
-            const { id: _id, tg_tao: _tg_tao, ma_nhan_vien: _ma_nhan_vien, ...submitData } = sanitizedData
-            void _id
-            void _tg_tao
-            void _ma_nhan_vien
             await updateMutation.mutateAsync({
                 id: selectedRelative.id!,
                 input: submitData
             })
         } else {
-            const { id: _id, tg_tao: _tg_tao, tg_cap_nhat: _tg_cap_nhat, ma_nhan_vien: _ma_nhan_vien, ...submitData } = sanitizedData
-            void _id
-            void _tg_tao
-            void _tg_cap_nhat
-            void _ma_nhan_vien
-            await createMutation.mutateAsync({
-                ...submitData,
-                ma_nhan_vien: maNhanVien
-            })
+            await createMutation.mutateAsync(submitData)
         }
     }
 
@@ -175,22 +180,28 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         ]
     }
 
-    // Prepare form sections
+    // Prepare form sections - Đồng nhất với nguoi-than-form-view.tsx
     const formSections: FormSection[] = [
         {
-            title: "Thông Tin Cơ Bản",
+            title: "Người thân",
             fields: [
                 { 
-                    name: "ho_va_ten", 
-                    label: "Họ và Tên", 
-                    required: true, 
-                    placeholder: "Nguyễn Văn A" 
-                },
-                { 
-                    name: "moi_quan_he", 
-                    label: "Mối Quan Hệ", 
+                    name: "ma_nhan_vien", 
+                    label: "Nhân Viên", 
+                    type: "select",
+                    options: (employees || []).map(emp => ({
+                        label: `${emp.ma_nhan_vien} - ${emp.ho_ten}`,
+                        value: String(emp.ma_nhan_vien)
+                    })),
                     required: true,
+                    disabled: true // Luôn disable vì đã chọn từ nhân sự cha
+                },
+                { name: "ho_va_ten", label: "Họ và Tên", required: true },
+                {
+                    name: "moi_quan_he",
+                    label: "Mối Quan Hệ",
                     type: "toggle",
+                    required: true,
                     options: [
                         { label: "Cha", value: "Cha" },
                         { label: "Mẹ", value: "Mẹ" },
@@ -198,7 +209,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
                         { label: "Con", value: "Con" },
                         { label: "Anh/Chị/Em", value: "Anh/Chị/Em" },
                         { label: "Khác", value: "Khác" },
-                    ]
+                    ],
                 },
                 { name: "ngay_sinh", label: "Ngày Sinh", type: "date" },
                 { name: "so_dien_thoai", label: "Số Điện Thoại" },
@@ -207,7 +218,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
         {
             title: "Ghi Chú",
             fields: [
-                { name: "ghi_chu", label: "Ghi Chú", type: "textarea" },
+                { name: "ghi_chu", label: "Ghi Chú", type: "textarea", colSpan: 2 },
             ]
         }
     ]
@@ -261,37 +272,79 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
 
     return (
         <>
-            <EmbeddedListSection
-                title="Danh Sách Người Thân"
-                titleIcon={UserRound}
-                titleClassName="text-primary"
-                data={relatives || []}
-                columns={columns}
-                isLoading={isLoading}
-                emptyMessage="Chưa có thông tin người thân"
-                onAdd={handleAdd}
-                addLabel="Thêm Người Thân"
-                onRowClick={handleRowClick}   // click dòng -> popup detail
-                onView={handleEyeClick}       // click mắt -> confirm + redirect
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                getItemId={(item) => item.id!}
-                getItemName={(item) => item.ho_va_ten}
-                // Compact mode: chỉ hiển thị 5 dòng đầu
-                compactMode={true}
-                compactRowCount={5}
-                showMoreIndicator={true}
-                // Expand view: mở dialog fullscreen
-                enableExpandView={true}
-                expandDialogTitle="Danh Sách Đầy Đủ Người Thân"
-                // Item count
-                showItemCount={true}
-                totalCount={relatives?.length || 0}
-                // Search trong expand dialog
-                enableSearch={true}
-                searchPlaceholder="Tìm kiếm người thân..."
-                searchFields={["ho_va_ten", "so_dien_thoai"]}
-            />
+            {/* Custom Header for "Danh Sách Người Thân" */}
+            <div className="space-y-3 sm:space-y-4 print:space-y-2 print:break-inside-avoid scroll-mt-28">
+                <div className="flex items-center justify-between gap-2 sm:gap-2.5 px-1">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                        <div className="p-1.5 rounded-md bg-primary/10 print:bg-transparent print:border print:border-primary">
+                            <UserRound className="h-4 w-4 text-primary shrink-0" />
+                        </div>
+                        <h3 className={sectionTitleClass("font-semibold tracking-tight text-primary")}>
+                            Danh Sách Người Thân
+                        </h3>
+                    </div>
+                    <div className="flex items-center gap-2 print:hidden">
+                        {(relatives || []).length > 0 && (
+                            <Button
+                                onClick={() => setExpandDialogOpen(true)}
+                                size="sm"
+                                variant="outline"
+                            >
+                                <Maximize2 className="mr-2 h-4 w-4" />
+                                Xem tất cả
+                            </Button>
+                        )}
+                        <Button onClick={handleAdd} size="sm">
+                            Thêm Người Thân
+                        </Button>
+                    </div>
+                </div>
+                {/* Embedded List Section (without its own header) */}
+                <div className="mt-4">
+                    <EmbeddedListSection
+                        title=""
+                        data={relatives || []}
+                        columns={columns}
+                        isLoading={isLoading}
+                        emptyMessage="Chưa có thông tin người thân"
+                        onRowClick={handleRowClick}
+                        onView={handleEyeClick}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        showActions={true}
+                        getItemId={(item) => item.id!}
+                        getItemName={(item) => item.ho_va_ten}
+                        compactMode={true}
+                        compactRowCount={5}
+                        showMoreIndicator={false}
+                        enableExpandView={false}
+                        defaultSortField="tg_tao"
+                        defaultSortDirection="desc"
+                    />
+                </div>
+            </div>
+
+            {/* Custom Expand Dialog */}
+            {expandDialogOpen && (
+                <EmbeddedListFullViewDialog
+                    open={expandDialogOpen}
+                    onOpenChange={setExpandDialogOpen}
+                    title="Danh Sách Đầy Đủ Người Thân"
+                    data={relatives || []}
+                    columns={columns}
+                    onRowClick={handleRowClick}
+                    onView={handleEyeClick}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    showActions={true}
+                    getItemId={(item) => item.id!}
+                    defaultSortField="tg_tao"
+                    defaultSortDirection="desc"
+                    enableSearch={true}
+                    searchPlaceholder="Tìm kiếm người thân..."
+                    searchFields={["ho_va_ten", "so_dien_thoai"]}
+                />
+            )}
 
             {/* Detail Dialog - Click dòng hoặc từ actions */}
             {selectedRelative && (
@@ -344,13 +397,18 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
                 subtitle={isEditMode ? "Cập nhật thông tin người thân" : "Thêm thông tin người thân của nhân viên"}
                 schema={nguoiThanSchema.omit({ 
                     id: true, 
-                    ma_nhan_vien: true, 
                     tg_tao: true, 
                     tg_cap_nhat: true,
                     nguoi_tao: true
+                }).extend({
+                    ma_nhan_vien: z.union([
+                        z.number({ required_error: "Mã nhân viên là bắt buộc" }),
+                        z.string().min(1, "Mã nhân viên là bắt buộc")
+                    ])
                 })}
                 defaultValues={isEditMode && selectedRelative 
                     ? {
+                        ma_nhan_vien: String(selectedRelative.ma_nhan_vien),
                         ho_va_ten: selectedRelative.ho_va_ten,
                         moi_quan_he: selectedRelative.moi_quan_he,
                         ngay_sinh: selectedRelative.ngay_sinh || "",
@@ -358,6 +416,7 @@ export function RelativesSection({ maNhanVien }: RelativesSectionProps) {
                         ghi_chu: selectedRelative.ghi_chu || "",
                     }
                     : {
+                        ma_nhan_vien: String(maNhanVien),
                         ho_va_ten: "",
                         moi_quan_he: "",
                         ngay_sinh: "",

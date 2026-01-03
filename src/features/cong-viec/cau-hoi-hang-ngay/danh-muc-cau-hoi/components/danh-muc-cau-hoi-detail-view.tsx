@@ -7,6 +7,7 @@ import { Edit } from "lucide-react"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { useDanhMucCauHoiById } from "../hooks"
 import { DeleteDanhMucCauHoiButton } from "./delete-danh-muc-cau-hoi-button"
+import { LichDangSection } from "./lich-dang-section"
 import { danhMucCauHoiConfig } from "../config"
 import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
@@ -111,14 +112,18 @@ export function DanhMucCauHoiDetailView({ id, initialData, onEdit, onBack }: Dan
   )
 
   return (
-    <GenericDetailViewSimple
-      title={danhMucCauHoi.ten_nhom}
-      subtitle={danhMucCauHoi.mo_ta || "Danh mục câu hỏi hàng ngày"}
-      sections={sections}
-      backUrl={onBack ? undefined : danhMucCauHoiConfig.routePath}
-      onBack={onBack}
-      actions={actions}
-    />
+    <>
+      <GenericDetailViewSimple
+        title={danhMucCauHoi.ten_nhom}
+        subtitle={danhMucCauHoi.mo_ta || "Danh mục câu hỏi hàng ngày"}
+        sections={sections}
+        backUrl={onBack ? undefined : danhMucCauHoiConfig.routePath}
+        onBack={onBack}
+        actions={actions}
+      />
+      {/* Lịch Đăng Section */}
+      <LichDangSection danhMucCauHoiId={id} />
+    </>
   )
 }
 

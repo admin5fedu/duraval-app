@@ -9,6 +9,9 @@ import {
   Database,
   Percent,
   TrendingUp,
+  ShoppingBag,
+  Store,
+  Package,
 } from "lucide-react"
 
 export default function KinhDoanhPage() {
@@ -52,6 +55,24 @@ export default function KinhDoanhPage() {
           href: "/kinh-doanh/sale-ads/quy-dinh-ty-le",
           icon: Percent,
           description: "Quản lý quy định tỷ lệ.",
+        },
+      ]
+    },
+    {
+      title: "Chương trình bán hàng",
+      icon: ShoppingBag,
+      items: [
+        {
+          title: "Chương trình bán lẻ",
+          href: "#",
+          icon: Store,
+          description: "Quản lý chương trình bán lẻ.",
+        },
+        {
+          title: "Chương trình bán buôn",
+          href: "#",
+          icon: Package,
+          description: "Quản lý chương trình bán buôn.",
         },
       ]
     }

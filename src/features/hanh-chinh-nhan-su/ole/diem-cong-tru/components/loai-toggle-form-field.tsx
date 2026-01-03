@@ -22,6 +22,7 @@ export function LoaiToggleFormField({
     onChange,
     disabled,
     id,
+    name,
 }: LoaiToggleFormFieldProps) {
 
     // Fetch unique hang_muc values from nhom-diem-cong-tru table
@@ -71,6 +72,7 @@ export function LoaiToggleFormField({
     return (
         <ToggleButtonGroup
             id={id}
+            name={name}
             value={value || undefined}
             onChange={handleChange}
             options={options}

@@ -116,6 +116,31 @@ const CauTraLoiListRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-
 const CauTraLoiDetailRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-detail-route'))
 const CauTraLoiFormRoute = lazy(() => import('@/features/cong-viec/cau-hoi-hang-ngay/cau-tra-loi/routes/cau-tra-loi-form-route'))
 
+// Nhóm chuyên đề module routes
+const NhomChuyenDeListRoute = lazy(() => import('@/features/cong-viec/dao-tao/nhom-chuyen-de/routes/nhom-chuyen-de-list-route'))
+const NhomChuyenDeDetailRoute = lazy(() => import('@/features/cong-viec/dao-tao/nhom-chuyen-de/routes/nhom-chuyen-de-detail-route'))
+const NhomChuyenDeFormRoute = lazy(() => import('@/features/cong-viec/dao-tao/nhom-chuyen-de/routes/nhom-chuyen-de-form-route'))
+
+// Chuyên đề module routes
+const ChuyenDeListRoute = lazy(() => import('@/features/cong-viec/dao-tao/chuyen-de/routes/chuyen-de-list-route'))
+const ChuyenDeDetailRoute = lazy(() => import('@/features/cong-viec/dao-tao/chuyen-de/routes/chuyen-de-detail-route'))
+const ChuyenDeFormRoute = lazy(() => import('@/features/cong-viec/dao-tao/chuyen-de/routes/chuyen-de-form-route'))
+
+// Câu hỏi module routes
+const CauHoiListRoute = lazy(() => import('@/features/cong-viec/dao-tao/cau-hoi/routes/cau-hoi-list-route'))
+const CauHoiDetailRoute = lazy(() => import('@/features/cong-viec/dao-tao/cau-hoi/routes/cau-hoi-detail-route'))
+const CauHoiFormRoute = lazy(() => import('@/features/cong-viec/dao-tao/cau-hoi/routes/cau-hoi-form-route'))
+
+// Kỳ thi module routes
+const KyThiListRoute = lazy(() => import('@/features/cong-viec/dao-tao/ky-thi/routes/ky-thi-list-route'))
+const KyThiDetailRoute = lazy(() => import('@/features/cong-viec/dao-tao/ky-thi/routes/ky-thi-detail-route'))
+const KyThiFormRoute = lazy(() => import('@/features/cong-viec/dao-tao/ky-thi/routes/ky-thi-form-route'))
+
+// Bài thi module routes
+const BaiThiListRoute = lazy(() => import('@/features/cong-viec/dao-tao/bai-thi/routes/bai-thi-list-route'))
+const BaiThiDetailRoute = lazy(() => import('@/features/cong-viec/dao-tao/bai-thi/routes/bai-thi-detail-route'))
+const BaiThiFormRoute = lazy(() => import('@/features/cong-viec/dao-tao/bai-thi/routes/bai-thi-form-route'))
+
 // Loại tài liệu module routes
 const LoaiTaiLieuListRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-list-route'))
 const LoaiTaiLieuDetailRoute = lazy(() => import('@/features/cong-viec/tai-lieu/loai-tai-lieu/routes/loai-tai-lieu-detail-route'))
@@ -1013,6 +1038,157 @@ export const routes: RouteConfig[] = [
   {
     path: '/cong-viec/cau-tra-loi',
     element: CauTraLoiListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Nhóm chuyên đề module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/nhom-chuyen-de/moi',
+    element: NhomChuyenDeFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/nhom-chuyen-de/:id/sua',
+    element: NhomChuyenDeFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/nhom-chuyen-de/:id',
+    element: NhomChuyenDeDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/nhom-chuyen-de',
+    element: NhomChuyenDeListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Chuyên đề module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/chuyen-de/moi',
+    element: ChuyenDeFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/chuyen-de/:id/sua',
+    element: ChuyenDeFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/chuyen-de/:id',
+    element: ChuyenDeDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/chuyen-de',
+    element: ChuyenDeListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Câu hỏi module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  // Note: "moi" route must come before ":id" route to avoid conflict
+  {
+    path: '/cong-viec/cau-hoi/moi',
+    element: CauHoiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/cau-hoi/:id/sua',
+    element: CauHoiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/cau-hoi/:id',
+    element: CauHoiDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/cau-hoi',
+    element: CauHoiListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Kỳ thi routes
+  {
+    path: '/cong-viec/ky-thi/moi',
+    element: KyThiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/ky-thi/:id/sua',
+    element: KyThiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/ky-thi/:id',
+    element: KyThiDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/ky-thi',
+    element: KyThiListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Bài thi module routes
+  {
+    path: '/cong-viec/bai-thi/moi',
+    element: BaiThiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/bai-thi/:id/sua',
+    element: BaiThiFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/cong-viec/bai-thi/:id',
+    element: BaiThiDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/cong-viec/bai-thi',
+    element: BaiThiListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

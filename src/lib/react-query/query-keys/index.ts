@@ -40,5 +40,10 @@ export { quanHuyenTSN, quanHuyenTSN as quanHuyenTSNQueryKeys } from "./quan-huye
 export { phuongXaTSN, phuongXaTSN as phuongXaTSNQueryKeys } from "./phuong-xa-tsn"
 export { tinhThanhSSN, tinhThanhSSN as tinhThanhSSNQueryKeys } from "./tinh-thanh-ssn"
 export { phuongXaSNN, phuongXaSNN as phuongXaSNNQueryKeys } from "./phuong-xa-snn"
+export { nhomChuyenDe, nhomChuyenDe as nhomChuyenDeQueryKeys } from "./nhom-chuyen-de"
+export { chuyenDe, chuyenDe as chuyenDeQueryKeys } from "./chuyen-de"
+export { cauHoi, cauHoi as cauHoiQueryKeys } from "./cau-hoi"
+export { kyThi, kyThi as kyThiQueryKeys } from "./ky-thi"
+export { baiThi, baiThi as baiThiQueryKeys } from "./bai-thi"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 

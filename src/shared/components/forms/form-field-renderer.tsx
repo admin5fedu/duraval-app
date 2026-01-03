@@ -34,7 +34,7 @@ interface FormFieldRendererProps {
     form: UseFormReturn<any>
 }
 
-// Wrapper component để lấy formItemId từ useFormField và truyền vào ToggleButtonFormField
+// Wrapper component để lấy formItemId và name từ useFormField và truyền vào ToggleButtonFormField
 function ToggleButtonFormFieldWithId({
     value,
     onChange,
@@ -48,10 +48,11 @@ function ToggleButtonFormFieldWithId({
     disabled?: boolean
     onBlur?: () => void
 }) {
-    const { formItemId } = useFormField()
+    const { formItemId, name } = useFormField()
     return (
         <ToggleButtonFormField
             id={formItemId}
+            name={name}
             value={value}
             onChange={onChange}
             options={options}
@@ -126,7 +127,21 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                 )}
                             </FormLabel>
                             <FormControl>
-                                {field.type === "image" ? (
+                                {field.type === "image" && field.multiple ? (
+                                    <div>
+                                        <MultipleImageUploadFormField
+                                            value={formField.value}
+                                            onChange={(urls: string[]) => {
+                                                if (field.disabled) return
+                                                formField.onChange(urls)
+                                            }}
+                                            disabled={field.disabled}
+                                            folder={field.imageFolder}
+                                            displayName={field.displayName || field.label}
+                                            maxSize={field.imageMaxSize}
+                                        />
+                                    </div>
+                                ) : field.type === "image" ? (
                                     <div>
                                         <InlineImageUpload
                                             value={formField.value}
