@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase"
+import { fetchAllRecursive, fetchPaginated, searchRecords, type PaginationResult } from "@/lib/supabase-utils"
+import type { ColumnFiltersState } from "@tanstack/react-table"
 import { TinhThanhSSN, CreateTinhThanhSSNInput, UpdateTinhThanhSSNInput } from "../schema"
 
 const TABLE_NAME = "var_ssn_tinh_thanh"
@@ -9,24 +11,83 @@ const TABLE_NAME = "var_ssn_tinh_thanh"
  */
 export class TinhThanhSSNAPI {
     /**
-     * Get all tỉnh thành SSN
+     * Get all tỉnh thành SSN (recursive fetch - bypasses 1000 row limit)
+     * Use this for reference data (dropdowns, selects) when you need all records
      */
     static async getAll(): Promise<TinhThanhSSN[]> {
-        const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .select("*")
-            .order("tg_tao", { ascending: false })
-
-        if (error) {
+        try {
+            const query = supabase
+                .from(TABLE_NAME)
+                .select("*")
+                .order("tg_tao", { ascending: false })
+            
+            return await fetchAllRecursive<TinhThanhSSN>(query as any)
+        } catch (error) {
             console.error("Lỗi khi tải danh sách tỉnh thành SSN:", error)
-            throw new Error(error.message)
+            throw error instanceof Error ? error : new Error("Failed to fetch tỉnh thành SSN")
         }
+    }
 
-        if (!data || data.length === 0) {
-            return []
+    /**
+     * Get paginated tỉnh thành SSN (for server-side pagination in list views)
+     * @param page - Page number (1-indexed)
+     * @param pageSize - Number of records per page
+     * @param filters - Optional column filters to apply (server-side filtering)
+     * @returns Pagination result with data and metadata
+     */
+    static async getPaginated(
+        page: number = 1, 
+        pageSize: number = 50,
+        filters?: ColumnFiltersState
+    ): Promise<PaginationResult<TinhThanhSSN>> {
+        try {
+            const query = supabase
+                .from(TABLE_NAME)
+                .select("*", { count: "exact" })
+                .order("tg_tao", { ascending: false })
+            
+            // Filters are applied inside fetchPaginated
+            return await fetchPaginated<TinhThanhSSN>(query as any, page, pageSize, filters)
+        } catch (error) {
+            console.error("Lỗi khi tải danh sách phân trang tỉnh thành SSN:", error)
+            throw error instanceof Error ? error : new Error("Failed to fetch paginated tỉnh thành SSN")
         }
+    }
 
-        return data as TinhThanhSSN[]
+    /**
+     * Search tỉnh thành SSN (for async select/dropdown and server-side search)
+     * @param searchTerm - Search term
+     * @param page - Page number (1-indexed)
+     * @param pageSize - Number of records per page
+     * @param filters - Optional: Additional column filters (server-side filtering)
+     * @returns Pagination result with filtered data
+     */
+    static async search(
+        searchTerm: string,
+        page: number = 1,
+        pageSize: number = 20,
+        filters?: ColumnFiltersState
+    ): Promise<PaginationResult<TinhThanhSSN>> {
+        try {
+            const query = supabase
+                .from(TABLE_NAME)
+                .select("*", { count: "exact" })
+                .order("ten_tinh_thanh", { ascending: true })
+            
+            // Search across multiple fields: ten_tinh_thanh, ma_tinh_thanh
+            // Filters are applied inside searchRecords
+            return await searchRecords<TinhThanhSSN>(
+                query as any, 
+                searchTerm, 
+                ["ten_tinh_thanh", "ma_tinh_thanh"], 
+                page, 
+                pageSize,
+                filters
+            )
+        } catch (error) {
+            console.error("Lỗi khi tìm kiếm tỉnh thành SSN:", error)
+            throw error instanceof Error ? error : new Error("Failed to search tỉnh thành SSN")
+        }
     }
 
     /**

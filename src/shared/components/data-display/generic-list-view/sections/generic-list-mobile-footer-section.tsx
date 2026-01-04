@@ -31,9 +31,14 @@ export function GenericListMobileFooterSection({
     handlePageInputBlur,
     handlePageInputFocus,
     handlePageInputKeyDown,
+    serverSidePagination,
 }: GenericListMobileFooterSectionProps) {
     const { setDefaultPageSize } = useUserPreferencesStore()
-    const pageCount = table.getPageCount() || 1
+    
+    // Use pageCount from server if server-side pagination is enabled
+    const pageCount = serverSidePagination?.enabled 
+        ? serverSidePagination.pageCount 
+        : (table.getPageCount() || 1)
     const pageSize = table.getState().pagination.pageSize
 
     return (

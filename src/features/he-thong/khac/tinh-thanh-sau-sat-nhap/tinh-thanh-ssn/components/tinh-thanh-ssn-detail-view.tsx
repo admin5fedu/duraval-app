@@ -3,10 +3,12 @@
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
-import { Edit, Plus } from "lucide-react"
+import { Edit } from "lucide-react"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { useTinhThanhSSNById } from "../hooks/use-tinh-thanh-ssn"
+import { usePhuongXaSNNByTinhThanhId } from "../../phuong-xa-snn/hooks/use-phuong-xa-snn"
 import { DeleteTinhThanhSSNButton } from "./delete-tinh-thanh-ssn-button"
+import { PhuongXaSection } from "./phuong-xa-section"
 import { tinhThanhSSNConfig } from "../config"
 import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
@@ -24,6 +26,11 @@ export function TinhThanhSSNDetailView({ id, initialData, onEdit, onBack }: Tinh
   const navigate = useNavigate()
   const query = useTinhThanhSSNById(id, initialData)
   const viewState = useDetailViewStateFromQuery(query, initialData)
+  
+  // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
+  // Load danh sách phường xã con - hook sẽ tự disable nếu id chưa có
+  const tinhThanhId = viewState.data?.id || null
+  const { data: phuongXaList = [], isLoading: isLoadingPhuongXa } = usePhuongXaSNNByTinhThanhId(tinhThanhId)
   
   const tinhThanh = viewState.data
 
@@ -92,10 +99,6 @@ export function TinhThanhSSNDetailView({ id, initialData, onEdit, onBack }: Tinh
     }
   }
 
-  const handleAddNew = () => {
-    navigate(`${tinhThanhSSNConfig.routePath}/moi`)
-  }
-
   const handleBack = () => {
     if (onBack) {
       onBack()
@@ -108,38 +111,39 @@ export function TinhThanhSSNDetailView({ id, initialData, onEdit, onBack }: Tinh
   const subtitle = tinhThanh.ma_tinh_thanh
 
   return (
-    <GenericDetailViewSimple
-      title={title}
-      subtitle={subtitle}
-      sections={sections}
-      onBack={handleBack}
-      actions={
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            className={actionButtonClass()}
-            onClick={handleAddNew}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm Mới
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            className={actionButtonClass()}
-            onClick={handleEdit}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Sửa
-          </Button>
-          <DeleteTinhThanhSSNButton 
-            id={id} 
-            name={tinhThanh.ten_tinh_thanh} 
-          />
-        </>
-      }
-    />
+    <>
+      <GenericDetailViewSimple
+        title={title}
+        subtitle={subtitle}
+        sections={sections}
+        onBack={handleBack}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className={actionButtonClass()}
+              onClick={handleEdit}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Sửa
+            </Button>
+            <DeleteTinhThanhSSNButton 
+              id={id} 
+              name={tinhThanh.ten_tinh_thanh} 
+            />
+          </>
+        }
+      />
+      
+      {/* Section hiển thị danh sách phường xã con - Chuẩn theo module Kỳ thi */}
+      <PhuongXaSection
+        tinhThanhId={tinhThanh.id!}
+        phuongXaList={phuongXaList}
+        isLoading={isLoadingPhuongXa}
+        tinhThanhName={tinhThanh.ten_tinh_thanh}
+      />
+    </>
   )
 }
 

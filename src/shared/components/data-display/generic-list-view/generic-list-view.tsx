@@ -13,6 +13,7 @@ import { useElementHeight } from "@/shared/hooks/use-element-height"
 import { useMobileBreakpoint } from "@/shared/hooks/use-mobile-breakpoint"
 import { getListViewContainerHeight } from "@/shared/constants"
 import { BatchDeleteConfirmationDialog } from "@/shared/components"
+import { Loader2 } from "lucide-react"
 
 /**
  * GenericListView Component
@@ -67,6 +68,7 @@ export function GenericListView<TData = any, TValue = unknown>({
     onDelete,
     renderLeftActions,
     batchDeleteConfig,
+    serverSidePagination,
 }: GenericListViewProps<TData, TValue>) {
     // Batch delete confirmation dialog state
     const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = React.useState(false)
@@ -99,6 +101,7 @@ export function GenericListView<TData = any, TValue = unknown>({
         onSearchChange,
         onSortChange,
         persistSelection,
+        serverSidePagination,
     })
 
     // 2. Manage selection state (selection mode, range selection, keyboard shortcuts)
@@ -214,12 +217,21 @@ export function GenericListView<TData = any, TValue = unknown>({
 
             {/* ✅ Table container với chiều cao được tính toán động */}
             <div 
-                className="flex-1 min-h-0 flex flex-col w-full max-w-full min-w-0"
+                className="flex-1 min-h-0 flex flex-col w-full max-w-full min-w-0 relative"
                 style={{
                     height: `calc(${containerHeight} - ${toolbarHeight}px)`,
                     maxHeight: `calc(${containerHeight} - ${toolbarHeight}px)`,
                 }}
             >
+                {/* Loading overlay for server-side pagination */}
+                {serverSidePagination?.enabled && serverSidePagination.isLoading && (
+                    <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                            <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>
+                        </div>
+                    </div>
+                )}
                 <GenericListMobileSection
                     filteredRows={filteredRows}
                     renderMobileCard={renderMobileCard}
@@ -256,6 +268,7 @@ export function GenericListView<TData = any, TValue = unknown>({
                     handlePageInputBlur={handlePageInputBlur}
                     handlePageInputFocus={handlePageInputFocus}
                     handlePageInputKeyDown={handlePageInputKeyDown}
+                    serverSidePagination={serverSidePagination}
                 />
 
                 <GenericListMobileFooterSection
@@ -268,6 +281,7 @@ export function GenericListView<TData = any, TValue = unknown>({
                     handlePageInputBlur={handlePageInputBlur}
                     handlePageInputFocus={handlePageInputFocus}
                     handlePageInputKeyDown={handlePageInputKeyDown}
+                    serverSidePagination={serverSidePagination}
                 />
             </div>
 

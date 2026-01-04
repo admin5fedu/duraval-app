@@ -10,49 +10,46 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useNhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/hooks"
+import { useNhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/hooks/use-nhan-su"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export interface NhanSuSelectProps {
-    value?: number | null // ma_nhan_vien của nhân viên được chọn
-    onChange: (maNhanVien: number | null) => void
+    value?: number | null // ID của nhân sự được chọn
+    onChange: (id: number | null, data?: { ten_nhan_su: string; ma_nhan_su?: string }) => void
     placeholder?: string
     searchPlaceholder?: string
     emptyText?: string
     disabled?: boolean
     className?: string
-    excludeMaNhanVien?: number[] // Danh sách mã nhân viên cần loại trừ
+    id?: string // ID từ FormControl
+    onBlur?: () => void // onBlur từ FormControl
 }
 
 /**
- * Component chọn nhân viên với ô search
+ * Component chọn nhân sự từ var_nhan_su với ô search
  * Reusable UI component - có thể dùng chung trong toàn bộ ứng dụng
  */
-export function NhanSuSelect({
+export const NhanSuSelect = React.forwardRef<HTMLButtonElement, NhanSuSelectProps>(
+function NhanSuSelect({
     value,
     onChange,
-    placeholder = "Chọn nhân viên...",
-    searchPlaceholder = "Tìm kiếm theo tên hoặc mã nhân viên...",
-    emptyText = "Không tìm thấy nhân viên.",
+    placeholder = "Chọn nhân sự...",
+    searchPlaceholder = "Tìm kiếm theo tên hoặc mã nhân sự...",
+    emptyText = "Không tìm thấy nhân sự.",
     disabled = false,
     className,
-    excludeMaNhanVien = [],
-}: NhanSuSelectProps) {
+    id,
+    onBlur,
+}, ref) {
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
     
-    // Fetch danh sách nhân viên
-    const { data: nhanSuList, isLoading } = useNhanSu()
+    // Fetch danh sách nhân sự
+    const { data: nhanSuList, isLoading } = useNhanSu(undefined)
     
     const searchInputId = React.useId()
 
-    // Filter danh sách nhân viên: loại trừ các mã nhân viên trong excludeMaNhanVien
-    const availableNhanSu = React.useMemo(() => {
-        if (!nhanSuList) return []
-        return nhanSuList.filter((ns) => !excludeMaNhanVien.includes(ns.ma_nhan_vien))
-    }, [nhanSuList, excludeMaNhanVien])
-
-    // Tìm nhân viên được chọn
+    // Tìm nhân sự được chọn
     const selectedNhanSu = React.useMemo(() => {
         if (!value || !nhanSuList) return null
         return nhanSuList.find((ns) => ns.ma_nhan_vien === value)
@@ -60,30 +57,32 @@ export function NhanSuSelect({
 
     // Filter options dựa trên search query (tìm theo tên hoặc mã)
     const filteredOptions = React.useMemo(() => {
+        if (!nhanSuList) return []
         if (!searchQuery.trim()) {
-            return availableNhanSu
+            return nhanSuList
         }
-        
         const query = searchQuery.toLowerCase()
-        return availableNhanSu.filter((ns) => {
-            const maNhanVien = String(ns.ma_nhan_vien).toLowerCase()
-            const hoTen = ns.ho_ten?.toLowerCase() || ""
-            return maNhanVien.includes(query) || hoTen.includes(query)
+        return nhanSuList.filter((ns) => {
+            const maNhanSu = String(ns.ma_nhan_vien).toLowerCase()
+            const tenNhanSu = ns.ho_ten?.toLowerCase() || ""
+            return maNhanSu.includes(query) || tenNhanSu.includes(query)
         })
-    }, [availableNhanSu, searchQuery])
+    }, [nhanSuList, searchQuery])
 
-    const handleSelect = React.useCallback((maNhanVien: number) => {
+    const handleSelect = React.useCallback((selectedId: number) => {
         if (disabled) return
-        onChange(maNhanVien)
+        const selected = nhanSuList?.find((ns) => ns.ma_nhan_vien === selectedId)
+        if (selected) {
+            onChange(selectedId, {
+                ten_nhan_su: selected.ho_ten,
+                ma_nhan_su: String(selected.ma_nhan_vien),
+            })
+        } else {
+            onChange(selectedId)
+        }
         setOpen(false)
         setSearchQuery("")
-    }, [onChange, disabled])
-
-    const handleClear = React.useCallback(() => {
-        if (disabled) return
-        onChange(null)
-        setSearchQuery("")
-    }, [onChange, disabled])
+    }, [onChange, disabled, nhanSuList])
 
     // Reset search khi popover đóng
     React.useEffect(() => {
@@ -92,125 +91,96 @@ export function NhanSuSelect({
         }
     }, [open])
 
-    // Display text cho selected value
-    const displayText = selectedNhanSu
-        ? `${selectedNhanSu.ma_nhan_vien} - ${selectedNhanSu.ho_ten}`
-        : placeholder
+    // Display text cho selected value (mã - tên)
+    const displayText = React.useMemo(() => {
+        if (!selectedNhanSu) return placeholder
+        const ma = String(selectedNhanSu.ma_nhan_vien || "")
+        const ten = selectedNhanSu.ho_ten || ""
+        if (ma && ten) {
+            return `${ma} - ${ten}`
+        }
+        return ten || ma || placeholder
+    }, [selectedNhanSu, placeholder])
 
     if (isLoading) {
         return (
-            <div className={cn("w-full", className)}>
-                <Skeleton className="h-10 w-full" />
-            </div>
+            <Skeleton className={cn("h-10 w-full", className)} />
         )
     }
 
     return (
-        <Popover open={open && !disabled} onOpenChange={(isOpen) => !disabled && setOpen(isOpen)}>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    type="button"
+                    ref={ref}
+                    id={id}
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    disabled={disabled}
+                    aria-controls={searchInputId}
                     className={cn(
                         "w-full justify-between",
-                        !value && "text-muted-foreground",
+                        !selectedNhanSu && "text-muted-foreground",
                         className
                     )}
+                    disabled={disabled}
+                    onBlur={onBlur}
                 >
-                    <span className="truncate flex-1 text-left">{displayText}</span>
-                    <div className="flex items-center gap-1 shrink-0">
-                        {value && (
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleClear()
-                                }}
-                                className="h-4 w-4 rounded-full hover:bg-destructive/10 flex items-center justify-center text-muted-foreground hover:text-destructive"
-                                title="Bỏ chọn"
-                            >
-                                <span className="text-xs">×</span>
-                            </button>
-                        )}
-                        <ChevronsUpDown className="h-4 w-4 opacity-50" />
-                    </div>
+                    <span className="truncate">{displayText}</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <div className="flex flex-col">
-                    {/* Search input */}
                     <div className="flex items-center border-b px-3">
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                         <Input
                             id={searchInputId}
-                            type="search"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="h-9 border-0 focus-visible:ring-0"
                             autoFocus
-                            onKeyDown={(e) => {
-                                if (e.key === "Escape") {
-                                    setOpen(false)
-                                }
-                            }}
                         />
                     </div>
-
-                    {/* Options list */}
-                    <div className="max-h-[300px] overflow-y-auto p-1">
+                    <div className="max-h-[300px] overflow-auto p-1">
                         {filteredOptions.length === 0 ? (
                             <div className="py-6 text-center text-sm text-muted-foreground">
                                 {emptyText}
                             </div>
                         ) : (
-                            <>
-                                {/* Option để clear selection */}
-                                {value && (
-                                    <div
-                                        onClick={handleClear}
+                            <div className="space-y-1">
+                                {filteredOptions.map((ns) => (
+                                    <button
+                                        key={ns.ma_nhan_vien}
+                                        type="button"
+                                        onClick={() => handleSelect(ns.ma_nhan_vien!)}
                                         className={cn(
-                                            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                                            "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                                            "hover:bg-accent hover:text-accent-foreground",
+                                            "focus:bg-accent focus:text-accent-foreground",
+                                            selectedNhanSu?.ma_nhan_vien === ns.ma_nhan_vien && "bg-accent text-accent-foreground"
                                         )}
                                     >
-                                        <span className="mr-2">×</span>
-                                        Bỏ chọn
-                                    </div>
-                                )}
-                                
-                                {/* Danh sách nhân viên */}
-                                {filteredOptions.map((ns) => {
-                                    const isSelected = value === ns.ma_nhan_vien
-                                    const displayLabel = `${ns.ma_nhan_vien} - ${ns.ho_ten}`
-                                    
-                                    return (
-                                        <div
-                                            key={ns.ma_nhan_vien}
+                                        <Check
                                             className={cn(
-                                                "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                                                isSelected && "bg-accent text-accent-foreground"
+                                                "mr-2 h-4 w-4 shrink-0",
+                                                selectedNhanSu?.ma_nhan_vien === ns.ma_nhan_vien ? "opacity-100" : "opacity-0"
                                             )}
-                                            onClick={() => handleSelect(ns.ma_nhan_vien)}
-                                        >
-                                            <Check
-                                                className={cn(
-                                                    "mr-2 h-4 w-4 shrink-0",
-                                                    isSelected ? "opacity-100" : "opacity-0"
-                                                )}
-                                            />
-                                            <span className="flex-1 truncate">{displayLabel}</span>
-                                        </div>
-                                    )
-                                })}
-                            </>
+                                        />
+                                        <span className="truncate">
+                                            <span className="font-mono text-xs text-muted-foreground mr-1.5">{ns.ma_nhan_vien}</span>
+                                            <span className="font-medium">{ns.ho_ten}</span>
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
                         )}
                     </div>
                 </div>
             </PopoverContent>
         </Popover>
     )
-}
+})
 
+NhanSuSelect.displayName = "NhanSuSelect"

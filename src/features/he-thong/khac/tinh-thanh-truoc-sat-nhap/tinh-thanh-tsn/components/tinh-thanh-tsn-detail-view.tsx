@@ -3,10 +3,12 @@
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
-import { Edit, Plus } from "lucide-react"
+import { Edit } from "lucide-react"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { useTinhThanhTSNById } from "../hooks/use-tinh-thanh-tsn"
+import { useQuanHuyenTSNByTinhThanhId } from "../../quan-huyen-tsn/hooks/use-quan-huyen-tsn"
 import { DeleteTinhThanhTSNButton } from "./delete-tinh-thanh-tsn-button"
+import { QuanHuyenSection } from "./quan-huyen-section"
 import { tinhThanhTSNConfig } from "../config"
 import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
@@ -24,6 +26,11 @@ export function TinhThanhTSNDetailView({ id, initialData, onEdit, onBack }: Tinh
   const navigate = useNavigate()
   const query = useTinhThanhTSNById(id, initialData)
   const viewState = useDetailViewStateFromQuery(query, initialData)
+  
+  // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
+  // Load danh sách quận huyện con - hook sẽ tự disable nếu id chưa có
+  const tinhThanhId = viewState.data?.id || null
+  const { data: quanHuyenList = [], isLoading: isLoadingQuanHuyen } = useQuanHuyenTSNByTinhThanhId(tinhThanhId)
   
   const tinhThanh = viewState.data
 
@@ -92,10 +99,6 @@ export function TinhThanhTSNDetailView({ id, initialData, onEdit, onBack }: Tinh
     }
   }
 
-  const handleAddNew = () => {
-    navigate(`${tinhThanhTSNConfig.routePath}/moi`)
-  }
-
   const handleBack = () => {
     if (onBack) {
       onBack()
@@ -108,38 +111,39 @@ export function TinhThanhTSNDetailView({ id, initialData, onEdit, onBack }: Tinh
   const subtitle = tinhThanh.ma_tinh_thanh
 
   return (
-    <GenericDetailViewSimple
-      title={title}
-      subtitle={subtitle}
-      sections={sections}
-      onBack={handleBack}
-      actions={
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            className={actionButtonClass()}
-            onClick={handleAddNew}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm Mới
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            className={actionButtonClass()}
-            onClick={handleEdit}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Sửa
-          </Button>
-          <DeleteTinhThanhTSNButton 
-            id={id} 
-            name={tinhThanh.ten_tinh_thanh} 
-          />
-        </>
-      }
-    />
+    <>
+      <GenericDetailViewSimple
+        title={title}
+        subtitle={subtitle}
+        sections={sections}
+        onBack={handleBack}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className={actionButtonClass()}
+              onClick={handleEdit}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Sửa
+            </Button>
+            <DeleteTinhThanhTSNButton 
+              id={id} 
+              name={tinhThanh.ten_tinh_thanh} 
+            />
+          </>
+        }
+      />
+      
+      {/* Section hiển thị danh sách quận huyện con - Chuẩn theo module Kỳ thi */}
+      <QuanHuyenSection
+        tinhThanhId={tinhThanh.id!}
+        quanHuyenList={quanHuyenList}
+        isLoading={isLoadingQuanHuyen}
+        tinhThanhName={tinhThanh.ten_tinh_thanh}
+      />
+    </>
   )
 }
 

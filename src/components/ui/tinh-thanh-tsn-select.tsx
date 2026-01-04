@@ -10,7 +10,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useTinhThanhTSN } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/tinh-thanh-tsn/hooks"
+import { useTinhThanhTSNForReference } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/tinh-thanh-tsn/hooks"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export interface TinhThanhTSNSelectProps {
@@ -44,8 +44,8 @@ function TinhThanhTSNSelect({
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
     
-    // Fetch danh sách tỉnh thành TSN
-    const { data: tinhThanhList, isLoading } = useTinhThanhTSN()
+    // Fetch danh sách tỉnh thành TSN (reference data - cached for 30 minutes)
+    const { data: tinhThanhList, isLoading } = useTinhThanhTSNForReference()
     
     const searchInputId = React.useId()
 

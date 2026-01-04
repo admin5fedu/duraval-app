@@ -94,9 +94,30 @@ export function DynamicBreadcrumb() {
     // Nếu có label hợp lệ
     if (label) {
       currentPath += `/${segment}`
+      
+      // Xác định href cho breadcrumb item
+      let href = currentPath
+      
+      // Danh sách các main category (segment chính) - điều hướng đến chính nó
+      const mainCategories = ["ban-buon", "he-thong", "cong-viec", "hanh-chinh-nhan-su", "kinh-doanh", "marketing", "mua-hang", "ke-toan", "kho-van"]
+      
+      // Nếu là main category, dùng currentPath (điều hướng đến trang submenu)
+      // Nếu không phải main category, tìm module con để điều hướng đến tab mặc định
+      if (!mainCategories.includes(segment)) {
+        const childModule = moduleRegistry.getAll().find(
+          config => config.parentPath === currentPath
+        )
+        if (childModule) {
+          // Sử dụng routePath của module con làm href (tab mặc định)
+          // Ví dụ: khi click vào "Dữ liệu khách buôn" (/ban-buon/du-lieu-khach-buon)
+          // thì điều hướng đến route của module con (danh sách KB)
+          href = childModule.routePath
+        }
+      }
+      
       breadcrumbItems.push({
         label,
-        href: currentPath
+        href
       })
     }
   })

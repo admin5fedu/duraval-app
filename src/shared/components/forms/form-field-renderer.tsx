@@ -13,9 +13,10 @@ import { Input } from "@/components/ui/input"
 import { NumberInput } from "@/components/ui/number-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { UseFormReturn } from "react-hook-form"
+import { UseFormReturn, useWatch } from "react-hook-form"
 import { FormFieldConfig } from "./generic-form-view/"
 import { ComboboxFormField } from "./combobox-form-field"
+import { ComboboxFormFieldWithCustom } from "./combobox-form-field-with-custom"
 import { ToggleButtonFormField } from "./toggle-button-form-field"
 import { MultipleImageUploadFormField } from "./multiple-image-upload-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
@@ -24,7 +25,12 @@ import { CapBacSelectFormField } from "@/components/ui/cap-bac-select-form-field
 import { LoaiPhieuSelect } from "@/components/ui/loai-phieu-select"
 import { TinhThanhTSNSelect } from "@/components/ui/tinh-thanh-tsn-select"
 import { QuanHuyenTSNSelect } from "@/components/ui/quan-huyen-tsn-select"
+import { PhuongXaTSNSelect } from "@/components/ui/phuong-xa-tsn-select"
 import { TinhThanhSSNSelect } from "@/components/ui/tinh-thanh-ssn-select"
+import { PhuongXaSNNSelect } from "@/components/ui/phuong-xa-snn-select"
+import { NhanSuSelect } from "@/components/ui/nhan-su-select"
+import { KhachBuonSelect } from "@/components/ui/khach-buon-select"
+import { MultiselectComboboxFormField } from "@/components/ui/multiselect-combobox-form-field"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -34,7 +40,6 @@ interface FormFieldRendererProps {
     form: UseFormReturn<any>
 }
 
-// Wrapper component để lấy formItemId và name từ useFormField và truyền vào ToggleButtonFormField
 function ToggleButtonFormFieldWithId({
     value,
     onChange,
@@ -62,6 +67,131 @@ function ToggleButtonFormFieldWithId({
     )
 }
 
+function MultiselectComboboxFormFieldWithId({
+    value,
+    onChange,
+    options,
+    disabled,
+    onBlur,
+}: {
+    value: string[]
+    onChange: (values: string[]) => void
+    options: Array<{ label: string; value: string; disabled?: boolean }>
+    disabled?: boolean
+    onBlur?: () => void
+}) {
+    const { formItemId, name } = useFormField()
+    return (
+        <MultiselectComboboxFormField
+            id={formItemId}
+            name={name}
+            value={value}
+            onChange={onChange}
+            options={options}
+            disabled={disabled}
+            onBlur={onBlur}
+        />
+    )
+}
+
+function ComboboxFormFieldWithId({
+    value,
+    onChange,
+    options,
+    placeholder,
+    searchPlaceholder,
+    disabled,
+    onBlur,
+}: {
+    value: string
+    onChange: (value: string) => void
+    options: Array<{ label: string; value: string }>
+    placeholder?: string
+    searchPlaceholder?: string
+    disabled?: boolean
+    onBlur?: () => void
+}) {
+    const { formItemId, name } = useFormField()
+    return (
+        <ComboboxFormField
+            id={formItemId}
+            name={name}
+            value={value}
+            onChange={onChange}
+            options={options}
+            placeholder={placeholder}
+            searchPlaceholder={searchPlaceholder}
+            disabled={disabled}
+            onBlur={onBlur}
+        />
+    )
+}
+
+function ComboboxFormFieldWithCustomWithId({
+    value,
+    onChange,
+    options,
+    placeholder,
+    searchPlaceholder,
+    disabled,
+    onBlur,
+    allowCustom,
+}: {
+    value: string
+    onChange: (value: string) => void
+    options: Array<{ label: string; value: string }>
+    placeholder?: string
+    searchPlaceholder?: string
+    disabled?: boolean
+    onBlur?: () => void
+    allowCustom?: boolean
+}) {
+    const { formItemId, name } = useFormField()
+    return (
+        <ComboboxFormFieldWithCustom
+            id={formItemId}
+            name={name}
+            value={value}
+            onChange={onChange}
+            options={options}
+            placeholder={placeholder}
+            searchPlaceholder={searchPlaceholder}
+            disabled={disabled}
+            onBlur={onBlur}
+            allowCustom={allowCustom}
+        />
+    )
+}
+
+function KhachBuonSelectWithId({
+    value,
+    onChange,
+    placeholder,
+    searchPlaceholder,
+    disabled,
+    onBlur,
+}: {
+    value: number | null
+    onChange: (id: number | null) => void
+    placeholder?: string
+    searchPlaceholder?: string
+    disabled?: boolean
+    onBlur?: () => void
+}) {
+    const { formItemId } = useFormField()
+    return (
+        <KhachBuonSelect
+            id={formItemId}
+            value={value}
+            onChange={(id) => onChange(id)}
+            placeholder={placeholder}
+            searchPlaceholder={searchPlaceholder}
+            disabled={disabled}
+            onBlur={onBlur}
+        />
+    )
+}
+
 // Wrapper component để lấy formItemId từ useFormField và truyền vào custom component
 function CustomFormFieldWithId({
     component: Component,
@@ -76,6 +206,7 @@ function CustomFormFieldWithId({
     return (
         <Component
             {...formField}
+            ref={formField.ref} // Forward ref from formField
             id={formItemId} // Override id với formItemId
             name={field.name}
             label={field.label}
@@ -86,12 +217,144 @@ function CustomFormFieldWithId({
     )
 }
 
-/**
- * Component để render các field types khác nhau trong form
- * Tuân thủ pattern Shadcn/UI: FormItem -> FormLabel -> FormControl -> [Component]
- * FormControl sẽ tự động clone element con và truyền id, aria-describedby vào đó
- * Mobile-optimized: Larger touch targets, better spacing, full width on mobile
- */
+// Wrapper component để reactively watch tsn_tinh_thanh_id và truyền vào QuanHuyenTSNSelect
+function QuanHuyenTSNSelectWrapper({
+    form,
+    formField,
+    field,
+}: {
+    form: UseFormReturn<any>
+    formField: any
+    field: FormFieldConfig
+}) {
+    // Reactively watch tsn_tinh_thanh_id để component tự động update khi tỉnh thành thay đổi
+    const tinhThanhId = useWatch({
+        control: form.control,
+        name: "tsn_tinh_thanh_id",
+    })
+
+    return (
+        <QuanHuyenTSNSelect
+            {...formField}
+            value={formField.value ? Number(formField.value) : null}
+            tinhThanhId={tinhThanhId ? Number(tinhThanhId) : null}
+            onChange={(id, data) => {
+                if (field.disabled) return
+                if (id && data) {
+                    formField.onChange(id)
+                    // Auto-fill tsn_ten_quan_huyen field
+                    form.setValue("tsn_ten_quan_huyen", data.ten_quan_huyen || "", { shouldValidate: false })
+                    // Also update tsn_ten_tinh_thanh if provided
+                    if (data.ten_tinh_thanh) {
+                        form.setValue("tsn_ten_tinh_thanh", data.ten_tinh_thanh, { shouldValidate: false })
+                    }
+                    // Reset phuong xa when quan huyen changes
+                    form.setValue("tsn_phuong_xa_id", null, { shouldValidate: false })
+                    form.setValue("tsn_ten_phuong_xa", "", { shouldValidate: false })
+                } else {
+                    formField.onChange(null)
+                    form.setValue("tsn_ten_quan_huyen", "", { shouldValidate: false })
+                    form.setValue("tsn_phuong_xa_id", null, { shouldValidate: false })
+                    form.setValue("tsn_ten_phuong_xa", "", { shouldValidate: false })
+                }
+            }}
+            placeholder={field.placeholder || "Chọn quận huyện..."}
+            searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã quận huyện..."}
+            disabled={field.disabled}
+        />
+    )
+}
+
+// Wrapper component để reactively watch tsn_quan_huyen_id và truyền vào PhuongXaTSNSelect
+function PhuongXaTSNSelectWrapper({
+    form,
+    formField,
+    field,
+}: {
+    form: UseFormReturn<any>
+    formField: any
+    field: FormFieldConfig
+}) {
+    // Reactively watch tsn_quan_huyen_id để component tự động update khi quận huyện thay đổi
+    const quanHuyenId = useWatch({
+        control: form.control,
+        name: "tsn_quan_huyen_id",
+    })
+
+    return (
+        <PhuongXaTSNSelect
+            {...formField}
+            value={formField.value ? Number(formField.value) : null}
+            quanHuyenId={quanHuyenId ? Number(quanHuyenId) : null}
+            onChange={(id, data) => {
+                if (field.disabled) return
+                if (id && data) {
+                    formField.onChange(id)
+                    // Auto-fill tsn_ten_phuong_xa field
+                    form.setValue("tsn_ten_phuong_xa", data.ten_phuong_xa || "", { shouldValidate: false })
+                    // Also update tsn_ten_quan_huyen if provided
+                    if (data.ten_quan_huyen) {
+                        form.setValue("tsn_ten_quan_huyen", data.ten_quan_huyen, { shouldValidate: false })
+                    }
+                } else {
+                    formField.onChange(null)
+                    form.setValue("tsn_ten_phuong_xa", "", { shouldValidate: false })
+                }
+            }}
+            placeholder={field.placeholder || "Chọn phường xã..."}
+            searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã phường xã..."}
+            disabled={field.disabled}
+        />
+    )
+}
+
+// Wrapper component để reactively watch ssn_tinh_thanh_id và truyền vào PhuongXaSNNSelect
+function PhuongXaSNNSelectWrapper({
+    form,
+    formField,
+    field,
+}: {
+    form: UseFormReturn<any>
+    formField: any
+    field: FormFieldConfig
+}) {
+    // Reactively watch ssn_tinh_thanh_id để component tự động update khi tỉnh thành thay đổi
+    const tinhThanhId = useWatch({
+        control: form.control,
+        name: "ssn_tinh_thanh_id",
+    })
+
+    const valueId = formField.value 
+        ? (typeof formField.value === 'number' ? formField.value : (typeof formField.value === 'object' && formField.value !== null && 'id' in formField.value ? (formField.value as any).id : Number(formField.value)))
+        : null
+    
+    return (
+        <PhuongXaSNNSelect
+            {...formField}
+            value={valueId}
+            tinhThanhId={tinhThanhId ? Number(tinhThanhId) : null}
+            onChange={(id, data) => {
+                if (field.disabled) return
+                if (id && data) {
+                    formField.onChange(id)
+                    // Auto-fill ssn_ten_phuong_xa field
+                    form.setValue("ssn_ten_phuong_xa", data.ten_phuong_xa || "", { shouldValidate: false })
+                    // Also update ssn_ten_tinh_thanh if provided
+                    if (data.ten_tinh_thanh) {
+                        form.setValue("ssn_ten_tinh_thanh", data.ten_tinh_thanh, { shouldValidate: false })
+                    }
+                } else {
+                    formField.onChange(null)
+                    form.setValue("ssn_ten_phuong_xa", "", { shouldValidate: false })
+                }
+            }}
+            placeholder={field.placeholder || "Chọn phường xã..."}
+            searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã phường xã..."}
+            disabled={field.disabled}
+        />
+    )
+}
+
 export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
     const isMobile = useIsMobile()
     
@@ -126,59 +389,64 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                     )}>*</span>
                                 )}
                             </FormLabel>
+                            {field.description && (
+                                <FormDescription className={cn(
+                                    isMobile && "text-xs"
+                                )}>
+                                    {field.description}
+                                </FormDescription>
+                            )}
                             <FormControl>
-                                {field.type === "image" && field.multiple ? (
-                                    <div>
-                                        <MultipleImageUploadFormField
-                                            value={formField.value}
-                                            onChange={(urls: string[]) => {
-                                                if (field.disabled) return
-                                                formField.onChange(urls)
-                                            }}
-                                            disabled={field.disabled}
-                                            folder={field.imageFolder}
-                                            displayName={field.displayName || field.label}
-                                            maxSize={field.imageMaxSize}
-                                        />
-                                    </div>
-                                ) : field.type === "image" ? (
-                                    <div>
-                                        <InlineImageUpload
-                                            value={formField.value}
-                                            onChange={(url) => {
-                                                if (field.disabled) return
-                                                formField.onChange(url)
-                                            }}
-                                            disabled={field.disabled}
-                                            folder={field.imageFolder}
-                                            displayName={field.displayName || field.label}
-                                            maxSize={field.imageMaxSize}
-                                        />
-                                    </div>
-                                ) : field.type === "multiple-image" ? (
-                                    <div>
-                                        <MultipleImageUploadFormField
-                                            value={formField.value}
-                                            onChange={(urls: string[]) => {
-                                                if (field.disabled) return
-                                                formField.onChange(urls)
-                                            }}
-                                            disabled={field.disabled}
-                                            folder={field.imageFolder || "uploads"}
-                                            maxSize={field.imageMaxSize || 10}
-                                        />
-                                    </div>
-                                ) : field.type === "combobox" ? (
-                                    <ComboboxFormField
+                                {field.type === "textarea" ? (
+                                    <Textarea
                                         {...formField}
-                                        value={String(formField.value || '')}
-                                        onChange={(value) => {
+                                        value={formField.value || ''}
+                                        placeholder={field.placeholder}
+                                        rows={isMobile ? 5 : 4}
+                                        className={cn(
+                                            "resize-none",
+                                            isMobile && "text-base"
+                                        )}
+                                        disabled={field.disabled}
+                                    />
+                                ) : field.type === "combobox" ? (
+                                    (field as any).allowCustom ? (
+                                        <ComboboxFormFieldWithCustomWithId
+                                            value={String(formField.value || '')}
+                                            onChange={(value) => {
+                                                if (field.disabled) return
+                                                formField.onChange(value)
+                                            }}
+                                            options={field.options || []}
+                                            placeholder={field.placeholder || "Chọn hoặc nhập..."}
+                                            searchPlaceholder={field.description || "Tìm kiếm hoặc nhập mới..."}
+                                            disabled={field.disabled}
+                                            allowCustom={true}
+                                            onBlur={formField.onBlur}
+                                        />
+                                    ) : (
+                                        <ComboboxFormFieldWithId
+                                            value={String(formField.value || '')}
+                                            onChange={(value) => {
+                                                if (field.disabled) return
+                                                formField.onChange(value)
+                                            }}
+                                            options={field.options || []}
+                                            placeholder={field.placeholder || "Chọn..."}
+                                            searchPlaceholder={field.description || "Tìm kiếm..."}
+                                            disabled={field.disabled}
+                                            onBlur={formField.onBlur}
+                                        />
+                                    )
+                                ) : field.type === "multiselect-combobox" ? (
+                                    <MultiselectComboboxFormFieldWithId
+                                        value={Array.isArray(formField.value) ? formField.value : (formField.value ? String(formField.value).split(',').filter(Boolean) : [])}
+                                        onChange={(values) => {
                                             if (field.disabled) return
-                                            formField.onChange(value)
+                                            // Store as comma-separated string
+                                            formField.onChange(values.length > 0 ? values.join(',') : null)
                                         }}
                                         options={field.options || []}
-                                        placeholder={field.placeholder || "Chọn..."}
-                                        searchPlaceholder={field.description || "Tìm kiếm..."}
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "toggle" ? (
@@ -229,16 +497,51 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                                 ))}
                                         </SelectContent>
                                     </Select>
-                                ) : field.type === "textarea" ? (
-                                    <Textarea
+                                ) : field.type === "date" ? (
+                                    <Input
                                         {...formField}
+                                        type="date"
                                         value={formField.value || ''}
                                         placeholder={field.placeholder}
-                                        rows={isMobile ? 5 : 4}
+                                        disabled={field.disabled}
                                         className={cn(
-                                            "resize-none",
-                                            isMobile && "text-base"
+                                            isMobile && "h-11 text-base"
                                         )}
+                                    />
+                                ) : field.type === "email" ? (
+                                    <Input
+                                        {...formField}
+                                        type="email"
+                                        value={formField.value || ''}
+                                        placeholder={field.placeholder}
+                                        disabled={field.disabled}
+                                        className={cn(
+                                            isMobile && "h-11 text-base"
+                                        )}
+                                    />
+                                ) : field.type === "image" ? (
+                                    <InlineImageUpload
+                                        {...formField}
+                                        value={formField.value || ''}
+                                        onChange={(url) => {
+                                            if (field.disabled) return
+                                            formField.onChange(url)
+                                        }}
+                                        folder={field.imageFolder || "uploads"}
+                                        maxSize={field.imageMaxSize || 5}
+                                        displayName={field.displayName}
+                                        disabled={field.disabled}
+                                    />
+                                ) : field.type === "multiple-image" ? (
+                                    <MultipleImageUploadFormField
+                                        {...formField}
+                                        value={Array.isArray(formField.value) ? formField.value : (formField.value ? [formField.value] : [])}
+                                        onChange={(urls: string[]) => {
+                                            if (field.disabled) return
+                                            formField.onChange(urls)
+                                        }}
+                                        folder={field.imageFolder || "uploads"}
+                                        maxSize={field.imageMaxSize || 5}
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "phong-ban-select" ? (
@@ -278,20 +581,25 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                 ) : field.type === "tinh-thanh-tsn-select" ? (
                                     <TinhThanhTSNSelect
                                         {...formField}
-                                        value={formField.value?.tinh_thanh_id ? Number(formField.value.tinh_thanh_id) : null}
+                                        value={formField.value ? Number(formField.value) : null}
                                         onChange={(id, data) => {
                                             if (field.disabled) return
                                             if (id && data) {
-                                                formField.onChange({
-                                                    tinh_thanh_id: id,
-                                                    ma_tinh_thanh: data.ma_tinh_thanh,
-                                                    ten_tinh_thanh: data.ten_tinh_thanh,
-                                                })
-                                                // Auto-fill ma_tinh_thanh field with format "Mã - Tên"
-                                                form.setValue("ma_tinh_thanh", `${data.ma_tinh_thanh} - ${data.ten_tinh_thanh}`, { shouldValidate: true })
+                                                formField.onChange(id)
+                                                // Auto-fill tsn_ten_tinh_thanh field
+                                                form.setValue("tsn_ten_tinh_thanh", data.ten_tinh_thanh || "", { shouldValidate: false })
+                                                // Reset quan huyen and phuong xa when tinh thanh changes
+                                                form.setValue("tsn_quan_huyen_id", null, { shouldValidate: false })
+                                                form.setValue("tsn_ten_quan_huyen", "", { shouldValidate: false })
+                                                form.setValue("tsn_phuong_xa_id", null, { shouldValidate: false })
+                                                form.setValue("tsn_ten_phuong_xa", "", { shouldValidate: false })
                                             } else {
                                                 formField.onChange(null)
-                                                form.setValue("ma_tinh_thanh", "", { shouldValidate: true })
+                                                form.setValue("tsn_ten_tinh_thanh", "", { shouldValidate: false })
+                                                form.setValue("tsn_quan_huyen_id", null, { shouldValidate: false })
+                                                form.setValue("tsn_ten_quan_huyen", "", { shouldValidate: false })
+                                                form.setValue("tsn_phuong_xa_id", null, { shouldValidate: false })
+                                                form.setValue("tsn_ten_phuong_xa", "", { shouldValidate: false })
                                             }
                                         }}
                                         placeholder={field.placeholder || "Chọn tỉnh thành..."}
@@ -301,20 +609,21 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                 ) : field.type === "tinh-thanh-ssn-select" ? (
                                     <TinhThanhSSNSelect
                                         {...formField}
-                                        value={formField.value?.tinh_thanh_id ? Number(formField.value.tinh_thanh_id) : null}
+                                        value={formField.value ? Number(formField.value) : null}
                                         onChange={(id, data) => {
                                             if (field.disabled) return
                                             if (id && data) {
-                                                formField.onChange({
-                                                    tinh_thanh_id: id,
-                                                    ma_tinh_thanh: data.ma_tinh_thanh,
-                                                    ten_tinh_thanh: data.ten_tinh_thanh,
-                                                })
-                                                // Auto-fill ma_tinh_thanh field with format "Mã - Tên"
-                                                form.setValue("ma_tinh_thanh", `${data.ma_tinh_thanh} - ${data.ten_tinh_thanh}`, { shouldValidate: true })
+                                                formField.onChange(id)
+                                                // Auto-fill ssn_ten_tinh_thanh field
+                                                form.setValue("ssn_ten_tinh_thanh", data.ten_tinh_thanh || "", { shouldValidate: false })
+                                                // Reset phuong xa when tinh thanh changes
+                                                form.setValue("ssn_phuong_xa_id", null, { shouldValidate: false })
+                                                form.setValue("ssn_ten_phuong_xa", "", { shouldValidate: false })
                                             } else {
                                                 formField.onChange(null)
-                                                form.setValue("ma_tinh_thanh", "", { shouldValidate: true })
+                                                form.setValue("ssn_ten_tinh_thanh", "", { shouldValidate: false })
+                                                form.setValue("ssn_phuong_xa_id", null, { shouldValidate: false })
+                                                form.setValue("ssn_ten_phuong_xa", "", { shouldValidate: false })
                                             }
                                         }}
                                         placeholder={field.placeholder || "Chọn tỉnh thành..."}
@@ -322,34 +631,60 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "quan-huyen-tsn-select" ? (
-                                    <QuanHuyenTSNSelect
+                                    <QuanHuyenTSNSelectWrapper
+                                        form={form}
+                                        formField={formField}
+                                        field={field}
+                                    />
+                                ) : field.type === "phuong-xa-tsn-select" ? (
+                                    <PhuongXaTSNSelectWrapper
+                                        form={form}
+                                        formField={formField}
+                                        field={field}
+                                    />
+                                ) : field.type === "phuong-xa-snn-select" ? (
+                                    <PhuongXaSNNSelectWrapper
+                                        form={form}
+                                        formField={formField}
+                                        field={field}
+                                    />
+                                ) : field.type === "nhan-su-select" ? (
+                                    <NhanSuSelect
                                         {...formField}
-                                        value={formField.value?.quan_huyen_id ? Number(formField.value.quan_huyen_id) : null}
+                                        value={formField.value ? Number(formField.value) : null}
                                         onChange={(id, data) => {
                                             if (field.disabled) return
+                                            formField.onChange(id)
+                                            // Auto-fill corresponding name field based on field name
                                             if (id && data) {
-                                                formField.onChange({
-                                                    quan_huyen_id: id,
-                                                    ma_quan_huyen: data.ma_quan_huyen,
-                                                    ten_quan_huyen: data.ten_quan_huyen,
-                                                    ma_tinh_thanh: data.ma_tinh_thanh,
-                                                    ten_tinh_thanh: data.ten_tinh_thanh,
-                                                    tinh_thanh_id: data.tinh_thanh_id || null,
-                                                })
-                                                // Auto-fill fields
-                                                form.setValue("ma_quan_huyen", `${data.ma_quan_huyen} - ${data.ten_quan_huyen}`, { shouldValidate: true })
-                                                if (data.ma_tinh_thanh && data.ten_tinh_thanh) {
-                                                    form.setValue("ma_tinh_thanh", `${data.ma_tinh_thanh} - ${data.ten_tinh_thanh}`, { shouldValidate: true })
+                                                if (field.name === "tele_sale_id") {
+                                                    form.setValue("ten_tele_sale", data.ten_nhan_su || "", { shouldValidate: false })
+                                                } else if (field.name === "thi_truong_id") {
+                                                    form.setValue("ten_thi_truong", data.ten_nhan_su || "", { shouldValidate: false })
                                                 }
                                             } else {
-                                                formField.onChange(null)
-                                                form.setValue("ma_quan_huyen", "", { shouldValidate: true })
-                                                form.setValue("ma_tinh_thanh", "", { shouldValidate: true })
+                                                if (field.name === "tele_sale_id") {
+                                                    form.setValue("ten_tele_sale", "", { shouldValidate: false })
+                                                } else if (field.name === "thi_truong_id") {
+                                                    form.setValue("ten_thi_truong", "", { shouldValidate: false })
+                                                }
                                             }
                                         }}
-                                        placeholder={field.placeholder || "Chọn quận huyện..."}
-                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã quận huyện..."}
+                                        placeholder={field.placeholder || "Chọn nhân sự..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã nhân sự..."}
                                         disabled={field.disabled}
+                                    />
+                                ) : field.type === "khach-buon-select" ? (
+                                    <KhachBuonSelectWithId
+                                        value={formField.value ? Number(formField.value) : null}
+                                        onChange={(id) => {
+                                            if (field.disabled) return
+                                            formField.onChange(id)
+                                        }}
+                                        placeholder={field.placeholder || "Chọn khách buôn..."}
+                                        searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã khách buôn..."}
+                                        disabled={field.disabled}
+                                        onBlur={formField.onBlur}
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
                                     <CustomFormFieldWithId
@@ -379,71 +714,17 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                 ) : (
                                     <Input
                                         {...formField}
-                                        type={field.type === "date" ? "date" : field.type === "email" ? "email" : field.type === "number" ? "number" : "text"}
-                                        value={formField.value !== null && formField.value !== undefined ? formField.value : ''}
+                                        value={formField.value || ''}
                                         placeholder={field.placeholder}
                                         disabled={field.disabled}
-                                        readOnly={field.disabled}
-                                        min={field.type === "number" ? (field.min !== undefined ? field.min : (field.name === "so_luong_cho_phep_thang" || field.name === "diem" || field.name === "tien") ? 0 : undefined) : undefined}
-                                        max={field.type === "number" ? field.max : undefined}
+                                        type={field.type === "number" ? "number" : "text"}
                                         className={cn(
-                                            isMobile && "h-11 text-base",
-                                            field.disabled && "bg-muted cursor-not-allowed"
+                                            isMobile && "h-11 text-base"
                                         )}
-                                        onChange={e => {
-                                            if (field.disabled) return
-                                            if (field.type === 'number') {
-                                                const numValue = e.target.valueAsNumber
-                                                // Validate min/max if specified
-                                                if (field.min !== undefined && !isNaN(numValue) && numValue < field.min) {
-                                                    formField.onChange(field.min)
-                                                    return
-                                                }
-                                                if (field.max !== undefined && !isNaN(numValue) && numValue > field.max) {
-                                                    formField.onChange(field.max)
-                                                    return
-                                                }
-                                                if ((field.name === "so_luong_cho_phep_thang" || field.name === "diem" || field.name === "tien") && numValue < 0) {
-                                                    formField.onChange(0)
-                                                } else {
-                                                    formField.onChange(isNaN(numValue) ? null : numValue)
-                                                }
-                                            } else {
-                                                formField.onChange(e.target.value)
-                                            }
-                                        }}
-                                        onBlur={e => {
-                                            if (field.type === 'number') {
-                                                const numValue = e.target.valueAsNumber
-                                                // Validate min/max on blur
-                                                if (field.min !== undefined && !isNaN(numValue) && numValue < field.min) {
-                                                    formField.onChange(field.min)
-                                                    return
-                                                }
-                                                if (field.max !== undefined && !isNaN(numValue) && numValue > field.max) {
-                                                    formField.onChange(field.max)
-                                                    return
-                                                }
-                                                if (field.name === "so_luong_cho_phep_thang") {
-                                                    if (isNaN(numValue) || numValue < 0) {
-                                                        formField.onChange(0)
-                                                    }
-                                                }
-                                            }
-                                        }}
                                     />
                                 )}
                             </FormControl>
-                            {field.description && (
-                                <FormDescription className={cn(
-                                    isMobile && "text-xs"
-                                )}>
-                                    {field.description}
-                                </FormDescription>
-                            )}
-                            <FormMessage className={cn(
-                                isMobile && "text-xs"
-                            )} />
+                            <FormMessage className={cn(isMobile && "text-xs")} />
                         </div>
                     </FormItem>
                 )

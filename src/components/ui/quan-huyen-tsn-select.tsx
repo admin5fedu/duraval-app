@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, Search } from "lucide-react"
+import { Check, ChevronsUpDown, Search, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,12 +10,14 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useQuanHuyenTSN } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/quan-huyen-tsn/hooks"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useQuanHuyenTSNSearch, useQuanHuyenTSNByTinhThanhId } from "@/features/he-thong/khac/tinh-thanh-truoc-sat-nhap/quan-huyen-tsn/hooks"
+import { useDebounce } from "@/shared/hooks/useDebounce"
+// import { Skeleton } from "@/components/ui/skeleton" // Not used
 
 export interface QuanHuyenTSNSelectProps {
     value?: number | null // ID của quận huyện được chọn
     onChange: (id: number | null, data?: { ma_quan_huyen: string; ten_quan_huyen: string; ma_tinh_thanh: string; ten_tinh_thanh: string; tinh_thanh_id?: number | null }) => void
+    tinhThanhId?: number | null // ID của tỉnh thành để filter quận huyện
     placeholder?: string
     searchPlaceholder?: string
     emptyText?: string
@@ -33,6 +35,7 @@ export const QuanHuyenTSNSelect = React.forwardRef<HTMLButtonElement, QuanHuyenT
 function QuanHuyenTSNSelect({
     value,
     onChange,
+    tinhThanhId,
     placeholder = "Chọn quận huyện...",
     searchPlaceholder = "Tìm kiếm theo tên hoặc mã quận huyện...",
     emptyText = "Không tìm thấy quận huyện.",
@@ -44,34 +47,68 @@ function QuanHuyenTSNSelect({
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
     
-    // Fetch danh sách quận huyện TSN
-    const { data: quanHuyenList, isLoading } = useQuanHuyenTSN()
+    // Debounce search query để tránh gọi API quá nhiều
+    const debouncedSearchQuery = useDebounce(searchQuery, 300)
     
     const searchInputId = React.useId()
 
-    // Tìm quận huyện được chọn
-    const selectedQuanHuyen = React.useMemo(() => {
-        if (!value || !quanHuyenList) return null
-        return quanHuyenList.find((qh) => qh.id === value)
-    }, [value, quanHuyenList])
+    // Load tất cả quận huyện theo tỉnh thành khi có tinhThanhId
+    const { data: allQuanHuyenByTinhThanh, isLoading: isLoadingAll } = useQuanHuyenTSNByTinhThanhId(
+        tinhThanhId || undefined
+    )
 
-    // Filter options dựa trên search query (tìm theo tên hoặc mã)
-    const filteredOptions = React.useMemo(() => {
-        if (!quanHuyenList) return []
-        if (!searchQuery.trim()) {
-            return quanHuyenList
+    // Async search - chỉ load khi có search query và tinhThanhId
+    // Filter được thực hiện ở server-side (API) để đảm bảo cascade dependency
+    const { data: searchResult, isLoading: isSearching } = useQuanHuyenTSNSearch(
+        debouncedSearchQuery,
+        1,
+        50,
+        open && debouncedSearchQuery.trim().length > 0 && !!tinhThanhId,
+        tinhThanhId || undefined
+    )
+
+    // Options từ search result (khi có search query) hoặc từ allQuanHuyenByTinhThanh (khi không có search)
+    const allOptions = React.useMemo(() => {
+        if (debouncedSearchQuery.trim() && searchResult?.data) {
+            // Khi có search query, dùng kết quả search
+            return searchResult.data
+        } else if (allQuanHuyenByTinhThanh) {
+            // Khi không có search query, dùng tất cả quận huyện của tỉnh thành
+            return allQuanHuyenByTinhThanh
         }
-        const query = searchQuery.toLowerCase()
-        return quanHuyenList.filter((qh) => {
+        return []
+    }, [debouncedSearchQuery, searchResult?.data, allQuanHuyenByTinhThanh])
+
+    // Filter options dựa trên search query (client-side filter khi đã có allOptions)
+    const filteredOptions = React.useMemo(() => {
+        if (!debouncedSearchQuery.trim()) {
+            // Không có search query, hiển thị tất cả
+            return allOptions
+        }
+        // Có search query, filter client-side từ allOptions
+        const query = debouncedSearchQuery.toLowerCase()
+        return allOptions.filter((qh) => {
             const maQuanHuyen = qh.ma_quan_huyen?.toLowerCase() || ""
             const tenQuanHuyen = qh.ten_quan_huyen?.toLowerCase() || ""
             return maQuanHuyen.includes(query) || tenQuanHuyen.includes(query)
         })
-    }, [quanHuyenList, searchQuery])
+    }, [allOptions, debouncedSearchQuery])
+
+    // Tìm quận huyện được chọn
+    const selectedQuanHuyen = React.useMemo(() => {
+        if (!value) return null
+        // Tìm trong filteredOptions
+        const found = filteredOptions.find((qh) => qh.id === value)
+        if (found) return found
+        // Nếu không tìm thấy trong filteredOptions, có thể đã bị filter ra, nhưng vẫn cần hiển thị
+        // Tìm trong allOptions
+        const foundInAll = allOptions.find((qh) => qh.id === value)
+        return foundInAll || null
+    }, [value, filteredOptions, allOptions])
 
     const handleSelect = React.useCallback((selectedId: number) => {
         if (disabled) return
-        const selected = quanHuyenList?.find((qh) => qh.id === selectedId)
+        const selected = allOptions.find((qh) => qh.id === selectedId)
         if (selected) {
             onChange(selectedId, {
                 ma_quan_huyen: selected.ma_quan_huyen,
@@ -85,7 +122,7 @@ function QuanHuyenTSNSelect({
         }
         setOpen(false)
         setSearchQuery("")
-    }, [onChange, disabled, quanHuyenList])
+    }, [onChange, disabled, allOptions])
 
     // handleClear is available for future use
     // const handleClear = React.useCallback(() => {
@@ -101,17 +138,24 @@ function QuanHuyenTSNSelect({
         }
     }, [open])
 
+    // Reset value khi tinhThanhId thay đổi (cascade dependency)
+    React.useEffect(() => {
+        if (tinhThanhId && value && selectedQuanHuyen && selectedQuanHuyen.tinh_thanh_id !== tinhThanhId) {
+            onChange(null)
+        } else if (!tinhThanhId && value) {
+            // Reset khi tinhThanhId bị xóa
+            onChange(null)
+        }
+    }, [tinhThanhId, value, selectedQuanHuyen, onChange])
+
     // Display text cho selected value
     const displayText = React.useMemo(() => {
         if (!selectedQuanHuyen) return placeholder
         return `${selectedQuanHuyen.ma_quan_huyen} - ${selectedQuanHuyen.ten_quan_huyen}`
     }, [selectedQuanHuyen, placeholder])
 
-    if (isLoading) {
-        return (
-            <Skeleton className={cn("h-10 w-full", className)} />
-        )
-    }
+    // Loading state
+    const isLoading = isLoadingAll || (isSearching && debouncedSearchQuery.trim().length > 0)
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -128,7 +172,7 @@ function QuanHuyenTSNSelect({
                         !selectedQuanHuyen && "text-muted-foreground",
                         className
                     )}
-                    disabled={disabled}
+                    disabled={disabled || !tinhThanhId}
                     onBlur={onBlur}
                 >
                     <span className="truncate">{displayText}</span>
@@ -149,9 +193,18 @@ function QuanHuyenTSNSelect({
                         />
                     </div>
                     <div className="max-h-[300px] overflow-auto p-1">
-                        {filteredOptions.length === 0 ? (
+                        {!tinhThanhId ? (
                             <div className="py-6 text-center text-sm text-muted-foreground">
-                                {emptyText}
+                                Vui lòng chọn tỉnh thành trước
+                            </div>
+                        ) : isLoading ? (
+                            <div className="py-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Đang tải...
+                            </div>
+                        ) : filteredOptions.length === 0 ? (
+                            <div className="py-6 text-center text-sm text-muted-foreground">
+                                {debouncedSearchQuery.trim() ? emptyText : "Không có quận huyện nào"}
                             </div>
                         ) : (
                             <div className="space-y-1">

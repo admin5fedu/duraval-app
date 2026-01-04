@@ -26,37 +26,50 @@ export function StickyTableHeaderCell({
     colSpan,
     children
 }: StickyTableHeaderCellProps) {
-    const headerStyle: React.CSSProperties = React.useMemo(() => ({
-        minWidth: `${minWidth}px`,
-        width: `${width}px`,
-        maxWidth: `${width}px`,
-        boxSizing: 'border-box',
-        backgroundColor: 'hsl(var(--background))',
-        ...(isStickyLeft ? {
-            left: stickyLeftOffset ?? 0,
-            top: 0, // ✅ Cần top: 0 để sticky cả 2 chiều (vertical + horizontal)
+    const headerStyle: React.CSSProperties = React.useMemo(() => {
+        // ✅ Tất cả headers đều sticky top: 0
+        const baseStyle: React.CSSProperties = {
+            minWidth: `${minWidth}px`,
+            width: `${width}px`,
+            maxWidth: `${width}px`,
+            boxSizing: 'border-box',
+            backgroundColor: 'hsl(var(--background))',
             position: 'sticky',
-            zIndex: 110, // Tăng z-index lên 110 để cao hơn body cells (100)
-            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-            borderRight: '1px solid hsl(var(--border) / 0.5)',
-            isolation: 'isolate',
-            transform: 'translateZ(0)',
-            willChange: 'transform',
-            backgroundClip: 'padding-box'
-        } : {}),
-        ...(isStickyRight ? {
-            right: 0,
-            top: 0, // ✅ Cần top: 0 để sticky cả 2 chiều (vertical + horizontal)
-            position: 'sticky',
-            zIndex: 110, // Tăng z-index lên 110 để cao hơn body cells (100)
-            boxShadow: '-2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-            borderLeft: '1px solid hsl(var(--border) / 0.5)',
-            isolation: 'isolate',
-            transform: 'translateZ(0)',
-            willChange: 'transform',
-            backgroundClip: 'padding-box'
-        } : {})
-    }), [isStickyLeft, isStickyRight, stickyLeftOffset, minWidth, width])
+            top: 0,
+            zIndex: isStickyLeft || isStickyRight ? 110 : 30, // Sticky columns cao hơn header thường
+        }
+
+        // ✅ Sticky left columns
+        if (isStickyLeft) {
+            return {
+                ...baseStyle,
+                left: stickyLeftOffset ?? 0,
+                boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                borderRight: '1px solid hsl(var(--border) / 0.5)',
+                isolation: 'isolate',
+                transform: 'translateZ(0)',
+                willChange: 'transform',
+                backgroundClip: 'padding-box'
+            }
+        }
+
+        // ✅ Sticky right columns
+        if (isStickyRight) {
+            return {
+                ...baseStyle,
+                right: 0,
+                boxShadow: '-2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                borderLeft: '1px solid hsl(var(--border) / 0.5)',
+                isolation: 'isolate',
+                transform: 'translateZ(0)',
+                willChange: 'transform',
+                backgroundClip: 'padding-box'
+            }
+        }
+
+        // ✅ Header thường (chỉ sticky top)
+        return baseStyle
+    }, [isStickyLeft, isStickyRight, stickyLeftOffset, minWidth, width])
     
     return (
         <TableHead colSpan={colSpan} style={headerStyle}>

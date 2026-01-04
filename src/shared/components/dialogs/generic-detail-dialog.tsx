@@ -6,6 +6,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
@@ -47,19 +48,31 @@ export function GenericDetailDialog({
 }: GenericDetailDialogProps) {
     const handleBack = onBack ?? (() => onOpenChange(false))
 
+    // Chỉ hiển thị DialogHeader nếu có dialogTitle hoặc dialogSubtitle
+    const showDialogHeader = dialogTitle !== undefined || dialogSubtitle !== undefined
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="!max-w-[1200px] !w-[90vw] max-w-[90vw] max-h-[95vh] p-0 flex flex-col"
+                className="!max-w-[1200px] !w-[90vw] max-w-[90vw] h-[90vh] max-h-[95vh] p-0 flex flex-col overflow-hidden"
                 onInteractOutside={(e) => e.preventDefault()}
             >
-                <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
-                    <DialogTitle className="text-xl">
+                {/* Always include DialogTitle and DialogDescription for accessibility, even if hidden */}
+                <DialogHeader className={showDialogHeader ? "px-6 pt-6 pb-4 border-b flex-shrink-0" : "sr-only"}>
+                    <DialogTitle className={showDialogHeader ? "text-xl" : "sr-only"}>
                         {/* Ưu tiên dialogTitle cho thanh header popup */}
                         {(typeof dialogTitle !== "undefined" && dialogTitle) || title}
                     </DialogTitle>
-                    {dialogSubtitle && (
-                        <p className="text-sm text-muted-foreground mt-1">{dialogSubtitle}</p>
+                    {dialogSubtitle ? (
+                        showDialogHeader ? (
+                            <p className="text-sm text-muted-foreground mt-1">{dialogSubtitle}</p>
+                        ) : (
+                            <DialogDescription className="sr-only">{dialogSubtitle}</DialogDescription>
+                        )
+                    ) : (
+                        <DialogDescription className="sr-only">
+                            {subtitle || "Chi tiết thông tin"}
+                        </DialogDescription>
                     )}
                 </DialogHeader>
                 <div className="flex-1 overflow-hidden min-h-0">

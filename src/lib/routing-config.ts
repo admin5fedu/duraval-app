@@ -46,6 +46,8 @@ const BASE_PATH_LABELS: Record<string, string> = {
   "mua-hang": "Mua Hàng",
   "ke-toan": "Kế Toán",
   "kho-van": "Kho Vận",
+  "ban-buon": "Bán Buôn",
+  "du-lieu-khach-buon": "Dữ liệu khách buôn",
   
   // He-thong sub-modules (flattened)
   "danh-sach-nhan-su": "Danh Sách Nhân Sự",

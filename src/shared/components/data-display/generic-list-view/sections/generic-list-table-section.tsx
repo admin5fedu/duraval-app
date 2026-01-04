@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { flexRender } from "@tanstack/react-table"
 import {
     Table,
@@ -22,7 +21,7 @@ const DEFAULT_MAX_COLUMN_WIDTH = 360
 
 /**
  * Table section component for GenericListView
- * Renders the desktop table with sticky headers, scrollable body, and sticky footer
+ * Renders a single table with sticky header, scrollable body, and sticky footer
  */
 export function GenericListTableSection<TData, TValue>({
     table,
@@ -47,131 +46,20 @@ export function GenericListTableSection<TData, TValue>({
     handlePageInputBlur,
     handlePageInputFocus,
     handlePageInputKeyDown,
+    serverSidePagination,
 }: GenericListTableSectionProps<TData, TValue>) {
     const headerGroups = table.getHeaderGroups()
 
-    // ✅ Sử dụng custom hooks để đo chiều cao động của header và footer (cho tương lai nếu cần)
-    const { ref: headerRef } = useElementHeight<HTMLDivElement>()
+    // ✅ Sử dụng custom hooks để đo chiều cao động của footer
     const { ref: footerRef } = useElementHeight<HTMLDivElement>()
-
-    // ✅ Ref để đồng bộ scroll giữa header và body
-    const headerScrollRef = React.useRef<HTMLDivElement>(null)
-    const bodyScrollRef = React.useRef<HTMLDivElement>(null)
-
-    // ✅ Đồng bộ scroll ngang giữa header và body
-    React.useEffect(() => {
-        const headerElement = headerScrollRef.current
-        const bodyElement = bodyScrollRef.current
-
-        if (!headerElement || !bodyElement) return
-
-        const handleBodyScroll = () => {
-            if (headerElement.scrollLeft !== bodyElement.scrollLeft) {
-                headerElement.scrollLeft = bodyElement.scrollLeft
-            }
-        }
-
-        const handleHeaderScroll = () => {
-            if (bodyElement.scrollLeft !== headerElement.scrollLeft) {
-                bodyElement.scrollLeft = headerElement.scrollLeft
-            }
-        }
-
-        bodyElement.addEventListener('scroll', handleBodyScroll, { passive: true })
-        headerElement.addEventListener('scroll', handleHeaderScroll, { passive: true })
-
-        return () => {
-            bodyElement.removeEventListener('scroll', handleBodyScroll)
-            headerElement.removeEventListener('scroll', handleHeaderScroll)
-        }
-    }, [])
 
     return (
         <div className="hidden md:flex rounded-md border flex-1 overflow-hidden flex-col w-full max-w-full min-w-0 isolate mt-2 min-h-0">
-            {/* ✅ Table Header - Scrollable ngang để đồng bộ với body */}
+            {/* ✅ Single Table Container - Scrollable */}
             <div 
-                ref={headerRef}
-                className="flex-shrink-0 border-b bg-background"
-                data-testid="list-view-table-header"
-            >
-                <div 
-                    ref={headerScrollRef} 
-                    className="overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden"
-                    style={{ 
-                        scrollbarWidth: 'none', // Firefox
-                        msOverflowStyle: 'none', // IE/Edge
-                    }}
-                >
-                    <Table containerClassName="w-full max-w-full min-w-0" style={{ minWidth: 'max-content' }}>
-                        <TableHeader
-                            className="sticky top-0 bg-background shadow-sm"
-                            style={{
-                                boxShadow:
-                                    "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-                                zIndex: 20, // ✅ Giảm từ 120 xuống 20 (thấp hơn toolbar z-30)
-                            }}
-                        >
-                            {headerGroups.map((headerGroup: any) => (
-                                <TableRow
-                                    key={headerGroup.id}
-                                    className="hover:bg-transparent"
-                                >
-                                    {headerGroup.headers.map((header: any) => {
-                                        const meta = header.column
-                                            .columnDef.meta as
-                                            | {
-                                                  stickyLeft?: boolean
-                                                  stickyLeftOffset?: number
-                                                  stickyRight?: boolean
-                                                  minWidth?: number
-                                                  maxWidth?: number
-                                              }
-                                            | undefined
-
-                                        const isStickyLeft = meta?.stickyLeft
-                                        const isStickyRight = meta?.stickyRight
-
-                                        const rawWidth = header.getSize()
-                                        const maxWidth =
-                                            meta?.maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH
-                                        const minWidth = Math.min(
-                                            meta?.minWidth || rawWidth,
-                                            maxWidth
-                                        )
-                                        const width = Math.min(rawWidth, maxWidth)
-
-                                        return (
-                                            <StickyTableHeaderCell
-                                                key={header.id}
-                                                colSpan={header.colSpan}
-                                                isStickyLeft={isStickyLeft}
-                                                isStickyRight={isStickyRight}
-                                                stickyLeftOffset={meta?.stickyLeftOffset}
-                                                minWidth={minWidth}
-                                                width={width}
-                                            >
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column.columnDef.header,
-                                                          header.getContext()
-                                                      )}
-                                            </StickyTableHeaderCell>
-                                        )
-                                    })}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                    </Table>
-                </div>
-            </div>
-
-            {/* ✅ Table Body - Scrollable với flex-1 để tự động mở rộng và đẩy footer xuống */}
-            <div 
-                ref={bodyScrollRef}
                 className="flex-1 min-h-0 overflow-y-auto overflow-x-auto w-full max-w-full min-w-0 relative"
                 style={{
-                    scrollBehavior: 'smooth', // ✅ Smooth scrolling
+                    scrollBehavior: 'smooth',
                 }}
                 role="region"
                 aria-label="Danh sách dữ liệu"
@@ -179,6 +67,66 @@ export function GenericListTableSection<TData, TValue>({
                 data-testid="list-view-table-body"
             >
                 <Table containerClassName="w-full max-w-full min-w-0" style={{ minWidth: 'max-content' }}>
+                    {/* ✅ Table Header - Sticky top */}
+                    <TableHeader
+                        className="bg-background"
+                        style={{
+                            boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+                        }}
+                    >
+                        {headerGroups.map((headerGroup: any) => (
+                            <TableRow
+                                key={headerGroup.id}
+                                className="hover:bg-transparent"
+                            >
+                                {headerGroup.headers.map((header: any) => {
+                                    const meta = header.column
+                                        .columnDef.meta as
+                                        | {
+                                              stickyLeft?: boolean
+                                              stickyLeftOffset?: number
+                                              stickyRight?: boolean
+                                              minWidth?: number
+                                              maxWidth?: number
+                                          }
+                                        | undefined
+
+                                    const isStickyLeft = meta?.stickyLeft
+                                    const isStickyRight = meta?.stickyRight
+
+                                    const rawWidth = header.getSize()
+                                    const maxWidth =
+                                        meta?.maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH
+                                    const minWidth = Math.min(
+                                        meta?.minWidth || rawWidth,
+                                        maxWidth
+                                    )
+                                    const width = Math.min(rawWidth, maxWidth)
+
+                                    return (
+                                        <StickyTableHeaderCell
+                                            key={header.id}
+                                            colSpan={header.colSpan}
+                                            isStickyLeft={isStickyLeft}
+                                            isStickyRight={isStickyRight}
+                                            stickyLeftOffset={meta?.stickyLeftOffset}
+                                            minWidth={minWidth}
+                                            width={width}
+                                        >
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef.header,
+                                                      header.getContext()
+                                                  )}
+                                        </StickyTableHeaderCell>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+
+                    {/* ✅ Table Body */}
                     {enableVirtualization && filteredRows.length > 100 ? (
                         <VirtualizedTableBody
                             table={table}
@@ -331,7 +279,7 @@ export function GenericListTableSection<TData, TValue>({
                 </Table>
             </div>
 
-            {/* ✅ Table Footer - Sticky bottom, luôn ở dưới cùng và sticky khi scroll */}
+            {/* ✅ Table Footer - Sticky bottom */}
             <div 
                 ref={footerRef}
                 className="flex-shrink-0 border-t bg-background sticky bottom-0 z-20"
@@ -347,9 +295,9 @@ export function GenericListTableSection<TData, TValue>({
                     handlePageInputBlur={handlePageInputBlur}
                     handlePageInputFocus={handlePageInputFocus}
                     handlePageInputKeyDown={handlePageInputKeyDown}
+                    serverSidePagination={serverSidePagination}
                 />
             </div>
         </div>
     )
 }
-

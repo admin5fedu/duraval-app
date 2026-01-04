@@ -21,7 +21,8 @@ interface InlineImageUploadProps {
   className?: string
 }
 
-export function InlineImageUpload({
+export const InlineImageUpload = React.forwardRef<HTMLDivElement, InlineImageUploadProps>(
+function InlineImageUpload({
   value,
   onChange,
   disabled = false,
@@ -29,7 +30,7 @@ export function InlineImageUpload({
   displayName = "User",
   maxSize = 10,
   className,
-}: InlineImageUploadProps) {
+}, ref) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [zoomViewerOpen, setZoomViewerOpen] = useState(false)
@@ -160,8 +161,17 @@ export function InlineImageUpload({
 
   return (
     <>
+      {/* Hidden input để label có thể trỏ đến (FormControl inject id vào div, nhưng label cần input) */}
+      <input
+        type="hidden"
+        id={formItemId}
+        value={value || ""}
+        aria-hidden="true"
+        tabIndex={-1}
+        readOnly
+      />
       <div
-        ref={dropZoneRef}
+        ref={ref || dropZoneRef}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -283,5 +293,7 @@ export function InlineImageUpload({
       )}
     </>
   )
-}
+})
+
+InlineImageUpload.displayName = "InlineImageUpload"
 

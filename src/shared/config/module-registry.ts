@@ -31,6 +31,12 @@ import { phuongXaSNNConfig } from "@/features/he-thong/khac/tinh-thanh-sau-sat-n
 import { nhomChuyenDeConfig } from "@/features/cong-viec/dao-tao/nhom-chuyen-de/config"
 import { chuyenDeConfig } from "@/features/cong-viec/dao-tao/chuyen-de/config"
 import { cauHoiConfig } from "@/features/cong-viec/dao-tao/cau-hoi/config"
+import { giaiDoanKhachBuonConfig } from "@/features/ban-buon/thiet-lap-khach-buon/giai-doan-khach-buon/config"
+import { trangThaiKhachBuonConfig } from "@/features/ban-buon/thiet-lap-khach-buon/trang-thai-khach-buon/config"
+import { mucDangKyConfig } from "@/features/ban-buon/thiet-lap-khach-buon/muc-dang-ky/config"
+import { danhSachKBConfig } from "@/features/ban-buon/thong-tin-khach-hang/du-lieu-khach-buon/danh-sach-KB/config"
+import { nguoiLienHeConfig } from "@/features/ban-buon/thong-tin-khach-hang/du-lieu-khach-buon/nguoi-lien-he/config"
+import { hinhAnhKhachBuonConfig } from "@/features/ban-buon/thong-tin-khach-hang/du-lieu-khach-buon/hinh-anh-khach-buon/config"
 
 /**
  * Registry class for managing module configurations
@@ -140,6 +146,12 @@ moduleRegistry.register(phuongXaSNNConfig)
 moduleRegistry.register(nhomChuyenDeConfig)
 moduleRegistry.register(chuyenDeConfig)
 moduleRegistry.register(cauHoiConfig)
+moduleRegistry.register(giaiDoanKhachBuonConfig)
+moduleRegistry.register(trangThaiKhachBuonConfig)
+moduleRegistry.register(mucDangKyConfig)
+moduleRegistry.register(danhSachKBConfig)
+moduleRegistry.register(nguoiLienHeConfig)
+moduleRegistry.register(hinhAnhKhachBuonConfig)
 
 // Export helper functions
 export function getModuleConfig(moduleName: string): ModuleConfig | undefined {

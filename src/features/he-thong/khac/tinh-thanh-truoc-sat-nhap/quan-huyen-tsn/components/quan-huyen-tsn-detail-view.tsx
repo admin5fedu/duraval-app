@@ -3,10 +3,12 @@
 import { useNavigate } from "react-router-dom"
 import { GenericDetailViewSimple, type DetailSection } from "@/shared/components"
 import { Button } from "@/components/ui/button"
-import { Edit, Plus } from "lucide-react"
+import { Edit } from "lucide-react"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { useQuanHuyenTSNById } from "../hooks/use-quan-huyen-tsn"
+import { usePhuongXaTSNByQuanHuyenId } from "../../phuong-xa-tsn/hooks/use-phuong-xa-tsn"
 import { DeleteQuanHuyenTSNButton } from "./delete-quan-huyen-tsn-button"
+import { PhuongXaSection } from "./phuong-xa-section"
 import { quanHuyenTSNConfig } from "../config"
 import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
@@ -24,6 +26,11 @@ export function QuanHuyenTSNDetailView({ id, initialData, onEdit, onBack }: Quan
   const navigate = useNavigate()
   const query = useQuanHuyenTSNById(id, initialData)
   const viewState = useDetailViewStateFromQuery(query, initialData)
+  
+  // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
+  // Load danh sách phường xã con - hook sẽ tự disable nếu id chưa có
+  const quanHuyenId = viewState.data?.id || null
+  const { data: phuongXaList = [], isLoading: isLoadingPhuongXa } = usePhuongXaTSNByQuanHuyenId(quanHuyenId)
   
   const quanHuyen = viewState.data
 
@@ -91,10 +98,6 @@ export function QuanHuyenTSNDetailView({ id, initialData, onEdit, onBack }: Quan
     }
   }
 
-  const handleAddNew = () => {
-    navigate(`${quanHuyenTSNConfig.routePath}/moi`)
-  }
-
   const handleBack = () => {
     if (onBack) {
       onBack()
@@ -107,38 +110,39 @@ export function QuanHuyenTSNDetailView({ id, initialData, onEdit, onBack }: Quan
   const subtitle = quanHuyen.ma_quan_huyen
 
   return (
-    <GenericDetailViewSimple
-      title={title}
-      subtitle={subtitle}
-      sections={sections}
-      onBack={handleBack}
-      actions={
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            className={actionButtonClass()}
-            onClick={handleAddNew}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm Mới
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            className={actionButtonClass()}
-            onClick={handleEdit}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Sửa
-          </Button>
-          <DeleteQuanHuyenTSNButton 
-            id={id} 
-            name={quanHuyen.ten_quan_huyen} 
-          />
-        </>
-      }
-    />
+    <>
+      <GenericDetailViewSimple
+        title={title}
+        subtitle={subtitle}
+        sections={sections}
+        onBack={handleBack}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className={actionButtonClass()}
+              onClick={handleEdit}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Sửa
+            </Button>
+            <DeleteQuanHuyenTSNButton 
+              id={id} 
+              name={quanHuyen.ten_quan_huyen} 
+            />
+          </>
+        }
+      />
+      
+      {/* Section hiển thị danh sách phường xã con - Chuẩn theo module Kỳ thi */}
+      <PhuongXaSection
+        quanHuyenId={quanHuyen.id!}
+        phuongXaList={phuongXaList}
+        isLoading={isLoadingPhuongXa}
+        quanHuyenName={quanHuyen.ten_quan_huyen}
+      />
+    </>
   )
 }
 

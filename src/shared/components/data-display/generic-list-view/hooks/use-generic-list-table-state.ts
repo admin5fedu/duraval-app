@@ -36,6 +36,7 @@ export function useGenericListTableState<TData, TValue>({
     onSearchChange,
     onSortChange,
     persistSelection,
+    serverSidePagination,
 }: UseGenericListTableStateParams<TData, TValue>): UseGenericListTableStateReturn {
     const { defaultPageSize } = useUserPreferencesStore()
 
@@ -47,7 +48,38 @@ export function useGenericListTableState<TData, TValue>({
 
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility || {})
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(initialFilters || [])
-    const [sorting, setSorting] = React.useState<SortingState>(initialSorting || [])
+    
+    // Validate initialSorting - only keep columns that actually exist
+    const validatedInitialSorting = React.useMemo(() => {
+        // Get all valid column ids from columns
+        // TanStack Table uses either 'id' or 'accessorKey' as the column identifier
+        const validColumnIds = new Set<string>()
+        columns.forEach((col: any) => {
+            // Column id takes precedence, but accessorKey is also valid
+            const columnId = col.id || col.accessorKey
+            if (columnId) {
+                validColumnIds.add(columnId)
+            }
+            // Also add accessorKey separately if it exists and is different
+            if (col.accessorKey && col.accessorKey !== col.id) {
+                validColumnIds.add(col.accessorKey)
+            }
+        })
+        
+        if (!initialSorting || initialSorting.length === 0) {
+            // If no initialSorting provided, return empty array
+            return []
+        }
+        
+        // Filter initialSorting to only include valid columns
+        const filtered = initialSorting.filter((sort) => validColumnIds.has(sort.id))
+        
+        // If no valid sorting remains, return empty array to avoid errors
+        // Table will use default sorting (no sorting) instead
+        return filtered
+    }, [initialSorting, columns])
+    
+    const [sorting, setSorting] = React.useState<SortingState>(validatedInitialSorting)
     const [globalFilter, setGlobalFilter] = React.useState(initialSearch || "")
     const deferredGlobalFilter = useDeferredValue(globalFilter)
 
@@ -157,6 +189,15 @@ export function useGenericListTableState<TData, TValue>({
         onPaginationChange: (updater) => {
             const newPagination = typeof updater === "function" ? updater(pagination) : updater
             setPagination(newPagination)
+            
+            // Call server-side pagination handler if enabled
+            if (serverSidePagination?.enabled && serverSidePagination.onPaginationChange) {
+                serverSidePagination.onPaginationChange(
+                    newPagination.pageIndex + 1, // Convert 0-indexed to 1-indexed
+                    newPagination.pageSize
+                )
+            }
+            
             if (!persistSelectionRef.current) {
                 setTimeout(() => {
                     setRowSelection({})
@@ -164,9 +205,12 @@ export function useGenericListTableState<TData, TValue>({
             }
         },
         getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: serverSidePagination?.enabled ? undefined : getFilteredRowModel(),
+        getPaginationRowModel: serverSidePagination?.enabled ? undefined : getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        // Server-side pagination configuration
+        manualPagination: serverSidePagination?.enabled ?? false,
+        pageCount: serverSidePagination?.enabled ? serverSidePagination.pageCount : undefined,
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
         globalFilterFn: (row, columnId, filterValue) => {
@@ -243,11 +287,22 @@ export function useGenericListTableState<TData, TValue>({
         [selectedRowModel.rows.length]
     )
     const filteredRowModel = table.getFilteredRowModel()
-    const totalRowCount = useMemo(
-        () => filteredRowModel.rows.length,
-        [filteredRowModel.rows.length]
-    )
-    const totalDataCount = useMemo(() => data.length, [data.length])
+    const totalRowCount = useMemo(() => {
+        // For server-side pagination, use total from server
+        if (serverSidePagination?.enabled) {
+            return serverSidePagination.total
+        }
+        // For client-side pagination, use filtered rows count
+        return filteredRowModel.rows.length
+    }, [serverSidePagination?.enabled, serverSidePagination?.total, filteredRowModel.rows.length])
+    const totalDataCount = useMemo(() => {
+        // For server-side pagination, use total from server
+        if (serverSidePagination?.enabled) {
+            return serverSidePagination.total
+        }
+        // For client-side pagination, use data length
+        return data.length
+    }, [serverSidePagination?.enabled, serverSidePagination?.total, data.length])
 
     useLazySelection(table, {
         threshold: 1000,

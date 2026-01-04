@@ -32,8 +32,14 @@ export function GenericListFooterSection({
     handlePageInputBlur,
     handlePageInputFocus,
     handlePageInputKeyDown,
+    serverSidePagination,
 }: GenericListFooterSectionProps) {
     const { setDefaultPageSize } = useUserPreferencesStore()
+    
+    // Use pageCount from server if server-side pagination is enabled
+    const pageCount = serverSidePagination?.enabled 
+        ? serverSidePagination.pageCount 
+        : (table.getPageCount() || 1)
 
     return (
         <div className="hidden md:flex shrink-0 bg-background py-2.5 px-3 md:px-4 flex-row items-center justify-between gap-2 md:gap-0">
@@ -132,7 +138,7 @@ export function GenericListFooterSection({
                         aria-label="Số trang"
                     />
                     <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">
-                        / {table.getPageCount() || 1}
+                        / {pageCount}
                     </span>
                 </div>
 
@@ -150,7 +156,7 @@ export function GenericListFooterSection({
                     size="icon"
                     className="h-7 w-7 md:h-8 md:w-8 hidden lg:flex"
                     onClick={() =>
-                        table.setPageIndex(table.getPageCount() - 1)
+                        table.setPageIndex(pageCount - 1)
                     }
                     disabled={!table.getCanNextPage()}
                 >

@@ -230,12 +230,12 @@ export function EmbeddedListFullViewDialog<T>({
                 }}
                 onInteractOutside={(e) => e.preventDefault()}
             >
-                <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
+                <DialogHeader className="px-6 pt-6 pb-4 pr-12 border-b flex-shrink-0">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between gap-4">
-                            <DialogTitle className="text-xl">{title}</DialogTitle>
+                            <DialogTitle className="text-xl flex-1 min-w-0">{title}</DialogTitle>
                             {enableSearch && (
-                                <div className="relative w-full max-w-sm">
+                                <div className="relative w-full max-w-sm flex-shrink-0">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
                                     <Input
                                         type="text"

@@ -59,6 +59,26 @@ export interface GenericListViewProps<TData, TValue> {
         isLoading: boolean
         getItemLabel: (item: TData) => string
     }
+    /**
+     * Server-side pagination configuration
+     * When enabled, pagination is handled on the server instead of client-side
+     */
+    serverSidePagination?: {
+        enabled: boolean
+        pageCount: number  // Total number of pages from server (totalPages)
+        total: number      // Total number of records from server
+        isLoading?: boolean // Loading state when fetching new page
+        onPaginationChange?: (page: number, pageSize: number) => void
+    }
+    /**
+     * Server-side search configuration
+     * When enabled, search is handled on the server instead of client-side
+     */
+    serverSideSearch?: {
+        enabled: boolean
+        onSearchChange?: (searchTerm: string) => void
+        debounceMs?: number // Debounce delay for search input (default: 300ms)
+    }
 }
 
 /**
@@ -75,6 +95,12 @@ export interface UseGenericListTableStateParams<TData, TValue> {
     onSearchChange?: (search: string) => void
     onSortChange?: (sorting: SortingState) => void
     persistSelection: boolean | undefined
+    serverSidePagination?: {
+        enabled: boolean
+        pageCount: number
+        total: number
+        onPaginationChange?: (page: number, pageSize: number) => void
+    }
 }
 
 /**
@@ -193,6 +219,11 @@ export interface GenericListMobileFooterSectionProps {
     handlePageInputBlur: () => void
     handlePageInputFocus: () => void
     handlePageInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+    serverSidePagination?: {
+        enabled: boolean
+        pageCount: number
+        total: number
+    }
 }
 
 /**
@@ -222,6 +253,11 @@ export interface GenericListTableSectionProps<TData, TValue> {
     handlePageInputBlur: () => void
     handlePageInputFocus: () => void
     handlePageInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+    serverSidePagination?: {
+        enabled: boolean
+        pageCount: number
+        total: number
+    }
 }
 
 /**
@@ -237,5 +273,10 @@ export interface GenericListFooterSectionProps {
     handlePageInputBlur: () => void
     handlePageInputFocus: () => void
     handlePageInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+    serverSidePagination?: {
+        enabled: boolean
+        pageCount: number
+        total: number
+    }
 }
 

@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "tinh-thanh-ssn-select"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "multiselect-combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "phuong-xa-tsn-select" | "tinh-thanh-ssn-select" | "phuong-xa-snn-select" | "nhan-su-select" | "khach-buon-select"
 
 /**
  * Form field configuration
@@ -34,6 +34,8 @@ export interface FormFieldConfig {
     formatThousands?: boolean // Format number with thousands separator
     allowDecimals?: boolean // Allow decimal values
     suffix?: string // Suffix text to display after the number (e.g., "%")
+    // For combobox type
+    allowCustom?: boolean // Allow entering custom values not in options
 }
 
 /**

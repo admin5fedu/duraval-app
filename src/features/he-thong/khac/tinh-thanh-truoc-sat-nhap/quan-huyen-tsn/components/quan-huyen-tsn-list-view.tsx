@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { GenericListView } from "@/shared/components/data-display/generic-list-view/generic-list-view"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import { QuanHuyenTSN } from "../schema"
-import { useQuanHuyenTSN, useBatchDeleteQuanHuyenTSN, useDeleteQuanHuyenTSN } from "../hooks"
+import { useQuanHuyenTSNPaginated, useQuanHuyenTSNSearch, useQuanHuyenTSNForReference, useBatchDeleteQuanHuyenTSN, useDeleteQuanHuyenTSN } from "../hooks"
 import { quanHuyenTSNColumns } from "./quan-huyen-tsn-columns"
 import { quanHuyenTSNConfig } from "../config"
 import { useListViewFilters } from "@/shared/hooks/use-list-view-filters"
@@ -33,13 +33,61 @@ interface QuanHuyenTSNListViewProps {
 }
 
 export function QuanHuyenTSNListView({
-    initialData,
+    initialData: _initialData, // Not used with server-side pagination
     onEdit,
     onAddNew,
     onView,
 }: QuanHuyenTSNListViewProps = {}) {
-    const { data: quanHuyenList, isLoading, isError, refetch } = useQuanHuyenTSN(initialData)
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
+    
+    // URL Sync: Get page, pageSize, and search from URL
+    const page = React.useMemo(() => {
+        const pageParam = searchParams.get('page')
+        return pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1
+    }, [searchParams])
+    
+    const pageSize = React.useMemo(() => {
+        const pageSizeParam = searchParams.get('pageSize')
+        return pageSizeParam ? Math.max(10, parseInt(pageSizeParam, 10)) : 50
+    }, [searchParams])
+    
+    const searchTerm = React.useMemo(() => {
+        return searchParams.get('search') || ''
+    }, [searchParams])
+    
+    // Get filters from URL
+    const filtersFromURL = React.useMemo(() => {
+        const filtersParam = searchParams.get('filters')
+        if (filtersParam) {
+            try {
+                return JSON.parse(filtersParam)
+            } catch {
+                return []
+            }
+        }
+        return []
+    }, [searchParams])
+    
+    // Server-side pagination/search hooks with filters
+    const paginatedQuery = useQuanHuyenTSNPaginated(page, pageSize, filtersFromURL)
+    const searchQuery = useQuanHuyenTSNSearch(
+        searchTerm, 
+        page, 
+        pageSize, 
+        !!searchTerm && searchTerm.trim().length > 0,
+        undefined, // tinhThanhId - not used in list view
+        filtersFromURL
+    )
+    
+    // Use search results if search term exists, otherwise use paginated results
+    const isSearchMode = !!searchTerm && searchTerm.trim().length > 0
+    const activeQuery = isSearchMode ? searchQuery : paginatedQuery
+    const { data: paginatedResult, isLoading, isError, refetch } = activeQuery
+    
+    // Load ALL data for filter options (reference data)
+    const { data: allQuanHuyen } = useQuanHuyenTSNForReference()
+    
     const batchDeleteMutation = useBatchDeleteQuanHuyenTSN()
     const deleteMutation = useDeleteQuanHuyenTSN()
     const batchImportMutation = useBatchUpsertQuanHuyenTSN()
@@ -47,22 +95,71 @@ export function QuanHuyenTSNListView({
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
     const [rowToDelete, setRowToDelete] = React.useState<QuanHuyenTSN | null>(null)
+    
+    // Extract data from paginated result
+    const quanHuyenList = paginatedResult?.data || []
 
     const columns = React.useMemo(() => quanHuyenTSNColumns(), [])
 
+    // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
+    // Note: For server-side search, we sync search to URL instead of session storage
     const {
         initialFilters,
-        initialSearch,
+        initialSearch: _initialSearch,
         initialSorting,
         handleFiltersChange,
-        handleSearchChange,
+        handleSearchChange: _handleSearchChange,
         handleSortChange,
     } = useListViewFilters(module, [{ id: "tg_tao", desc: true }])
+    
+    // Override handleSearchChange to sync to URL
+    const handleSearchChange = React.useCallback((newSearch: string) => {
+        const newSearchParams = new URLSearchParams(searchParams)
+        if (newSearch.trim()) {
+            newSearchParams.set('search', newSearch.trim())
+            newSearchParams.set('page', '1') // Reset to page 1 when searching
+        } else {
+            newSearchParams.delete('search')
+        }
+        setSearchParams(newSearchParams, { replace: true })
+    }, [searchParams, setSearchParams])
+    
+    // Override handleFiltersChange to sync to URL and reset to page 1
+    const handleFiltersChangeWithURL = React.useCallback((filters: any) => {
+        handleFiltersChange(filters)
+        const newSearchParams = new URLSearchParams(searchParams)
+        if (filters.length > 0) {
+            newSearchParams.set('filters', JSON.stringify(filters))
+        } else {
+            newSearchParams.delete('filters')
+        }
+        // Reset to page 1 when filters change
+        newSearchParams.set('page', '1')
+        setSearchParams(newSearchParams, { replace: true })
+    }, [searchParams, setSearchParams, handleFiltersChange])
+    
+    // Get initial filters from URL if available
+    const initialFiltersFromURL = React.useMemo(() => {
+        const filtersParam = searchParams.get('filters')
+        if (filtersParam) {
+            try {
+                return JSON.parse(filtersParam)
+            } catch {
+                return initialFilters
+            }
+        }
+        return initialFilters
+    }, [searchParams, initialFilters])
+    
+    // Use search term from URL as initial search
+    const initialSearch = searchTerm
 
-    // Generate filter options from data (combine ma and ten)
+    // Generate filter options from ALL data (reference data), not just current page
+    // This ensures filter options show all possible values from entire database
     const tinhThanhOptions = React.useMemo(() => {
+        if (!allQuanHuyen) return []
         const uniquePairs = new Map<string, { ma: string; ten: string }>()
-        quanHuyenList?.forEach((e) => {
+        allQuanHuyen.forEach((e) => {
             const ma = e.ma_tinh_thanh || ""
             const ten = e.ten_tinh_thanh || ""
             if (ma || ten) {
@@ -78,7 +175,7 @@ export function QuanHuyenTSNListView({
                 label: combined,
                 value: combined,
             }))
-    }, [quanHuyenList])
+    }, [allQuanHuyen])
 
     // Build filters array with combined filter
     const filters = React.useMemo(() => {
@@ -111,9 +208,29 @@ export function QuanHuyenTSNListView({
         if (onView) {
             onView(id)
         } else {
-            navigate(`${quanHuyenTSNConfig.routePath}/${id}`)
+            // Preserve page, pageSize, search, and filters in URL when navigating to detail
+            const currentPage = searchParams.get('page') || '1'
+            const currentPageSize = searchParams.get('pageSize') || '50'
+            const currentSearch = searchParams.get('search') || ''
+            const currentFilters = searchParams.get('filters') || ''
+            
+            const queryParams = new URLSearchParams()
+            queryParams.set('page', currentPage)
+            queryParams.set('pageSize', currentPageSize)
+            if (currentSearch) queryParams.set('search', currentSearch)
+            if (currentFilters) queryParams.set('filters', currentFilters)
+            
+            navigate(`${quanHuyenTSNConfig.routePath}/${id}?${queryParams.toString()}`)
         }
     }
+    
+    // Handle pagination change - update URL
+    const handlePaginationChange = React.useCallback((newPage: number, newPageSize: number) => {
+        const newSearchParams = new URLSearchParams(searchParams)
+        newSearchParams.set('page', newPage.toString())
+        newSearchParams.set('pageSize', newPageSize.toString())
+        setSearchParams(newSearchParams, { replace: true })
+    }, [searchParams, setSearchParams])
 
     const renderMobileCard = React.useCallback((row: QuanHuyenTSN) => {
         return (
@@ -214,12 +331,17 @@ export function QuanHuyenTSNListView({
                 onImport={() => setImportDialogOpen(true)}
                 isImporting={batchImportMutation.isPending}
                 filters={filters}
-                initialFilters={initialFilters}
+                initialFilters={initialFiltersFromURL}
                 initialSearch={initialSearch}
                 initialSorting={initialSorting}
-                onFiltersChange={handleFiltersChange}
+                onFiltersChange={handleFiltersChangeWithURL}
                 onSearchChange={handleSearchChange}
                 onSortChange={handleSortChange}
+                serverSideSearch={{
+                    enabled: true,
+                    onSearchChange: handleSearchChange,
+                    debounceMs: 300,
+                }}
                 renderMobileCard={renderMobileCard}
                 searchFields={quanHuyenTSNConfig.searchFields as (keyof QuanHuyenTSN)[]}
                 enableSuggestions={true}
@@ -240,6 +362,13 @@ export function QuanHuyenTSNListView({
                     setDeleteDialogOpen(true)
                 }}
                 onRowClick={(row) => handleViewClick(row.id!)}
+                serverSidePagination={{
+                    enabled: true,
+                    pageCount: paginatedResult?.totalPages || 0,
+                    total: paginatedResult?.total || 0,
+                    isLoading: isLoading,
+                    onPaginationChange: handlePaginationChange,
+                }}
             />
 
             {/* Delete Confirmation Dialog for single row */}
