@@ -12,6 +12,7 @@ import {
   Megaphone,
   ChevronRight,
   Store,
+  Wallet,
 } from 'lucide-react'
 
 import {
@@ -95,6 +96,11 @@ const data: { navMain: NavGroup[] } = {
           title: 'Marketing',
           url: '/marketing',
           icon: Megaphone,
+        },
+        {
+          title: 'Quản lý chi phí',
+          url: '/quan-ly-chi-phi',
+          icon: Wallet,
         },
         {
           title: 'Mua hàng',
@@ -182,7 +188,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     className="gap-3 transition-all duration-200 ease-in-out hover:pl-4"
                                   >
                                     {Icon && <Icon className="size-4" />}
-                                    <span className="font-medium">{item.title}</span>
+                                    <span className="font-medium text-base">{item.title}</span>
                                   </SidebarMenuButton>
                                 </Link>
                               ) : (
@@ -191,7 +197,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                   className="gap-3 transition-all duration-200 ease-in-out hover:pl-4 flex-1"
                                 >
                                   {Icon && <Icon className="size-4" />}
-                                  <span className="font-medium">{item.title}</span>
+                                  <span className="font-medium text-base">{item.title}</span>
                                 </SidebarMenuButton>
                               )}
                               <CollapsibleTrigger asChild>
@@ -211,7 +217,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 {item.subGroups.map((subGroup) => (
                                   <React.Fragment key={subGroup.title}>
                                     <SidebarMenuSubItem>
-                                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                      <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                                         {subGroup.title}
                                       </div>
                                     </SidebarMenuSubItem>
@@ -227,7 +233,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                             isActive={isSubItemActive}
                                           >
                                             <Link to={subItem.url}>
-                                              <span>{subItem.title}</span>
+                                              <span className="text-base">{subItem.title}</span>
                                             </Link>
                                           </SidebarMenuSubButton>
                                         </SidebarMenuSubItem>
@@ -260,7 +266,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             className="flex items-center"
                           >
                             {Icon && <Icon className="size-4" />}
-                            <span className="font-medium">{item.title}</span>
+                            <span className="font-medium text-base">{item.title}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -274,7 +280,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <Link to={group.url || '#'}>
                         {group.icon && <group.icon className="size-4" />}
-                        <span>{group.title}</span>
+                        <span className="text-base">{group.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

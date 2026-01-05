@@ -12,6 +12,7 @@ import {
   Calculator,
   Truck,
   Store,
+  Wallet,
 } from 'lucide-react'
 
 // Feature modules configuration
@@ -55,6 +56,14 @@ const features = [
     href: '/marketing',
     color: 'text-pink-600',
     bgColor: 'bg-pink-100',
+  },
+  {
+    title: 'Quản lý chi phí',
+    description: 'Theo dõi và quản lý các khoản chi phí, ngân sách.',
+    icon: Wallet,
+    href: '/quan-ly-chi-phi',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-100',
   },
   {
     title: 'Mua hàng',

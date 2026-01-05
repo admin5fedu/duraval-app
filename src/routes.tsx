@@ -282,6 +282,7 @@ const HanhChinhNhanSuPage = lazy(() => import('@/pages/hanh-chinh-nhan-su/HanhCh
 const MarketingPage = lazy(() => import('@/pages/marketing/MarketingPage'))
 const KinhDoanhPage = lazy(() => import('@/pages/kinh-doanh/KinhDoanhPage'))
 const BanBuonPage = lazy(() => import('@/pages/ban-buon/BanBuonPage'))
+const QuanLyChiPhiPage = lazy(() => import('@/pages/quan-ly-chi-phi/QuanLyChiPhiPage'))
 
 import type { ScrollBehavior } from './shared/types/scroll-behavior'
 
@@ -430,6 +431,13 @@ export const routes: RouteConfig[] = [
   {
     path: '/ban-buon',
     element: BanBuonPage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'auto',
+  },
+  {
+    path: '/quan-ly-chi-phi',
+    element: QuanLyChiPhiPage,
     protected: true,
     layout: true,
     scrollBehavior: 'auto',
