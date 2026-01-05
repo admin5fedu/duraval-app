@@ -11,6 +11,7 @@ import {
   FileCheck,
   ClipboardCheck,
   Settings,
+  Target,
 } from "lucide-react"
 
 export default function BanBuonPage() {
@@ -43,6 +44,12 @@ export default function BanBuonPage() {
       title: "Chăm sóc",
       icon: HeartHandshake,
       items: [
+        {
+          title: "Kế hoạch thị trường",
+          href: "/ban-buon/ke-hoach-thi-truong",
+          icon: Target,
+          description: "Kế hoạch thị trường cho khách buôn.",
+        },
         {
           title: "Chăm sóc khách buôn",
           href: "/ban-buon/cham-soc-khach-buon",

@@ -31,6 +31,7 @@ import { PhuongXaSNNSelect } from "@/components/ui/phuong-xa-snn-select"
 import { NhanSuSelect } from "@/components/ui/nhan-su-select"
 import { KhachBuonSelect } from "@/components/ui/khach-buon-select"
 import { MultiselectComboboxFormField } from "@/components/ui/multiselect-combobox-form-field"
+import { GPSLocationInput } from "@/components/ui/gps-location-input"
 import { SPACING } from "@/shared/constants/spacing"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -358,6 +359,14 @@ function PhuongXaSNNSelectWrapper({
 export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
     const isMobile = useIsMobile()
     
+    // Watch form values for conditional required
+    const formValues = useWatch({ control: form.control })
+    
+    // Determine if field is required (support both boolean and function)
+    const isRequired = typeof field.required === 'function' 
+        ? field.required(formValues) 
+        : field.required === true
+    
     return (
         <FormField
             key={field.name}
@@ -382,7 +391,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                 isMobile && "text-sm font-medium"
                             )}>
                                 <span>{field.label}</span>
-                                {field.required && (
+                                {isRequired && (
                                     <span className={cn(
                                         "text-destructive",
                                         isMobile && "text-xs"
@@ -518,6 +527,18 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         className={cn(
                                             isMobile && "h-11 text-base"
                                         )}
+                                    />
+                                ) : field.type === "gps-location-input" ? (
+                                    <GPSLocationInput
+                                        {...formField}
+                                        value={formField.value || ''}
+                                        onChange={(value) => {
+                                            if (field.disabled) return
+                                            formField.onChange(value)
+                                        }}
+                                        placeholder={field.placeholder}
+                                        disabled={field.disabled}
+                                        onBlur={formField.onBlur}
                                     />
                                 ) : field.type === "image" ? (
                                     <InlineImageUpload

@@ -261,6 +261,16 @@ const HinhAnhKhachBuonListRoute = lazy(() => import('@/features/ban-buon/thong-t
 const HinhAnhKhachBuonDetailRoute = lazy(() => import('@/features/ban-buon/thong-tin-khach-hang/du-lieu-khach-buon/hinh-anh-khach-buon/routes/hinh-anh-khach-buon-detail-route'))
 const HinhAnhKhachBuonFormRoute = lazy(() => import('@/features/ban-buon/thong-tin-khach-hang/du-lieu-khach-buon/hinh-anh-khach-buon/routes/hinh-anh-khach-buon-form-route'))
 
+// Kế hoạch thị trường module routes
+const KeHoachThiTruongListRoute = lazy(() => import('@/features/ban-buon/cham-soc/ke-hoach-thi-truong/routes/ke-hoach-thi-truong-list-route'))
+const KeHoachThiTruongDetailRoute = lazy(() => import('@/features/ban-buon/cham-soc/ke-hoach-thi-truong/routes/ke-hoach-thi-truong-detail-route'))
+const KeHoachThiTruongFormRoute = lazy(() => import('@/features/ban-buon/cham-soc/ke-hoach-thi-truong/routes/ke-hoach-thi-truong-form-route'))
+
+// Chăm sóc khách buôn module routes
+const ChamSocKhachBuonListRoute = lazy(() => import('@/features/ban-buon/cham-soc/cham-soc-khach-buon/routes/cham-soc-khach-buon-list-route'))
+const ChamSocKhachBuonDetailRoute = lazy(() => import('@/features/ban-buon/cham-soc/cham-soc-khach-buon/routes/cham-soc-khach-buon-detail-route'))
+const ChamSocKhachBuonFormRoute = lazy(() => import('@/features/ban-buon/cham-soc/cham-soc-khach-buon/routes/cham-soc-khach-buon-form-route'))
+
 // Kinh doanh - Sale Ads module pages
 const BangChiaDataPage = lazy(() => import('@/features/kinh-doanh/sale-ads/bang-chia-data'))
 const QuyDinhTyLePage = lazy(() => import('@/features/kinh-doanh/sale-ads/quy-dinh-ty-le'))
@@ -596,6 +606,64 @@ export const routes: RouteConfig[] = [
   {
     path: '/ban-buon/hinh-anh-khach-buon',
     element: HinhAnhKhachBuonListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Kế hoạch thị trường module routes
+  {
+    path: '/ban-buon/ke-hoach-thi-truong/moi',
+    element: KeHoachThiTruongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/ke-hoach-thi-truong/:id/sua',
+    element: KeHoachThiTruongFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/ke-hoach-thi-truong/:id',
+    element: KeHoachThiTruongDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/ban-buon/ke-hoach-thi-truong',
+    element: KeHoachThiTruongListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Chăm sóc khách buôn module routes
+  {
+    path: '/ban-buon/cham-soc-khach-buon/moi',
+    element: ChamSocKhachBuonFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/cham-soc-khach-buon/:id/sua',
+    element: ChamSocKhachBuonFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/cham-soc-khach-buon/:id',
+    element: ChamSocKhachBuonDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/ban-buon/cham-soc-khach-buon',
+    element: ChamSocKhachBuonListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

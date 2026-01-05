@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "multiselect-combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "phuong-xa-tsn-select" | "tinh-thanh-ssn-select" | "phuong-xa-snn-select" | "nhan-su-select" | "khach-buon-select"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "multiselect-combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "phuong-xa-tsn-select" | "tinh-thanh-ssn-select" | "phuong-xa-snn-select" | "nhan-su-select" | "khach-buon-select" | "gps-location-input"
 
 /**
  * Form field configuration
@@ -16,7 +16,7 @@ export interface FormFieldConfig {
     description?: string
     options?: Array<{ label: string; value: string; disabled?: boolean }> // For select/toggle
     colSpan?: number // 1, 2, 3
-    required?: boolean
+    required?: boolean | ((formValues: any) => boolean)
     disabled?: boolean
     customComponent?: React.ComponentType<any> | React.ForwardRefExoticComponent<any>
     // For image type
@@ -36,6 +36,8 @@ export interface FormFieldConfig {
     suffix?: string // Suffix text to display after the number (e.g., "%")
     // For combobox type
     allowCustom?: boolean // Allow entering custom values not in options
+    // Conditional rendering
+    hidden?: boolean | ((formValues: any) => boolean) // Hide field conditionally (can be a function that receives form values)
 }
 
 /**
