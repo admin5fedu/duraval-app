@@ -108,6 +108,8 @@ export const dangKyDoanhSoBaseSchema = z.object({
     },
     z.number({ required_error: "Doanh số max năm là bắt buộc", invalid_type_error: "Doanh số max năm phải là số" })
   ),
+  link_hop_dong: z.string().optional().nullable(),
+  file_hop_dong: z.string().optional().nullable(),
   // Enriched fields from related tables (optional, not in DB)
   ten_nguoi_tao: z.string().optional().nullable(), // Format: "mã - tên" or just "tên"
   ma_nguoi_tao: z.number().optional().nullable(), // For display

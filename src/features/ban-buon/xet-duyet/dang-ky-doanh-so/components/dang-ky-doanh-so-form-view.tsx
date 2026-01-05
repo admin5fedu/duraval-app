@@ -48,6 +48,8 @@ const getSections = (): FormSection[] => [
     title: "Thông Tin Bổ Sung",
     fields: [
       { name: "ghi_chu", label: "Ghi Chú", type: "textarea", colSpan: 2 },
+      { name: "link_hop_dong", label: "Link Hợp Đồng", type: "text", placeholder: "Nhập link hợp đồng..." },
+      { name: "file_hop_dong", label: "File Hợp Đồng", type: "image", imageFolder: "hop-dong", imageMaxSize: 10, displayName: "Hợp đồng" },
     ]
   },
 ]
@@ -94,6 +96,8 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
         doanh_so_min_nam: existingData.doanh_so_min_nam !== null && existingData.doanh_so_min_nam !== undefined ? String(existingData.doanh_so_min_nam) : "",
         doanh_so_max_nam: existingData.doanh_so_max_nam !== null && existingData.doanh_so_max_nam !== undefined ? String(existingData.doanh_so_max_nam) : "",
         ghi_chu: existingData.ghi_chu ? String(existingData.ghi_chu) : "",
+        link_hop_dong: existingData.link_hop_dong ? String(existingData.link_hop_dong) : "",
+        file_hop_dong: existingData.file_hop_dong ? String(existingData.file_hop_dong) : "",
       }
     }
 
@@ -106,6 +110,8 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
       doanh_so_min_nam: "",
       doanh_so_max_nam: "",
       ghi_chu: "",
+      link_hop_dong: "",
+      file_hop_dong: "",
     }
   }, [isEditMode, existingData])
 
@@ -137,6 +143,8 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
       doanh_so_min_nam: parseNumber(data.doanh_so_min_nam) ?? undefined,
       doanh_so_max_nam: parseNumber(data.doanh_so_max_nam) ?? undefined,
       ghi_chu: data.ghi_chu || null,
+      link_hop_dong: data.link_hop_dong || null,
+      file_hop_dong: data.file_hop_dong || null,
       nguoi_tao_id: employee?.ma_nhan_vien || null,
     }
 

@@ -197,6 +197,62 @@ export const dangKyDoanhSoColumns = (): ColumnDef<DangKyDoanhSo>[] => [
       },
   },
   {
+    accessorKey: "link_hop_dong",
+    header: ({ column }) => <SortableHeader column={column} title="Link Hợp Đồng" />,
+    cell: ({ row }) => {
+      const linkHopDong = row.getValue("link_hop_dong") as string | null | undefined
+      if (!linkHopDong) return <div className="min-w-[150px]">-</div>
+      return (
+        <div className="min-w-[150px]">
+          <a 
+            href={linkHopDong} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline truncate block"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {linkHopDong.length > 30 ? `${linkHopDong.substring(0, 30)}...` : linkHopDong}
+          </a>
+        </div>
+      )
+    },
+    size: 200,
+    minSize: 150,
+      meta: {
+        title: "Link Hợp Đồng",
+        order: 9,
+        minWidth: 150,
+      },
+  },
+  {
+    accessorKey: "file_hop_dong",
+    header: ({ column }) => <SortableHeader column={column} title="File Hợp Đồng" />,
+    cell: ({ row }) => {
+      const fileHopDong = row.getValue("file_hop_dong") as string | null | undefined
+      if (!fileHopDong) return <div className="min-w-[150px]">-</div>
+      return (
+        <div className="min-w-[150px]">
+          <a 
+            href={fileHopDong} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline truncate block"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Xem file
+          </a>
+        </div>
+      )
+    },
+    size: 150,
+    minSize: 120,
+      meta: {
+        title: "File Hợp Đồng",
+        order: 10,
+        minWidth: 120,
+      },
+  },
+  {
     id: "actions",
     header: () => <div className="text-right pr-4">Thao tác</div>,
     cell: ({ row }) => {

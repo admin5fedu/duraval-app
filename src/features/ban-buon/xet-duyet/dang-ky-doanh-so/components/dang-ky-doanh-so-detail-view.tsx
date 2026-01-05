@@ -128,6 +128,23 @@ export function DangKyDoanhSoDetailView({ id, onBack, backUrl }: DangKyDoanhSoDe
       ]
     },
     {
+      title: "Hợp Đồng",
+      fields: [
+        { 
+          key: "link_hop_dong", 
+          label: "Link Hợp Đồng", 
+          value: dangKyDoanhSo.link_hop_dong || "-",
+          ...(dangKyDoanhSo.link_hop_dong ? { type: "url" as const } : {})
+        },
+        { 
+          key: "file_hop_dong", 
+          label: "File Hợp Đồng", 
+          value: dangKyDoanhSo.file_hop_dong || "-",
+          ...(dangKyDoanhSo.file_hop_dong ? { type: "url" as const } : {})
+        },
+      ]
+    },
+    {
       title: "Thông Tin Hệ Thống",
       fields: [
         { key: "ten_nguoi_tao", label: "Người Tạo", value: dangKyDoanhSo.ten_nguoi_tao || "-" },
