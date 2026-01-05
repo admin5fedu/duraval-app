@@ -14,7 +14,7 @@
 
 "use client"
 
-import React, { useState, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
 import { EmbeddedListSection, type EmbeddedListColumn } from "@/shared/components/data-display/embedded-list-section"
@@ -48,7 +48,7 @@ import { ChucVuMultiSelect } from "@/components/ui/chuc-vu-multi-select"
 import { useFormContext } from "react-hook-form"
 import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
+import { TimePicker } from "@/components/ui/time-picker"
 
 const VIEW_DETAIL_SKIP_CONFIRM_STORAGE_KEY = "lich-dang-view-detail-skip-confirm"
 
@@ -460,35 +460,17 @@ export function LichDangSection({ danhMucCauHoiId }: LichDangSectionProps) {
                         label: "Giờ Đăng", 
                         type: "custom",
                         required: true,
-                        customComponent: ({ value, onChange, disabled, placeholder }: any) => {
-                            const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                let inputValue = e.target.value.replace(/\D/g, '') // Remove non-digits
-                                
-                                // Limit to 4 digits (HHmm)
-                                if (inputValue.length > 4) {
-                                    inputValue = inputValue.slice(0, 4)
-                                }
-                                
-                                // Format as HH:mm
-                                let formatted = inputValue
-                                if (inputValue.length > 2) {
-                                    formatted = inputValue.slice(0, 2) + ':' + inputValue.slice(2, 4)
-                                } else if (inputValue.length > 0) {
-                                    formatted = inputValue
-                                }
-                                
-                                onChange(formatted)
-                            }
+                        customComponent: ({ value, onChange, disabled }: any) => {
+                            const form = useFormContext()
+                            const error = form.formState.errors.gio_dang?.message as string | undefined
                             
                             return (
-                                <Input
-                                    type="text"
+                                <TimePicker
                                     value={value || ''}
-                                    onChange={handleChange}
-                                    placeholder={placeholder || "10:00"}
+                                    onChange={onChange}
+                                    placeholder="Chọn giờ đăng"
                                     disabled={disabled}
-                                    maxLength={5}
-                                    pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                    error={!!error}
                                 />
                             )
                         }

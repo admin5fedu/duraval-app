@@ -20,6 +20,7 @@ import { ComboboxFormFieldWithCustom } from "./combobox-form-field-with-custom"
 import { ToggleButtonFormField } from "./toggle-button-form-field"
 import { MultipleImageUploadFormField } from "./multiple-image-upload-form-field"
 import { InlineImageUpload } from "@/components/ui/inline-image-upload"
+import { FileUploadSupabase } from "@/components/ui/file-upload-supabase"
 import { PhongBanSelect } from "@/components/ui/phong-ban-select"
 import { CapBacSelectFormField } from "@/components/ui/cap-bac-select-form-field"
 import { LoaiPhieuSelect } from "@/components/ui/loai-phieu-select"
@@ -624,6 +625,21 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         }}
                                         folder={field.imageFolder || "uploads"}
                                         maxSize={field.imageMaxSize || 5}
+                                        disabled={field.disabled}
+                                    />
+                                ) : field.type === "file" || field.type === "file-supabase" ? (
+                                    <FileUploadSupabase
+                                        {...formField}
+                                        value={formField.value || ''}
+                                        onChange={(url) => {
+                                            if (field.disabled) return
+                                            formField.onChange(url)
+                                        }}
+                                        accept={field.accept || "*/*"}
+                                        maxSize={field.maxSize || 50}
+                                        folder={field.folder}
+                                        bucket={field.bucket || "duraval_file"}
+                                        displayName={field.displayName || "file"}
                                         disabled={field.disabled}
                                     />
                                 ) : field.type === "phong-ban-select" ? (

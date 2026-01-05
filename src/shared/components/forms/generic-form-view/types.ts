@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Field type options for form fields
  */
-export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "multiselect-combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "phuong-xa-tsn-select" | "tinh-thanh-ssn-select" | "phuong-xa-snn-select" | "nhan-su-select" | "khach-buon-select" | "muc-dang-ky-select" | "gps-location-input"
+export type FieldType = "text" | "number" | "email" | "date" | "select" | "combobox" | "multiselect-combobox" | "toggle" | "textarea" | "image" | "multiple-image" | "file" | "file-supabase" | "custom" | "phong-ban-select" | "cap-bac-select" | "loai-phieu-select" | "tinh-thanh-tsn-select" | "quan-huyen-tsn-select" | "phuong-xa-tsn-select" | "tinh-thanh-ssn-select" | "phuong-xa-snn-select" | "nhan-su-select" | "khach-buon-select" | "muc-dang-ky-select" | "gps-location-input"
 
 /**
  * Form field configuration
@@ -26,6 +26,11 @@ export interface FormFieldConfig {
     multiple?: boolean // For image type - allow multiple images
     // For multiple-image type
     // Uses same imageFolder and imageMaxSize as image type
+    // For file/file-supabase type
+    accept?: string // File types to accept (e.g., "application/pdf", "*/*")
+    maxSize?: number // Max file size in MB (default: 50)
+    folder?: string // Folder path in bucket
+    bucket?: string // Supabase bucket name (default: "duraval_file")
     // For phong-ban-select and cap-bac-select type
     excludeIds?: number[] // IDs to exclude from selection
     // For number type

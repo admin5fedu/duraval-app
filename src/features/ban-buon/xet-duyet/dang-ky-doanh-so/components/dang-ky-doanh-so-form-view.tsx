@@ -49,7 +49,7 @@ const getSections = (): FormSection[] => [
     fields: [
       { name: "ghi_chu", label: "Ghi Chú", type: "textarea", colSpan: 2 },
       { name: "link_hop_dong", label: "Link Hợp Đồng", type: "text", placeholder: "Nhập link hợp đồng..." },
-      { name: "file_hop_dong", label: "File Hợp Đồng", type: "image", imageFolder: "hop-dong", imageMaxSize: 10, displayName: "Hợp đồng" },
+      { name: "file_hop_dong", label: "File Hợp Đồng", type: "file", folder: "hop-dong", maxSize: 50, accept: "*/*", displayName: "Hợp đồng", bucket: "duraval_file" },
     ]
   },
 ]
