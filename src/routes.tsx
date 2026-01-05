@@ -271,6 +271,11 @@ const ChamSocKhachBuonListRoute = lazy(() => import('@/features/ban-buon/cham-so
 const ChamSocKhachBuonDetailRoute = lazy(() => import('@/features/ban-buon/cham-soc/cham-soc-khach-buon/routes/cham-soc-khach-buon-detail-route'))
 const ChamSocKhachBuonFormRoute = lazy(() => import('@/features/ban-buon/cham-soc/cham-soc-khach-buon/routes/cham-soc-khach-buon-form-route'))
 
+// Đăng ký doanh số module routes
+const DangKyDoanhSoBanBuonListRoute = lazy(() => import('@/features/ban-buon/xet-duyet/dang-ky-doanh-so/routes/dang-ky-doanh-so-list-route'))
+const DangKyDoanhSoBanBuonDetailRoute = lazy(() => import('@/features/ban-buon/xet-duyet/dang-ky-doanh-so/routes/dang-ky-doanh-so-detail-route'))
+const DangKyDoanhSoBanBuonFormRoute = lazy(() => import('@/features/ban-buon/xet-duyet/dang-ky-doanh-so/routes/dang-ky-doanh-so-form-route'))
+
 // Kinh doanh - Sale Ads module pages
 const BangChiaDataPage = lazy(() => import('@/features/kinh-doanh/sale-ads/bang-chia-data'))
 const QuyDinhTyLePage = lazy(() => import('@/features/kinh-doanh/sale-ads/quy-dinh-ty-le'))
@@ -2025,6 +2030,36 @@ export const routes: RouteConfig[] = [
     protected: true,
     layout: true,
     scrollBehavior: 'top',
+  },
+  // Bán buôn - Đăng ký doanh số module routes - explicit routes (no splat pattern)
+  // Order matters: more specific routes must come before generic ones
+  {
+    path: '/ban-buon/dang-ky-doanh-so/moi',
+    element: DangKyDoanhSoBanBuonFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/dang-ky-doanh-so/:id/sua',
+    element: DangKyDoanhSoBanBuonFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/dang-ky-doanh-so/:id',
+    element: DangKyDoanhSoBanBuonDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/ban-buon/dang-ky-doanh-so',
+    element: DangKyDoanhSoBanBuonListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
   },
   // Add more module routes here or use generateRoutesFromConfig()
   {

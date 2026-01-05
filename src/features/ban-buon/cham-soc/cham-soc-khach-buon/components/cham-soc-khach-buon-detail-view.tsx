@@ -8,7 +8,6 @@ import { chamSocKhachBuonConfig } from "../config"
 import { Button } from "@/components/ui/button"
 import { Edit } from "lucide-react"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
-import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { formatDate } from "@/shared/utils/date-format"
 import { DeleteChamSocKhachBuonButton } from "./delete-cham-soc-khach-buon-button"
 
@@ -123,10 +122,10 @@ export function ChamSocKhachBuonDetailView({ id, onBack, backUrl }: ChamSocKhach
       actions={
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleEdit}
-            className={actionButtonClass()}
           >
             <Edit className="h-4 w-4 mr-2" />
             Sửa

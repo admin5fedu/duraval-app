@@ -75,10 +75,10 @@ export default function BanBuonPage() {
           description: "Xét duyệt và quản lý công nợ của khách buôn.",
         },
         {
-          title: "Xét duyệt đăng ký doanh số",
-          href: "/ban-buon/xet-duyet-dang-ky-doanh-so",
+          title: "Đăng ký doanh số",
+          href: "/ban-buon/dang-ky-doanh-so",
           icon: ClipboardCheck,
-          description: "Xét duyệt đăng ký doanh số và mục tiêu bán hàng.",
+          description: "Đăng ký doanh số và mục tiêu bán hàng.",
         },
       ]
     },

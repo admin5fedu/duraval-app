@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GenericFormView, type FormSection } from "@/shared/components"
 import { keHoachThiTruongBaseSchema } from "../schema"
@@ -150,41 +151,48 @@ export function KeHoachThiTruongFormView({ id, onComplete, onCancel }: KeHoachTh
     ? keHoachThiTruongConfig.routePath
     : (id ? `${keHoachThiTruongConfig.routePath}/${id}` : keHoachThiTruongConfig.routePath)
 
+  // Store created/updated ID for navigation
+  const [createdId, setCreatedId] = React.useState<number | null>(null)
+
   const handleSubmit = async (data: any) => {
-    try {
-      const payload: CreateKeHoachThiTruongInput | UpdateKeHoachThiTruongInput = {
-        ngay: data.ngay || null,
-        nhan_vien_id: data.nhan_vien_id ? Number(data.nhan_vien_id) : undefined,
-        buoi: data.buoi || null,
-        khach_buon_id: data.khach_buon_id ? Number(data.khach_buon_id) : null,
-        tsn_tinh_thanh_id: data.tsn_tinh_thanh_id ? Number(data.tsn_tinh_thanh_id) : null,
-        trang_thai: data.trang_thai || null,
-        hanh_dong: data.hanh_dong || null,
-        muc_tieu: data.muc_tieu || null,
-        ghi_chu: data.ghi_chu || null,
-        nguoi_tao_id: employee?.ma_nhan_vien || null,
-      }
+    const payload: CreateKeHoachThiTruongInput | UpdateKeHoachThiTruongInput = {
+      ngay: data.ngay || null,
+      nhan_vien_id: data.nhan_vien_id ? Number(data.nhan_vien_id) : undefined,
+      buoi: data.buoi || null,
+      khach_buon_id: data.khach_buon_id ? Number(data.khach_buon_id) : null,
+      tsn_tinh_thanh_id: data.tsn_tinh_thanh_id ? Number(data.tsn_tinh_thanh_id) : null,
+      trang_thai: data.trang_thai || null,
+      hanh_dong: data.hanh_dong || null,
+      muc_tieu: data.muc_tieu || null,
+      ghi_chu: data.ghi_chu || null,
+      nguoi_tao_id: employee?.ma_nhan_vien || null,
+    }
 
-      if (isEditMode && id) {
-        await updateMutation.mutateAsync({ id, input: payload })
-      } else {
-        await createMutation.mutateAsync(payload as CreateKeHoachThiTruongInput)
+    if (isEditMode && id) {
+      await updateMutation.mutateAsync({ id, input: payload })
+      setCreatedId(id)
+    } else {
+      const result = await createMutation.mutateAsync(payload as CreateKeHoachThiTruongInput)
+      // Store the ID of the newly created record
+      if (result?.id) {
+        setCreatedId(result.id)
       }
+    }
+  }
 
-      if (onComplete) {
-        onComplete()
+  const handleSuccess = () => {
+    if (onComplete) {
+      onComplete()
+    } else {
+      const returnTo = searchParams.get('returnTo') || 'list'
+      // Use createdId for new records, id for edited records
+      const targetId = createdId || id
+      
+      if (returnTo === 'detail' && targetId) {
+        navigate(`${keHoachThiTruongConfig.routePath}/${targetId}`)
       } else {
-        if (returnTo === 'list') {
-          navigate(keHoachThiTruongConfig.routePath)
-        } else if (isEditMode && id) {
-          navigate(`${keHoachThiTruongConfig.routePath}/${id}`)
-        } else {
-          navigate(keHoachThiTruongConfig.routePath)
-        }
+        navigate(keHoachThiTruongConfig.routePath)
       }
-    } catch (error) {
-      // Error is handled by mutation hook (toast)
-      console.error("Error submitting form:", error)
     }
   }
 
@@ -203,6 +211,7 @@ export function KeHoachThiTruongFormView({ id, onComplete, onCancel }: KeHoachTh
       defaultValues={defaultValues}
       sections={sections}
       onSubmit={handleSubmit}
+      onSuccess={handleSuccess}
       onCancel={handleCancel}
     >
       <KeHoachThiTruongFormAutoTinhThanh isEditMode={isEditMode} />

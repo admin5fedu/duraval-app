@@ -140,6 +140,9 @@ export function ChamSocKhachBuonFormView({ id, onComplete, onCancel }: ChamSocKh
 
   const { handleCancel } = useFormNavigation({ onCancel })
 
+  // Store created/updated ID for navigation
+  const [createdId, setCreatedId] = React.useState<number | null>(null)
+
   const handleSubmit = async (data: any) => {
     // Transform form data to API format
     const submitData: CreateChamSocKhachBuonInput | UpdateChamSocKhachBuonInput = {
@@ -158,16 +161,26 @@ export function ChamSocKhachBuonFormView({ id, onComplete, onCancel }: ChamSocKh
 
     if (isEditMode && formId) {
       await updateMutation.mutateAsync({ id: formId, input: submitData as UpdateChamSocKhachBuonInput })
+      setCreatedId(formId)
     } else {
-      await createMutation.mutateAsync(submitData as CreateChamSocKhachBuonInput)
+      const result = await createMutation.mutateAsync(submitData as CreateChamSocKhachBuonInput)
+      // Store the ID of the newly created record
+      if (result?.id) {
+        setCreatedId(result.id)
+      }
     }
+  }
 
+  const handleSuccess = () => {
     if (onComplete) {
       onComplete()
     } else {
       const returnTo = searchParams.get('returnTo') || 'list'
-      if (returnTo === 'detail' && formId) {
-        navigate(`${chamSocKhachBuonConfig.routePath}/${formId}`)
+      // Use createdId for new records, formId for edited records
+      const targetId = createdId || formId
+      
+      if (returnTo === 'detail' && targetId) {
+        navigate(`${chamSocKhachBuonConfig.routePath}/${targetId}`)
       } else {
         navigate(chamSocKhachBuonConfig.routePath)
       }
@@ -182,6 +195,7 @@ export function ChamSocKhachBuonFormView({ id, onComplete, onCancel }: ChamSocKh
         defaultValues={{}}
         sections={[]}
         onSubmit={handleSubmit}
+        onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
     )
@@ -194,6 +208,7 @@ export function ChamSocKhachBuonFormView({ id, onComplete, onCancel }: ChamSocKh
       defaultValues={defaultValues}
       sections={sections}
       onSubmit={handleSubmit}
+      onSuccess={handleSuccess}
       onCancel={handleCancel}
     />
   )

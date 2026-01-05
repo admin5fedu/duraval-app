@@ -30,6 +30,7 @@ import { TinhThanhSSNSelect } from "@/components/ui/tinh-thanh-ssn-select"
 import { PhuongXaSNNSelect } from "@/components/ui/phuong-xa-snn-select"
 import { NhanSuSelect } from "@/components/ui/nhan-su-select"
 import { KhachBuonSelect } from "@/components/ui/khach-buon-select"
+import { MucDangKySelect } from "@/components/ui/muc-dang-ky-select"
 import { MultiselectComboboxFormField } from "@/components/ui/multiselect-combobox-form-field"
 import { GPSLocationInput } from "@/components/ui/gps-location-input"
 import { SPACING } from "@/shared/constants/spacing"
@@ -189,6 +190,66 @@ function KhachBuonSelectWithId({
             searchPlaceholder={searchPlaceholder}
             disabled={disabled}
             onBlur={onBlur}
+        />
+    )
+}
+
+function MucDangKySelectWithId({
+    value,
+    onChange,
+    placeholder,
+    searchPlaceholder,
+    disabled,
+    onBlur,
+}: {
+    value: number | null
+    onChange: (id: number | null, data?: { ten_hang: string; ma_hang?: string }) => void
+    placeholder?: string
+    searchPlaceholder?: string
+    disabled?: boolean
+    onBlur?: () => void
+}) {
+    const { formItemId } = useFormField()
+    return (
+        <MucDangKySelect
+            id={formItemId}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            searchPlaceholder={searchPlaceholder}
+            disabled={disabled}
+            onBlur={onBlur}
+        />
+    )
+}
+
+// Wrapper component để auto-fill ten_muc_dang_ky khi chọn mức đăng ký
+function MucDangKySelectWrapper({
+    form,
+    formField,
+    field,
+}: {
+    form: UseFormReturn<any>
+    formField: any
+    field: FormFieldConfig
+}) {
+    return (
+        <MucDangKySelectWithId
+            value={formField.value ? Number(formField.value) : null}
+            onChange={(id, data) => {
+                if (field.disabled) return
+                formField.onChange(id)
+                // Auto-fill ten_muc_dang_ky field
+                if (id && data) {
+                    form.setValue("ten_muc_dang_ky", data.ten_hang || "", { shouldValidate: false })
+                } else {
+                    form.setValue("ten_muc_dang_ky", "", { shouldValidate: false })
+                }
+            }}
+            placeholder={field.placeholder || "Chọn mức đăng ký..."}
+            searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã hạng..."}
+            disabled={field.disabled}
+            onBlur={formField.onBlur}
         />
     )
 }
@@ -706,6 +767,12 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         searchPlaceholder={field.description || "Tìm kiếm theo tên hoặc mã khách buôn..."}
                                         disabled={field.disabled}
                                         onBlur={formField.onBlur}
+                                    />
+                                ) : field.type === "muc-dang-ky-select" ? (
+                                    <MucDangKySelectWrapper
+                                        form={form}
+                                        formField={formField}
+                                        field={field}
                                     />
                                 ) : field.type === "custom" && field.customComponent ? (
                                     <CustomFormFieldWithId
