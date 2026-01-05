@@ -121,6 +121,20 @@ function formatThoiGian(thoiGian: string): string {
 }
 
 /**
+ * Kiểm tra xem nội dung có phải là hành động hệ thống không
+ */
+function isSystemAction(noiDung: string): boolean {
+  if (!noiDung) return false
+  const trimmed = noiDung.trim()
+  return trimmed.startsWith("[HỦY YÊU CẦU]") || 
+         trimmed.startsWith("[HÀNH ĐỘNG]") ||
+         trimmed.startsWith("[Quản lý duyệt:") ||
+         trimmed.startsWith("[BGD duyệt:") ||
+         trimmed.startsWith("[QUẢN LÝ DUYỆT") ||
+         trimmed.startsWith("[BGD DUYỆT")
+}
+
+/**
  * Format tên người dùng theo format "mã - tên"
  */
 function formatNguoiDung(
@@ -232,8 +246,14 @@ function TraoDoiHistoryTable({
                       )}
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-sm text-foreground align-top whitespace-pre-wrap break-words">
-                    {item.noi_dung || "-"}
+                  <td className="py-3 px-4 text-sm align-top whitespace-pre-wrap break-words">
+                    {isSystemAction(item.noi_dung) ? (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-2 text-red-700 font-medium">
+                        {item.noi_dung || "-"}
+                      </div>
+                    ) : (
+                      <span className="text-foreground">{item.noi_dung || "-"}</span>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-sm text-muted-foreground align-top">
                     {formatThoiGian(item.thoi_gian)}
@@ -356,8 +376,14 @@ function TraoDoiHistoryList({
                   </>
                 )}
               </div>
-              <div className="text-sm text-foreground whitespace-pre-wrap pl-0">
-                {item.noi_dung || "-"}
+              <div className="text-sm whitespace-pre-wrap pl-0">
+                {isSystemAction(item.noi_dung) ? (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-2 text-red-700 font-medium">
+                    {item.noi_dung || "-"}
+                  </div>
+                ) : (
+                  <span className="text-foreground">{item.noi_dung || "-"}</span>
+                )}
               </div>
             </div>
           )
