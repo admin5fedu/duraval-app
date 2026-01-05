@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { XetDuyetCongNoAPI } from "../services/xet-duyet-cong-no.api"
 import type { XetDuyetCongNo, CreateXetDuyetCongNoInput, UpdateXetDuyetCongNoInput } from "../schema"
 import { createUseListQuery, createUseDetailQuery } from "@/lib/react-query"
@@ -28,6 +29,20 @@ export const useXetDuyetCongNoById = createUseDetailQuery<XetDuyetCongNo>({
   queryKeys: xetDuyetCongNoQueryKeys,
   api: { getById: XetDuyetCongNoAPI.getById },
 })
+
+/**
+ * Hook to get xét duyệt công nợ by khach_buon_id
+ */
+export function useXetDuyetCongNoByKhachBuonId(khachBuonId: number | null | undefined) {
+  return useQuery({
+    queryKey: [...xetDuyetCongNoQueryKeys.all(), "by-khach-buon", khachBuonId],
+    queryFn: () => {
+      if (!khachBuonId) return Promise.resolve([])
+      return XetDuyetCongNoAPI.getByKhachBuonId(khachBuonId)
+    },
+    enabled: !!khachBuonId,
+  })
+}
 
 /**
  * Mutation hooks for xét duyệt công nợ

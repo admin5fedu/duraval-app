@@ -4,17 +4,63 @@ import { type ColumnDef } from "@tanstack/react-table"
 import { useNavigate } from "react-router-dom"
 import { XetDuyetCongNo } from "../schema"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Edit } from "lucide-react"
 import { xetDuyetCongNoConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { SortableHeader } from "@/shared/components"
 import { formatNumber } from "@/shared/utils/detail-utils"
 import { DeleteXetDuyetCongNoButton } from "./delete-xet-duyet-cong-no-button"
+import { format } from "date-fns"
+import { vi } from "date-fns/locale"
 
 // Number cell component
 function NumberCell({ value }: { value: number | null | undefined }) {
   if (value === null || value === undefined) return <span>-</span>
   return <span>{formatNumber(value)}</span>
+}
+
+// Loại hình badge class
+function getLoaiHinhBadgeClass(loaiHinh: string | null | undefined): string {
+  if (!loaiHinh) return "bg-muted text-muted-foreground border-transparent"
+  
+  const normalized = loaiHinh.trim()
+  if (normalized === "Nợ gối đầu") {
+    return "bg-blue-50 text-blue-700 border-blue-200"
+  }
+  if (normalized === "TT cuối tháng") {
+    return "bg-green-50 text-green-700 border-green-200"
+  }
+  if (normalized === "Nợ gối đơn") {
+    return "bg-purple-50 text-purple-700 border-purple-200"
+  }
+  return "bg-muted text-muted-foreground border-transparent"
+}
+
+// Trạng thái badge class
+function getTrangThaiBadgeClass(trangThai: string | null | undefined): string {
+  if (!trangThai) return "bg-muted text-muted-foreground border-transparent"
+  
+  const normalized = trangThai.trim()
+  if (normalized === "Chờ kiểm tra") {
+    return "bg-yellow-50 text-yellow-700 border-yellow-200"
+  }
+  if (normalized === "Chờ duyệt") {
+    return "bg-blue-50 text-blue-700 border-blue-200"
+  }
+  if (normalized === "Đã duyệt") {
+    return "bg-green-50 text-green-700 border-green-200"
+  }
+  if (normalized === "Từ chối") {
+    return "bg-red-50 text-red-700 border-red-200"
+  }
+  if (normalized === "Đã hủy") {
+    return "bg-gray-100 text-gray-600 border-gray-300"
+  }
+  if (normalized === "Yêu cầu bổ sung") {
+    return "bg-orange-50 text-orange-700 border-orange-200"
+  }
+  return "bg-muted text-muted-foreground border-transparent"
 }
 
 // Actions cell component
@@ -45,6 +91,20 @@ function ActionsCell({ id }: { id: number }) {
 export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
   createSelectColumn<XetDuyetCongNo>(),
   {
+    accessorKey: "nguoi_tao_id",
+    header: () => null,
+    cell: () => null,
+    enableHiding: true,
+    filterFn: (row, id, value) => {
+      if (!value) return true
+      const rowValue = row.getValue(id) as number | null | undefined
+      return rowValue === value
+    },
+    meta: {
+      title: "Người Tạo ID",
+    },
+  },
+  {
     accessorKey: "ten_khach_buon",
     header: ({ column }) => <SortableHeader column={column} title="Khách Buôn" />,
     cell: ({ row }) => {
@@ -61,6 +121,7 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
       title: "Khách Buôn",
       order: 1,
       minWidth: 200,
+      stickyLeft: true,
     },
   },
   {
@@ -68,11 +129,21 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     header: ({ column }) => <SortableHeader column={column} title="Loại Hình" />,
     cell: ({ row }) => {
       const loaiHinh = row.getValue("loai_hinh") as string | null | undefined
+      const badgeClass = getLoaiHinhBadgeClass(loaiHinh)
       return (
         <div className="min-w-[150px]">
-          {loaiHinh || "-"}
+          {loaiHinh ? (
+            <Badge variant="outline" className={badgeClass}>
+              {loaiHinh}
+            </Badge>
+          ) : (
+            <span>-</span>
+          )}
         </div>
       )
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
     },
     size: 200,
     minSize: 150,
@@ -102,6 +173,36 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     },
   },
   {
+    accessorKey: "tg_tao",
+    header: ({ column }) => <SortableHeader column={column} title="Thời Gian Tạo" />,
+    cell: ({ row }) => {
+      const date = row.getValue("tg_tao") as string | null | undefined
+      return (
+        <div className="min-w-[120px]">
+          {date ? format(new Date(date), "dd/MM/yyyy HH:mm", { locale: vi }) : "-"}
+        </div>
+      )
+    },
+    filterFn: (row, id, value) => {
+      if (!value || (!value.from && !value.to)) return true
+      const rowDate = new Date(row.getValue(id) as string)
+      if (value.from && rowDate < value.from) return false
+      if (value.to) {
+        const toDate = new Date(value.to)
+        toDate.setHours(23, 59, 59, 999)
+        if (rowDate > toDate) return false
+      }
+      return true
+    },
+    size: 180,
+    minSize: 120,
+    meta: {
+      title: "Thời Gian Tạo",
+      order: 4,
+      minWidth: 120,
+    },
+  },
+  {
     accessorKey: "de_xuat_ngay_ap_dung",
     header: ({ column }) => <SortableHeader column={column} title="Đề Xuất Ngày Áp Dụng" />,
     cell: ({ row }) => {
@@ -116,7 +217,7 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     minSize: 120,
     meta: {
       title: "Đề Xuất Ngày Áp Dụng",
-      order: 4,
+      order: 5,
       minWidth: 120,
     },
   },
@@ -135,7 +236,7 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     minSize: 120,
     meta: {
       title: "Ngày Áp Dụng",
-      order: 5,
+      order: 6,
       minWidth: 120,
     },
   },
@@ -144,18 +245,52 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     header: ({ column }) => <SortableHeader column={column} title="Trạng Thái" />,
     cell: ({ row }) => {
       const trangThai = row.getValue("trang_thai") as string | null | undefined
+      const badgeClass = getTrangThaiBadgeClass(trangThai)
       return (
         <div className="min-w-[120px]">
-          {trangThai || "-"}
+          {trangThai ? (
+            <Badge variant="outline" className={badgeClass}>
+              {trangThai}
+            </Badge>
+          ) : (
+            <span>-</span>
+          )}
         </div>
       )
     },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
     size: 150,
     minSize: 120,
-    meta: {
+      meta: {
       title: "Trạng Thái",
-      order: 6,
+      order: 7,
       minWidth: 120,
+    },
+  },
+  {
+    accessorKey: "quan_ly_id",
+    header: ({ column }) => <SortableHeader column={column} title="Quản Lý ID" />,
+    cell: ({ row }) => {
+      const quanLyId = row.getValue("quan_ly_id") as number | null | undefined
+      return (
+        <div className="min-w-[100px]">
+          {quanLyId || "-"}
+        </div>
+      )
+    },
+    filterFn: (row, id, value) => {
+      if (!value) return true
+      const rowValue = row.getValue(id) as number | null | undefined
+      return rowValue === value
+    },
+    size: 120,
+    minSize: 100,
+    meta: {
+      title: "Quản Lý ID",
+      order: 8,
+      minWidth: 100,
     },
   },
   {
@@ -173,8 +308,32 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     minSize: 120,
     meta: {
       title: "Quản Lý Duyệt",
-      order: 7,
+      order: 9,
       minWidth: 120,
+    },
+  },
+  {
+    accessorKey: "bgd_id",
+    header: ({ column }) => <SortableHeader column={column} title="BGD ID" />,
+    cell: ({ row }) => {
+      const bgdId = row.getValue("bgd_id") as number | null | undefined
+      return (
+        <div className="min-w-[100px]">
+          {bgdId || "-"}
+        </div>
+      )
+    },
+    filterFn: (row, id, value) => {
+      if (!value) return true
+      const rowValue = row.getValue(id) as number | null | undefined
+      return rowValue === value
+    },
+    size: 120,
+    minSize: 100,
+    meta: {
+      title: "BGD ID",
+      order: 10,
+      minWidth: 100,
     },
   },
   {
@@ -192,7 +351,7 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     minSize: 120,
     meta: {
       title: "BGD Duyệt",
-      order: 8,
+      order: 11,
       minWidth: 120,
     },
   },
@@ -211,7 +370,7 @@ export const xetDuyetCongNoColumns = (): ColumnDef<XetDuyetCongNo>[] => [
     minSize: 200,
     meta: {
       title: "Ghi Chú",
-      order: 9,
+      order: 12,
       minWidth: 200,
     },
   },

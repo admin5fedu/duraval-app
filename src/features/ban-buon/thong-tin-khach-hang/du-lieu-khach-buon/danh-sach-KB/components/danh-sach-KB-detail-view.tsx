@@ -15,6 +15,8 @@ import { NguoiLienHeSection } from "./nguoi-lien-he-section"
 import { useNguoiLienHeByKhachBuonId } from "../../nguoi-lien-he/hooks/use-nguoi-lien-he"
 import { HinhAnhKhachBuonSection } from "./hinh-anh-khach-buon-section"
 import { useHinhAnhKhachBuonByKhachBuonId } from "../../hinh-anh-khach-buon/hooks/use-hinh-anh-khach-buon"
+import { XetDuyetCongNoSection } from "./xet-duyet-cong-no-section"
+import { useXetDuyetCongNoByKhachBuonId } from "@/features/ban-buon/xet-duyet/xet-duyet-cong-no/hooks/use-xet-duyet-cong-no"
 
 interface DanhSachKBDetailViewProps {
   id: number
@@ -36,6 +38,9 @@ export function DanhSachKBDetailView({ id, onBack, backUrl }: DanhSachKBDetailVi
 
   // Fetch hình ảnh khách buôn list
   const { data: hinhAnhKhachBuonList, isLoading: isLoadingHinhAnhKhachBuon } = useHinhAnhKhachBuonByKhachBuonId(id)
+
+  // Fetch xét duyệt công nợ list
+  const { data: xetDuyetCongNoList, isLoading: isLoadingXetDuyetCongNo } = useXetDuyetCongNoByKhachBuonId(id)
 
   const returnTo = searchParams.get('returnTo') || 'list'
 
@@ -232,6 +237,16 @@ export function DanhSachKBDetailView({ id, onBack, backUrl }: DanhSachKBDetailVi
             khachBuonId={id}
             hinhAnhKhachBuonList={hinhAnhKhachBuonList || []}
             isLoading={isLoadingHinhAnhKhachBuon}
+            khachBuonName={khachBuon.ten_khach_buon || undefined}
+          />
+        </div>
+
+        {/* Xét Duyệt Công Nợ Section */}
+        <div className="mt-6">
+          <XetDuyetCongNoSection
+            khachBuonId={id}
+            xetDuyetCongNoList={xetDuyetCongNoList || []}
+            isLoading={isLoadingXetDuyetCongNo}
             khachBuonName={khachBuon.ten_khach_buon || undefined}
           />
         </div>

@@ -130,6 +130,134 @@ export class XetDuyetCongNoAPI {
   }
 
   /**
+   * Get xét duyệt công nợ by khach_buon_id
+   */
+  static async getByKhachBuonId(khachBuonId: number): Promise<XetDuyetCongNo[]> {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("*")
+      .eq("khach_buon_id", khachBuonId)
+      .order("id", { ascending: false })
+
+    if (error) {
+      console.error("Lỗi khi tải danh sách xét duyệt công nợ theo khách buôn:", error)
+      throw new Error(error.message)
+    }
+
+    if (!data || data.length === 0) {
+      return []
+    }
+
+    // Enrich data similar to getAll
+    const khachBuonIds = [...new Set(data.map(item => item.khach_buon_id).filter(Boolean) as number[])]
+    const quanLyIds = [...new Set(data.map(item => item.quan_ly_id).filter(Boolean) as number[])]
+    const bgdIds = [...new Set(data.map(item => item.bgd_id).filter(Boolean) as number[])]
+    const nguoiTaoIds = [...new Set(data.map(item => item.nguoi_tao_id).filter(Boolean) as number[])]
+    const nguoiHuyIds = [...new Set(data.map(item => (item as any).nguoi_huy_id).filter(Boolean) as number[])]
+
+    let khachBuonMap = new Map<number, string>()
+    if (khachBuonIds.length > 0) {
+      const { data: khachBuonData, error: khachBuonError } = await supabase
+        .from("bb_khach_buon")
+        .select("id, ten_khach_buon")
+        .in("id", khachBuonIds)
+      
+      if (khachBuonError) {
+        console.error("Lỗi khi lấy thông tin khách buôn:", khachBuonError)
+      }
+      
+      if (khachBuonData) {
+        khachBuonMap = new Map(
+          khachBuonData.map(kb => [kb.id, kb.ten_khach_buon || ""])
+        )
+      }
+    }
+
+    let quanLyMap = new Map<number, string>()
+    if (quanLyIds.length > 0) {
+      const { data: quanLyData, error: quanLyError } = await supabase
+        .from("var_nhan_su")
+        .select("ma_nhan_vien, ho_ten")
+        .in("ma_nhan_vien", quanLyIds)
+      
+      if (quanLyError) {
+        console.error("Lỗi khi lấy thông tin quản lý:", quanLyError)
+      }
+      
+      if (quanLyData) {
+        quanLyMap = new Map(
+          quanLyData.map(ns => [ns.ma_nhan_vien, ns.ho_ten || ""])
+        )
+      }
+    }
+
+    let bgdMap = new Map<number, string>()
+    if (bgdIds.length > 0) {
+      const { data: bgdData, error: bgdError } = await supabase
+        .from("var_nhan_su")
+        .select("ma_nhan_vien, ho_ten")
+        .in("ma_nhan_vien", bgdIds)
+      
+      if (bgdError) {
+        console.error("Lỗi khi lấy thông tin BGD:", bgdError)
+      }
+      
+      if (bgdData) {
+        bgdMap = new Map(
+          bgdData.map(ns => [ns.ma_nhan_vien, ns.ho_ten || ""])
+        )
+      }
+    }
+
+    let nguoiTaoMap = new Map<number, string>()
+    if (nguoiTaoIds.length > 0) {
+      const { data: nguoiTaoData, error: nguoiTaoError } = await supabase
+        .from("var_nhan_su")
+        .select("ma_nhan_vien, ho_ten")
+        .in("ma_nhan_vien", nguoiTaoIds)
+      
+      if (nguoiTaoError) {
+        console.error("Lỗi khi lấy thông tin người tạo:", nguoiTaoError)
+      }
+      
+      if (nguoiTaoData) {
+        nguoiTaoMap = new Map(
+          nguoiTaoData.map(ns => [ns.ma_nhan_vien, ns.ho_ten || ""])
+        )
+      }
+    }
+
+    let nguoiHuyMap = new Map<number, string>()
+    if (nguoiHuyIds.length > 0) {
+      const { data: nguoiHuyData, error: nguoiHuyError } = await supabase
+        .from("var_nhan_su")
+        .select("ma_nhan_vien, ho_ten")
+        .in("ma_nhan_vien", nguoiHuyIds)
+      
+      if (nguoiHuyError) {
+        console.error("Lỗi khi lấy thông tin người hủy:", nguoiHuyError)
+      }
+      
+      if (nguoiHuyData) {
+        nguoiHuyMap = new Map(
+          nguoiHuyData.map(ns => [ns.ma_nhan_vien, ns.ho_ten || ""])
+        )
+      }
+    }
+
+    return data.map(item => {
+      return {
+        ...item,
+        ten_khach_buon: item.khach_buon_id ? khachBuonMap.get(item.khach_buon_id) || null : null,
+        ten_quan_ly: item.quan_ly_id ? quanLyMap.get(item.quan_ly_id) || null : null,
+        ten_bgd: item.bgd_id ? bgdMap.get(item.bgd_id) || null : null,
+        ten_nguoi_tao: item.nguoi_tao_id ? nguoiTaoMap.get(item.nguoi_tao_id) || null : null,
+        ten_nguoi_huy: (item as any).nguoi_huy_id ? nguoiHuyMap.get((item as any).nguoi_huy_id) || null : null,
+      }
+    }) as XetDuyetCongNo[]
+  }
+
+  /**
    * Get xét duyệt công nợ by ID
    */
   static async getById(id: number): Promise<XetDuyetCongNo | null> {
