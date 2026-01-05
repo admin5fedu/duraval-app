@@ -285,6 +285,10 @@ const XetDuyetCongNoFormRoute = lazy(() => import('@/features/ban-buon/xet-duyet
 const BangChiaDataPage = lazy(() => import('@/features/kinh-doanh/sale-ads/bang-chia-data'))
 const QuyDinhTyLePage = lazy(() => import('@/features/kinh-doanh/sale-ads/quy-dinh-ty-le'))
 
+// Kinh doanh - Thông tin module routes
+const SanPhamXuatVatListRoute = lazy(() => import('@/features/kinh-doanh/thong-tin/san-pham-xuat-vat/routes/san-pham-xuat-vat-list-route'))
+const SanPhamXuatVatDetailRoute = lazy(() => import('@/features/kinh-doanh/thong-tin/san-pham-xuat-vat/routes/san-pham-xuat-vat-detail-route'))
+
 // Module dashboard pages
 const CongViecPage = lazy(() => import('@/pages/cong-viec/CongViecPage'))
 const HeThongPage = lazy(() => import('@/pages/he-thong/HeThongPage'))
@@ -2040,6 +2044,21 @@ export const routes: RouteConfig[] = [
   {
     path: '/kinh-doanh/sale-ads/quy-dinh-ty-le',
     element: QuyDinhTyLePage,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top',
+  },
+  // Kinh doanh - Thông tin module routes
+  {
+    path: '/kinh-doanh/san-pham-xuat-vat',
+    element: SanPhamXuatVatListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore',
+  },
+  {
+    path: '/kinh-doanh/san-pham-xuat-vat/:index',
+    element: SanPhamXuatVatDetailRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'top',

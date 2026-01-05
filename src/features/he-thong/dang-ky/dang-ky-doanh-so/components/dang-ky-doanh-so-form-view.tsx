@@ -86,7 +86,6 @@ function DoanhThuFormField({ value, onChange, disabled }: { value?: number | nul
         disabled={disabled}
         placeholder="Nhập doanh thu..."
         formatThousands={true}
-        formatOnBlur={true}
         min={0}
         allowDecimals={false}
         className="w-full"

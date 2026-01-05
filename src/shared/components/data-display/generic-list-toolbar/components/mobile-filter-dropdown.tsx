@@ -98,6 +98,7 @@ export function MobileFilterDropdown<TData>({
             <div className={cn(compactPaddingClass(), "space-y-2 py-2")}>
               {/* Custom Filters */}
               {safeCustomFilters.map((filter, index) => {
+                // Handle React element
                 if (React.isValidElement(filter)) {
                   const filterProps = filter.props as Record<string, any>
                   if (filterProps.column === undefined) {
@@ -112,12 +113,39 @@ export function MobileFilterDropdown<TData>({
                       }
                     }
                   }
+                  return (
+                    <React.Fragment key={`custom-filter-${index}`}>
+                      {filter}
+                    </React.Fragment>
+                  )
                 }
-                return (
-                  <React.Fragment key={`custom-filter-${index}`}>
-                    {filter}
-                  </React.Fragment>
-                )
+                
+                // Handle object config: {columnId, component, props}
+                if (filter && typeof filter === 'object' && 'component' in filter && 'columnId' in filter) {
+                  const config = filter as { columnId: string; component: React.ComponentType<any>; props?: Record<string, any> }
+                  const column = table.getColumn(config.columnId)
+                  if (column && config.component) {
+                    const FilterComponent = config.component
+                    return (
+                      <div key={`custom-filter-${index}-${config.columnId}`} className="space-y-1">
+                        <FilterComponent
+                          column={column}
+                          {...(config.props || {})}
+                        />
+                      </div>
+                    )
+                  }
+                  return null
+                }
+                
+                // Fallback: Don't render if it's not a valid React element or config object
+                // This prevents "Objects are not valid as a React child" error
+                if (filter && typeof filter === 'object') {
+                  console.warn('Invalid customFilter format:', filter)
+                  return null
+                }
+                
+                return null
               })}
 
               {/* Standard Filters */}

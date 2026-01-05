@@ -142,6 +142,7 @@ export function DesktopToolbar<TData>({
       {(filters.length > 0 || customFilters.length > 0) && (
         <div className="hidden md:flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 pb-1 -mx-1 px-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded">
           {customFilters.map((filter, index) => {
+            // Handle React element
             if (React.isValidElement(filter)) {
               const filterProps = filter.props as Record<string, any>
               if (filterProps.column === undefined) {
@@ -156,12 +157,38 @@ export function DesktopToolbar<TData>({
                   }
                 }
               }
+              return (
+                <React.Fragment key={`custom-filter-${index}`}>
+                  {filter}
+                </React.Fragment>
+              )
             }
-            return (
-              <React.Fragment key={`custom-filter-${index}`}>
-                {filter}
-              </React.Fragment>
-            )
+            
+            // Handle object config: {columnId, component, props}
+            if (filter && typeof filter === 'object' && 'component' in filter && 'columnId' in filter) {
+              const config = filter as { columnId: string; component: React.ComponentType<any>; props?: Record<string, any> }
+              const column = table.getColumn(config.columnId)
+              if (column && config.component) {
+                const FilterComponent = config.component
+                return (
+                  <FilterComponent
+                    key={`custom-filter-${index}-${config.columnId}`}
+                    column={column}
+                    {...(config.props || {})}
+                  />
+                )
+              }
+              return null
+            }
+            
+            // Fallback: Don't render if it's not a valid React element or config object
+            // This prevents "Objects are not valid as a React child" error
+            if (filter && typeof filter === 'object') {
+              console.warn('Invalid customFilter format:', filter)
+              return null
+            }
+            
+            return null
           })}
           {filters.map(filter => (
             table.getColumn(filter.columnId) && (

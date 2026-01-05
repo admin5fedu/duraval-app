@@ -12,6 +12,9 @@ import {
   ShoppingBag,
   Store,
   Package,
+  Info,
+  Receipt,
+  Archive,
 } from "lucide-react"
 
 export default function KinhDoanhPage() {
@@ -73,6 +76,24 @@ export default function KinhDoanhPage() {
           href: "#",
           icon: Package,
           description: "Quản lý chương trình bán buôn.",
+        },
+      ]
+    },
+    {
+      title: "Thông tin",
+      icon: Info,
+      items: [
+        {
+          title: "Sản phẩm xuất VAT",
+          href: "/kinh-doanh/san-pham-xuat-vat",
+          icon: Receipt,
+          description: "Quản lý sản phẩm xuất VAT.",
+        },
+        {
+          title: "Hàng thanh lý",
+          href: "/kinh-doanh/hang-thanh-ly",
+          icon: Archive,
+          description: "Quản lý hàng thanh lý.",
         },
       ]
     }

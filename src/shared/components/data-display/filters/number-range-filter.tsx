@@ -11,6 +11,7 @@ import { BADGE_TYPOGRAPHY } from "@/shared/constants/typography"
 import { standardPaddingClass } from "@/shared/utils/spacing-styles"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { NumberInput } from "@/components/ui/number-input"
 import {
     Popover,
     PopoverContent,
@@ -21,10 +22,13 @@ import { Separator } from "@/components/ui/separator"
 
 interface NumberRangeFilterProps<TData, TValue> {
     column?: Column<TData, TValue>
+    columnId?: string // Column ID for lookup when column is not provided
     title?: string
     min?: number
     max?: number
     step?: number
+    formatThousands?: boolean // Format với dấu phẩy phân tách hàng nghìn
+    suffix?: string // Suffix text (e.g., "%")
 }
 
 /**
@@ -38,6 +42,8 @@ export function NumberRangeFilter<TData, TValue>({
     min,
     max,
     step = 1,
+    formatThousands = false,
+    suffix,
 }: NumberRangeFilterProps<TData, TValue>) {
     const [isOpen, setIsOpen] = React.useState(false)
     
@@ -48,13 +54,17 @@ export function NumberRangeFilter<TData, TValue>({
     })
 
     React.useEffect(() => {
-        if (filterValue) {
+        // ⚠️ CRITICAL: Reset range when filterValue is cleared (undefined)
+        // This ensures the component syncs with table filter state when filters are cleared
+        if (filterValue === undefined || filterValue === null) {
+            setRange({})
+        } else {
             setRange(filterValue)
         }
     }, [filterValue])
 
-    const handleRangeChange = (field: 'min' | 'max', value: string) => {
-        const numValue = value === '' ? undefined : Number(value)
+    const handleRangeChange = (field: 'min' | 'max', value: number | null) => {
+        const numValue = value === null || value === undefined ? undefined : value
         const newRange = { ...range, [field]: numValue }
         setRange(newRange)
         
@@ -63,6 +73,11 @@ export function NumberRangeFilter<TData, TValue>({
         } else {
             column?.setFilterValue(undefined)
         }
+    }
+    
+    const handleRangeChangeString = (field: 'min' | 'max', value: string) => {
+        const numValue = value === '' ? undefined : Number(value)
+        handleRangeChange(field, numValue === undefined ? null : numValue)
     }
 
     const handleClear = () => {
@@ -117,35 +132,69 @@ export function NumberRangeFilter<TData, TValue>({
                             <Label htmlFor="min-value" className="text-xs">
                                 Từ
                             </Label>
-                            <Input
-                                id="min-value"
-                                name="min-value"
-                                type="number"
-                                placeholder="Min"
-                                value={range.min ?? ''}
-                                onChange={(e) => handleRangeChange('min', e.target.value)}
-                                min={min}
-                                max={max}
-                                step={step}
-                                className="h-8 text-xs"
-                            />
+                            {formatThousands ? (
+                                <NumberInput
+                                    id="min-value"
+                                    name="min-value"
+                                    placeholder="Min"
+                                    value={range.min}
+                                    onChange={(value) => handleRangeChange('min', value)}
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    allowDecimals={step < 1}
+                                    formatThousands={formatThousands}
+                                    suffix={suffix}
+                                    className="h-8 text-xs"
+                                />
+                            ) : (
+                                <Input
+                                    id="min-value"
+                                    name="min-value"
+                                    type="number"
+                                    placeholder="Min"
+                                    value={range.min ?? ''}
+                                    onChange={(e) => handleRangeChangeString('min', e.target.value)}
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    className="h-8 text-xs"
+                                />
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="max-value" className="text-xs">
                                 Đến
                             </Label>
-                            <Input
-                                id="max-value"
-                                name="max-value"
-                                type="number"
-                                placeholder="Max"
-                                value={range.max ?? ''}
-                                onChange={(e) => handleRangeChange('max', e.target.value)}
-                                min={min}
-                                max={max}
-                                step={step}
-                                className="h-8 text-xs"
-                            />
+                            {formatThousands ? (
+                                <NumberInput
+                                    id="max-value"
+                                    name="max-value"
+                                    placeholder="Max"
+                                    value={range.max}
+                                    onChange={(value) => handleRangeChange('max', value)}
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    allowDecimals={step < 1}
+                                    formatThousands={formatThousands}
+                                    suffix={suffix}
+                                    className="h-8 text-xs"
+                                />
+                            ) : (
+                                <Input
+                                    id="max-value"
+                                    name="max-value"
+                                    type="number"
+                                    placeholder="Max"
+                                    value={range.max ?? ''}
+                                    onChange={(e) => handleRangeChangeString('max', e.target.value)}
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    className="h-8 text-xs"
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

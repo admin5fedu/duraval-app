@@ -809,7 +809,6 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         min={field.min !== undefined ? field.min : 0}
                                         allowDecimals={field.allowDecimals !== undefined ? field.allowDecimals : false}
                                         formatThousands={field.formatThousands || true}
-                                        formatOnBlur={true}
                                         suffix={field.suffix}
                                         className={cn(
                                             isMobile && "h-11 text-base"

@@ -52,5 +52,6 @@ export { danhSachKB, danhSachKB as danhSachKBQueryKeys } from "./danh-sach-KB"
 export { nguoiLienHe, nguoiLienHe as nguoiLienHeQueryKeys } from "./nguoi-lien-he"
 export { hinhAnhKhachBuon, hinhAnhKhachBuon as hinhAnhKhachBuonQueryKeys } from "./hinh-anh-khach-buon"
 export { keHoachThiTruong, keHoachThiTruong as keHoachThiTruongQueryKeys } from "./ke-hoach-thi-truong"
+export { sanPhamXuatVat, sanPhamXuatVat as sanPhamXuatVatQueryKeys } from "./san-pham-xuat-vat"
 export type { QueryKeyFactory, QueryKey, BaseQueryKey } from "./types"
 
