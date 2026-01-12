@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { ChamSocKhachBuonAPI } from "../services/cham-soc-khach-buon.api"
 import type { ChamSocKhachBuon, CreateChamSocKhachBuonInput, UpdateChamSocKhachBuonInput } from "../schema"
 import { createUseListQuery, createUseDetailQuery } from "@/lib/react-query"
@@ -28,6 +29,20 @@ export const useChamSocKhachBuonById = createUseDetailQuery<ChamSocKhachBuon>({
   queryKeys: chamSocKhachBuonQueryKeys,
   api: { getById: ChamSocKhachBuonAPI.getById },
 })
+
+/**
+ * Hook to get chăm sóc khách buôn by khach_buon_id
+ */
+export function useChamSocKhachBuonByKhachBuonId(khachBuonId: number | null | undefined) {
+  return useQuery({
+    queryKey: [...chamSocKhachBuonQueryKeys.all(), "by-khach-buon", khachBuonId],
+    queryFn: () => {
+      if (!khachBuonId) return Promise.resolve([])
+      return ChamSocKhachBuonAPI.getByKhachBuonId(khachBuonId)
+    },
+    enabled: !!khachBuonId,
+  })
+}
 
 /**
  * Mutation hooks for chăm sóc khách buôn

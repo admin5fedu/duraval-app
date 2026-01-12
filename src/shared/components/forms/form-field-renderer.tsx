@@ -796,7 +796,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         formField={formField}
                                         field={field}
                                     />
-                                ) : field.type === "number" && ((field.name === "diem" || field.name === "tien") || field.formatThousands || field.suffix) ? (
+                                ) : field.type === "number" && ((field.name === "diem" || field.name === "tien") || field.formatThousands !== undefined || field.suffix !== undefined) ? (
                                     <NumberInput
                                         {...formField}
                                         value={formField.value !== null && formField.value !== undefined ? formField.value : undefined}
@@ -808,7 +808,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                                         disabled={field.disabled}
                                         min={field.min !== undefined ? field.min : 0}
                                         allowDecimals={field.allowDecimals !== undefined ? field.allowDecimals : false}
-                                        formatThousands={field.formatThousands || true}
+                                        formatThousands={field.formatThousands !== undefined ? field.formatThousands : true}
                                         suffix={field.suffix}
                                         className={cn(
                                             isMobile && "h-11 text-base"

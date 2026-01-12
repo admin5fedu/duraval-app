@@ -11,6 +11,8 @@ import { DeleteDanhSachKBButton } from "./delete-danh-sach-KB-button"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
 import { actionButtonClass } from "@/shared/utils/toolbar-styles"
 import { formatDate } from "@/shared/utils/date-format"
+import { LichSuChamSocSection } from "./lich-su-cham-soc-section"
+import { useChamSocKhachBuonByKhachBuonId } from "@/features/ban-buon/cham-soc/cham-soc-khach-buon/hooks/use-cham-soc-khach-buon"
 import { NguoiLienHeSection } from "./nguoi-lien-he-section"
 import { useNguoiLienHeByKhachBuonId } from "../../nguoi-lien-he/hooks/use-nguoi-lien-he"
 import { HinhAnhKhachBuonSection } from "./hinh-anh-khach-buon-section"
@@ -32,6 +34,9 @@ export function DanhSachKBDetailView({ id, onBack, backUrl }: DanhSachKBDetailVi
   const viewState = useDetailViewStateFromQuery(query, undefined)
   
   const khachBuon = viewState.data
+
+  // Fetch lịch sử chăm sóc list
+  const { data: chamSocKhachBuonList, isLoading: isLoadingChamSocKhachBuon } = useChamSocKhachBuonByKhachBuonId(id)
 
   // Fetch người liên hệ list
   const { data: nguoiLienHeList, isLoading: isLoadingNguoiLienHe } = useNguoiLienHeByKhachBuonId(id)
@@ -221,6 +226,16 @@ export function DanhSachKBDetailView({ id, onBack, backUrl }: DanhSachKBDetailVi
           backUrl={backUrl || (returnTo === 'list' ? danhSachKBConfig.routePath : undefined)}
         />
         
+        {/* Lịch Sử Chăm Sóc Section */}
+        <div className="mt-6">
+          <LichSuChamSocSection
+            khachBuonId={id}
+            chamSocKhachBuonList={chamSocKhachBuonList || []}
+            isLoading={isLoadingChamSocKhachBuon}
+            khachBuonName={khachBuon.ten_khach_buon || undefined}
+          />
+        </div>
+
         {/* Người Liên Hệ Section */}
         <div className="mt-6">
           <NguoiLienHeSection

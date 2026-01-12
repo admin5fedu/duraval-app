@@ -433,6 +433,38 @@ export const phanHoiKhachHangColumns: ColumnDef<PhanHoiKhachHang>[] = [
         },
     },
     {
+        accessorKey: "bien_phap_hien_tai",
+        header: ({ column }) => <SortableHeader column={column} title="Biện Pháp Hiện Tại" />,
+        size: 250,
+        minSize: 200,
+        cell: ({ row }) => {
+            const bienPhap = row.getValue("bien_phap_hien_tai") as string | null
+            if (!bienPhap) return <span className="text-muted-foreground">-</span>
+            return <div className="line-clamp-2 text-sm">{bienPhap}</div>
+        },
+        meta: {
+            title: "Biện Pháp Hiện Tại",
+            order: 19,
+            minWidth: 200,
+        },
+    },
+    {
+        accessorKey: "bien_phap_de_xuat",
+        header: ({ column }) => <SortableHeader column={column} title="Biện Pháp Đề Xuất" />,
+        size: 250,
+        minSize: 200,
+        cell: ({ row }) => {
+            const bienPhap = row.getValue("bien_phap_de_xuat") as string | null
+            if (!bienPhap) return <span className="text-muted-foreground">-</span>
+            return <div className="line-clamp-2 text-sm">{bienPhap}</div>
+        },
+        meta: {
+            title: "Biện Pháp Đề Xuất",
+            order: 20,
+            minWidth: 200,
+        },
+    },
+    {
         accessorKey: "nguoi_tao_id",
         header: ({ column }) => <SortableHeader column={column} title="Người Tạo" />,
         size: 180,

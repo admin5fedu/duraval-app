@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { GenericListView } from "@/shared/components/data-display/generic-list-view/generic-list-view"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -44,6 +44,7 @@ export function PhanHoiKhachHangListView({
 }: PhanHoiKhachHangListViewProps = {}) {
     const { data: phanHoiList, isLoading, isError, refetch } = usePhanHoiKhachHang(initialData)
     const navigate = useNavigate()
+    const location = useLocation()
     const batchDeleteMutation = useBatchDeletePhanHoiKhachHang()
     const deleteMutation = useDeletePhanHoiKhachHang()
     const batchImportMutation = useBatchUpsertPhanHoiKhachHang()
@@ -51,6 +52,54 @@ export function PhanHoiKhachHangListView({
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
     const [rowToDelete, setRowToDelete] = React.useState<PhanHoiKhachHang | null>(null)
+    
+    // Refetch khi navigate về từ form page (sử dụng location.state hoặc pathname change)
+    const prevPathnameRef = React.useRef<string | null>(null)
+    React.useEffect(() => {
+        const currentPath = location.pathname
+        const isListPage = currentPath === phanHoiKhachHangConfig.routePath
+        
+        // Nếu đang ở list page và pathname thay đổi từ form/detail page, refetch
+        if (isListPage && prevPathnameRef.current && prevPathnameRef.current !== currentPath) {
+            const wasFormPage = prevPathnameRef.current.includes('/moi') || 
+                               prevPathnameRef.current.includes('/sua') ||
+                               prevPathnameRef.current.match(/\/\d+$/) // detail page
+            
+            if (wasFormPage) {
+                // Refetch để cập nhật danh sách mới nhất
+                refetch()
+            }
+        }
+        
+        prevPathnameRef.current = currentPath
+    }, [location.pathname, refetch])
+    
+    // Refetch sau khi delete mutation thành công
+    React.useEffect(() => {
+        if (deleteMutation.isSuccess) {
+            refetch()
+            // Reset mutation state
+            deleteMutation.reset()
+        }
+    }, [deleteMutation.isSuccess, refetch, deleteMutation])
+    
+    // Refetch sau khi batch delete mutation thành công
+    React.useEffect(() => {
+        if (batchDeleteMutation.isSuccess) {
+            refetch()
+            // Reset mutation state
+            batchDeleteMutation.reset()
+        }
+    }, [batchDeleteMutation.isSuccess, refetch, batchDeleteMutation])
+    
+    // Refetch sau khi import mutation thành công
+    React.useEffect(() => {
+        if (batchImportMutation.isSuccess) {
+            refetch()
+            // Reset mutation state
+            batchImportMutation.reset()
+        }
+    }, [batchImportMutation.isSuccess, refetch, batchImportMutation])
 
     // Create columns
     const columns = React.useMemo(() => {
@@ -201,6 +250,8 @@ export function PhanHoiKhachHangListView({
         const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
         if (ids.length > 0) {
             await batchDeleteMutation.mutateAsync(ids)
+            // Refetch để cập nhật danh sách ngay lập tức
+            await refetch()
         }
     }
 
@@ -440,6 +491,8 @@ export function PhanHoiKhachHangListView({
                                         await deleteMutation.mutateAsync(rowToDelete.id)
                                         setDeleteDialogOpen(false)
                                         setRowToDelete(null)
+                                        // Refetch để cập nhật danh sách ngay lập tức
+                                        await refetch()
                                     } catch (error) {
                                         // Error handled by mutation
                                     }

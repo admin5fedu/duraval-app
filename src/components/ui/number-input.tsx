@@ -98,19 +98,25 @@ function NumberInput({
             : (allowDecimals ? /[^0-9.,]/g : /[^0-9.]/g)  // vi-VN style: dot for thousands
         val = val.replace(regex, "")
 
-        // Hiển thị tạm thời để user gõ không bị giật
-        setDisplayValue(val)
-
-        // Parse để lấy giá trị thực gửi lên Store/DB
+        // Parse để lấy giá trị thực
         const numericValue = parseViNumber(val)
         
         if (!isNaN(numericValue)) {
             let finalValue = numericValue
             if (min !== undefined && finalValue < min) finalValue = min
             if (max !== undefined && finalValue > max) finalValue = max
+            
+            // Format lại ngay khi đang gõ để hiển thị phân tách hàng nghìn
+            const formatted = formatValue(finalValue)
+            setDisplayValue(formatted)
+            
             onChange?.(finalValue)
         } else if (val === "") {
+            setDisplayValue("")
             onChange?.(null)
+        } else {
+            // Nếu parse fail nhưng vẫn có ký tự hợp lệ, giữ nguyên để user tiếp tục gõ
+            setDisplayValue(val)
         }
     }
 

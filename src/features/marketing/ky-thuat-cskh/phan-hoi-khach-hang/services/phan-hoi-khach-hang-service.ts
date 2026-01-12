@@ -65,6 +65,7 @@ export class PhanHoiKhachHangService {
     assignIfDefined("yeu_cau_khach_hang", input.yeu_cau_khach_hang as any)
     assignIfDefined("hinh_anh", input.hinh_anh as any)
     assignIfDefined("bien_phap_hien_tai", input.bien_phap_hien_tai as any)
+    assignIfDefined("bien_phap_de_xuat", input.bien_phap_de_xuat as any)
     assignIfDefined("han_xu_ly", input.han_xu_ly as any)
     assignIfDefined("trang_thai", input.trang_thai as any)
     assignIfDefined("kt_mo_ta_loi", input.kt_mo_ta_loi as any)

@@ -10,8 +10,6 @@ import {
   Percent,
   TrendingUp,
   ShoppingBag,
-  Store,
-  Package,
   Info,
   Receipt,
   Archive,
@@ -62,27 +60,15 @@ export default function KinhDoanhPage() {
       ]
     },
     {
-      title: "Chương trình bán hàng",
-      icon: ShoppingBag,
-      items: [
-        {
-          title: "Chương trình bán lẻ",
-          href: "#",
-          icon: Store,
-          description: "Quản lý chương trình bán lẻ.",
-        },
-        {
-          title: "Chương trình bán buôn",
-          href: "#",
-          icon: Package,
-          description: "Quản lý chương trình bán buôn.",
-        },
-      ]
-    },
-    {
       title: "Thông tin",
       icon: Info,
       items: [
+        {
+          title: "Chương trình bán hàng",
+          href: "#",
+          icon: ShoppingBag,
+          description: "Quản lý chương trình bán hàng.",
+        },
         {
           title: "Sản phẩm xuất VAT",
           href: "/kinh-doanh/san-pham-xuat-vat",

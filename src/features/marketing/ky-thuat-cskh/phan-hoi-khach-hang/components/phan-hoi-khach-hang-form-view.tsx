@@ -155,6 +155,11 @@ const getSections = (isEditMode: boolean): FormSection[] => [
         type: "textarea",
       },
       { 
+        name: "bien_phap_de_xuat", 
+        label: "Biện Pháp Đề Xuất", 
+        type: "textarea",
+      },
+      { 
         name: "han_xu_ly", 
         label: "Hạn Xử Lý", 
         type: "date",
@@ -207,6 +212,7 @@ export function PhanHoiKhachHangFormView({ id, initialData, onComplete, onCancel
           ? phanHoi.hinh_anh.join(", ") 
           : (phanHoi.hinh_anh || ""),
         bien_phap_hien_tai: phanHoi.bien_phap_hien_tai || "",
+        bien_phap_de_xuat: phanHoi.bien_phap_de_xuat || "",
         han_xu_ly: phanHoi.han_xu_ly || "",
         trang_thai: phanHoi.trang_thai || "Mới",
         kt_mo_ta_loi: phanHoi.kt_mo_ta_loi || "",

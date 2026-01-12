@@ -52,6 +52,7 @@ export const phanHoiKhachHangSchema = z.object({
     ),
     hinh_anh: z.array(z.string()).optional().nullable(), // ARRAY
     bien_phap_hien_tai: z.string().optional().nullable(),
+    bien_phap_de_xuat: z.string().optional().nullable(),
     han_xu_ly: z.string().optional().nullable(), // date
     trang_thai: z.string().optional().nullable().default("Mới"),
     kt_mo_ta_loi: z.string().optional().nullable(),

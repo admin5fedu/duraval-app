@@ -193,6 +193,74 @@ export const MODULES: ModuleConfig[] = [
     group: "Kỹ thuật & CSKH",
     description: "Quản lý trục hạt"
   },
+
+  // Kinh doanh - Phiếu đề xuất bán hàng
+  {
+    id: "phieu-de-xuat-ban-hang",
+    name: "Phiếu đề xuất bán hàng",
+    category: "Kinh doanh",
+    group: "Phiếu đề xuất bán hàng",
+    description: "Quản lý phiếu đề xuất bán hàng"
+  },
+  // Kinh doanh - Quỹ hỗ trợ bán hàng
+  {
+    id: "loai-phieu-hang-muc",
+    name: "Loại Phiếu & Hạng Mục",
+    category: "Kinh doanh",
+    group: "Quỹ hỗ trợ bán hàng",
+    description: "Quản lý loại phiếu và hạng mục quỹ"
+  },
+  {
+    id: "quy-de-xuat-chiet-khau",
+    name: "Quỹ Đề Xuất Chiết Khấu",
+    category: "Kinh doanh",
+    group: "Quỹ hỗ trợ bán hàng",
+    description: "Quản lý quỹ đề xuất chiết khấu"
+  },
+  {
+    id: "quy-htbh-theo-thang",
+    name: "Quỹ HTBH Theo Tháng",
+    category: "Kinh doanh",
+    group: "Quỹ hỗ trợ bán hàng",
+    description: "Quản lý quỹ hỗ trợ bán hàng theo tháng"
+  },
+  {
+    id: "tong-quan-quy-htbh",
+    name: "Tổng Quan Quỹ",
+    category: "Kinh doanh",
+    group: "Quỹ hỗ trợ bán hàng",
+    description: "Xem tổng quan quỹ hỗ trợ bán hàng"
+  },
+  // Kinh doanh - Sale Ads
+  {
+    id: "bang-chia-data",
+    name: "Bảng Chia Data",
+    category: "Kinh doanh",
+    group: "Sale Ads",
+    description: "Quản lý bảng chia data cho sale"
+  },
+  {
+    id: "quy-dinh-ty-le",
+    name: "Quy Định Tỷ Lệ",
+    category: "Kinh doanh",
+    group: "Sale Ads",
+    description: "Quản lý quy định tỷ lệ chia data"
+  },
+  // Kinh doanh - Thông tin
+  {
+    id: "chuong-trinh-ban-hang",
+    name: "Chương trình bán hàng",
+    category: "Kinh doanh",
+    group: "Thông tin",
+    description: "Quản lý chương trình bán hàng"
+  },
+  {
+    id: "san-pham-xuat-vat",
+    name: "Sản Phẩm Xuất VAT",
+    category: "Kinh doanh",
+    group: "Thông tin",
+    description: "Danh sách sản phẩm xuất VAT"
+  },
 ]
 
 /**

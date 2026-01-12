@@ -262,5 +262,77 @@ export class ChamSocKhachBuonAPI {
       throw new Error(error.message)
     }
   }
+
+  /**
+   * Get chăm sóc khách buôn by khach_buon_id
+   */
+  static async getByKhachBuonId(khachBuonId: number): Promise<ChamSocKhachBuon[]> {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("*")
+      .eq("khach_buon_id", khachBuonId)
+      .order("ngay", { ascending: false })
+      .order("id", { ascending: false })
+
+    if (error) {
+      console.error("Lỗi khi tải danh sách chăm sóc khách buôn theo khách buôn:", error)
+      throw new Error(error.message)
+    }
+
+    if (!data || data.length === 0) {
+      return []
+    }
+
+    // Batch enrich foreign keys
+    const nhanVienIds = [...new Set(data.map(item => item.nhan_vien_id).filter(Boolean) as number[])]
+    const khachBuonIds = [...new Set(data.map(item => item.khach_buon_id).filter(Boolean) as number[])]
+    const nguoiTaoIds = [...new Set(data.map(item => item.nguoi_tao_id).filter(Boolean) as number[])]
+
+    // Enrich ten_nhan_vien and ten_nguoi_tao from var_nhan_su (format: "mã - tên")
+    const allNhanSuIds = [...new Set([...nhanVienIds, ...nguoiTaoIds])]
+    let nhanSuMap = new Map<number, { ma_nhan_vien: number; ho_ten: string }>()
+    
+    if (allNhanSuIds.length > 0) {
+      const { data: nhanSuData } = await supabase
+        .from("var_nhan_su")
+        .select("ma_nhan_vien, ho_ten")
+        .in("ma_nhan_vien", allNhanSuIds)
+      
+      if (nhanSuData) {
+        nhanSuMap = new Map(
+          nhanSuData.map(ns => [ns.ma_nhan_vien, { ma_nhan_vien: ns.ma_nhan_vien, ho_ten: ns.ho_ten || "" }])
+        )
+      }
+    }
+
+    // Enrich ten_khach_buon from bb_khach_buon
+    let khachBuonMap = new Map<number, string>()
+    if (khachBuonIds.length > 0) {
+      const { data: khachBuonData } = await supabase
+        .from("bb_khach_buon")
+        .select("id, ten_khach_buon")
+        .in("id", khachBuonIds)
+      
+      if (khachBuonData) {
+        khachBuonMap = new Map(
+          khachBuonData.map(kb => [kb.id, kb.ten_khach_buon || ""])
+        )
+      }
+    }
+
+    return data.map(item => {
+      const nhanSuInfo = item.nhan_vien_id ? nhanSuMap.get(item.nhan_vien_id) : null
+      const nguoiTaoInfo = item.nguoi_tao_id ? nhanSuMap.get(item.nguoi_tao_id) : null
+      
+      return {
+        ...item,
+        ma_nhan_vien: nhanSuInfo?.ma_nhan_vien || null,
+        ten_nhan_vien: nhanSuInfo ? (nhanSuInfo.ho_ten ? `${nhanSuInfo.ma_nhan_vien} - ${nhanSuInfo.ho_ten}` : String(nhanSuInfo.ma_nhan_vien)) : null,
+        ten_khach_buon: item.khach_buon_id ? khachBuonMap.get(item.khach_buon_id) || null : null,
+        ma_nguoi_tao: nguoiTaoInfo?.ma_nhan_vien || null,
+        ten_nguoi_tao: nguoiTaoInfo ? (nguoiTaoInfo.ho_ten ? `${nguoiTaoInfo.ma_nhan_vien} - ${nguoiTaoInfo.ho_ten}` : String(nguoiTaoInfo.ma_nhan_vien)) : null,
+      }
+    }) as ChamSocKhachBuon[]
+  }
 }
 

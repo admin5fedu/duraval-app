@@ -283,6 +283,12 @@ export function PhanHoiKhachHangDetailView({ id, initialData, onEdit, onBack }: 
           colSpan: 2,
         },
         { 
+          label: "Biện Pháp Đề Xuất", 
+          key: "bien_phap_de_xuat", 
+          value: phanHoi.bien_phap_de_xuat || "-",
+          colSpan: 2,
+        },
+        { 
           label: "Hạn Xử Lý", 
           key: "han_xu_ly", 
           value: phanHoi.han_xu_ly || "-",

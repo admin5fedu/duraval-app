@@ -281,6 +281,11 @@ const XetDuyetCongNoListRoute = lazy(() => import('@/features/ban-buon/xet-duyet
 const XetDuyetCongNoDetailRoute = lazy(() => import('@/features/ban-buon/xet-duyet/xet-duyet-cong-no/routes/xet-duyet-cong-no-detail-route'))
 const XetDuyetCongNoFormRoute = lazy(() => import('@/features/ban-buon/xet-duyet/xet-duyet-cong-no/routes/xet-duyet-cong-no-form-route'))
 
+// Xét duyệt khách buôn module routes
+const XetDuyetKhachBuonListRoute = lazy(() => import('@/features/ban-buon/xet-duyet/xet-duyet-khach-buon/routes/xet-duyet-khach-buon-list-route'))
+const XetDuyetKhachBuonDetailRoute = lazy(() => import('@/features/ban-buon/xet-duyet/xet-duyet-khach-buon/routes/xet-duyet-khach-buon-detail-route'))
+const XetDuyetKhachBuonFormRoute = lazy(() => import('@/features/ban-buon/xet-duyet/xet-duyet-khach-buon/routes/xet-duyet-khach-buon-form-route'))
+
 // Kinh doanh - Sale Ads module pages
 const BangChiaDataPage = lazy(() => import('@/features/kinh-doanh/sale-ads/bang-chia-data'))
 const QuyDinhTyLePage = lazy(() => import('@/features/kinh-doanh/sale-ads/quy-dinh-ty-le'))
@@ -2118,6 +2123,35 @@ export const routes: RouteConfig[] = [
   {
     path: '/ban-buon/xet-duyet-cong-no',
     element: XetDuyetCongNoListRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form
+  },
+  // Xét duyệt khách buôn module routes
+  {
+    path: '/ban-buon/xet-duyet-khach-buon/moi',
+    element: XetDuyetKhachBuonFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/xet-duyet-khach-buon/:id/sua',
+    element: XetDuyetKhachBuonFormRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // FormView
+  },
+  {
+    path: '/ban-buon/xet-duyet-khach-buon/:id',
+    element: XetDuyetKhachBuonDetailRoute,
+    protected: true,
+    layout: true,
+    scrollBehavior: 'top', // DetailView
+  },
+  {
+    path: '/ban-buon/xet-duyet-khach-buon',
+    element: XetDuyetKhachBuonListRoute,
     protected: true,
     layout: true,
     scrollBehavior: 'restore', // ListView - restore scroll khi quay lại từ detail/form

@@ -66,10 +66,10 @@ export function createUseCreateMutation<TEntity extends { id?: number }, TCreate
           queryKey: config.queryKeys.all(),
           exact: false, // Invalidate tất cả queries con
         })
-        // Force refetch list query ngay lập tức
+        // Force refetch list query ngay lập tức (bỏ exact: true để refetch tất cả queries liên quan)
         queryClient.refetchQueries({
           queryKey: config.queryKeys.list(),
-          exact: true,
+          exact: false, // Refetch tất cả queries bắt đầu với list key
         })
         // Set detail query data for instant navigation
         if (data.id) {
@@ -126,7 +126,7 @@ export function createUseUpdateMutation<TEntity, TUpdateInput>(
         })
         queryClient.refetchQueries({
           queryKey: config.queryKeys.list(),
-          exact: true,
+          exact: false, // Refetch tất cả queries bắt đầu với list key
         })
         queryClient.setQueryData(config.queryKeys.detail(variables.id), data)
         toast.success(config.messages.updateSuccess)
@@ -175,7 +175,7 @@ export function createUseDeleteMutation(
         })
         queryClient.refetchQueries({
           queryKey: config.queryKeys.list(),
-          exact: true,
+          exact: false, // Refetch tất cả queries bắt đầu với list key
         })
         queryClient.removeQueries({ queryKey: config.queryKeys.detail(id) })
         toast.success(config.messages.deleteSuccess)
@@ -224,7 +224,7 @@ export function createUseBatchDeleteMutation(
         })
         queryClient.refetchQueries({
           queryKey: config.queryKeys.list(),
-          exact: true,
+          exact: false, // Refetch tất cả queries bắt đầu với list key
         })
         ids.forEach((id) => {
           queryClient.removeQueries({ queryKey: config.queryKeys.detail(id) })

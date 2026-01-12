@@ -38,6 +38,7 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreatePhanHoiKha
   const mucDo = row.muc_do ? String(row.muc_do).trim() : null
   const yeuCauKhachHang = row.yeu_cau_khach_hang ? String(row.yeu_cau_khach_hang).trim() : null
   const bienPhapHienTai = row.bien_phap_hien_tai ? String(row.bien_phap_hien_tai).trim() : null
+  const bienPhapDeXuat = row.bien_phap_de_xuat ? String(row.bien_phap_de_xuat).trim() : null
   const hanXuLy = row.han_xu_ly ? String(row.han_xu_ly).trim() : null
   const trangThai = row.trang_thai ? String(row.trang_thai).trim() : "Mới"
   const ktMoTaLoi = row.kt_mo_ta_loi ? String(row.kt_mo_ta_loi).trim() : null
@@ -80,6 +81,7 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreatePhanHoiKha
     ...(yeuCauKhachHang !== null && { yeu_cau_khach_hang: yeuCauKhachHang }),
     ...(hinhAnh !== null && { hinh_anh: hinhAnh }),
     ...(bienPhapHienTai !== null && { bien_phap_hien_tai: bienPhapHienTai }),
+    ...(bienPhapDeXuat !== null && { bien_phap_de_xuat: bienPhapDeXuat }),
     ...(hanXuLy !== null && { han_xu_ly: hanXuLy }),
     trang_thai: trangThai,
     ...(ktMoTaLoi !== null && { kt_mo_ta_loi: ktMoTaLoi }),
