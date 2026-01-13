@@ -26,10 +26,10 @@ interface QuanLyDuyetButtonProps {
   disabled?: boolean
 }
 
-export function QuanLyDuyetButton({ 
-  phieuDeXuatBanHang, 
-  onSuccess, 
-  disabled = false 
+export function QuanLyDuyetButton({
+  phieuDeXuatBanHang,
+  onSuccess,
+  disabled = false
 }: QuanLyDuyetButtonProps) {
   const [open, setOpen] = React.useState(false)
   const updateMutation = useUpdatePhieuDeXuatBanHang()
@@ -38,6 +38,26 @@ export function QuanLyDuyetButton({
 
   // Kiểm tra xem đã duyệt chưa
   const isDuyeted = phieuDeXuatBanHang.quan_ly_duyet === "có" || phieuDeXuatBanHang.quan_ly_duyet === "đã duyệt"
+
+  // Kiểm tra quyền duyệt
+  const hasPermission = React.useMemo(() => {
+    if (!employee) return false
+
+    // Trường hợp 1: Admin/Cấp cao (cap_bac = 1)
+    if (employee.cap_bac === 1) return true
+
+    // Trường hợp 2: Quản lý trực tiếp (cap_bac = 2) VÀ cùng phòng ban
+    if (employee.cap_bac === 2) {
+      if (employee.phong_ban_id && phieuDeXuatBanHang.phong_id) {
+        return employee.phong_ban_id === phieuDeXuatBanHang.phong_id
+      }
+    }
+
+    return false
+  }, [employee, phieuDeXuatBanHang])
+
+  // Nếu không có quyền, ẩn nút luôn
+  if (!hasPermission) return null
 
   const handleDuyet = async () => {
     if (!employee?.ma_nhan_vien) {
@@ -52,6 +72,7 @@ export function QuanLyDuyetButton({
           quan_ly_duyet: "có",
           quan_ly_id: employee.ma_nhan_vien,
           tg_quan_ly_duyet: new Date().toISOString(),
+          trang_thai: "Chờ phê duyệt",
         } as any,
       })
 
@@ -59,7 +80,7 @@ export function QuanLyDuyetButton({
       queryClient.invalidateQueries({ queryKey: phieuDeXuatBanHangQueryKeys.all() })
 
       setOpen(false)
-      
+
       toast.success("Quản lý đã duyệt thành công")
 
       if (onSuccess) {

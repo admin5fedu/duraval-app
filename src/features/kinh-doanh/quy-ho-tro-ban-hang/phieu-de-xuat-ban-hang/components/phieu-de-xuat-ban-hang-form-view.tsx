@@ -17,20 +17,20 @@ import { useHangMucByLoaiPhieuId } from "@/features/kinh-doanh/quy-ho-tro-ban-ha
 import { HangMucToggleFormField } from "./hang-muc-toggle-form-field"
 
 // Wrapper component for NhanVienSelectFormField
-const NhanVienSelectWrapper = React.forwardRef<HTMLButtonElement, { 
-  value?: number | null; 
-  onChange: (value: number | null) => void; 
+const NhanVienSelectWrapper = React.forwardRef<HTMLButtonElement, {
+  value?: number | null;
+  onChange: (value: number | null) => void;
   disabled?: boolean;
   id?: string;
   name?: string;
   onBlur?: () => void;
 }>(({ value, onChange, disabled, id, name, onBlur }, ref) => {
   return (
-    <NhanVienSelectFormField 
+    <NhanVienSelectFormField
       ref={ref}
       name={name || "nhan_vien_id"}
-      value={value || null} 
-      onChange={onChange} 
+      value={value || null}
+      onChange={onChange}
       disabled={disabled}
       id={id}
       onBlur={onBlur}
@@ -41,9 +41,9 @@ const NhanVienSelectWrapper = React.forwardRef<HTMLButtonElement, {
 NhanVienSelectWrapper.displayName = "NhanVienSelectWrapper"
 
 // Wrapper component for HangMucToggleFormField
-const HangMucToggleWrapper = React.forwardRef<HTMLDivElement, { 
-  value?: string | null; 
-  onChange: (value: string | null) => void; 
+const HangMucToggleWrapper = React.forwardRef<HTMLDivElement, {
+  value?: string | null;
+  onChange: (value: string | null) => void;
   disabled?: boolean;
   id?: string;
   name?: string;
@@ -67,13 +67,13 @@ function PhieuDeXuatBanHangFormAutoFillLoaiPhieuHangMuc() {
   const loaiPhieuId = watch("loai_phieu_id")
   const hangMucId = watch("hang_muc_id")
   const { data: loaiPhieuList } = useLoaiPhieu()
-  
+
   // Convert string to number for API call
   const loaiPhieuIdNum = useMemo(() => {
     if (!loaiPhieuId) return 0
     return typeof loaiPhieuId === 'string' ? Number(loaiPhieuId) : loaiPhieuId
   }, [loaiPhieuId])
-  
+
   const { data: hangMucList } = useHangMucByLoaiPhieuId(loaiPhieuIdNum)
 
   React.useEffect(() => {
@@ -125,10 +125,10 @@ interface PhieuDeXuatBanHangFormViewProps {
   onCancel?: () => void
 }
 
-export function PhieuDeXuatBanHangFormView({ 
-  id, 
-  onComplete, 
-  onCancel 
+export function PhieuDeXuatBanHangFormView({
+  id,
+  onComplete,
+  onCancel
 }: PhieuDeXuatBanHangFormViewProps) {
   const { data: existingData, isLoading: isLoadingData } = usePhieuDeXuatBanHangById(id || 0)
   const createMutation = useCreatePhieuDeXuatBanHang()
@@ -172,25 +172,31 @@ export function PhieuDeXuatBanHangFormView({
     // Convert string IDs back to numbers for submission
     const submitData = { ...data }
     if ((submitData as any).loai_phieu_id) {
-      (submitData as any).loai_phieu_id = typeof (submitData as any).loai_phieu_id === 'string' 
-        ? Number((submitData as any).loai_phieu_id) 
+      (submitData as any).loai_phieu_id = typeof (submitData as any).loai_phieu_id === 'string'
+        ? Number((submitData as any).loai_phieu_id)
         : (submitData as any).loai_phieu_id
     }
     if ((submitData as any).hang_muc_id) {
-      (submitData as any).hang_muc_id = typeof (submitData as any).hang_muc_id === 'string' 
-        ? Number((submitData as any).hang_muc_id) 
+      (submitData as any).hang_muc_id = typeof (submitData as any).hang_muc_id === 'string'
+        ? Number((submitData as any).hang_muc_id)
         : (submitData as any).hang_muc_id
     }
-    
+
     // Ensure ngay is set to today for create mode
     if (!isEditMode) {
       (submitData as any).ngay = getToday()
     }
-    // Ensure nhan_vien_id is set from employee
+    // Ensure nhan_vien_id and nguoi_tao_id is set from employee
     if (!isEditMode && employee?.ma_nhan_vien) {
-      (submitData as any).nhan_vien_id = employee.ma_nhan_vien
+      (submitData as any).nhan_vien_id = employee.ma_nhan_vien;
+      (submitData as any).nguoi_tao_id = employee.ma_nhan_vien;
     }
-    
+
+    // Set default status for new records
+    if (!isEditMode) {
+      (submitData as any).trang_thai = "Chờ kiểm tra"
+    }
+
     if (isEditMode && id) {
       await updateMutation.mutateAsync({ id, input: submitData as UpdatePhieuDeXuatBanHangInput })
     } else {
@@ -207,16 +213,16 @@ export function PhieuDeXuatBanHangFormView({
     {
       title: "Thông Tin Cơ Bản",
       fields: [
-        { 
-          name: "ngay", 
-          label: "Ngày", 
+        {
+          name: "ngay",
+          label: "Ngày",
           type: "date",
           disabled: true,
           required: true
         },
-        { 
-          name: "nhan_vien_id", 
-          label: "Nhân viên", 
+        {
+          name: "nhan_vien_id",
+          label: "Nhân viên",
           type: "custom",
           customComponent: NhanVienSelectWrapper,
           required: true,
@@ -227,64 +233,64 @@ export function PhieuDeXuatBanHangFormView({
     {
       title: "Thông Tin Phiếu",
       fields: [
-        { 
-          name: "loai_quy", 
-          label: "Loại quỹ", 
+        {
+          name: "loai_quy",
+          label: "Loại quỹ",
           type: "toggle",
           options: generateLoaiQuyToggleOptions(),
           required: true
         },
-        { 
-          name: "loai_phieu_id", 
-          label: "Loại phiếu", 
+        {
+          name: "loai_phieu_id",
+          label: "Loại phiếu",
           type: "toggle",
           options: loaiPhieuOptions,
           required: true
         },
-        { 
-          name: "hang_muc_id", 
-          label: "Hạng mục", 
+        {
+          name: "hang_muc_id",
+          label: "Hạng mục",
           type: "custom",
           customComponent: HangMucToggleWrapper,
           required: true
         },
-        { 
-          name: "mo_ta", 
-          label: "Mô tả", 
+        {
+          name: "mo_ta",
+          label: "Mô tả",
           type: "textarea",
           required: true
         },
-        { 
-          name: "so_hoa_don", 
-          label: "Số hóa đơn", 
+        {
+          name: "so_hoa_don",
+          label: "Số hóa đơn",
           type: "text"
         },
-        { 
-          name: "tien_don_hang", 
-          label: "Tiền đơn hàng", 
+        {
+          name: "tien_don_hang",
+          label: "Tiền đơn hàng",
           type: "number",
           formatThousands: true,
           required: true
         },
-        { 
-          name: "tong_ck", 
-          label: "Tổng chiết khấu", 
+        {
+          name: "tong_ck",
+          label: "Tổng chiết khấu",
           type: "number",
           formatThousands: true,
           required: true
         },
-        { 
-          name: "ty_le", 
-          label: "Tỷ lệ", 
+        {
+          name: "ty_le",
+          label: "Tỷ lệ",
           type: "number",
           disabled: true,
           suffix: "%",
           allowDecimals: true,
           formatThousands: true
         },
-        { 
-          name: "hinh_anh", 
-          label: "Hình ảnh", 
+        {
+          name: "hinh_anh",
+          label: "Hình ảnh",
           type: "image",
           imageFolder: "phieu-de-xuat-ban-hang",
           imageMaxSize: 10

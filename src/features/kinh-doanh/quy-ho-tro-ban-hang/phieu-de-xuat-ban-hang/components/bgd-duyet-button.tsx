@@ -26,18 +26,41 @@ interface BGDDuyetButtonProps {
   disabled?: boolean
 }
 
-export function BGDDuyetButton({ 
-  phieuDeXuatBanHang, 
-  onSuccess, 
-  disabled = false 
+export function BGDDuyetButton({
+  phieuDeXuatBanHang,
+  onSuccess,
+  disabled = false
 }: BGDDuyetButtonProps) {
   const [open, setOpen] = React.useState(false)
   const updateMutation = useUpdatePhieuDeXuatBanHang()
-  const { employee } = useAuthStore()
-  const queryClient = useQueryClient()
-
   // Kiểm tra xem đã duyệt chưa
   const isDuyeted = phieuDeXuatBanHang.bgd_duyet === "có" || phieuDeXuatBanHang.bgd_duyet === "đã duyệt"
+
+  // Load thêm permissions từ store
+  const { employee, permissions } = useAuthStore()
+  const queryClient = useQueryClient()
+
+  // Kiểm tra quyền duyệt
+  const hasPermission = React.useMemo(() => {
+    if (!employee) return false
+
+    // Trường hợp 1: Admin/Cấp cao (cap_bac = 1)
+    if (employee.cap_bac === 1) return true
+
+    // Trường hợp 2: Có quyền quản trị module phiếu đề xuất bán hàng
+    // Tìm quyền cho module hiện tại
+    const modulePermission = permissions.find(p => p.module_id === 'phieu-de-xuat-ban-hang')
+
+    // Check quyền quan_tri
+    if (modulePermission?.quyen?.quan_tri) {
+      return true
+    }
+
+    return false
+  }, [employee, permissions])
+
+  // Nếu không có quyền, ẩn nút luôn
+  if (!hasPermission) return null
 
   const handleDuyet = async () => {
     if (!employee?.ma_nhan_vien) {
@@ -52,6 +75,7 @@ export function BGDDuyetButton({
           bgd_duyet: "có",
           bgd_id: employee.ma_nhan_vien,
           tg_bgd_duyet: new Date().toISOString(),
+          trang_thai: "Đã duyệt",
         } as any,
       })
 
@@ -59,7 +83,7 @@ export function BGDDuyetButton({
       queryClient.invalidateQueries({ queryKey: phieuDeXuatBanHangQueryKeys.all() })
 
       setOpen(false)
-      
+
       toast.success("BGD đã duyệt thành công")
 
       if (onSuccess) {
