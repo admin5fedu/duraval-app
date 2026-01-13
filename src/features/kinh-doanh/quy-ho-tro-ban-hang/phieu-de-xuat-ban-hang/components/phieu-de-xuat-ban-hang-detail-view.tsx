@@ -14,6 +14,7 @@ import { TraoDoiHistory } from "@/shared/components/data-display/trao-doi-histor
 import { TraoDoiButton } from "./trao-doi-button"
 import { QuanLyDuyetButton } from "./quan-ly-duyet-button"
 import { BGDDuyetButton } from "./bgd-duyet-button"
+import { ChiTienButton } from "./chi-tien-button"
 import { Button } from "@/components/ui/button"
 import { getActionVariant, getActionSize } from "@/shared/utils/action-styles"
 
@@ -63,19 +64,19 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
         { label: "ID", key: "id", value: phieu.id, type: "number" },
         { label: "Ngày", key: "ngay", value: phieu.ngay, type: "date" },
         { label: "Nhân viên", key: "ten_nhan_vien", value: phieu.ten_nhan_vien || "-" },
-        { 
-          label: "Phòng", 
-          key: "phong", 
-          value: phieu.ma_phong && phieu.ten_phong_ban 
-            ? `${phieu.ma_phong} - ${phieu.ten_phong_ban}` 
-            : phieu.ma_phong || phieu.ten_phong_ban || "-" 
+        {
+          label: "Phòng",
+          key: "phong",
+          value: phieu.ma_phong && phieu.ten_phong_ban
+            ? `${phieu.ma_phong} - ${phieu.ten_phong_ban}`
+            : phieu.ma_phong || phieu.ten_phong_ban || "-"
         },
-        { 
-          label: "Nhóm", 
-          key: "nhom", 
-          value: phieu.ma_nhom && phieu.ten_nhom 
-            ? `${phieu.ma_nhom} - ${phieu.ten_nhom}` 
-            : phieu.ma_nhom || phieu.ten_nhom || "-" 
+        {
+          label: "Nhóm",
+          key: "nhom",
+          value: phieu.ma_nhom && phieu.ten_nhom
+            ? `${phieu.ma_nhom} - ${phieu.ten_nhom}`
+            : phieu.ma_nhom || phieu.ten_nhom || "-"
         },
       ]
     },
@@ -94,10 +95,10 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
       fields: [
         { label: "Tiền đơn hàng", key: "tien_don_hang", value: phieu.tien_don_hang, type: "currency" },
         { label: "Tổng chiết khấu", key: "tong_ck", value: phieu.tong_ck, type: "currency" },
-        { 
-          label: "Tỷ lệ", 
-          key: "ty_le", 
-          value: phieu.ty_le, 
+        {
+          label: "Tỷ lệ",
+          key: "ty_le",
+          value: phieu.ty_le,
           type: "number",
           format: (val: number | null | undefined) => {
             if (val === null || val === undefined) return "-"
@@ -109,10 +110,10 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
     {
       title: "Hình ảnh",
       fields: [
-        { 
-          label: "Hình ảnh", 
-          key: "hinh_anh", 
-          value: phieu.hinh_anh, 
+        {
+          label: "Hình ảnh",
+          key: "hinh_anh",
+          value: phieu.hinh_anh,
           type: "image",
           displayName: phieu.ten_nhan_vien || "Phiếu đề xuất bán hàng"
         },
@@ -123,16 +124,16 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
       fields: [
         { label: "Trạng thái", key: "trang_thai", value: phieu.trang_thai || "-" },
         { label: "Quản lý duyệt", key: "quan_ly_duyet", value: phieu.quan_ly_duyet || "-" },
-        { 
-          label: "TG quản lý duyệt", 
-          key: "tg_quan_ly_duyet", 
+        {
+          label: "TG quản lý duyệt",
+          key: "tg_quan_ly_duyet",
           value: phieu.tg_quan_ly_duyet ? format(new Date(phieu.tg_quan_ly_duyet), "dd/MM/yyyy HH:mm", { locale: vi }) : "-",
           type: "date"
         },
         { label: "BGD duyệt", key: "bgd_duyet", value: phieu.bgd_duyet || "-" },
-        { 
-          label: "TG BGD duyệt", 
-          key: "tg_bgd_duyet", 
+        {
+          label: "TG BGD duyệt",
+          key: "tg_bgd_duyet",
           value: phieu.tg_bgd_duyet ? format(new Date(phieu.tg_bgd_duyet), "dd/MM/yyyy HH:mm", { locale: vi }) : "-",
           type: "date"
         },
@@ -145,15 +146,15 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
         { label: "Người nhận quỹ", key: "ten_nguoi_nhan_quy", value: phieu.ten_nguoi_nhan_quy || "-" },
         { label: "Loại doanh thu", key: "ten_loai_doanh_thu", value: phieu.ten_loai_doanh_thu || "-" },
         { label: "Mã COMBO", key: "ma_com_bo", value: phieu.ma_com_bo || "-" },
-        { 
-          label: "Ngày tạo", 
-          key: "tg_tao", 
+        {
+          label: "Ngày tạo",
+          key: "tg_tao",
           value: phieu.tg_tao ? format(new Date(phieu.tg_tao), "dd/MM/yyyy HH:mm", { locale: vi }) : "-",
           type: "date"
         },
-        { 
-          label: "Ngày cập nhật", 
-          key: "tg_cap_nhat", 
+        {
+          label: "Ngày cập nhật",
+          key: "tg_cap_nhat",
           value: phieu.tg_cap_nhat ? format(new Date(phieu.tg_cap_nhat), "dd/MM/yyyy HH:mm", { locale: vi }) : "-",
           type: "date"
         },
@@ -186,50 +187,59 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
   // Secondary actions: Approval buttons (Quản lý duyệt, BGD duyệt)
   // Default action: Trao đổi
   const quanLyDuyetElement = (
-      <QuanLyDuyetButton
+    <QuanLyDuyetButton
       key="quan-ly-duyet"
-        phieuDeXuatBanHang={phieu}
-        onSuccess={() => {
-          query.refetch()
-        }}
-      />
+      phieuDeXuatBanHang={phieu}
+      onSuccess={() => {
+        query.refetch()
+      }}
+    />
   )
   const bgdDuyetElement = (
-      <BGDDuyetButton
+    <BGDDuyetButton
       key="bgd-duyet"
-        phieuDeXuatBanHang={phieu}
-        onSuccess={() => {
-          query.refetch()
-        }}
-      />
+      phieuDeXuatBanHang={phieu}
+      onSuccess={() => {
+        query.refetch()
+      }}
+    />
   )
   const traoDoiElement = (
-      <TraoDoiButton
+    <TraoDoiButton
       key="trao-doi"
-        phieuDeXuatBanHang={phieu}
-        onSuccess={() => {
-          query.refetch()
-        }}
-      />
+      phieuDeXuatBanHang={phieu}
+      onSuccess={() => {
+        query.refetch()
+      }}
+    />
+  )
+  const chiTienElement = (
+    <ChiTienButton
+      key="chi-tien"
+      phieuDeXuatBanHang={phieu}
+      onSuccess={() => {
+        query.refetch()
+      }}
+    />
   )
 
   // Secondary action: Sửa (nằm cạnh nút Xóa)
   const editButton = (
-      <Button
+    <Button
       key="edit"
       variant={getActionVariant("secondary")}
       size={getActionSize("secondary")}
-        onClick={() => {
-          if (onEdit) {
-            onEdit()
-          } else {
-            navigate(`${phieuDeXuatBanHangConfig.routePath}/${id}/sua`)
-          }
-        }}
-      >
-        <Edit className="mr-2 h-4 w-4" />
-        Sửa
-      </Button>
+      onClick={() => {
+        if (onEdit) {
+          onEdit()
+        } else {
+          navigate(`${phieuDeXuatBanHangConfig.routePath}/${id}/sua`)
+        }
+      }}
+    >
+      <Edit className="mr-2 h-4 w-4" />
+      Sửa
+    </Button>
   )
 
   const deleteElement = <DeletePhieuDeXuatBanHangButton key="delete" id={id} />
@@ -239,6 +249,7 @@ export function PhieuDeXuatBanHangDetailView({ id, initialData, onEdit, onBack }
     <div className="flex items-center gap-2">
       {quanLyDuyetElement}
       {bgdDuyetElement}
+      {chiTienElement}
       {traoDoiElement}
       {editButton}
       {deleteElement}

@@ -10,6 +10,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useLoaiDoanhThu } from "../../loai-phieu-hang-muc/loai-doanh-thu/hooks/use-loai-doanh-thu"
+import { Label } from "@/components/ui/label"
 import { useUpdatePhieuDeXuatBanHang } from "../hooks/use-phieu-de-xuat-ban-hang-mutations"
 import { ActionGroup } from "@/shared/components/actions"
 import { useAuthStore } from "@/shared/stores/auth-store"
@@ -32,13 +41,27 @@ export function BGDDuyetButton({
   disabled = false
 }: BGDDuyetButtonProps) {
   const [open, setOpen] = React.useState(false)
+  const [selectedLoaiDoanhThu, setSelectedLoaiDoanhThu] = React.useState<string>("")
   const updateMutation = useUpdatePhieuDeXuatBanHang()
+  const { data: loaiDoanhThuList } = useLoaiDoanhThu()
+
   // Kiểm tra xem đã duyệt chưa
   const isDuyeted = phieuDeXuatBanHang.bgd_duyet === "có" || phieuDeXuatBanHang.bgd_duyet === "đã duyệt"
 
   // Load thêm permissions từ store
   const { employee, permissions } = useAuthStore()
   const queryClient = useQueryClient()
+
+  // Reset state when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      if (phieuDeXuatBanHang.loai_doanh_thu_id) {
+        setSelectedLoaiDoanhThu(String(phieuDeXuatBanHang.loai_doanh_thu_id))
+      } else {
+        setSelectedLoaiDoanhThu("")
+      }
+    }
+  }, [open, phieuDeXuatBanHang])
 
   // Kiểm tra quyền duyệt
   const hasPermission = React.useMemo(() => {
@@ -68,6 +91,13 @@ export function BGDDuyetButton({
       return
     }
 
+    if (!selectedLoaiDoanhThu) {
+      toast.error("Vui lòng chọn loại doanh thu")
+      return
+    }
+
+    const selectedLoai = loaiDoanhThuList?.find(l => String(l.id) === selectedLoaiDoanhThu)
+
     try {
       await updateMutation.mutateAsync({
         id: phieuDeXuatBanHang.id!,
@@ -76,6 +106,8 @@ export function BGDDuyetButton({
           bgd_id: employee.ma_nhan_vien,
           tg_bgd_duyet: new Date().toISOString(),
           trang_thai: "Đã duyệt",
+          loai_doanh_thu_id: Number(selectedLoaiDoanhThu),
+          ten_loai_doanh_thu: selectedLoai?.ten_doanh_thu
         } as any,
       })
 
@@ -109,6 +141,25 @@ export function BGDDuyetButton({
               Bạn có chắc chắn muốn duyệt phiếu đề xuất bán hàng này? Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="loai-doanh-thu">Loại doanh thu</Label>
+              <Select value={selectedLoaiDoanhThu} onValueChange={setSelectedLoaiDoanhThu}>
+                <SelectTrigger id="loai-doanh-thu">
+                  <SelectValue placeholder="Chọn loại doanh thu" />
+                </SelectTrigger>
+                <SelectContent>
+                  {loaiDoanhThuList?.map((loai) => (
+                    <SelectItem key={loai.id} value={String(loai.id)}>
+                      {loai.ten_doanh_thu}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="flex items-center justify-end gap-2 px-6 py-4 border-t">
             <ActionGroup
               actions={[
@@ -147,4 +198,3 @@ export function BGDDuyetButton({
     </>
   )
 }
-

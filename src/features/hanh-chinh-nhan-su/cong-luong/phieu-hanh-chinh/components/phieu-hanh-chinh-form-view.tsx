@@ -18,6 +18,7 @@ import { useFormField } from "@/components/ui/form"
 import { useAuthStore } from "@/shared/stores/auth-store"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+import { PhieuHanhChinhAutoFill } from "./phieu-hanh-chinh-auto-fill"
 
 // Custom component for Loại Phiếu
 function LoaiPhieuFormField({ value, onChange, disabled }: { value?: string; onChange: (value: string) => void; disabled?: boolean }) {
@@ -35,7 +36,7 @@ function MaPhieuFormField({ value, onChange, disabled }: { value?: string; onCha
   const loaiPhieu = form.watch("loai_phieu")
   const { formItemId } = useFormField()
   const prevLoaiPhieuRef = React.useRef<string | undefined>(loaiPhieu)
-  
+
   // ✅ Reset mã phiếu khi loại phiếu thay đổi
   React.useEffect(() => {
     if (prevLoaiPhieuRef.current !== undefined && prevLoaiPhieuRef.current !== loaiPhieu) {
@@ -45,7 +46,7 @@ function MaPhieuFormField({ value, onChange, disabled }: { value?: string; onCha
     }
     prevLoaiPhieuRef.current = loaiPhieu
   }, [loaiPhieu, onChange, form])
-  
+
   return (
     <div id={formItemId}>
       <MaPhieuSelect loaiPhieu={loaiPhieu} value={value} onChange={onChange} disabled={disabled} />
@@ -62,11 +63,11 @@ function CaToggleButtons({ value, onChange, disabled }: { value?: string; onChan
     { label: "Tối", value: "Tối" },
     { label: "Cả ngày", value: "Cả ngày" },
   ]
-  
+
   const handleChange = (val: string | number) => {
     onChange(String(val))
   }
-  
+
   return (
     <div id={formItemId}>
       <ToggleButtonGroup value={value} onChange={handleChange} options={options} disabled={disabled} />
@@ -92,10 +93,10 @@ function SoGioToggleButtons({ value, onChange, disabled }: { value?: number | st
     { label: "7.5", value: 7.5 },
     { label: "8", value: 8 },
   ]
-  
+
   // Normalize value for comparison
   const normalizedValue = value ? (typeof value === 'string' ? parseFloat(value) : value) : undefined
-  
+
   return <ToggleButtonGroup value={normalizedValue} onChange={onChange} options={options} disabled={disabled} />
 }
 
@@ -107,11 +108,11 @@ function PhuongTienToggleButtons({ value, onChange, disabled }: { value?: string
     { label: "Xe máy công ty", value: "Xe máy công ty" },
     { label: "Xe ô tô công ty", value: "Xe ô tô công ty" },
   ]
-  
+
   const handleChange = (val: string | number) => {
     onChange(String(val))
   }
-  
+
   return <ToggleButtonGroup value={value} onChange={handleChange} options={options} disabled={disabled} />
 }
 
@@ -122,7 +123,7 @@ function ComTruaToggleButtons({ value, onChange, disabled }: { value?: boolean |
     { label: "Có", value: "true" },
     { label: "Không", value: "false" },
   ]
-  
+
   // Normalize value for comparison - handle null as undefined, convert boolean to string
   const normalizedValue = React.useMemo(() => {
     if (value === undefined || value === null) return undefined
@@ -133,7 +134,7 @@ function ComTruaToggleButtons({ value, onChange, disabled }: { value?: boolean |
     }
     return undefined
   }, [value])
-  
+
   const handleChange = (selectedValue: string | number) => {
     // Convert to boolean (null will be handled as undefined which means not selected)
     const stringValue = String(selectedValue)
@@ -145,77 +146,77 @@ function ComTruaToggleButtons({ value, onChange, disabled }: { value?: boolean |
       onChange(null)
     }
   }
-  
+
   return <ToggleButtonGroup value={normalizedValue} onChange={handleChange} options={options} disabled={disabled} />
 }
 
 // Function to get sections based on loai_phieu
 const getSections = (loaiPhieu?: string, nguoiTaoDisplay?: string, tgTaoDisplay?: string): FormSection[] => {
   const baseFields: FormFieldConfig[] = [
-    { 
-      name: "ngay", 
-      label: "Ngày", 
+    {
+      name: "ngay",
+      label: "Ngày",
       required: true,
       type: "date",
     },
-    { 
-      name: "loai_phieu", 
-      label: "Loại Phiếu", 
+    {
+      name: "loai_phieu",
+      label: "Loại Phiếu",
       required: true,
       type: "custom",
       customComponent: LoaiPhieuFormField,
     },
-    { 
-      name: "ma_phieu", 
-      label: "Mã Phiếu", 
+    {
+      name: "ma_phieu",
+      label: "Mã Phiếu",
       required: true,
       type: "custom",
       customComponent: MaPhieuFormField,
     },
-    { 
-      name: "ca", 
-      label: "Ca", 
+    {
+      name: "ca",
+      label: "Ca",
       required: true,
       type: "custom",
       customComponent: CaToggleButtons,
     },
-    { 
-      name: "ly_do", 
-      label: "Lý Do", 
+    {
+      name: "ly_do",
+      label: "Lý Do",
       type: "textarea",
       required: true,
     },
   ]
 
   const additionalFields: FormFieldConfig[] = []
-  
+
   // Số Giờ: chỉ hiển thị và bắt buộc cho "Tăng ca"
   if (loaiPhieu === "Tăng ca") {
     additionalFields.push({
-      name: "so_gio", 
-      label: "Số Giờ", 
+      name: "so_gio",
+      label: "Số Giờ",
       required: true,
       type: "custom",
       customComponent: SoGioToggleButtons,
     })
   }
-  
+
   // Cơm Trưa: chỉ hiển thị và bắt buộc cho "Công tác" và "Xin nghỉ"
   if (loaiPhieu === "Công tác" || loaiPhieu === "Xin nghỉ") {
     additionalFields.push({
-      name: "com_trua", 
-      label: "Cơm Trưa", 
+      name: "com_trua",
+      label: "Cơm Trưa",
       type: "custom",
       customComponent: ComTruaToggleButtons,
       required: true,
     })
   }
-  
+
   // Phương Tiện: chỉ hiển thị và bắt buộc cho "Công tác"
   if (loaiPhieu === "Công tác") {
     additionalFields.push({
-      name: "phuong_tien", 
-      label: "Phương Tiện", 
+      name: "phuong_tien",
+      label: "Phương Tiện",
       required: true,
       type: "custom",
       customComponent: PhuongTienToggleButtons,
@@ -226,16 +227,16 @@ const getSections = (loaiPhieu?: string, nguoiTaoDisplay?: string, tgTaoDisplay?
   if (nguoiTaoDisplay || tgTaoDisplay) {
     if (nguoiTaoDisplay) {
       additionalFields.push({
-        name: "nguoi_tao_display", 
-        label: "Người Tạo", 
+        name: "nguoi_tao_display",
+        label: "Người Tạo",
         type: "text",
         disabled: true,
       })
     }
     if (tgTaoDisplay) {
       additionalFields.push({
-        name: "tg_tao_display", 
-        label: "Thời Gian Tạo", 
+        name: "tg_tao_display",
+        label: "Thời Gian Tạo",
         type: "text",
         disabled: true,
       })
@@ -266,10 +267,10 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
   const createMutation = useCreatePhieuHanhChinh()
   const updateMutation = useUpdatePhieuHanhChinh()
   const { employee } = useAuthStore()
-  
+
   // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   // để đảm bảo thứ tự hooks nhất quán giữa các lần render
-  
+
   // If id is provided, fetch existing data for edit mode
   // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
   const { data: existingData, isLoading } = usePhieuHanhChinhById(id ?? 0, undefined)
@@ -278,12 +279,12 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
   // Phải được tạo TRƯỚC early return
   const formSchema = useMemo(() => {
     return phieuHanhChinhSchema
-      .omit({ 
-        id: true, 
-        tg_tao: true, 
-        tg_cap_nhat: true, 
-        nguoi_tao_id: true, 
-        nguoi_tao_ten: true, 
+      .omit({
+        id: true,
+        tg_tao: true,
+        tg_cap_nhat: true,
+        nguoi_tao_id: true,
+        nguoi_tao_ten: true,
         trao_doi: true,
         trang_thai: true,
         quan_ly_duyet: true,
@@ -302,7 +303,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
             path: ["ca"],
           })
         }
-        
+
         // Validate so_gio: bắt buộc cho "Tăng ca"
         if (data.loai_phieu === "Tăng ca") {
           if (!data.so_gio || data.so_gio === null || data.so_gio === undefined) {
@@ -313,7 +314,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
             })
           }
         }
-        
+
         // Validate com_trua: bắt buộc cho "Công tác" và "Xin nghỉ"
         if (data.loai_phieu === "Công tác" || data.loai_phieu === "Xin nghỉ") {
           if (data.com_trua === null || data.com_trua === undefined) {
@@ -324,7 +325,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
             })
           }
         }
-        
+
         // Validate phuong_tien: bắt buộc cho "Công tác"
         if (data.loai_phieu === "Công tác") {
           if (!data.phuong_tien || data.phuong_tien.trim() === "") {
@@ -348,12 +349,12 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
         : existingData.nguoi_tao_id
           ? String(existingData.nguoi_tao_id)
           : existingData.nguoi_tao_ten || ""
-      
+
       // Format thời gian tạo
       const tgTaoDisplay = existingData.tg_tao
         ? format(new Date(existingData.tg_tao), "dd/MM/yyyy HH:mm", { locale: vi })
         : ""
-      
+
       return {
         ...existingData,
         // Ensure boolean fields are properly handled - keep null if null
@@ -381,7 +382,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
   // Computed values (không phải hooks, có thể đặt sau early return)
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
-  const cancelUrl = returnTo === 'list' 
+  const cancelUrl = returnTo === 'list'
     ? phieuHanhChinhConfig.routePath
     : (id ? `${phieuHanhChinhConfig.routePath}/${id}` : phieuHanhChinhConfig.routePath)
 
@@ -399,7 +400,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
     // ✅ Validate và normalize ca
     const allowedCaValues = ["Sáng", "Chiều", "Tối", "Cả ngày"]
     let normalizedCa: string | null = null
-    
+
     if (data.ca) {
       const trimmedCa = String(data.ca).trim()
       if (trimmedCa !== "") {
@@ -412,7 +413,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
         normalizedCa = trimmedCa
       }
     }
-    
+
     // Convert toggle values
     const submitData = {
       ...data,
@@ -421,8 +422,8 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
       // ✅ Sử dụng giá trị ca đã được validate và normalize
       ca: normalizedCa,
       // com_trua: keep boolean if selected, null if not required or not selected
-      com_trua: data.com_trua === true || data.com_trua === "true" ? true : 
-                data.com_trua === false || data.com_trua === "false" ? false : null,
+      com_trua: data.com_trua === true || data.com_trua === "true" ? true :
+        data.com_trua === false || data.com_trua === "false" ? false : null,
       // Convert so_gio to number if it's a string
       so_gio: data.so_gio ? (typeof data.so_gio === 'string' ? parseFloat(data.so_gio) : data.so_gio) : null,
       // Convert date strings to proper format
@@ -432,10 +433,10 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
       quan_ly_duyet: false,
       hcns_duyet: false,
     }
-    
+
     // Log để debug
     console.log("Form submit - ca value:", data.ca, "→ normalized:", normalizedCa)
-    
+
     if (isEditMode && id) {
       await updateMutation.mutateAsync({ id, input: submitData as UpdatePhieuHanhChinhInput })
     } else {
@@ -475,7 +476,7 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
     if (!existingData?.ma_phieu) return ''
     const maPhieu = existingData.ma_phieu
     const tenNhomPhieu = existingData.ten_nhom_phieu
-    return tenNhomPhieu 
+    return tenNhomPhieu
       ? `${maPhieu} - ${tenNhomPhieu}`
       : maPhieu
   }, [existingData])
@@ -494,8 +495,9 @@ export function PhieuHanhChinhFormView({ id, onComplete, onCancel }: PhieuHanhCh
       errorMessage={isEditMode ? "Có lỗi xảy ra khi cập nhật phiếu hành chính" : "Có lỗi xảy ra khi thêm mới phiếu hành chính"}
       defaultValues={defaultValues}
     >
+      <PhieuHanhChinhAutoFill isEditMode={isEditMode} />
       {/* ⚡ Dynamic Sections: Sử dụng useWatch + useMemo pattern (Declarative) */}
-      <DynamicSections 
+      <DynamicSections
         getSections={getSectionsForForm}
         watchFields={["loai_phieu"]} // Chỉ watch loai_phieu field để optimize performance
       />

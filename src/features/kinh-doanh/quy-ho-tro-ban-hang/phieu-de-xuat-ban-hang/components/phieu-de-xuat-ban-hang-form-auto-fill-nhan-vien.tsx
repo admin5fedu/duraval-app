@@ -36,7 +36,7 @@ export function PhieuDeXuatBanHangFormAutoFillNhanVien() {
       if (nhanVien.ho_ten) {
         setValue("ten_nhan_vien", nhanVien.ho_ten, { shouldValidate: false, shouldDirty: false })
       }
-      
+
       // phong_id và ma_phong từ phong_ban_id và phong_ban
       if (nhanVien.phong_ban_id) {
         setValue("phong_id", nhanVien.phong_ban_id, { shouldValidate: false, shouldDirty: false })
@@ -44,7 +44,7 @@ export function PhieuDeXuatBanHangFormAutoFillNhanVien() {
       if (nhanVien.phong_ban) {
         setValue("ma_phong", nhanVien.phong_ban, { shouldValidate: false, shouldDirty: false })
       }
-      
+
       // nhom_id và ma_nhom từ nhom_id và nhom trong var_nhan_su
       const nhomId = (nhanVien as any).nhom_id
       if (nhomId !== null && nhomId !== undefined) {
@@ -52,12 +52,12 @@ export function PhieuDeXuatBanHangFormAutoFillNhanVien() {
       } else {
         setValue("nhom_id", null, { shouldValidate: false, shouldDirty: false })
       }
-      
+
       // ma_nhom từ nhom (tên nhóm)
       if (nhanVien.nhom) {
         setValue("ma_nhom", nhanVien.nhom, { shouldValidate: false, shouldDirty: false })
       }
-    } else if (!nhanVienId || nhanVienId === null || nhanVienId === undefined || nhanVienId === 0) {
+    } else if (!nhanVienId || nhanVienId === 0) {
       // Clear các field khi không có nhan_vien_id
       setValue("ten_nhan_vien", null, { shouldValidate: false, shouldDirty: false })
       setValue("ma_phong", null, { shouldValidate: false, shouldDirty: false })

@@ -38,7 +38,14 @@ export const phieuHanhChinhSchema = z.object({
     // Joined field from var_nhan_su
     nguoi_tao_ten: z.string().optional().nullable(),
     // Joined field from nhom_phieu_hanh_chinh
+    // Joined field from nhom_phieu_hanh_chinh
     ten_nhom_phieu: z.string().optional().nullable(),
+
+    // Auto-filled fields
+    phong_id: z.number().optional().nullable(),
+    ma_phong: z.string().optional().nullable(),
+    nhom_id: z.number().optional().nullable(),
+    ma_nhom: z.string().optional().nullable(),
 })
 
 export type PhieuHanhChinh = z.infer<typeof phieuHanhChinhSchema>
