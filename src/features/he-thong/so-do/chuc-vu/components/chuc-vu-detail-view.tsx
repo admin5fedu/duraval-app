@@ -12,7 +12,6 @@ import { useDetailViewStateFromQuery } from "@/hooks/use-detail-view-state"
 import { DetailErrorState } from "@/shared/components/data-display/detail/detail-error-state"
 import { usePhongBan } from "../../phong-ban/hooks"
 import { useCapBac } from "../../cap-bac/hooks"
-import { useNhanSu } from "../../../nhan-su/danh-sach-nhan-su/hooks"
 
 interface ChucVuDetailViewProps {
   id: number
@@ -27,8 +26,7 @@ export function ChucVuDetailView({ id, initialData, onEdit, onBack }: ChucVuDeta
   const viewState = useDetailViewStateFromQuery(query, initialData)
   const { data: phongBanList } = usePhongBan()
   const { data: capBacList } = useCapBac()
-  const { data: nhanSuList } = useNhanSu()
-  
+
   const chucVu = viewState.data
 
   // ✅ Hiển thị loading state
@@ -64,14 +62,9 @@ export function ChucVuDetailView({ id, initialData, onEdit, onBack }: ChucVuDeta
   const phongBanDisplay = chucVu.phong_ban_id && phongBanList
     ? phongBanList.find((pb) => pb.id === chucVu.phong_ban_id)
     : null
-  
+
   const capBacDisplay = chucVu.cap_bac_id && capBacList
     ? capBacList.find((cb) => cb.id === chucVu.cap_bac_id)
-    : null
-  
-  // Map nguoi_tao với nhanSuList để hiển thị tên
-  const nguoiTaoDisplay = chucVu.nguoi_tao && nhanSuList
-    ? nhanSuList.find((ns) => ns.ma_nhan_vien === chucVu.nguoi_tao)
     : null
 
   const sections: DetailSection[] = [
@@ -80,14 +73,14 @@ export function ChucVuDetailView({ id, initialData, onEdit, onBack }: ChucVuDeta
       fields: [
         { label: "Mã Chức Vụ", key: "ma_chuc_vu", value: chucVu.ma_chuc_vu },
         { label: "Tên Chức Vụ", key: "ten_chuc_vu", value: chucVu.ten_chuc_vu },
-        { label: "Mã Cấp Bậc", key: "ma_cap_bac", value: chucVu.ma_cap_bac },
+        { label: "Cấp Bậc", key: "cap_bac", value: chucVu.cap_bac?.toString() || "-" },
         { label: "Tên Cấp Bậc", key: "ten_cap_bac", value: chucVu.ten_cap_bac || "-" },
-        { 
-          label: "Cấp Bậc (ID)", 
-          key: "cap_bac_id", 
-          value: capBacDisplay 
-            ? `${chucVu.cap_bac_id} - ${capBacDisplay.ma_cap_bac} - ${capBacDisplay.ten_cap_bac}${capBacDisplay.bac ? ` (Bậc ${capBacDisplay.bac})` : ''}` 
-            : (chucVu.cap_bac_id?.toString() || "-") 
+        {
+          label: "Cấp Bậc (ID)",
+          key: "cap_bac_id",
+          value: capBacDisplay
+            ? `${chucVu.cap_bac_id} - ${capBacDisplay.ten_cap_bac}${capBacDisplay.cap_bac ? ` (Cấp bậc ${capBacDisplay.cap_bac})` : ''}`
+            : (chucVu.cap_bac_id?.toString() || "-")
         },
       ]
     },
@@ -95,16 +88,13 @@ export function ChucVuDetailView({ id, initialData, onEdit, onBack }: ChucVuDeta
       title: "Thông Tin Phòng Ban",
       fields: [
         { label: "Mã Phòng Ban", key: "ma_phong_ban", value: chucVu.ma_phong_ban },
-        { 
-          label: "Phòng Ban (ID)", 
-          key: "phong_ban_id", 
-          value: phongBanDisplay 
-            ? `${chucVu.phong_ban_id} - ${phongBanDisplay.ma_phong_ban} - ${phongBanDisplay.ten_phong_ban}` 
-            : (chucVu.phong_ban_id?.toString() || "-") 
+        {
+          label: "Phòng Ban (ID)",
+          key: "phong_ban_id",
+          value: phongBanDisplay
+            ? `${chucVu.phong_ban_id} - ${phongBanDisplay.ma_phong_ban} - ${phongBanDisplay.ten_phong_ban}`
+            : (chucVu.phong_ban_id?.toString() || "-")
         },
-        { label: "Mã Nhóm", key: "ma_nhom", value: chucVu.ma_nhom || "-" },
-        { label: "Mã Bộ Phận", key: "ma_bo_phan", value: chucVu.ma_bo_phan || "-" },
-        { label: "Mã Phòng", key: "ma_phong", value: chucVu.ma_phong || "-" },
       ]
     },
     {
@@ -120,13 +110,6 @@ export function ChucVuDetailView({ id, initialData, onEdit, onBack }: ChucVuDeta
     {
       title: "Thông Tin Hệ Thống",
       fields: [
-        { 
-          label: "Người Tạo", 
-          key: "nguoi_tao", 
-          value: nguoiTaoDisplay 
-            ? `${nguoiTaoDisplay.ma_nhan_vien} - ${nguoiTaoDisplay.ho_ten}` 
-            : (chucVu.nguoi_tao?.toString() || "-") 
-        },
         { label: "Thời Gian Tạo", key: "tg_tao", value: chucVu.tg_tao, type: "date" },
         { label: "Thời Gian Cập Nhật", key: "tg_cap_nhat", value: chucVu.tg_cap_nhat, type: "date" },
       ]

@@ -25,9 +25,9 @@ const columnMappings: ColumnMapping[] = [
             "STT", "stt", "TT", "tt", "Thứ tự", "Thu tu",
             "Order", "order", "Index", "index", "No", "no"
         ],
-        required: false,
+        required: true,
         type: "number",
-        description: "Số thứ tự (không bắt buộc)",
+        description: "Số thứ tự (bắt buộc)",
     },
     {
         dbField: "ma_phong_ban",
@@ -63,15 +63,15 @@ const columnMappings: ColumnMapping[] = [
         description: "Cấp độ (bắt buộc)",
     },
     {
-        dbField: "truc_thuoc_phong_ban",
+        dbField: "truc_thuoc_ma",
         excelNames: [
-            "Trực thuộc phòng ban", "Trực Thuộc Phòng Ban", "Truc thuoc phong ban", "Truc Thuoc Phong Ban",
-            "Trực_thuộc_PB", "Trực_Thuộc_PB", "Truc_thuoc_PB", "Truc_Thuoc_PB",
-            "Parent Department", "ParentDepartment", "parent_dept", "Parent", "parent"
+            "Trực thuộc mã", "Trực Thuộc Mã", "Truc thuoc ma", "Truc Thuộc Ma",
+            "Mã_Trực_Thuộc", "Ma_Truc_Thuoc",
+            "Parent Code", "ParentCode", "parent_code", "Parent", "parent"
         ],
         required: false,
         type: "text",
-        description: "Trực thuộc phòng ban (không bắt buộc)",
+        description: "Mã trực thuộc (không bắt buộc)",
     },
 ]
 
@@ -80,8 +80,8 @@ const templateColumns: TemplateColumn[] = [
     {
         header: "Số thứ tự",
         type: "number",
-        required: false,
-        description: "Số thứ tự (không bắt buộc)",
+        required: true,
+        description: "Số thứ tự (bắt buộc)",
     },
     {
         header: "Mã phòng ban",
@@ -102,10 +102,10 @@ const templateColumns: TemplateColumn[] = [
         description: "Cấp độ (bắt buộc)",
     },
     {
-        header: "Trực thuộc phòng ban",
+        header: "Mã trực thuộc",
         type: "text",
         required: false,
-        description: "Trực thuộc phòng ban (không bắt buộc)",
+        description: "Mã trực thuộc (không bắt buộc)",
     },
 ]
 
@@ -117,6 +117,10 @@ function validateRow(
     const errors: string[] = []
 
     // Required fields
+    if (!row.tt || isNaN(Number(row.tt))) {
+        errors.push("Thứ tự là bắt buộc và phải là số")
+    }
+
     if (!row.ma_phong_ban || String(row.ma_phong_ban).trim() === "") {
         errors.push("Mã phòng ban là bắt buộc")
     }
@@ -168,9 +172,9 @@ function mapExcelToDb(
     return rows.map((row) => {
         const mapped: Partial<PhongBan> = {}
 
-        // Map optional fields
+        // Map required fields
         if (!shouldSkipValue(row.data["tt"], options.skipEmptyCells)) {
-            mapped.tt = Number(row.data["tt"]) || null
+            mapped.tt = Number(row.data["tt"])
         }
 
         // Map required fields
@@ -187,8 +191,8 @@ function mapExcelToDb(
         }
 
         // Map optional fields
-        if (!shouldSkipValue(row.data["truc_thuoc_phong_ban"], options.skipEmptyCells)) {
-            mapped.truc_thuoc_phong_ban = String(row.data["truc_thuoc_phong_ban"]).trim()
+        if (!shouldSkipValue(row.data["truc_thuoc_ma"], options.skipEmptyCells)) {
+            mapped.truc_thuoc_ma = String(row.data["truc_thuoc_ma"]).trim()
         }
 
         return mapped
@@ -241,12 +245,12 @@ export function PhongBanImportDialog({ open, onOpenChange, mutation }: PhongBanI
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="phòng ban"
-            
+
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            
+
         />
     )
 }

@@ -24,7 +24,7 @@ export function PhongBanDetailView({ id, initialData, onEdit, onBack }: PhongBan
   const query = usePhongBanById(id, initialData)
   const { data: phongBanList } = usePhongBan()
   const viewState = useDetailViewStateFromQuery(query, initialData)
-  
+
   const phongBan = viewState.data
 
   // ✅ Hiển thị loading state
@@ -57,13 +57,13 @@ export function PhongBanDetailView({ id, initialData, onEdit, onBack }: PhongBan
   }
 
   // Find trực thuộc phòng ban để hiển thị "mã - tên"
-  const trucThuocPhongBan = phongBan.truc_thuoc_id 
+  const trucThuocPhongBan = phongBan.truc_thuoc_id
     ? phongBanList?.find((pb) => pb.id === phongBan.truc_thuoc_id)
     : null
 
   const trucThuocDisplay = trucThuocPhongBan
     ? `${trucThuocPhongBan.ma_phong_ban} - ${trucThuocPhongBan.ten_phong_ban}`
-    : (phongBan.truc_thuoc_phong_ban || "-")
+    : (phongBan.truc_thuoc_ma || "-")
 
   const sections: DetailSection[] = [
     {
@@ -78,9 +78,9 @@ export function PhongBanDetailView({ id, initialData, onEdit, onBack }: PhongBan
     {
       title: "Thông Tin Trực Thuộc",
       fields: [
-        { 
-          label: "Trực Thuộc Phòng Ban", 
-          key: "truc_thuoc_phong_ban", 
+        {
+          label: "Trực Thuộc Phòng Ban",
+          key: "truc_thuoc_ma",
           value: trucThuocDisplay,
           colSpan: 2,
         },

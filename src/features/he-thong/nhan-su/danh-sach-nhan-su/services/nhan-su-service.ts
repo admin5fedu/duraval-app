@@ -1,3 +1,4 @@
+import { z } from "zod"
 import { nhanSuSchema, type NhanSu } from "../types"
 import type {
   CreateNhanSuInput,
@@ -22,7 +23,7 @@ export class NhanSuService {
     if (!result.success) {
       const message =
         "Dữ liệu nhân sự không hợp lệ: " +
-        result.error.issues.map((e) => e.message).join(", ")
+        result.error.issues.map((e: z.ZodIssue) => e.message).join(", ")
       throw new Error(message)
     }
 
@@ -50,10 +51,13 @@ export class NhanSuService {
     assignIfDefined("ho_ten", input.ho_ten as any)
     assignIfDefined("avatar_url", input.avatar_url as any)
     assignIfDefined("tinh_trang", input.tinh_trang as any)
-    assignIfDefined("phong_ban", input.phong_ban as any)
-    assignIfDefined("bo_phan", input.bo_phan as any)
-    assignIfDefined("nhom", input.nhom as any)
-    assignIfDefined("chuc_vu", input.chuc_vu as any)
+
+    // New fields
+    assignIfDefined("ma_phong", input.ma_phong as any)
+    assignIfDefined("ma_bo_phan", input.ma_bo_phan as any)
+    assignIfDefined("ma_nhom", input.ma_nhom as any)
+    assignIfDefined("ma_chuc_vu", input.ma_chuc_vu as any)
+
     assignIfDefined("gioi_tinh", input.gioi_tinh as any)
     assignIfDefined("hon_nhan", input.hon_nhan as any)
     assignIfDefined("so_dien_thoai", input.so_dien_thoai as any)
@@ -69,6 +73,9 @@ export class NhanSuService {
     assignIfDefined("cap_bac", input.cap_bac as any)
     assignIfDefined("chuc_vu_id", input.chuc_vu_id as any)
     assignIfDefined("phong_ban_id", input.phong_ban_id as any)
+    assignIfDefined("phong_id", input.phong_id as any)
+    assignIfDefined("nhom_id", input.nhom_id as any)
+    assignIfDefined("bo_phan_id", input.bo_phan_id as any)
 
     return payload
   }

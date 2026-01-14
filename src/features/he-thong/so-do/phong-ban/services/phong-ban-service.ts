@@ -15,7 +15,7 @@ export class PhongBanService {
    * Validate & chuẩn hoá input tạo mới từ form/UI.
    */
   validateCreateInput(input: CreatePhongBanInput): CreatePhongBanInput {
-    const result = phongBanSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true }).safeParse(input)
+    const result = phongBanSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true }).safeParse(input)
 
     if (!result.success) {
       const message =
@@ -49,7 +49,7 @@ export class PhongBanService {
     assignIfDefined("ma_phong_ban", input.ma_phong_ban as any)
     assignIfDefined("ten_phong_ban", input.ten_phong_ban as any)
     assignIfDefined("cap_do", input.cap_do as any)
-    assignIfDefined("truc_thuoc_phong_ban", input.truc_thuoc_phong_ban as any)
+    assignIfDefined("truc_thuoc_ma", input.truc_thuoc_ma as any)
     assignIfDefined("truc_thuoc_id", input.truc_thuoc_id as any)
     assignIfDefined("tg_cap_nhat", input.tg_cap_nhat as any)
 

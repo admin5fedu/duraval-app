@@ -24,12 +24,9 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateChucVuInpu
   // Extract fields
   const maChucVu = String(row.ma_chuc_vu || "").trim()
   const tenChucVu = String(row.ten_chuc_vu || "").trim()
-  const maCapBac = String(row.ma_cap_bac || "").trim()
+  const capBac = row.cap_bac !== undefined && row.cap_bac !== null ? Number(row.cap_bac) : null
   const tenCapBac = row.ten_cap_bac ? String(row.ten_cap_bac).trim() : null
   const maPhongBan = String(row.ma_phong_ban || "").trim()
-  const maNhom = row.ma_nhom ? String(row.ma_nhom).trim() : null
-  const maBoPhan = row.ma_bo_phan ? String(row.ma_bo_phan).trim() : null
-  const maPhong = row.ma_phong ? String(row.ma_phong).trim() : null
   const ngachLuong = row.ngach_luong ? String(row.ngach_luong).trim() : null
   const mucDongBaoHiem = row.muc_dong_bao_hiem ? Number(row.muc_dong_bao_hiem) : null
   const soNgayNghiThu7 = row.so_ngay_nghi_thu_7 ? String(row.so_ngay_nghi_thu_7).trim() : null
@@ -43,8 +40,8 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateChucVuInpu
   if (!tenChucVu) {
     throw new Error(`Dòng ${rowIndex + 1}: Tên chức vụ không được để trống`)
   }
-  if (!maCapBac) {
-    throw new Error(`Dòng ${rowIndex + 1}: Mã cấp bậc không được để trống`)
+  if (capBac === null) {
+    throw new Error(`Dòng ${rowIndex + 1}: Cấp bậc không được để trống`)
   }
   if (!maPhongBan) {
     throw new Error(`Dòng ${rowIndex + 1}: Mã phòng ban không được để trống`)
@@ -54,12 +51,9 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateChucVuInpu
   const data: CreateChucVuInput = {
     ma_chuc_vu: maChucVu,
     ten_chuc_vu: tenChucVu,
-    ma_cap_bac: maCapBac,
+    cap_bac: capBac,
     ten_cap_bac: tenCapBac || null,
     ma_phong_ban: maPhongBan,
-    ma_nhom: maNhom || null,
-    ma_bo_phan: maBoPhan || null,
-    ma_phong: maPhong || null,
     ngach_luong: ngachLuong || null,
     muc_dong_bao_hiem: mucDongBaoHiem || null,
     so_ngay_nghi_thu_7: soNgayNghiThu7 || null,
@@ -70,7 +64,7 @@ function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateChucVuInpu
   }
 
   // Validate with Zod schema
-  const result = chucVuSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true }).safeParse(data)
+  const result = chucVuSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true }).safeParse(data)
   if (!result.success) {
     const errors = result.error.issues.map((e) => e.message).join(", ")
     throw new Error(`Dòng ${rowIndex + 1}: ${errors}`)

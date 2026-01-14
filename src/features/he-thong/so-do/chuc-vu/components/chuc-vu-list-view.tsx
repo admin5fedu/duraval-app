@@ -16,7 +16,6 @@ import { useBatchUpsertChucVu } from "../actions/chuc-vu-excel-actions"
 import { ChucVuImportDialog } from "./chuc-vu-import-dialog"
 import { usePhongBan } from "../../phong-ban/hooks"
 import { useCapBac } from "../../cap-bac/hooks"
-import { useNhanSu } from "../../../nhan-su/danh-sach-nhan-su/hooks"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,7 +34,7 @@ interface ChucVuListViewProps {
     onView?: (id: number) => void
 }
 
-export function ChucVuListView({ 
+export function ChucVuListView({
     initialData,
     onEdit,
     onAddNew,
@@ -44,7 +43,6 @@ export function ChucVuListView({
     const { data: chucVuList, isLoading, isError, refetch } = useChucVu(initialData)
     const { data: phongBanList } = usePhongBan() // Fetch phong ban list for mapping
     const { data: capBacList } = useCapBac() // Fetch cap bac list for mapping
-    const { data: nhanSuList } = useNhanSu() // Fetch nhan su list for mapping nguoi_tao
     const navigate = useNavigate()
     const batchDeleteMutation = useBatchDeleteChucVu()
     const deleteMutation = useDeleteChucVu()
@@ -54,10 +52,10 @@ export function ChucVuListView({
     const [rowToDelete, setRowToDelete] = React.useState<ChucVu | null>(null)
     const [importDialogOpen, setImportDialogOpen] = React.useState(false)
 
-    // Create columns with nhanSuList for mapping nguoi_tao
+    // Create columns
     const columns = React.useMemo(() => {
-        return chucVuColumns(nhanSuList || [])
-    }, [nhanSuList])
+        return chucVuColumns()
+    }, [])
 
     // ✅ Session Storage Pattern: Sử dụng custom hook để quản lý filters
     const {
@@ -80,7 +78,7 @@ export function ChucVuListView({
                     .filter((pb): pb is string => !!pb)
             )
         )
-        
+
         // Map với phong ban list để lấy tên
         return uniqueMaPhongBan
             .map((maPb) => {
@@ -102,63 +100,32 @@ export function ChucVuListView({
     // Generate filter options for cấp bậc từ data với mapping tên và bậc
     const capBacOptions = React.useMemo(() => {
         if (!chucVuList || !capBacList) return []
-        // Lấy danh sách các mã cấp bậc unique từ chức vụ
-        const uniqueMaCapBac = Array.from(
+        // Lấy danh sách các số cấp bậc unique từ chức vụ
+        const uniqueCapBac = Array.from(
             new Set(
                 chucVuList
-                    .map((cv) => cv.ma_cap_bac)
-                    .filter((cb): cb is string => !!cb)
+                    .map((cv) => cv.cap_bac)
+                    .filter((cb): cb is number => cb !== null && cb !== undefined)
             )
         )
-        
-        // Map với cap bac list để lấy tên và bậc
-        return uniqueMaCapBac
-            .map((maCb) => {
-                const capBac = capBacList.find((cb) => cb.ma_cap_bac === maCb)
-                if (capBac) {
-                    const bacText = capBac.bac ? ` - Bậc ${capBac.bac}` : ""
-                    return {
-                        label: `${capBac.ma_cap_bac} - ${capBac.ten_cap_bac}${bacText}`,
-                        value: maCb,
-                    }
-                }
-                return {
-                    label: maCb,
-                    value: maCb,
-                }
-            })
-            .sort((a, b) => a.label.localeCompare(b.label))
-    }, [chucVuList, capBacList])
 
-    // Generate filter options for phòng từ data với mapping tên phòng ban
-    const phongOptions = React.useMemo(() => {
-        if (!chucVuList || !phongBanList) return []
-        // Lấy danh sách các mã phòng unique từ chức vụ
-        const uniqueMaPhong = Array.from(
-            new Set(
-                chucVuList
-                    .map((cv) => cv.ma_phong)
-                    .filter((p): p is string => !!p)
-            )
-        )
-        
-        // Map với phong ban list để lấy tên (ma_phong có thể match với ma_phong_ban)
-        return uniqueMaPhong
-            .map((maPhong) => {
-                const phongBan = phongBanList.find((pb) => pb.ma_phong_ban === maPhong)
-                if (phongBan) {
+        // Map với cap bac list để lấy tên
+        return uniqueCapBac
+            .map((cbValue) => {
+                const capBac = capBacList.find((cb) => cb.cap_bac === cbValue)
+                if (capBac) {
                     return {
-                        label: `${phongBan.ma_phong_ban} - ${phongBan.ten_phong_ban}`,
-                        value: maPhong,
+                        label: `Cấp ${capBac.cap_bac} - ${capBac.ten_cap_bac}`,
+                        value: String(cbValue),
                     }
                 }
                 return {
-                    label: maPhong,
-                    value: maPhong,
+                    label: `Cấp ${cbValue}`,
+                    value: String(cbValue),
                 }
             })
-            .sort((a, b) => a.label.localeCompare(b.label))
-    }, [chucVuList, phongBanList])
+            .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }))
+    }, [chucVuList, capBacList])
 
     // Generate filter options for ngạch lương từ data
     const ngachLuongOptions = React.useMemo(() => {
@@ -171,7 +138,7 @@ export function ChucVuListView({
                     .filter((nl): nl is string => !!nl)
             )
         ).sort((a, b) => a.localeCompare(b))
-        
+
         return uniqueNgachLuong.map((nl) => ({
             label: nl,
             value: nl,
@@ -189,7 +156,7 @@ export function ChucVuListView({
                     .filter((md): md is number => md !== null && md !== undefined)
             )
         ).sort((a, b) => a - b)
-        
+
         return uniqueMucDong.map((md) => ({
             label: md.toLocaleString("vi-VN"),
             value: String(md),
@@ -207,7 +174,7 @@ export function ChucVuListView({
                     .filter((sn): sn is string => !!sn)
             )
         ).sort((a, b) => a.localeCompare(b))
-        
+
         return uniqueSoNgay.map((sn) => ({
             label: sn,
             value: sn,
@@ -224,16 +191,10 @@ export function ChucVuListView({
                     options: phongBanOptions,
                 }
             }
-            if (filterConfig.columnId === "ma_cap_bac") {
+            if (filterConfig.columnId === "cap_bac") {
                 return {
                     ...filterConfig,
                     options: capBacOptions,
-                }
-            }
-            if (filterConfig.columnId === "ma_phong") {
-                return {
-                    ...filterConfig,
-                    options: phongOptions,
                 }
             }
             if (filterConfig.columnId === "ngach_luong") {
@@ -256,7 +217,7 @@ export function ChucVuListView({
             }
             return filterConfig
         })
-    }, [phongBanOptions, capBacOptions, phongOptions, ngachLuongOptions, mucDongBaoHiemOptions, soNgayNghiThu7Options])
+    }, [phongBanOptions, capBacOptions, ngachLuongOptions, mucDongBaoHiemOptions, soNgayNghiThu7Options])
 
     // Mobile card renderer
     const renderMobileCard = React.useCallback((row: ChucVu) => {
@@ -280,9 +241,9 @@ export function ChucVuListView({
                             Mã: <span className="font-medium text-foreground">{row.ma_chuc_vu}</span>
                         </p>
                     )}
-                    {row.ma_cap_bac && (
+                    {row.cap_bac !== null && row.cap_bac !== undefined && (
                         <p className="leading-snug">
-                            Mã cấp bậc: <span className="font-medium text-foreground">{row.ma_cap_bac}</span>
+                            Cấp bậc: <span className="font-medium text-foreground">{row.cap_bac}</span>
                         </p>
                     )}
                     {row.ma_phong_ban && (
@@ -321,14 +282,8 @@ export function ChucVuListView({
             if (!value) return ""
             return format(new Date(value), "dd/MM/yyyy HH:mm", { locale: vi })
         }
-        if (columnId === "nguoi_tao") {
-            const nguoiTaoId = (row as any)[columnId] as number | null | undefined
-            if (!nguoiTaoId) return ""
-            const nguoiTao = nhanSuList?.find((ns) => ns.ma_nhan_vien === nguoiTaoId)
-            return nguoiTao ? `${nguoiTao.ma_nhan_vien} - ${nguoiTao.ho_ten}` : String(nguoiTaoId)
-        }
         return (row as any)[columnId] ?? ""
-    }, [nhanSuList])
+    }, [])
 
     if (isLoading) {
         return (
@@ -350,75 +305,75 @@ export function ChucVuListView({
 
     return (
         <>
-        <GenericListView
-            columns={columns}
-            data={chucVuList || []}
-            filterColumn="ma_chuc_vu"
-            initialSorting={initialSorting}
-            initialFilters={initialFilters}
-            initialSearch={initialSearch}
-            onFiltersChange={handleFiltersChange}
-            onSearchChange={handleSearchChange}
-            onSortChange={handleSortChange}
-            onRowClick={(row) => {
-                if (onView) {
-                    onView(row.id!)
-                } else {
-                    navigate(`${chucVuConfig.routePath}/${row.id}`)
-                }
-            }}
-            onAdd={() => {
-                if (onAddNew) {
-                    onAddNew()
-                } else {
-                    navigate(`${chucVuConfig.routePath}/moi`)
-                }
-            }}
-            addHref={`${chucVuConfig.routePath}/moi`}
-            onBack={() => {
-                navigate(chucVuConfig.parentPath)
-            }}
-            onDeleteSelected={async (selectedRows) => {
-                const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
-                await batchDeleteMutation.mutateAsync(ids)
-            }}
-            batchDeleteConfig={{
-                itemName: "chức vụ",
-                moduleName: chucVuConfig.moduleTitle,
-                isLoading: batchDeleteMutation.isPending,
-                getItemLabel: (item: ChucVu) => item.ten_chuc_vu || String(item.id),
-            }}
-            filters={filters}
-            searchFields={chucVuConfig.searchFields as (keyof ChucVu)[]}
-            module={module}
-            enableSuggestions={true}
-            enableRangeSelection={true}
-            enableLongPress={true}
-            persistSelection={false}
-            renderMobileCard={renderMobileCard}
-            enableVirtualization={(chucVuList?.length || 0) > 100}
-            virtualRowHeight={60}
-            exportOptions={{
-                columns: columns,
-                totalCount: chucVuList?.length || 0,
-                moduleName: chucVuConfig.moduleTitle,
-                getColumnTitle,
-                getCellValue,
-            }}
-            onImport={() => setImportDialogOpen(true)}
-            isImporting={batchImportMutation.isPending}
-            onEdit={(row) => {
-                if (onEdit) {
-                    onEdit(row.id!)
-                } else {
-                    navigate(`${chucVuConfig.routePath}/${row.id}/sua`)
-                }
-            }}
-            onDelete={(row) => {
-                setRowToDelete(row)
-                setDeleteDialogOpen(true)
-            }}
-        />
+            <GenericListView
+                columns={columns}
+                data={chucVuList || []}
+                filterColumn="ma_chuc_vu"
+                initialSorting={initialSorting}
+                initialFilters={initialFilters}
+                initialSearch={initialSearch}
+                onFiltersChange={handleFiltersChange}
+                onSearchChange={handleSearchChange}
+                onSortChange={handleSortChange}
+                onRowClick={(row) => {
+                    if (onView) {
+                        onView(row.id!)
+                    } else {
+                        navigate(`${chucVuConfig.routePath}/${row.id}`)
+                    }
+                }}
+                onAdd={() => {
+                    if (onAddNew) {
+                        onAddNew()
+                    } else {
+                        navigate(`${chucVuConfig.routePath}/moi`)
+                    }
+                }}
+                addHref={`${chucVuConfig.routePath}/moi`}
+                onBack={() => {
+                    navigate(chucVuConfig.parentPath)
+                }}
+                onDeleteSelected={async (selectedRows) => {
+                    const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
+                    await batchDeleteMutation.mutateAsync(ids)
+                }}
+                batchDeleteConfig={{
+                    itemName: "chức vụ",
+                    moduleName: chucVuConfig.moduleTitle,
+                    isLoading: batchDeleteMutation.isPending,
+                    getItemLabel: (item: ChucVu) => item.ten_chuc_vu || String(item.id),
+                }}
+                filters={filters}
+                searchFields={chucVuConfig.searchFields as (keyof ChucVu)[]}
+                module={module}
+                enableSuggestions={true}
+                enableRangeSelection={true}
+                enableLongPress={true}
+                persistSelection={false}
+                renderMobileCard={renderMobileCard}
+                enableVirtualization={(chucVuList?.length || 0) > 100}
+                virtualRowHeight={60}
+                exportOptions={{
+                    columns: columns,
+                    totalCount: chucVuList?.length || 0,
+                    moduleName: chucVuConfig.moduleTitle,
+                    getColumnTitle,
+                    getCellValue,
+                }}
+                onImport={() => setImportDialogOpen(true)}
+                isImporting={batchImportMutation.isPending}
+                onEdit={(row) => {
+                    if (onEdit) {
+                        onEdit(row.id!)
+                    } else {
+                        navigate(`${chucVuConfig.routePath}/${row.id}/sua`)
+                    }
+                }}
+                onDelete={(row) => {
+                    setRowToDelete(row)
+                    setDeleteDialogOpen(true)
+                }}
+            />
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -461,4 +416,3 @@ export function ChucVuListView({
         </>
     )
 }
-

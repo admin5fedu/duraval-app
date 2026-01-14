@@ -28,10 +28,10 @@ export function useBatchUpsertPhongBan() {
 
         // Validate and sanitize records
         const validRecords: CreatePhongBanInput[] = []
-        
+
         batch.forEach((record, batchIndex) => {
           const originalIndex = i + batchIndex
-          
+
           // Validate required fields
           if (!record.ma_phong_ban || !String(record.ma_phong_ban).trim()) {
             errors.push({
@@ -57,13 +57,21 @@ export function useBatchUpsertPhongBan() {
             return
           }
 
+          if (!record.tt || isNaN(Number(record.tt))) {
+            errors.push({
+              row: originalIndex,
+              error: "Thứ tự là bắt buộc và phải là số",
+            })
+            return
+          }
+
           // Sanitize input
           const sanitizedRecord: CreatePhongBanInput = {
-            tt: record.tt ? Number(record.tt) : null,
+            tt: Number(record.tt),
             ma_phong_ban: String(record.ma_phong_ban).trim(),
             ten_phong_ban: String(record.ten_phong_ban).trim(),
             cap_do: String(record.cap_do).trim(),
-            truc_thuoc_phong_ban: record.truc_thuoc_phong_ban && String(record.truc_thuoc_phong_ban).trim() !== "" ? String(record.truc_thuoc_phong_ban).trim() : null,
+            truc_thuoc_ma: record.truc_thuoc_ma && String(record.truc_thuoc_ma).trim() !== "" ? String(record.truc_thuoc_ma).trim() : null,
             truc_thuoc_id: record.truc_thuoc_id ? Number(record.truc_thuoc_id) : null,
           }
 
@@ -103,7 +111,7 @@ export function useBatchUpsertPhongBan() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: phongBanQueryKeys.all() })
-      
+
       if (result.errors.length > 0) {
         toast.warning(
           `Nhập dữ liệu hoàn tất: ${result.inserted} thêm mới, ${result.errors.length} lỗi`

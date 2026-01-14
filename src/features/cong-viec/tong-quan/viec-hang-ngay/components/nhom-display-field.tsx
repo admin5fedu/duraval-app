@@ -16,19 +16,19 @@ interface NhomDisplayFieldProps {
 
 export function NhomDisplayField({ value, disabled, placeholder }: NhomDisplayFieldProps) {
     const { data: employees } = useNhanSu()
-    
+
     // Find nhom from employees where nhom matches ma_nhom
     const nhomInfo = React.useMemo(() => {
         if (!value || !employees) return null
         // Find first employee with matching nhom
-        const emp = employees.find(e => e.nhom === value)
-        return emp ? emp.nhom : null
+        const emp = employees.find(e => e.ma_nhom === value)
+        return emp ? emp.ma_nhom : null
     }, [value, employees])
-    
-    const displayValue = nhomInfo 
+
+    const displayValue = nhomInfo
         ? `${value} - ${nhomInfo}`
         : value || ""
-    
+
     return (
         <Input
             value={displayValue}
@@ -36,7 +36,7 @@ export function NhomDisplayField({ value, disabled, placeholder }: NhomDisplayFi
             placeholder={placeholder}
             readOnly
             className="bg-muted cursor-not-allowed"
-            onChange={() => {}} // Read-only, prevent changes
+            onChange={() => { }} // Read-only, prevent changes
         />
     )
 }

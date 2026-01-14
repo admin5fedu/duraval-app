@@ -19,17 +19,6 @@ interface CapBacImportDialogProps {
 // Column mappings for auto-mapping
 const columnMappings: ColumnMapping[] = [
     {
-        dbField: "ma_cap_bac",
-        excelNames: [
-            "Mã cấp bậc", "Mã Cấp Bậc", "Ma cap bac", "Ma Cap Bac",
-            "Mã_CB", "Mã_cb", "Ma_CB", "Ma_cb",
-            "Level Code", "LevelCode", "level_code", "Code", "code"
-        ],
-        required: true,
-        type: "text",
-        description: "Mã cấp bậc (bắt buộc)",
-    },
-    {
         dbField: "ten_cap_bac",
         excelNames: [
             "Tên cấp bậc", "Tên Cấp Bậc", "Ten cap bac", "Ten Cap Bac",
@@ -41,7 +30,7 @@ const columnMappings: ColumnMapping[] = [
         description: "Tên cấp bậc (bắt buộc)",
     },
     {
-        dbField: "bac",
+        dbField: "cap_bac",
         excelNames: [
             "Bậc", "bac", "Bac", "BAC",
             "Grade", "grade", "Level", "level", "Rank", "rank"
@@ -54,12 +43,6 @@ const columnMappings: ColumnMapping[] = [
 
 // Template columns for Excel import
 const templateColumns: TemplateColumn[] = [
-    {
-        header: "Mã cấp bậc",
-        type: "text",
-        required: true,
-        description: "Mã cấp bậc (bắt buộc)",
-    },
     {
         header: "Tên cấp bậc",
         type: "text",
@@ -82,19 +65,15 @@ function validateRow(
     const errors: string[] = []
 
     // Required fields
-    if (!row.ma_cap_bac || String(row.ma_cap_bac).trim() === "") {
-        errors.push("Mã cấp bậc là bắt buộc")
-    }
-
     if (!row.ten_cap_bac || String(row.ten_cap_bac).trim() === "") {
         errors.push("Tên cấp bậc là bắt buộc")
     }
 
-    if (!row.bac || isNaN(Number(row.bac))) {
+    if (!row.cap_bac || isNaN(Number(row.cap_bac))) {
         errors.push("Bậc phải là số nguyên dương")
     } else {
-        const bacNumber = Number(row.bac)
-        if (bacNumber < 1 || !Number.isInteger(bacNumber)) {
+        const capBacNumber = Number(row.cap_bac)
+        if (capBacNumber < 1 || !Number.isInteger(capBacNumber)) {
             errors.push("Bậc phải là số nguyên dương")
         }
     }
@@ -110,10 +89,10 @@ function checkDuplicates(
     const keyMap = new Map<string, number[]>()
 
     rows.forEach((row, index) => {
-        const maCapBac = row.data.ma_cap_bac
+        const tenCapBac = row.data.ten_cap_bac
 
-        if (maCapBac) {
-            const key = String(maCapBac).trim()
+        if (tenCapBac) {
+            const key = String(tenCapBac).trim()
             if (!keyMap.has(key)) {
                 keyMap.set(key, [])
             }
@@ -139,16 +118,12 @@ function mapExcelToDb(
         const mapped: Partial<CapBac> = {}
 
         // Map required fields
-        if (!shouldSkipValue(row.data["ma_cap_bac"], options.skipEmptyCells)) {
-            mapped.ma_cap_bac = String(row.data["ma_cap_bac"]).trim()
-        }
-
         if (!shouldSkipValue(row.data["ten_cap_bac"], options.skipEmptyCells)) {
             mapped.ten_cap_bac = String(row.data["ten_cap_bac"]).trim()
         }
 
-        if (!shouldSkipValue(row.data["bac"], options.skipEmptyCells)) {
-            mapped.bac = Number(row.data["bac"])
+        if (!shouldSkipValue(row.data["cap_bac"], options.skipEmptyCells)) {
+            mapped.cap_bac = Number(row.data["cap_bac"])
         }
 
         return mapped
@@ -173,9 +148,8 @@ export function CapBacImportDialog({ open, onOpenChange, mutation }: CapBacImpor
         try {
             // Convert rows to ExcelRow format for mutation
             const excelRows = rows.map((row) => ({
-                ma_cap_bac: row.ma_cap_bac,
                 ten_cap_bac: row.ten_cap_bac,
-                bac: row.bac,
+                cap_bac: row.cap_bac,
             }))
             const result = await batchUpsertMutation.mutateAsync(excelRows)
             return {

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ImportDialog, type ImportOptions } from "@/shared/components/data-display/import/import-dialog"
 import { useBatchUpsertNhanSu } from "../actions/nhan-su-excel-actions"
-import { NhanSu } from "../types"
+import { NhanSu } from "../schema"
 import type { TemplateColumn } from "@/lib/excel/template-utils"
 import type { ColumnMapping } from "@/shared/utils/excel-column-mapper"
 import { parseDate } from "@/shared/utils/excel-date-parser"
@@ -24,8 +24,6 @@ const columnMappings: ColumnMapping[] = [
         excelNames: [
             "Mã nhân viên", "Mã Nhân Viên", "Ma Nhan Vien", "Ma nhan vien",
             "Mã NV", "Mã nv", "Ma NV", "Ma nv",
-            "Mã_Nhân_Viên", "Mã_nhân_viên", "Ma_Nhan_Vien", "Ma_nhan_vien",
-            "Mã_NV", "Mã_nv", "Ma_NV", "Ma_nv",
             "Employee ID", "EmployeeID", "employee_id", "ID", "id"
         ],
         required: true,
@@ -37,8 +35,6 @@ const columnMappings: ColumnMapping[] = [
         excelNames: [
             "Họ tên", "Họ Tên", "Ho Ten", "Ho ten",
             "Họ và Tên", "Họ và tên", "Ho va Ten", "Ho va ten",
-            "Họ_Tên", "Họ_tên", "Ho_Ten", "Ho_ten",
-            "Họ_và_Tên", "Họ_và_tên", "Ho_va_Ten", "Ho_va_ten",
             "Full Name", "FullName", "full_name", "Name", "name"
         ],
         required: true,
@@ -49,9 +45,6 @@ const columnMappings: ColumnMapping[] = [
         dbField: "email_cong_ty",
         excelNames: [
             "Email công ty", "Email Công Ty", "Email Cong Ty", "Email cong ty",
-            "Email Cty", "Email cty", "Email CTY", "Email cty",
-            "Email_Công_Ty", "Email_công_ty", "Email_Cong_Ty", "Email_cong_ty",
-            "Email_Cty", "Email_cty", "Email_CTY", "Email_cty",
             "Work Email", "WorkEmail", "work_email", "Email", "email"
         ],
         required: false,
@@ -62,7 +55,6 @@ const columnMappings: ColumnMapping[] = [
         dbField: "gioi_tinh",
         excelNames: [
             "Giới tính", "Giới Tính", "Gioi Tinh", "Gioi tinh",
-            "Giới_Tính", "Giới_tính", "Gioi_Tinh", "Gioi_tinh",
             "Gender", "gender", "Sex", "sex"
         ],
         required: false,
@@ -73,7 +65,6 @@ const columnMappings: ColumnMapping[] = [
         dbField: "ngay_sinh",
         excelNames: [
             "Ngày sinh", "Ngày Sinh", "Ngay sinh", "Ngay Sinh",
-            "Ngày_sinh", "Ngày_Sinh", "Ngay_sinh", "Ngay_Sinh",
             "Date of Birth", "DateOfBirth", "date_of_birth", "DOB", "dob"
         ],
         required: false,
@@ -84,7 +75,6 @@ const columnMappings: ColumnMapping[] = [
         dbField: "so_dien_thoai",
         excelNames: [
             "Số điện thoại", "Số Điện Thoại", "So dien thoai", "So Dien Thoai",
-            "Số_điện_thoại", "Số_Điện_Thoại", "So_dien_thoai", "So_Dien_Thoai",
             "SĐT", "SDT", "sdt", "Phone", "phone", "Mobile", "mobile"
         ],
         required: false,
@@ -92,32 +82,45 @@ const columnMappings: ColumnMapping[] = [
         description: "Số điện thoại (10-11 chữ số)",
     },
     {
-        dbField: "phong_ban",
+        dbField: "ma_phong",
         excelNames: [
+            "Mã phòng", "Mã Phòng", "Ma phong", "Ma Phong",
             "Phòng ban", "Phòng Ban", "Phong ban", "Phong Ban",
-            "Phòng_ban", "Phòng_Ban", "Phong_ban", "Phong_Ban",
-            "Department", "department", "Dept", "dept"
+            "Room Code", "room_code", "Department", "department", "Dept", "dept"
         ],
         required: false,
         type: "text",
-        description: "Tên phòng ban",
+        description: "Mã phòng hoặc Tên phòng ban",
     },
     {
-        dbField: "chuc_vu",
+        dbField: "ma_chuc_vu",
         excelNames: [
+            "Mã chức vụ", "Mã Chức Vụ", "Ma chuc vu", "Ma Chuc Vu",
             "Chức vụ", "Chức Vụ", "Chuc vu", "Chuc Vu",
-            "Chức_vụ", "Chức_Vụ", "Chuc_vu", "Chuc_Vu",
-            "Position", "position", "Title", "title", "Job Title", "job_title"
+            "Position Code", "position_code", "Position", "position", "Title", "title"
         ],
         required: false,
         type: "text",
-        description: "Tên chức vụ",
+        description: "Mã chức vụ hoặc Tên chức vụ",
+    },
+    {
+        dbField: "ma_bo_phan",
+        excelNames: ["Mã bộ phận", "Bộ phận", "Ma bo phan", "Division Code", "division_code"],
+        required: false,
+        type: "text",
+        description: "Mã bộ phận hoặc Tên bộ phận",
+    },
+    {
+        dbField: "ma_nhom",
+        excelNames: ["Mã nhóm", "Nhóm", "Ma nhom", "Group Code", "group_code"],
+        required: false,
+        type: "text",
+        description: "Mã nhóm hoặc Tên nhóm",
     },
     {
         dbField: "tinh_trang",
         excelNames: [
             "Tình trạng", "Tình Trạng", "Tinh trang", "Tinh Trang",
-            "Tình_trạng", "Tình_Trạng", "Tinh_trang", "Tinh_Trang",
             "Status", "status", "State", "state"
         ],
         required: false,
@@ -128,7 +131,6 @@ const columnMappings: ColumnMapping[] = [
         dbField: "ngay_thu_viec",
         excelNames: [
             "Ngày thử việc", "Ngày Thử Việc", "Ngay thu viec", "Ngay Thu Viec",
-            "Ngày_thử_việc", "Ngày_Thử_Việc", "Ngay_thu_viec", "Ngay_Thu_Viec",
             "Probation Date", "probation_date", "Start Date", "start_date"
         ],
         required: false,
@@ -139,7 +141,6 @@ const columnMappings: ColumnMapping[] = [
         dbField: "ngay_chinh_thuc",
         excelNames: [
             "Ngày chính thức", "Ngày Chính Thức", "Ngay chinh thuc", "Ngay Chinh Thuc",
-            "Ngày_chính_thức", "Ngày_Chính_Thức", "Ngay_chinh_thuc", "Ngay_Chinh_Thuc",
             "Official Date", "official_date", "Permanent Date", "permanent_date"
         ],
         required: false,
@@ -193,17 +194,17 @@ const templateColumns: TemplateColumn[] = [
         type: "phone",
     },
     {
-        header: "Phòng ban",
-        description: "Tên phòng ban",
+        header: "Mã phòng",
+        description: "Mã phòng hoặc Tên phòng ban",
         required: false,
-        example: "Phòng Kỹ thuật",
+        example: "PHC",
         type: "text",
     },
     {
-        header: "Chức vụ",
-        description: "Tên chức vụ",
+        header: "Mã chức vụ",
+        description: "Mã chức vụ hoặc Tên chức vụ",
         required: false,
-        example: "Nhân viên",
+        example: "NV",
         type: "text",
     },
     {
@@ -229,11 +230,10 @@ const templateColumns: TemplateColumn[] = [
     },
 ]
 
-// Validate a row of data (using mapped field names)
+// Validate a row of data
 function validateRow(row: Record<string, any>, _rowNumber: number): string[] {
     const errors: string[] = []
 
-    // Required fields (using db field names after mapping)
     if (!row["ma_nhan_vien"] && row["ma_nhan_vien"] !== 0) {
         errors.push("Mã nhân viên không được để trống")
     } else {
@@ -247,7 +247,6 @@ function validateRow(row: Record<string, any>, _rowNumber: number): string[] {
         errors.push("Họ tên không được để trống")
     }
 
-    // Email không bắt buộc, nhưng nếu có thì phải hợp lệ
     if (row["email_cong_ty"] && String(row["email_cong_ty"]).trim() !== "") {
         const email = String(row["email_cong_ty"]).trim()
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -256,27 +255,20 @@ function validateRow(row: Record<string, any>, _rowNumber: number): string[] {
         }
     }
 
-    // Optional field validations
     if (row["gioi_tinh"] && !["Nam", "Nữ"].includes(String(row["gioi_tinh"]).trim())) {
         errors.push("Giới tính phải là 'Nam' hoặc 'Nữ'")
     }
 
     if (row["tinh_trang"] && !["Chính thức", "Thử việc", "Nghỉ việc", "Tạm nghỉ"].includes(String(row["tinh_trang"]).trim())) {
-        errors.push("Tình trạng không hợp lệ (phải là: Chính thức, Thử việc, Nghỉ việc, Tạm nghỉ)")
+        errors.push("Tình trạng không hợp lệ")
     }
 
-    // Date validations (using parseDate utility)
     const dateFields = ["ngay_sinh", "ngay_thu_viec", "ngay_chinh_thuc"]
     dateFields.forEach((field) => {
         if (row[field]) {
             const parsed = parseDate(row[field], 'dd/mm/yyyy')
             if (!parsed) {
-                const fieldNames: Record<string, string> = {
-                    ngay_sinh: "Ngày sinh",
-                    ngay_thu_viec: "Ngày thử việc",
-                    ngay_chinh_thuc: "Ngày chính thức",
-                }
-                errors.push(`${fieldNames[field]} không hợp lệ (định dạng: dd/mm/yyyy)`)
+                errors.push(`${field} không hợp lệ (định dạng: dd/mm/yyyy)`)
             }
         }
     })
@@ -284,13 +276,13 @@ function validateRow(row: Record<string, any>, _rowNumber: number): string[] {
     return errors
 }
 
-// Check for duplicates in the file (using mapped field names)
+// Check for duplicates in the file
 function checkDuplicates(rows: Array<{ rowNumber: number; data: Record<string, any> }>): Map<string, number[]> {
     const duplicates = new Map<string, number[]>()
     const maNhanVienMap = new Map<number, number[]>()
 
     rows.forEach((row, index) => {
-        const maNhanVien = row.data["ma_nhan_vien"] // Use mapped field name
+        const maNhanVien = row.data["ma_nhan_vien"]
         if (maNhanVien !== null && maNhanVien !== undefined && maNhanVien !== "") {
             const maNV = Number(maNhanVien)
             if (!isNaN(maNV)) {
@@ -311,8 +303,7 @@ function checkDuplicates(rows: Array<{ rowNumber: number; data: Record<string, a
     return duplicates
 }
 
-// Map Excel columns to database fields (data is already mapped by ImportDialog)
-// This function now handles skip empty cells and date parsing
+// Map Excel columns to database fields
 function mapExcelToDb(
     rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>,
     options: ImportOptions
@@ -320,12 +311,10 @@ function mapExcelToDb(
     return rows.map((row) => {
         const mapped: Partial<NhanSu> = {}
 
-        // Map fields (data is already mapped to db field names by ImportDialog)
         if (row.data["ma_nhan_vien"] !== undefined && row.data["ma_nhan_vien"] !== null && row.data["ma_nhan_vien"] !== "") {
             mapped.ma_nhan_vien = Number(row.data["ma_nhan_vien"])
         }
 
-        // Skip empty cells if option enabled
         if (!shouldSkipValue(row.data["ho_ten"], options.skipEmptyCells)) {
             mapped.ho_ten = String(row.data["ho_ten"]).trim()
         }
@@ -338,17 +327,22 @@ function mapExcelToDb(
         if (!shouldSkipValue(row.data["so_dien_thoai"], options.skipEmptyCells)) {
             mapped.so_dien_thoai = String(row.data["so_dien_thoai"]).trim()
         }
-        if (!shouldSkipValue(row.data["phong_ban"], options.skipEmptyCells)) {
-            mapped.phong_ban = String(row.data["phong_ban"]).trim()
+        if (!shouldSkipValue(row.data["ma_phong"], options.skipEmptyCells)) {
+            mapped.ma_phong = String(row.data["ma_phong"]).trim()
         }
-        if (!shouldSkipValue(row.data["chuc_vu"], options.skipEmptyCells)) {
-            mapped.chuc_vu = String(row.data["chuc_vu"]).trim()
+        if (!shouldSkipValue(row.data["ma_chuc_vu"], options.skipEmptyCells)) {
+            mapped.ma_chuc_vu = String(row.data["ma_chuc_vu"]).trim()
+        }
+        if (!shouldSkipValue(row.data["ma_bo_phan"], options.skipEmptyCells)) {
+            mapped.ma_bo_phan = String(row.data["ma_bo_phan"]).trim()
+        }
+        if (!shouldSkipValue(row.data["ma_nhom"], options.skipEmptyCells)) {
+            mapped.ma_nhom = String(row.data["ma_nhom"]).trim()
         }
         if (!shouldSkipValue(row.data["tinh_trang"], options.skipEmptyCells)) {
             mapped.tinh_trang = String(row.data["tinh_trang"]).trim()
         }
 
-        // Parse dates using utility (dd/mm/yyyy)
         const dateFormat = options.dateFormat || 'dd/mm/yyyy'
         if (row.data["ngay_sinh"] && !shouldSkipValue(row.data["ngay_sinh"], options.skipEmptyCells)) {
             mapped.ngay_sinh = parseDate(row.data["ngay_sinh"], dateFormat)
@@ -367,7 +361,7 @@ function mapExcelToDb(
 export function NhanSuImportDialog({ open, onOpenChange, mutation }: NhanSuImportDialogProps) {
     const defaultMutation = useBatchUpsertNhanSu()
     const batchUpsertMutation = mutation || defaultMutation
-    const [importOptions, _setImportOptions] = React.useState<ImportOptions>({
+    const [importOptions] = React.useState<ImportOptions>({
         skipEmptyCells: true,
         upsertMode: 'update',
         dateFormat: 'dd/mm/yyyy',
@@ -388,7 +382,7 @@ export function NhanSuImportDialog({ open, onOpenChange, mutation }: NhanSuImpor
                 updated: result.updated,
                 failed: result.errors.length,
                 errors: result.errors.map((err) => ({
-                    rowNumber: err.row + 1, // Convert 0-based to 1-based
+                    rowNumber: err.row + 1,
                     errors: [err.error],
                 })),
             }
@@ -397,7 +391,6 @@ export function NhanSuImportDialog({ open, onOpenChange, mutation }: NhanSuImpor
         }
     }
 
-    // Transform Excel data to database format
     const transformData = (rows: Array<{ rowNumber: number; data: Record<string, any>; errors: string[] }>): Partial<NhanSu>[] => {
         return mapExcelToDb(rows, importOptions)
     }
@@ -411,12 +404,10 @@ export function NhanSuImportDialog({ open, onOpenChange, mutation }: NhanSuImpor
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="nhân sự"
-             // Use db field names after mapping
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            
         />
     )
 }

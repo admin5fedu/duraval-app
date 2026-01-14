@@ -18,9 +18,9 @@ const getSections = (_phongBanList: any[] = [], excludeId?: number): FormSection
       { name: "tt", label: "Số Thứ Tự", type: "number" },
       { name: "ma_phong_ban", label: "Mã Phòng Ban", required: true },
       { name: "ten_phong_ban", label: "Tên Phòng Ban", required: true },
-      { 
-        name: "cap_do", 
-        label: "Cấp Độ", 
+      {
+        name: "cap_do",
+        label: "Cấp Độ",
         required: true,
         type: "toggle",
         options: [
@@ -34,9 +34,9 @@ const getSections = (_phongBanList: any[] = [], excludeId?: number): FormSection
   {
     title: "Thông Tin Trực Thuộc",
     fields: [
-      { 
-        name: "truc_thuoc_id", 
-        label: "Trực Thuộc Phòng Ban", 
+      {
+        name: "truc_thuoc_id",
+        label: "Trực Thuộc Phòng Ban",
         type: "phong-ban-select",
         placeholder: "Chọn phòng ban trực thuộc...",
         description: "Tìm kiếm theo tên hoặc mã phòng ban",
@@ -58,18 +58,18 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
   const [searchParams] = useSearchParams()
   const createMutation = useCreatePhongBan()
   const updateMutation = useUpdatePhongBan()
-  
+
   // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   // để đảm bảo thứ tự hooks nhất quán giữa các lần render
-  
+
   // Fetch list of phòng ban for dropdown
   const { data: phongBanList } = usePhongBan()
-  
+
   // Create sections with phòng ban list, exclude current ID when editing
   const sections = useMemo(() => {
     return getSections(phongBanList || [], id || undefined)
   }, [phongBanList, id])
-  
+
   // If id is provided, fetch existing data for edit mode
   // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
   const { data: existingData, isLoading } = usePhongBanById(id ?? 0, undefined)
@@ -78,7 +78,7 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
   // Phải được tạo TRƯỚC early return
   const formSchema = useMemo(() => {
     return phongBanSchema
-      .omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true })
+      .omit({ id: true, tg_tao: true, tg_cap_nhat: true })
   }, [])
 
   // Calculate max tt + 1 for new records
@@ -112,7 +112,7 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
   // Computed values (không phải hooks, có thể đặt sau early return)
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
-  const cancelUrl = returnTo === 'list' 
+  const cancelUrl = returnTo === 'list'
     ? phongBanConfig.routePath
     : (id ? `${phongBanConfig.routePath}/${id}` : phongBanConfig.routePath)
 
@@ -122,11 +122,11 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
       watchField: "truc_thuoc_id",
       targetFields: [
         {
-          fieldName: "truc_thuoc_phong_ban",
+          fieldName: "truc_thuoc_ma",
           mapper: (trucThuocId) => {
             if (!trucThuocId || !phongBanList) return null
             const selectedPhongBan = phongBanList.find((pb) => pb.id === trucThuocId)
-            return selectedPhongBan?.ten_phong_ban || null
+            return selectedPhongBan?.ma_phong_ban || null
           }
         }
       ],
@@ -140,9 +140,9 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
     const submitData = {
       ...data,
       truc_thuoc_id: data.truc_thuoc_id || null,
-      truc_thuoc_phong_ban: data.truc_thuoc_phong_ban || null,
+      truc_thuoc_ma: data.truc_thuoc_ma || null,
     }
-    
+
     if (isEditMode && id) {
       await updateMutation.mutateAsync({ id, input: submitData as UpdatePhongBanInput })
     } else {
@@ -188,7 +188,7 @@ export function PhongBanFormView({ id, onComplete, onCancel }: PhongBanFormViewP
       errorMessage={isEditMode ? "Có lỗi xảy ra khi cập nhật phòng ban" : "Có lỗi xảy ra khi thêm mới phòng ban"}
       defaultValues={defaultValues}
     >
-      {/* ⚡ Auto-fill Fields: Tự động điền truc_thuoc_phong_ban khi chọn truc_thuoc_id */}
+      {/* ⚡ Auto-fill Fields: Tự động điền truc_thuoc_ma khi chọn truc_thuoc_id */}
       <AutoFillFields rules={autoFillRules} />
     </GenericFormView>
   )

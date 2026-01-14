@@ -41,14 +41,14 @@ const columnMappings: ColumnMapping[] = [
         description: "Tên chức vụ (bắt buộc)",
     },
     {
-        dbField: "ma_cap_bac",
+        dbField: "cap_bac",
         excelNames: [
-            "Mã cấp bậc", "Mã Cấp Bậc", "Ma cap bac", "Ma Cap Bac",
-            "Level Code", "level_code", "Ma_CB", "Ma_cb"
+            "Cấp bậc", "Cấp Bậc", "Cap bac", "Cap Bac",
+            "Level", "level", "Grade", "grade"
         ],
         required: true,
-        type: "text",
-        description: "Mã cấp bậc (bắt buộc)",
+        type: "number",
+        description: "Số cấp bậc (bắt buộc, ví dụ: 1, 2, 3)",
     },
     {
         dbField: "ten_cap_bac",
@@ -69,27 +69,6 @@ const columnMappings: ColumnMapping[] = [
         required: true,
         type: "text",
         description: "Mã phòng ban (bắt buộc)",
-    },
-    {
-        dbField: "ma_nhom",
-        excelNames: ["Mã nhóm", "Mã Nhóm", "Ma nhom", "Ma Nhom", "Group Code", "group_code"],
-        required: false,
-        type: "text",
-        description: "Mã nhóm (không bắt buộc)",
-    },
-    {
-        dbField: "ma_bo_phan",
-        excelNames: ["Mã bộ phận", "Mã Bộ Phận", "Ma bo phan", "Ma Bo Phan", "Division Code", "division_code"],
-        required: false,
-        type: "text",
-        description: "Mã bộ phận (không bắt buộc)",
-    },
-    {
-        dbField: "ma_phong",
-        excelNames: ["Mã phòng", "Mã Phòng", "Ma phong", "Ma Phong", "Room Code", "room_code"],
-        required: false,
-        type: "text",
-        description: "Mã phòng (không bắt buộc)",
     },
     {
         dbField: "ngach_luong",
@@ -143,10 +122,10 @@ const templateColumns: TemplateColumn[] = [
         description: "Tên chức vụ (bắt buộc)",
     },
     {
-        header: "Mã cấp bậc",
-        type: "text",
+        header: "Cấp bậc",
+        type: "number",
         required: true,
-        description: "Mã cấp bậc (bắt buộc)",
+        description: "Số cấp bậc (bắt buộc)",
     },
     {
         header: "Tên cấp bậc",
@@ -159,24 +138,6 @@ const templateColumns: TemplateColumn[] = [
         type: "text",
         required: true,
         description: "Mã phòng ban (bắt buộc)",
-    },
-    {
-        header: "Mã nhóm",
-        type: "text",
-        required: false,
-        description: "Mã nhóm (không bắt buộc)",
-    },
-    {
-        header: "Mã bộ phận",
-        type: "text",
-        required: false,
-        description: "Mã bộ phận (không bắt buộc)",
-    },
-    {
-        header: "Mã phòng",
-        type: "text",
-        required: false,
-        description: "Mã phòng (không bắt buộc)",
     },
     {
         header: "Ngạch lương",
@@ -226,8 +187,8 @@ function validateRow(
         errors.push("Tên chức vụ là bắt buộc")
     }
 
-    if (!row.ma_cap_bac || String(row.ma_cap_bac).trim() === "") {
-        errors.push("Mã cấp bậc là bắt buộc")
+    if (row.cap_bac === undefined || row.cap_bac === null || row.cap_bac === "") {
+        errors.push("Cấp bậc là bắt buộc")
     }
 
     if (!row.ma_phong_ban || String(row.ma_phong_ban).trim() === "") {
@@ -282,8 +243,8 @@ function mapExcelToDb(
             mapped.ten_chuc_vu = String(row.data["ten_chuc_vu"]).trim()
         }
 
-        if (!shouldSkipValue(row.data["ma_cap_bac"], options.skipEmptyCells)) {
-            mapped.ma_cap_bac = String(row.data["ma_cap_bac"]).trim()
+        if (!shouldSkipValue(row.data["cap_bac"], options.skipEmptyCells)) {
+            mapped.cap_bac = Number(row.data["cap_bac"])
         }
 
         if (!shouldSkipValue(row.data["ten_cap_bac"], options.skipEmptyCells)) {
@@ -295,18 +256,6 @@ function mapExcelToDb(
         }
 
         // Map optional fields
-        if (!shouldSkipValue(row.data["ma_nhom"], options.skipEmptyCells)) {
-            mapped.ma_nhom = String(row.data["ma_nhom"]).trim()
-        }
-
-        if (!shouldSkipValue(row.data["ma_bo_phan"], options.skipEmptyCells)) {
-            mapped.ma_bo_phan = String(row.data["ma_bo_phan"]).trim()
-        }
-
-        if (!shouldSkipValue(row.data["ma_phong"], options.skipEmptyCells)) {
-            mapped.ma_phong = String(row.data["ma_phong"]).trim()
-        }
-
         if (!shouldSkipValue(row.data["ngach_luong"], options.skipEmptyCells)) {
             mapped.ngach_luong = String(row.data["ngach_luong"]).trim()
         }
@@ -351,12 +300,9 @@ export function ChucVuImportDialog({ open, onOpenChange, mutation }: ChucVuImpor
             const excelRows = rows.map((row) => ({
                 ma_chuc_vu: row.ma_chuc_vu,
                 ten_chuc_vu: row.ten_chuc_vu,
-                ma_cap_bac: row.ma_cap_bac,
+                cap_bac: row.cap_bac,
                 ten_cap_bac: row.ten_cap_bac,
                 ma_phong_ban: row.ma_phong_ban,
-                ma_nhom: row.ma_nhom,
-                ma_bo_phan: row.ma_bo_phan,
-                ma_phong: row.ma_phong,
                 ngach_luong: row.ngach_luong,
                 muc_dong_bao_hiem: row.muc_dong_bao_hiem,
                 so_ngay_nghi_thu_7: row.so_ngay_nghi_thu_7,
@@ -393,13 +339,12 @@ export function ChucVuImportDialog({ open, onOpenChange, mutation }: ChucVuImpor
             checkDuplicates={checkDuplicates}
             transformData={transformData}
             moduleName="chức vụ"
-            
+
             templateColumns={templateColumns}
             columnMappings={columnMappings}
             enableAutoMapping={true}
             importOptions={importOptions}
-            
+
         />
     )
 }
-

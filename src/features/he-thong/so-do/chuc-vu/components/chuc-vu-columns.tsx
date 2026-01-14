@@ -9,12 +9,12 @@ import { DeleteChucVuButton } from "./delete-chuc-vu-button"
 import { chucVuConfig } from "../config"
 import { createSelectColumn } from "@/shared/components/data-display/table/create-select-column"
 import { SortableHeader } from "@/shared/components"
-import type { NhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/schema"
+
 
 // Name cell component with navigation
 function NameCell({ name, id }: { name: string; id: number }) {
     const navigate = useNavigate()
-    
+
     return (
         <button
             onClick={() => navigate(`${chucVuConfig.routePath}/${id}`)}
@@ -28,7 +28,7 @@ function NameCell({ name, id }: { name: string; id: number }) {
 // Actions cell component
 function ActionsCell({ id, name }: { id: number; name: string }) {
     const navigate = useNavigate()
-    
+
     return (
         <div className="flex items-center gap-2 justify-end pr-4 min-w-[100px]">
             <Button
@@ -50,7 +50,7 @@ function ActionsCell({ id, name }: { id: number; name: string }) {
     )
 }
 
-export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] => [
+export const chucVuColumns = (): ColumnDef<ChucVu>[] => [
     // ⚡ Professional: Use generic select column utility
     createSelectColumn<ChucVu>(),
     {
@@ -90,18 +90,18 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
     },
     {
-        accessorKey: "ma_cap_bac",
-        header: ({ column }) => <SortableHeader column={column} title="Mã Cấp Bậc" />,
-        size: 120,
-        minSize: 100,
-        filterFn: (row, id, value) => {
-            const maCapBac = row.getValue(id) as string | null
-            return value.includes(maCapBac || "")
+        accessorKey: "cap_bac",
+        header: ({ column }) => <SortableHeader column={column} title="Cấp Bậc" />,
+        size: 100,
+        minSize: 80,
+        cell: ({ row }) => {
+            const value = row.getValue("cap_bac") as number | null | undefined
+            return value || <span className="text-muted-foreground">-</span>
         },
         meta: {
-            title: "Mã Cấp Bậc",
+            title: "Cấp Bậc",
             order: 3,
-            minWidth: 100,
+            minWidth: 80,
         },
     },
     {
@@ -131,55 +131,6 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
     },
     {
-        accessorKey: "ma_nhom",
-        header: ({ column }) => <SortableHeader column={column} title="Mã Nhóm" />,
-        size: 120,
-        minSize: 100,
-        cell: ({ row }) => {
-            const value = row.getValue("ma_nhom") as string | null | undefined
-            return value || <span className="text-muted-foreground">-</span>
-        },
-        meta: {
-            title: "Mã Nhóm",
-            order: 6,
-            minWidth: 100,
-        },
-    },
-    {
-        accessorKey: "ma_bo_phan",
-        header: ({ column }) => <SortableHeader column={column} title="Mã Bộ Phận" />,
-        size: 120,
-        minSize: 100,
-        cell: ({ row }) => {
-            const value = row.getValue("ma_bo_phan") as string | null | undefined
-            return value || <span className="text-muted-foreground">-</span>
-        },
-        meta: {
-            title: "Mã Bộ Phận",
-            order: 7,
-            minWidth: 100,
-        },
-    },
-    {
-        accessorKey: "ma_phong",
-        header: ({ column }) => <SortableHeader column={column} title="Mã Phòng" />,
-        size: 120,
-        minSize: 100,
-        filterFn: (row, id, value) => {
-            const maPhong = row.getValue(id) as string | null
-            return value.includes(maPhong || "")
-        },
-        cell: ({ row }) => {
-            const value = row.getValue("ma_phong") as string | null | undefined
-            return value || <span className="text-muted-foreground">-</span>
-        },
-        meta: {
-            title: "Mã Phòng",
-            order: 8,
-            minWidth: 100,
-        },
-    },
-    {
         accessorKey: "ngach_luong",
         header: ({ column }) => <SortableHeader column={column} title="Ngạch Lương" />,
         size: 120,
@@ -194,7 +145,7 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
         meta: {
             title: "Ngạch Lương",
-            order: 9,
+            order: 6,
             minWidth: 100,
         },
     },
@@ -212,13 +163,13 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
         cell: ({ row }) => {
             const value = row.getValue("muc_dong_bao_hiem") as number | null | undefined
-            return value !== null && value !== undefined 
-                ? value.toLocaleString("vi-VN") 
+            return value !== null && value !== undefined
+                ? value.toLocaleString("vi-VN")
                 : <span className="text-muted-foreground">-</span>
         },
         meta: {
             title: "Mức Đóng Bảo Hiểm",
-            order: 10,
+            order: 7,
             minWidth: 100,
         },
     },
@@ -237,7 +188,7 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
         meta: {
             title: "Số Ngày Nghỉ Thứ 7",
-            order: 11,
+            order: 8,
             minWidth: 110,
         },
     },
@@ -252,7 +203,7 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
         meta: {
             title: "Nhóm Thưởng",
-            order: 12,
+            order: 9,
             minWidth: 100,
         },
     },
@@ -263,13 +214,13 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         minSize: 100,
         cell: ({ row }) => {
             const value = row.getValue("diem_thuong") as number | null | undefined
-            return value !== null && value !== undefined 
-                ? value.toLocaleString("vi-VN") 
+            return value !== null && value !== undefined
+                ? value.toLocaleString("vi-VN")
                 : <span className="text-muted-foreground">-</span>
         },
         meta: {
             title: "Điểm Thưởng",
-            order: 13,
+            order: 10,
             minWidth: 100,
         },
     },
@@ -289,7 +240,7 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
         meta: {
             title: "Thời gian tạo",
-            order: 14,
+            order: 11,
             minWidth: 140,
         },
     },
@@ -309,7 +260,7 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         },
         meta: {
             title: "Thời gian cập nhật",
-            order: 15,
+            order: 12,
             minWidth: 140,
         },
     },
@@ -320,13 +271,13 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         minSize: 100,
         cell: ({ row }) => {
             const value = row.getValue("phong_ban_id") as number | null | undefined
-            return value !== null && value !== undefined 
-                ? value.toString() 
+            return value !== null && value !== undefined
+                ? value.toString()
                 : <span className="text-muted-foreground">-</span>
         },
         meta: {
             title: "ID Phòng Ban",
-            order: 16,
+            order: 13,
             minWidth: 100,
         },
     },
@@ -337,42 +288,14 @@ export const chucVuColumns = (nhanSuList: NhanSu[] = []): ColumnDef<ChucVu>[] =>
         minSize: 100,
         cell: ({ row }) => {
             const value = row.getValue("cap_bac_id") as number | null | undefined
-            return value !== null && value !== undefined 
-                ? value.toString() 
+            return value !== null && value !== undefined
+                ? value.toString()
                 : <span className="text-muted-foreground">-</span>
         },
         meta: {
             title: "ID Cấp Bậc",
-            order: 17,
+            order: 14,
             minWidth: 100,
-        },
-    },
-    {
-        accessorKey: "nguoi_tao",
-        header: ({ column }) => <SortableHeader column={column} title="Người Tạo" />,
-        size: 200,
-        minSize: 150,
-        cell: ({ row }) => {
-            const nguoiTaoId = row.getValue("nguoi_tao") as number | null | undefined
-            if (!nguoiTaoId) {
-                return <span className="text-muted-foreground">-</span>
-            }
-            
-            // Map nguoi_tao (ma_nhan_vien) với nhanSuList để lấy ho_ten
-            const nguoiTao = nhanSuList.find((ns) => ns.ma_nhan_vien === nguoiTaoId)
-            if (nguoiTao) {
-                return (
-                    <span className="truncate">
-                        {nguoiTao.ma_nhan_vien} - {nguoiTao.ho_ten}
-                    </span>
-                )
-            }
-            return <span>{nguoiTaoId}</span>
-        },
-        meta: {
-            title: "Người Tạo",
-            order: 18,
-            minWidth: 150,
         },
     },
     {

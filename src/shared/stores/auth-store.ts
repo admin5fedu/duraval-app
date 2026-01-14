@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
-import { NhanSu } from '@/features/he-thong/nhan-su/danh-sach-nhan-su/schema'
+import { NhanSu } from '@/features/he-thong/nhan-su/danh-sach-nhan-su/types/nhan-su-types'
 import { NhanSuAPI } from '@/features/he-thong/nhan-su/danh-sach-nhan-su/services/nhan-su.api'
 import { PhanQuyen } from '@/features/he-thong/thiet-lap/phan-quyen/schema'
 import { PhanQuyenAPI } from '@/features/he-thong/thiet-lap/phan-quyen/services/phan-quyen.api'

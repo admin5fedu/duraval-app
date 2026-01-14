@@ -18,33 +18,30 @@ const getSections = (): FormSection[] => [
     fields: [
       { name: "ma_chuc_vu", label: "Mã Chức Vụ", required: true },
       { name: "ten_chuc_vu", label: "Tên Chức Vụ", required: true },
-      { 
-        name: "cap_bac_id", 
-        label: "Cấp Bậc", 
+      {
+        name: "cap_bac_id",
+        label: "Cấp Bậc",
         required: true,
         type: "cap-bac-select",
         placeholder: "Chọn cấp bậc...",
-        description: "Tìm kiếm theo tên hoặc mã cấp bậc",
+        description: "Tìm kiếm theo tên cấp bậc",
       },
-      { name: "ma_cap_bac", label: "Mã Cấp Bậc", placeholder: "Tự động điền từ cấp bậc", disabled: true },
+      { name: "cap_bac", label: "Cấp Bậc", placeholder: "Tự động điền từ cấp bậc", disabled: true },
       { name: "ten_cap_bac", label: "Tên Cấp Bậc", placeholder: "Tự động điền từ cấp bậc", disabled: true, colSpan: 2 },
     ]
   },
   {
     title: "Thông Tin Phòng Ban",
     fields: [
-      { 
-        name: "phong_ban_id", 
-        label: "Phòng Ban", 
+      {
+        name: "phong_ban_id",
+        label: "Phòng Ban",
         required: true,
         type: "phong-ban-select",
         placeholder: "Chọn phòng ban...",
         description: "Tìm kiếm theo tên hoặc mã phòng ban",
       },
-      { name: "ma_phong_ban", label: "Mã Phòng Ban", placeholder: "Tự động điền từ phòng ban", disabled: true },
-      { name: "ma_nhom", label: "Mã Nhóm" },
-      { name: "ma_bo_phan", label: "Mã Bộ Phận" },
-      { name: "ma_phong", label: "Mã Phòng" },
+      { name: "ma_phong_ban", label: "Mã Phòng Ban", placeholder: "Tự động điền từ phòng ban", disabled: true, colSpan: 2 },
     ]
   },
   {
@@ -70,19 +67,19 @@ export function ChucVuFormView({ id, onComplete, onCancel }: ChucVuFormViewProps
   const [searchParams] = useSearchParams()
   const createMutation = useCreateChucVu()
   const updateMutation = useUpdateChucVu()
-  
+
   // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   // để đảm bảo thứ tự hooks nhất quán giữa các lần render
-  
+
   // Fetch data for mapping
   const { data: capBacList } = useCapBac()
   const { data: phongBanList } = usePhongBan()
-  
+
   // Create sections
   const sections = useMemo(() => {
     return getSections()
   }, [])
-  
+
   // If id is provided, fetch existing data for edit mode
   // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
   const { data: existingData, isLoading } = useChucVuById(id ?? 0, undefined)
@@ -91,7 +88,7 @@ export function ChucVuFormView({ id, onComplete, onCancel }: ChucVuFormViewProps
   // Phải được tạo TRƯỚC early return
   const formSchema = useMemo(() => {
     return chucVuSchema
-      .omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true })
+      .omit({ id: true, tg_tao: true, tg_cap_nhat: true })
   }, [])
 
   // Prepare default values
@@ -110,29 +107,17 @@ export function ChucVuFormView({ id, onComplete, onCancel }: ChucVuFormViewProps
     }
   }, [id, existingData])
 
-  // ✅ QUAN TRỌNG: Early return PHẢI ở sau tất cả hooks
-  if (id && isLoading) {
-    return <div>Đang tải...</div>
-  }
-
-  // Computed values (không phải hooks, có thể đặt sau early return)
-  const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
-  const isEditMode = !!id
-  const cancelUrl = returnTo === 'list' 
-    ? chucVuConfig.routePath
-    : (id ? `${chucVuConfig.routePath}/${id}` : chucVuConfig.routePath)
-
   // Auto-fill rules: Tự động điền ma_cap_bac, ten_cap_bac, ma_phong_ban khi chọn cap_bac_id hoặc phong_ban_id
   const autoFillRules = useMemo<AutoFillRule[]>(() => [
     {
       watchField: "cap_bac_id",
       targetFields: [
         {
-          fieldName: "ma_cap_bac",
+          fieldName: "cap_bac",
           mapper: (capBacId) => {
-            if (!capBacId || !capBacList) return ""
+            if (!capBacId || !capBacList) return null
             const selectedCapBac = capBacList.find((cb) => cb.id === capBacId)
-            return selectedCapBac?.ma_cap_bac || ""
+            return selectedCapBac?.cap_bac || null
           }
         },
         {
@@ -161,6 +146,19 @@ export function ChucVuFormView({ id, onComplete, onCancel }: ChucVuFormViewProps
       dependencies: [phongBanList]
     }
   ], [capBacList, phongBanList])
+
+  // ✅ QUAN TRỌNG: Early return PHẢI ở sau tất cả hooks
+  if (id && isLoading) {
+    return <div>Đang tải...</div>
+  }
+
+  // Computed values (không phải hooks, có thể đặt sau early return)
+  const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
+  const isEditMode = !!id
+  const cancelUrl = returnTo === 'list'
+    ? chucVuConfig.routePath
+    : (id ? `${chucVuConfig.routePath}/${id}` : chucVuConfig.routePath)
+
 
   const handleSubmit = async (data: any) => {
     if (isEditMode && id) {

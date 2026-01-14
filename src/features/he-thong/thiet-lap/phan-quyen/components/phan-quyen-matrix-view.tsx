@@ -12,10 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Quyen } from "../schema"
-import { 
-  Loader2, 
-  Save, 
-  Search, 
+import {
+  Loader2,
+  Save,
+  Search,
   ChevronDown,
   ChevronRight,
   BriefcaseBusiness,
@@ -75,7 +75,7 @@ export function PhanQuyenMatrixView() {
   React.useEffect(() => {
     const categories = Object.keys(modulesByCategoryAndGroup)
     setExpandedCategories(new Set(categories))
-    
+
     // Expand all groups in all categories
     const allGroups = new Set<string>()
     categories.forEach(category => {
@@ -89,16 +89,16 @@ export function PhanQuyenMatrixView() {
   // Create permission map from server data: chuc_vu_id -> module_id -> quyen
   const serverPermissionMap = React.useMemo(() => {
     const map = new Map<number, Map<string, Quyen>>()
-    
+
     if (!phanQuyenList) return map
 
     phanQuyenList.forEach((pq) => {
       if (!pq.chuc_vu_id || !pq.module_id || !pq.quyen) return
-      
+
       if (!map.has(pq.chuc_vu_id)) {
         map.set(pq.chuc_vu_id, new Map())
       }
-      
+
       const moduleMap = map.get(pq.chuc_vu_id)!
       moduleMap.set(pq.module_id, pq.quyen as Quyen)
     })
@@ -119,31 +119,31 @@ export function PhanQuyenMatrixView() {
   // Filter modules by search (2-level structure)
   const filteredModulesByCategoryAndGroup = React.useMemo(() => {
     if (!moduleSearch.trim()) return modulesByCategoryAndGroup
-    
+
     const searchLower = moduleSearch.toLowerCase()
     const filtered: Record<string, Record<string, typeof MODULES>> = {}
-    
+
     Object.entries(modulesByCategoryAndGroup).forEach(([category, groups]) => {
       const filteredGroups: Record<string, typeof MODULES> = {}
-      
+
       Object.entries(groups).forEach(([group, modules]) => {
-      const filteredModules = modules.filter(m => 
-        m.name.toLowerCase().includes(searchLower) ||
-        m.description?.toLowerCase().includes(searchLower) ||
+        const filteredModules = modules.filter(m =>
+          m.name.toLowerCase().includes(searchLower) ||
+          m.description?.toLowerCase().includes(searchLower) ||
           m.id.toLowerCase().includes(searchLower) ||
           category.toLowerCase().includes(searchLower) ||
           group.toLowerCase().includes(searchLower)
-      )
-      if (filteredModules.length > 0) {
+        )
+        if (filteredModules.length > 0) {
           filteredGroups[group] = filteredModules
         }
       })
-      
+
       if (Object.keys(filteredGroups).length > 0) {
         filtered[category] = filteredGroups
       }
     })
-    
+
     return filtered
   }, [modulesByCategoryAndGroup, moduleSearch])
 
@@ -185,17 +185,17 @@ export function PhanQuyenMatrixView() {
       export: false,
       quan_tri: false,
     }
-    
+
     // Check local changes first
     const changeKey = `${chucVuId}-${moduleId}`
     if (localChanges.has(changeKey)) {
       return localChanges.get(changeKey)!
     }
-    
+
     // Fall back to server data
     const moduleMap = serverPermissionMap.get(chucVuId)
     if (!moduleMap) return defaultQuyen
-    
+
     return moduleMap.get(moduleId) || defaultQuyen
   }, [serverPermissionMap, localChanges])
 
@@ -209,13 +209,13 @@ export function PhanQuyenMatrixView() {
     setLocalChanges((prev) => {
       const newMap = new Map(prev)
       const changeKey = `${chucVuId}-${moduleId}`
-      
+
       const currentQuyen = getPermission(chucVuId, moduleId)
       const newQuyen: Quyen = {
         ...currentQuyen,
         [quyenKey]: checked,
       }
-      
+
       newMap.set(changeKey, newQuyen)
       setHasChanges(true)
       return newMap
@@ -231,7 +231,7 @@ export function PhanQuyenMatrixView() {
   ) => {
     setLocalChanges((prev) => {
       const newMap = new Map(prev)
-      
+
       chucVuIds.forEach(chucVuId => {
         const changeKey = `${chucVuId}-${moduleId}`
         const currentQuyen = getPermission(chucVuId, moduleId)
@@ -241,7 +241,7 @@ export function PhanQuyenMatrixView() {
         }
         newMap.set(changeKey, newQuyen)
       })
-      
+
       setHasChanges(true)
       return newMap
     })
@@ -256,7 +256,7 @@ export function PhanQuyenMatrixView() {
     setLocalChanges((prev) => {
       const newMap = new Map(prev)
       const changeKey = `${chucVuId}-${moduleId}`
-      
+
       const newQuyen: Quyen = {
         xem: shouldSelect,
         them: shouldSelect,
@@ -266,7 +266,7 @@ export function PhanQuyenMatrixView() {
         export: shouldSelect,
         quan_tri: shouldSelect,
       }
-      
+
       newMap.set(changeKey, newQuyen)
       setHasChanges(true)
       return newMap
@@ -311,16 +311,16 @@ export function PhanQuyenMatrixView() {
   }, [])
 
   const selectedModule = MODULES.find(m => m.id === selectedModuleId)
-  
+
   // Generate filter options for phòng ban
   const phongBanFilterOptions = React.useMemo(() => {
     if (!chucVuList || !phongBanList) return []
-    
-    // Get unique ma_phong from chucVuList
+
+    // Get unique ma_phong_ban from chucVuList
     const uniquePhongs = Array.from(new Set(
-      chucVuList.map(cv => cv.ma_phong).filter((phong): phong is string => !!phong)
+      chucVuList.map(cv => cv.ma_phong_ban).filter((phong): phong is string => !!phong)
     ))
-    
+
     return uniquePhongs.map(maPhong => {
       // Find phong ban with matching ma_phong_ban
       const phongBan = phongBanList.find(pb => pb.ma_phong_ban === maPhong)
@@ -334,19 +334,19 @@ export function PhanQuyenMatrixView() {
   // Filter chucVuList by selected phong
   const filteredChucVuList = React.useMemo(() => {
     if (!chucVuList || selectedPhongFilter === "all") return chucVuList
-    
-    return chucVuList.filter(cv => cv.ma_phong === selectedPhongFilter)
+
+    return chucVuList.filter(cv => cv.ma_phong_ban === selectedPhongFilter)
   }, [chucVuList, selectedPhongFilter])
 
   // Group chức vụ theo Phòng -> Phòng ban
   const chucVusGroupedByPhong = React.useMemo(() => {
     if (!filteredChucVuList || !phongBanList) return []
-    
+
     // Map: ma_phong -> Map<phong_ban_id, ChucVu[]>
     const groups = new Map<string | null, Map<number | null, ChucVu[]>>()
 
     filteredChucVuList.forEach(cv => {
-      const maPhong = cv.ma_phong || null
+      const maPhong = cv.ma_phong_ban || null
       const phongBanId = cv.phong_ban_id ?? null
 
       if (!groups.has(maPhong)) {
@@ -359,7 +359,7 @@ export function PhanQuyenMatrixView() {
       }
       phongBanMap.get(phongBanId)!.push(cv)
     })
-    
+
     // Convert to array và lấy tên phòng / phòng ban
     const result: PhongGroup[] = []
     groups.forEach((phongBanMap, maPhong) => {
@@ -423,14 +423,14 @@ export function PhanQuyenMatrixView() {
     shouldSelect: boolean
   ) => {
     if (!filteredChucVuList) return
-    
+
     const chucVusInPhongBan = filteredChucVuList.filter(cv => {
       if (phongBanId !== null) {
         return cv.phong_ban_id === phongBanId
       }
-      return cv.phong_ban_id === null && cv.ma_phong === maPhong
+      return cv.phong_ban_id === null && cv.ma_phong_ban === maPhong
     })
-    
+
     batchTogglePermission(
       chucVusInPhongBan.map(cv => cv.id).filter((id): id is number => id !== undefined),
       moduleId,
@@ -447,9 +447,9 @@ export function PhanQuyenMatrixView() {
     shouldSelect: boolean
   ) => {
     if (!filteredChucVuList) return
-    
-    const chucVusInPhong = filteredChucVuList.filter(cv => cv.ma_phong === maPhong)
-    
+
+    const chucVusInPhong = filteredChucVuList.filter(cv => cv.ma_phong_ban === maPhong)
+
     batchTogglePermission(
       chucVusInPhong.map(cv => cv.id).filter((id): id is number => id !== undefined),
       moduleId,
@@ -526,42 +526,42 @@ export function PhanQuyenMatrixView() {
                                 {/* Group Level (Cấp 2) */}
                                 <button
                                   onClick={() => toggleGroup(category, group)}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
-                      >
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
+                                >
                                   {isGroupExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
                                   <span>{group}</span>
-                      </button>
+                                </button>
                                 {isGroupExpanded && (
-                        <div className="ml-6 space-y-0.5">
-                          {modules.map(module => {
-                            const isSelected = selectedModuleId === module.id
-                            
-                            // Check if this module has any permissions
-                            const hasAnyPermission = chucVuList.some((cv) => {
-                              if (!cv.id) return false
-                              const quyen = getPermission(cv.id, module.id)
+                                  <div className="ml-6 space-y-0.5">
+                                    {modules.map(module => {
+                                      const isSelected = selectedModuleId === module.id
+
+                                      // Check if this module has any permissions
+                                      const hasAnyPermission = chucVuList.some((cv) => {
+                                        if (!cv.id) return false
+                                        const quyen = getPermission(cv.id, module.id)
                                         return quyen.xem || quyen.them || quyen.sua || quyen.xoa || quyen.import || quyen.export || quyen.quan_tri
-                            })
-                            
-                            return (
-                              <button
-                                key={module.id}
-                                onClick={() => setSelectedModuleId(module.id)}
-                                className={cn(
-                                  "w-full text-left px-3 py-2 rounded-md text-sm transition-all",
-                                  "hover:bg-accent",
-                                  isSelected 
-                                    ? "bg-primary text-primary-foreground font-medium" 
-                                    : "text-foreground",
-                                  hasAnyPermission && !isSelected && "text-primary"
-                                )}
-                              >
-                                {module.name}
-                              </button>
+                                      })
+
+                                      return (
+                                        <button
+                                          key={module.id}
+                                          onClick={() => setSelectedModuleId(module.id)}
+                                          className={cn(
+                                            "w-full text-left px-3 py-2 rounded-md text-sm transition-all",
+                                            "hover:bg-accent",
+                                            isSelected
+                                              ? "bg-primary text-primary-foreground font-medium"
+                                              : "text-foreground",
+                                            hasAnyPermission && !isSelected && "text-primary"
+                                          )}
+                                        >
+                                          {module.name}
+                                        </button>
                                       )
                                     })}
                                   </div>
@@ -583,7 +583,7 @@ export function PhanQuyenMatrixView() {
         <Card className="min-w-0 flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 8rem)' }}>
           <CardContent className="p-0 flex-1 min-h-0 min-w-0 flex flex-col">
             {/* Sticky Toolbar - Không scroll ngang */}
-            <div 
+            <div
               className="flex-shrink-0 sticky top-0 z-30 bg-background border-b px-6 py-4"
               style={{
                 boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
@@ -654,7 +654,7 @@ export function PhanQuyenMatrixView() {
             </div>
             {/* Table Container - Scroll ngang và dọc */}
             {selectedModule ? (
-              <div 
+              <div
                 className="flex-1 min-h-0 overflow-y-auto overflow-x-auto"
                 style={{
                   scrollBehavior: 'smooth',
@@ -669,7 +669,7 @@ export function PhanQuyenMatrixView() {
                   }
                 `}</style>
                 <table className="w-full border-collapse" style={{ minWidth: '800px' }}>
-                  <thead 
+                  <thead
                     className="bg-background border-b"
                     style={{
                       position: 'sticky',
@@ -679,186 +679,268 @@ export function PhanQuyenMatrixView() {
                       boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
                     }}
                   >
-                      <tr>
-                        <th 
-                          className="border-r p-2 sm:p-3 text-center font-semibold text-xs sm:text-sm min-w-[50px] sm:min-w-[60px]"
+                    <tr>
+                      <th
+                        className="border-r p-2 sm:p-3 text-center font-semibold text-xs sm:text-sm min-w-[50px] sm:min-w-[60px]"
+                        style={{
+                          position: 'sticky',
+                          left: 0,
+                          top: 0,
+                          zIndex: 25,
+                          boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                          borderRight: '1px solid hsl(var(--border) / 0.5)',
+                          isolation: 'isolate',
+                          transform: 'translateZ(0)',
+                          willChange: 'transform',
+                          backgroundClip: 'padding-box',
+                          backgroundColor: 'hsl(var(--background))',
+                        }}
+                      >
+                        <div
                           style={{
-                            position: 'sticky',
-                            left: 0,
-                            top: 0,
-                            zIndex: 25,
-                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-                            borderRight: '1px solid hsl(var(--border) / 0.5)',
-                            isolation: 'isolate',
-                            transform: 'translateZ(0)',
-                            willChange: 'transform',
-                            backgroundClip: 'padding-box',
-                            backgroundColor: 'hsl(var(--background))',
+                            position: 'absolute',
+                            inset: 0,
+                            backgroundColor: 'white',
+                            zIndex: 0,
+                            pointerEvents: 'none',
                           }}
-                        >
-                          <div 
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              backgroundColor: 'white',
-                              zIndex: 0,
-                              pointerEvents: 'none',
-                            }}
-                          />
-                          <div style={{ position: 'relative', zIndex: 1 }}>
-                          </div>
-                        </th>
-                        <th 
-                          className="border-r p-2 sm:p-3 text-left font-semibold text-xs sm:text-sm min-w-[150px] sm:min-w-[250px]"
-                          data-sticky-left="50"
+                        />
+                        <div style={{ position: 'relative', zIndex: 1 }}>
+                        </div>
+                      </th>
+                      <th
+                        className="border-r p-2 sm:p-3 text-left font-semibold text-xs sm:text-sm min-w-[150px] sm:min-w-[250px]"
+                        data-sticky-left="50"
+                        style={{
+                          position: 'sticky',
+                          left: '50px',
+                          top: 0,
+                          zIndex: 25,
+                          boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                          borderRight: '1px solid hsl(var(--border) / 0.5)',
+                          isolation: 'isolate',
+                          transform: 'translateZ(0)',
+                          willChange: 'transform',
+                          backgroundClip: 'padding-box',
+                          backgroundColor: 'hsl(var(--background))',
+                        }}
+                      >
+                        <div
                           style={{
-                            position: 'sticky',
-                            left: '50px',
-                            top: 0,
-                            zIndex: 25,
-                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-                            borderRight: '1px solid hsl(var(--border) / 0.5)',
-                            isolation: 'isolate',
-                            transform: 'translateZ(0)',
-                            willChange: 'transform',
-                            backgroundClip: 'padding-box',
-                            backgroundColor: 'hsl(var(--background))',
+                            position: 'absolute',
+                            inset: 0,
+                            backgroundColor: 'white',
+                            zIndex: 0,
+                            pointerEvents: 'none',
                           }}
-                        >
-                          <div 
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              backgroundColor: 'white',
-                              zIndex: 0,
-                              pointerEvents: 'none',
-                            }}
-                          />
-                          <div style={{ position: 'relative', zIndex: 1 }}>
-                            Chức vụ
-                          </div>
-                        </th>
-                        {selectedModule && QUYEN_LABELS.map(({ key, label }) => {
-                          // Check if all chức vụ have this permission
-                          const allChecked = allChucVuIds.length > 0 && allChucVuIds.every(chucVuId => {
-                            const quyen = getPermission(chucVuId, selectedModule.id)
-                            return quyen[key]
-                          })
-                          
-                          return (
-                            <th
-                              key={key}
-                              className="p-1.5 sm:p-2 md:p-3 text-center font-semibold text-[10px] sm:text-xs md:text-sm min-w-[80px] sm:min-w-[100px] md:min-w-[120px] border-r last:border-r-0"
-                            >
-                              <div className="flex flex-col items-center gap-0.5 sm:gap-1 md:gap-2">
-                                <span className="text-[10px] sm:text-xs md:text-sm leading-tight">{label}</span>
-                                <Checkbox
-                                  checked={allChecked}
-                                  onCheckedChange={(checked) => {
-                                    batchTogglePermission(allChucVuIds, selectedModule.id, key, !!checked)
-                                  }}
-                                  disabled={batchUpsertMutation.isPending}
-                                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
-                                />
-                              </div>
-                            </th>
-                          )
-                        })}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {chucVusGroupedByPhong.map((phongGroup, phongIndex) => {
+                        />
+                        <div style={{ position: 'relative', zIndex: 1 }}>
+                          Chức vụ
+                        </div>
+                      </th>
+                      {selectedModule && QUYEN_LABELS.map(({ key, label }) => {
+                        // Check if all chức vụ have this permission
+                        const allChecked = allChucVuIds.length > 0 && allChucVuIds.every(chucVuId => {
+                          const quyen = getPermission(chucVuId, selectedModule.id)
+                          return quyen[key]
+                        })
+
                         return (
-                          <React.Fragment key={phongGroup.maPhong ?? `phong-${phongIndex}`}>
-                            {/* Phòng Header Row */}
-                            <tr className="bg-muted/40 border-b">
-                              <td 
-                                className="border-r p-2 sm:p-2.5" 
-                                colSpan={2}
-                                style={{
-                                  position: 'sticky',
-                                  left: 0,
-                                  zIndex: 20,
-                                  boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-                                  borderRight: '1px solid hsl(var(--border) / 0.5)',
-                                  isolation: 'isolate',
-                                  transform: 'translateZ(0)',
-                                  willChange: 'transform',
-                                  backgroundClip: 'padding-box',
-                                  backgroundColor: 'hsl(var(--muted) / 0.4)',
+                          <th
+                            key={key}
+                            className="p-1.5 sm:p-2 md:p-3 text-center font-semibold text-[10px] sm:text-xs md:text-sm min-w-[80px] sm:min-w-[100px] md:min-w-[120px] border-r last:border-r-0"
+                          >
+                            <div className="flex flex-col items-center gap-0.5 sm:gap-1 md:gap-2">
+                              <span className="text-[10px] sm:text-xs md:text-sm leading-tight">{label}</span>
+                              <Checkbox
+                                checked={allChecked}
+                                onCheckedChange={(checked) => {
+                                  batchTogglePermission(allChucVuIds, selectedModule.id, key, !!checked)
                                 }}
-                              >
-                                <div 
-                                  style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    backgroundColor: 'white',
-                                    zIndex: 0,
-                                    pointerEvents: 'none',
-                                  }}
-                                />
-                                <div 
-                                  style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    backgroundColor: 'hsl(var(--muted) / 0.4)',
-                                    zIndex: 1,
-                                    pointerEvents: 'none',
-                                  }}
-                                />
-                                <div className="flex items-center gap-2" style={{ position: 'relative', zIndex: 2 }}>
-                                  <span className="font-semibold text-xs sm:text-sm text-foreground">{phongGroup.tenPhong}</span>
-                                </div>
-                              </td>
-                              {QUYEN_LABELS.map(({ key }) => {
-                                // Get all chức vụ IDs in this phòng
-                                const allChucVuIdsInPhong = phongGroup.phongBanGroups
-                                  .flatMap(pb => pb.chucVus)
-                                  .map(cv => cv.id)
-                                  .filter((id): id is number => id !== undefined)
-                                
-                                // Check if all chức vụ in phòng have this permission
-                                const allChecked = allChucVuIdsInPhong.length > 0 && allChucVuIdsInPhong.every(chucVuId => {
-                                  const quyen = getPermission(chucVuId, selectedModule.id)
-                                  return quyen[key]
-                                })
-                                
-                                return (
-                                  <td
-                                    key={key}
-                                    className="bg-muted/40 p-1.5 sm:p-2 md:p-2.5 text-center border-r last:border-r-0"
-                                  >
-                                    <div className="flex justify-center">
-                                      <Checkbox
-                                        checked={allChecked}
-                                        onCheckedChange={(checked) =>
-                                          handleTogglePhongPermissions(phongGroup.maPhong, selectedModule.id, key, !!checked)
-                                        }
-                                        disabled={batchUpsertMutation.isPending}
-                                        className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
-                                      />
-                                    </div>
-                                  </td>
-                                )
-                              })}
-                            </tr>
-                            
-                            {/* Phòng ban groups and chức vụ rows */}
-                            {phongGroup.phongBanGroups.map((phongBanGroup, pbIndex) => {
-                              const chucVuIdsInPhongBan = phongBanGroup.chucVus
+                                disabled={batchUpsertMutation.isPending}
+                                className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
+                              />
+                            </div>
+                          </th>
+                        )
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chucVusGroupedByPhong.map((phongGroup, phongIndex) => {
+                      return (
+                        <React.Fragment key={phongGroup.maPhong ?? `phong-${phongIndex}`}>
+                          {/* Phòng Header Row */}
+                          <tr className="bg-muted/40 border-b">
+                            <td
+                              className="border-r p-2 sm:p-2.5"
+                              colSpan={2}
+                              style={{
+                                position: 'sticky',
+                                left: 0,
+                                zIndex: 20,
+                                boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                isolation: 'isolate',
+                                transform: 'translateZ(0)',
+                                willChange: 'transform',
+                                backgroundClip: 'padding-box',
+                                backgroundColor: 'hsl(var(--muted) / 0.4)',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  inset: 0,
+                                  backgroundColor: 'white',
+                                  zIndex: 0,
+                                  pointerEvents: 'none',
+                                }}
+                              />
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  inset: 0,
+                                  backgroundColor: 'hsl(var(--muted) / 0.4)',
+                                  zIndex: 1,
+                                  pointerEvents: 'none',
+                                }}
+                              />
+                              <div className="flex items-center gap-2" style={{ position: 'relative', zIndex: 2 }}>
+                                <span className="font-semibold text-xs sm:text-sm text-foreground">{phongGroup.tenPhong}</span>
+                              </div>
+                            </td>
+                            {QUYEN_LABELS.map(({ key }) => {
+                              // Get all chức vụ IDs in this phòng
+                              const allChucVuIdsInPhong = phongGroup.phongBanGroups
+                                .flatMap(pb => pb.chucVus)
                                 .map(cv => cv.id)
                                 .filter((id): id is number => id !== undefined)
-                              
-                              // Only show phòng ban header if there are multiple phòng bans in the phòng
-                              const showPhongBanHeader = phongGroup.phongBanGroups.length > 1
-                              
+
+                              // Check if all chức vụ in phòng have this permission
+                              const allChecked = allChucVuIdsInPhong.length > 0 && allChucVuIdsInPhong.every(chucVuId => {
+                                const quyen = getPermission(chucVuId, selectedModule.id)
+                                return quyen[key]
+                              })
+
                               return (
-                                <React.Fragment key={phongBanGroup.phongBanId ?? `pb-${pbIndex}`}>
-                                  {showPhongBanHeader && (
-                                    <tr className="bg-muted/20 border-b">
-                                      <td 
-                                        className="border-r p-2 sm:p-2 pl-3 sm:pl-5" 
-                                        colSpan={2}
+                                <td
+                                  key={key}
+                                  className="bg-muted/40 p-1.5 sm:p-2 md:p-2.5 text-center border-r last:border-r-0"
+                                >
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={allChecked}
+                                      onCheckedChange={(checked) =>
+                                        handleTogglePhongPermissions(phongGroup.maPhong, selectedModule.id, key, !!checked)
+                                      }
+                                      disabled={batchUpsertMutation.isPending}
+                                      className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
+                                    />
+                                  </div>
+                                </td>
+                              )
+                            })}
+                          </tr>
+
+                          {/* Phòng ban groups and chức vụ rows */}
+                          {phongGroup.phongBanGroups.map((phongBanGroup, pbIndex) => {
+                            const chucVuIdsInPhongBan = phongBanGroup.chucVus
+                              .map(cv => cv.id)
+                              .filter((id): id is number => id !== undefined)
+
+                            // Only show phòng ban header if there are multiple phòng bans in the phòng
+                            const showPhongBanHeader = phongGroup.phongBanGroups.length > 1
+
+                            return (
+                              <React.Fragment key={phongBanGroup.phongBanId ?? `pb-${pbIndex}`}>
+                                {showPhongBanHeader && (
+                                  <tr className="bg-muted/20 border-b">
+                                    <td
+                                      className="border-r p-2 sm:p-2 pl-3 sm:pl-5"
+                                      colSpan={2}
+                                      style={{
+                                        position: 'sticky',
+                                        left: 0,
+                                        zIndex: 20,
+                                        boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                        borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                        isolation: 'isolate',
+                                        transform: 'translateZ(0)',
+                                        willChange: 'transform',
+                                        backgroundClip: 'padding-box',
+                                        backgroundColor: 'hsl(var(--muted) / 0.2)',
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          inset: 0,
+                                          backgroundColor: 'white',
+                                          zIndex: 0,
+                                          pointerEvents: 'none',
+                                        }}
+                                      />
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          inset: 0,
+                                          backgroundColor: 'hsl(var(--muted) / 0.2)',
+                                          zIndex: 1,
+                                          pointerEvents: 'none',
+                                        }}
+                                      />
+                                      <div className="flex items-center gap-2" style={{ position: 'relative', zIndex: 2 }}>
+                                        <span className="font-medium text-xs text-muted-foreground">{phongBanGroup.tenPhongBan}</span>
+                                      </div>
+                                    </td>
+                                    {QUYEN_LABELS.map(({ key }) => {
+                                      const allChecked = chucVuIdsInPhongBan.length > 0 && chucVuIdsInPhongBan.every(chucVuId => {
+                                        const quyen = getPermission(chucVuId, selectedModule.id)
+                                        return quyen[key]
+                                      })
+
+                                      return (
+                                        <td
+                                          key={key}
+                                          className="bg-muted/20 p-1.5 sm:p-2 md:p-2 text-center border-r last:border-r-0"
+                                        >
+                                          <div className="flex justify-center">
+                                            <Checkbox
+                                              checked={allChecked}
+                                              onCheckedChange={(checked) =>
+                                                handleTogglePhongBanPermissions(
+                                                  phongBanGroup.phongBanId,
+                                                  phongGroup.maPhong,
+                                                  selectedModule.id,
+                                                  key,
+                                                  !!checked
+                                                )
+                                              }
+                                              disabled={batchUpsertMutation.isPending}
+                                              className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
+                                            />
+                                          </div>
+                                        </td>
+                                      )
+                                    })}
+                                  </tr>
+                                )}
+
+                                {/* Chức vụ rows */}
+                                {phongBanGroup.chucVus.map((chucVu) => {
+                                  if (!chucVu.id) return null
+                                  const quyen = getPermission(chucVu.id, selectedModule.id)
+
+                                  const allPermissionsSelected = QUYEN_LABELS.every(({ key }) => quyen[key])
+
+                                  return (
+                                    <tr
+                                      key={chucVu.id}
+                                      className="border-b hover:bg-muted/30 transition-colors"
+                                    >
+                                      <td
+                                        className="border-r p-2 sm:p-2.5"
                                         style={{
                                           position: 'sticky',
                                           left: 0,
@@ -869,53 +951,71 @@ export function PhanQuyenMatrixView() {
                                           transform: 'translateZ(0)',
                                           willChange: 'transform',
                                           backgroundClip: 'padding-box',
-                                          backgroundColor: 'hsl(var(--muted) / 0.2)',
+                                          backgroundColor: 'hsl(var(--background))',
                                         }}
                                       >
-                                        <div 
+                                        <div
                                           style={{
                                             position: 'absolute',
                                             inset: 0,
-                                            backgroundColor: 'white',
+                                            backgroundColor: 'hsl(var(--background))',
                                             zIndex: 0,
                                             pointerEvents: 'none',
                                           }}
                                         />
-                                        <div 
+                                        <div className="flex justify-center" style={{ position: 'relative', zIndex: 10 }}>
+                                          <Checkbox
+                                            checked={allPermissionsSelected}
+                                            onCheckedChange={(checked) =>
+                                              handleToggleAllPermissions(chucVu.id!, selectedModule.id, !!checked)
+                                            }
+                                            disabled={batchUpsertMutation.isPending}
+                                            className="h-3.5 w-3.5 sm:h-4 sm:w-4 border-primary"
+                                          />
+                                        </div>
+                                      </td>
+                                      <td
+                                        className="border-r p-2 sm:p-2.5"
+                                        data-sticky-left="50"
+                                        style={{
+                                          position: 'sticky',
+                                          left: '50px',
+                                          zIndex: 20,
+                                          boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
+                                          borderRight: '1px solid hsl(var(--border) / 0.5)',
+                                          isolation: 'isolate',
+                                          transform: 'translateZ(0)',
+                                          willChange: 'transform',
+                                          backgroundClip: 'padding-box',
+                                          backgroundColor: 'hsl(var(--background))',
+                                        }}
+                                      >
+                                        <div
                                           style={{
                                             position: 'absolute',
                                             inset: 0,
-                                            backgroundColor: 'hsl(var(--muted) / 0.2)',
-                                            zIndex: 1,
+                                            backgroundColor: 'hsl(var(--background))',
+                                            zIndex: 0,
                                             pointerEvents: 'none',
                                           }}
                                         />
-                                        <div className="flex items-center gap-2" style={{ position: 'relative', zIndex: 2 }}>
-                                          <span className="font-medium text-xs text-muted-foreground">{phongBanGroup.tenPhongBan}</span>
+                                        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0" style={{ position: 'relative', zIndex: 10 }}>
+                                          <BriefcaseBusiness className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
+                                          <div className="font-medium text-xs sm:text-sm truncate">{chucVu.ten_chuc_vu}</div>
                                         </div>
                                       </td>
-                                      {QUYEN_LABELS.map(({ key }) => {
-                                        const allChecked = chucVuIdsInPhongBan.length > 0 && chucVuIdsInPhongBan.every(chucVuId => {
-                                          const quyen = getPermission(chucVuId, selectedModule.id)
-                                          return quyen[key]
-                                        })
-                                        
+                                      {QUYEN_LABELS.map(({ key, label: _label }) => {
+                                        const hasPerm = quyen[key]
                                         return (
                                           <td
                                             key={key}
-                                            className="bg-muted/20 p-1.5 sm:p-2 md:p-2 text-center border-r last:border-r-0"
+                                            className="p-1.5 sm:p-2 md:p-2.5 text-center border-r last:border-r-0"
                                           >
-                                            <div className="flex justify-center">
+                                            <div className="flex justify-center" style={{ position: 'relative', zIndex: 10 }}>
                                               <Checkbox
-                                                checked={allChecked}
+                                                checked={hasPerm}
                                                 onCheckedChange={(checked) =>
-                                                  handleTogglePhongBanPermissions(
-                                                    phongBanGroup.phongBanId,
-                                                    phongGroup.maPhong,
-                                                    selectedModule.id,
-                                                    key,
-                                                    !!checked
-                                                  )
+                                                  handlePermissionChange(chucVu.id!, selectedModule.id, key, !!checked)
                                                 }
                                                 disabled={batchUpsertMutation.isPending}
                                                 className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
@@ -925,116 +1025,16 @@ export function PhanQuyenMatrixView() {
                                         )
                                       })}
                                     </tr>
-                                  )}
-                                  
-                                  {/* Chức vụ rows */}
-                                  {phongBanGroup.chucVus.map((chucVu) => {
-                                    if (!chucVu.id) return null
-                                    const quyen = getPermission(chucVu.id, selectedModule.id)
-                                    
-                                    const allPermissionsSelected = QUYEN_LABELS.every(({ key }) => quyen[key])
-                                    
-                                    return (
-                                      <tr
-                                        key={chucVu.id}
-                                        className="border-b hover:bg-muted/30 transition-colors"
-                                      >
-                                        <td 
-                                          className="border-r p-2 sm:p-2.5"
-                                          style={{
-                                            position: 'sticky',
-                                            left: 0,
-                                            zIndex: 20,
-                                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-                                            borderRight: '1px solid hsl(var(--border) / 0.5)',
-                                            isolation: 'isolate',
-                                            transform: 'translateZ(0)',
-                                            willChange: 'transform',
-                                            backgroundClip: 'padding-box',
-                                            backgroundColor: 'hsl(var(--background))',
-                                          }}
-                                        >
-                                          <div 
-                                            style={{
-                                              position: 'absolute',
-                                              inset: 0,
-                                              backgroundColor: 'hsl(var(--background))',
-                                              zIndex: 0,
-                                              pointerEvents: 'none',
-                                            }}
-                                          />
-                                          <div className="flex justify-center" style={{ position: 'relative', zIndex: 10 }}>
-                                            <Checkbox
-                                              checked={allPermissionsSelected}
-                                              onCheckedChange={(checked) =>
-                                                handleToggleAllPermissions(chucVu.id!, selectedModule.id, !!checked)
-                                              }
-                                              disabled={batchUpsertMutation.isPending}
-                                              className="h-3.5 w-3.5 sm:h-4 sm:w-4 border-primary"
-                                            />
-                                          </div>
-                                        </td>
-                                        <td 
-                                          className="border-r p-2 sm:p-2.5"
-                                          data-sticky-left="50"
-                                          style={{
-                                            position: 'sticky',
-                                            left: '50px',
-                                            zIndex: 20,
-                                            boxShadow: '2px 0 6px -2px rgba(0, 0, 0, 0.15)',
-                                            borderRight: '1px solid hsl(var(--border) / 0.5)',
-                                            isolation: 'isolate',
-                                            transform: 'translateZ(0)',
-                                            willChange: 'transform',
-                                            backgroundClip: 'padding-box',
-                                            backgroundColor: 'hsl(var(--background))',
-                                          }}
-                                        >
-                                          <div 
-                                            style={{
-                                              position: 'absolute',
-                                              inset: 0,
-                                              backgroundColor: 'hsl(var(--background))',
-                                              zIndex: 0,
-                                              pointerEvents: 'none',
-                                            }}
-                                          />
-                                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0" style={{ position: 'relative', zIndex: 10 }}>
-                                            <BriefcaseBusiness className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
-                                            <div className="font-medium text-xs sm:text-sm truncate">{chucVu.ten_chuc_vu}</div>
-                                          </div>
-                                        </td>
-                                        {QUYEN_LABELS.map(({ key, label: _label }) => {
-                                          const hasPerm = quyen[key]
-                                          return (
-                                            <td
-                                              key={key}
-                                              className="p-1.5 sm:p-2 md:p-2.5 text-center border-r last:border-r-0"
-                                            >
-                                              <div className="flex justify-center" style={{ position: 'relative', zIndex: 10 }}>
-                                                <Checkbox
-                                                  checked={hasPerm}
-                                                  onCheckedChange={(checked) =>
-                                                    handlePermissionChange(chucVu.id!, selectedModule.id, key, !!checked)
-                                                  }
-                                                  disabled={batchUpsertMutation.isPending}
-                                                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 border-primary"
-                                                />
-                                              </div>
-                                            </td>
-                                          )
-                                        })}
-                                      </tr>
-                                    )
-                                  })}
-                                </React.Fragment>
-                              )
-                            })}
-                          </React.Fragment>
-                        )
-                      })}
-                    </tbody>
-                  </table>
+                                  )
+                                })}
+                              </React.Fragment>
+                            )
+                          })}
+                        </React.Fragment>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">

@@ -88,7 +88,7 @@ export function UserNav() {
 
   // Determine display name and title from employee data
   const displayName = employee?.ho_ten || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Người dùng'
-  const displayTitle = employee?.chuc_vu || 'Nhân viên'
+  const displayTitle = employee?.ma_chuc_vu || 'Nhân viên'
   const rawAvatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
   // Transform URL for optimized avatar display
   const avatarUrl = rawAvatarUrl ? transformCloudinaryUrl(rawAvatarUrl) : null
@@ -120,8 +120,8 @@ export function UserNav() {
             <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 opacity-60 group-hover:opacity-100 transition-opacity hidden sm:block" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          className="w-56" 
+        <DropdownMenuContent
+          className="w-56"
           align="end"
         >
           <DropdownMenuLabel className="font-normal">
@@ -134,19 +134,19 @@ export function UserNav() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => navigate('/ho-so')}
               className="cursor-pointer"
             >
               <span>Xem hồ sơ</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => navigate('/doi-mat-khau')}
               className="cursor-pointer"
             >
               <span>Đổi mật khẩu</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => navigate('/settings')}
               className="cursor-pointer"
             >

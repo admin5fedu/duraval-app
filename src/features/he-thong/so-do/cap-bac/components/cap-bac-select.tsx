@@ -40,10 +40,10 @@ export function CapBacSelect({
 }: CapBacSelectProps) {
     const [open, setOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
-    
+
     // Fetch danh sách cấp bậc
     const { data: capBacList, isLoading } = useCapBac()
-    
+
     const searchInputId = React.useId()
 
     // Filter danh sách cấp bậc: loại trừ các ID trong excludeIds
@@ -63,12 +63,11 @@ export function CapBacSelect({
         if (!searchQuery.trim()) {
             return availableCapBac
         }
-        
+
         const query = searchQuery.toLowerCase()
         return availableCapBac.filter((cb) => {
-            const maCapBac = cb.ma_cap_bac?.toLowerCase() || ""
             const tenCapBac = cb.ten_cap_bac?.toLowerCase() || ""
-            return maCapBac.includes(query) || tenCapBac.includes(query)
+            return tenCapBac.includes(query)
         })
     }, [availableCapBac, searchQuery])
 
@@ -101,8 +100,8 @@ export function CapBacSelect({
                     {selectedCapBac ? (
                         <div className="flex items-center justify-between flex-1 min-w-0 mr-2">
                             <span className="truncate">
-                                {selectedCapBac.ma_cap_bac} - {selectedCapBac.ten_cap_bac}
-                                {selectedCapBac.bac ? ` (Bậc ${selectedCapBac.bac})` : ''}
+                                {selectedCapBac.ten_cap_bac}
+                                {selectedCapBac.cap_bac ? ` (Bậc ${selectedCapBac.cap_bac})` : ''}
                             </span>
                             {!disabled && (
                                 <X
@@ -152,8 +151,8 @@ export function CapBacSelect({
                             <div className="p-1">
                                 {filteredOptions.map((cb) => {
                                     const isSelected = value === cb.id
-                                    const displayLabel = `${cb.ma_cap_bac} - ${cb.ten_cap_bac}${cb.bac ? ` (Bậc ${cb.bac})` : ''}`
-                                    
+                                    const displayLabel = `${cb.ten_cap_bac}${cb.cap_bac ? ` (Bậc ${cb.cap_bac})` : ''}`
+
                                     return (
                                         <div
                                             key={cb.id}

@@ -46,6 +46,7 @@ export function GenericFormView<T extends z.ZodType<any, any>>({
     errorMessage = "Có lỗi xảy ra khi lưu dữ liệu",
     hideHeader = false,
     hideFooter = false,
+    mode = "page",
     children,
 }: GenericFormViewProps<T>) {
     // 1. Navigation handler
@@ -72,9 +73,9 @@ export function GenericFormView<T extends z.ZodType<any, any>>({
     // 6. Render form
     return (
         <Form {...form}>
-            <form 
+            <form
                 ref={formRef}
-                onSubmit={form.handleSubmit(handleSubmit)} 
+                onSubmit={form.handleSubmit(handleSubmit)}
                 className={cn(sectionSpacingClass(), "pb-10")}
             >
                 {!hideHeader && (
@@ -93,10 +94,11 @@ export function GenericFormView<T extends z.ZodType<any, any>>({
                 {/* Sections */}
                 <div className={formSectionContainerClass()}>
                     {sections.map((section, index) => (
-                        <FormSectionCard 
-                            key={index} 
-                            section={section} 
+                        <FormSectionCard
+                            key={index}
+                            section={section}
                             form={form}
+                            mode={mode}
                         />
                     ))}
                 </div>

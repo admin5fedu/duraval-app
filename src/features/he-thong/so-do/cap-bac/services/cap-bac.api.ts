@@ -15,7 +15,7 @@ export class CapBacAPI {
         const { data, error } = await supabase
             .from(TABLE_NAME)
             .select("*")
-            .order("bac", { ascending: true })
+            .order("cap_bac", { ascending: true })
 
         if (error) {
             console.error("Lỗi khi tải danh sách cấp bậc:", error)

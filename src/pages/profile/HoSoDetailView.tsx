@@ -33,9 +33,9 @@ export default function HoSoDetailView() {
 
   // Use employee data if available, fallback to user metadata
   const displayName = employee?.ho_ten || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Người dùng'
-  const displaySubtitle = employee?.ten_cap_bac 
-    ? `${employee.ten_cap_bac}${employee.chuc_vu ? ` • ${employee.chuc_vu}` : ''}`
-    : employee?.chuc_vu || 'Nhân viên'
+  const displaySubtitle = employee?.ten_cap_bac
+    ? `${employee.ten_cap_bac}${employee.ma_chuc_vu ? ` • ${employee.ma_chuc_vu}` : ''}`
+    : employee?.ma_chuc_vu || 'Nhân viên'
   const rawAvatarUrl = employee?.avatar_url || user?.user_metadata?.avatar_url
   // Transform URL for optimized avatar display in header
   const avatarUrl = rawAvatarUrl ? transformCloudinaryUrl(rawAvatarUrl) : null
@@ -109,26 +109,26 @@ export default function HoSoDetailView() {
       fields: [
         {
           label: 'Phòng Ban',
-          key: 'phong_ban',
-          value: employee?.phong_ban || '-',
+          key: 'ma_phong',
+          value: employee?.ma_phong || '-',
           type: 'text',
         },
         {
           label: 'Bộ Phận',
-          key: 'bo_phan',
-          value: employee?.bo_phan || '-',
+          key: 'ma_bo_phan',
+          value: employee?.ma_bo_phan || '-',
           type: 'text',
         },
         {
           label: 'Nhóm',
-          key: 'nhom',
-          value: employee?.nhom || '-',
+          key: 'ma_nhom',
+          value: employee?.ma_nhom || '-',
           type: 'text',
         },
         {
           label: 'Chức Vụ',
-          key: 'chuc_vu',
-          value: employee?.chuc_vu || '-',
+          key: 'ma_chuc_vu',
+          value: employee?.ma_chuc_vu || '-',
           type: 'text',
         },
         {

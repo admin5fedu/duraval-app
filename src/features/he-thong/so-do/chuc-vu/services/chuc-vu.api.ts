@@ -55,9 +55,7 @@ export class ChucVuAPI {
         const sanitizedInput = {
             ...input,
             ten_cap_bac: input.ten_cap_bac && input.ten_cap_bac.trim() !== "" ? input.ten_cap_bac : null,
-            ma_nhom: input.ma_nhom && input.ma_nhom.trim() !== "" ? input.ma_nhom : null,
-            ma_bo_phan: input.ma_bo_phan && input.ma_bo_phan.trim() !== "" ? input.ma_bo_phan : null,
-            ma_phong: input.ma_phong && input.ma_phong.trim() !== "" ? input.ma_phong : null,
+            cap_bac: input.cap_bac || null,
             ngach_luong: input.ngach_luong && input.ngach_luong.trim() !== "" ? input.ngach_luong : null,
             so_ngay_nghi_thu_7: input.so_ngay_nghi_thu_7 && input.so_ngay_nghi_thu_7.trim() !== "" ? input.so_ngay_nghi_thu_7 : null,
             nhom_thuong: input.nhom_thuong && input.nhom_thuong.trim() !== "" ? input.nhom_thuong : null,
@@ -89,20 +87,11 @@ export class ChucVuAPI {
         const sanitizedInput: UpdateChucVuInput = {}
         if (input.ma_chuc_vu !== undefined) sanitizedInput.ma_chuc_vu = input.ma_chuc_vu
         if (input.ten_chuc_vu !== undefined) sanitizedInput.ten_chuc_vu = input.ten_chuc_vu
-        if (input.ma_cap_bac !== undefined) sanitizedInput.ma_cap_bac = input.ma_cap_bac
+        if (input.cap_bac !== undefined) sanitizedInput.cap_bac = input.cap_bac || null
         if (input.ten_cap_bac !== undefined) {
             sanitizedInput.ten_cap_bac = input.ten_cap_bac && input.ten_cap_bac.trim() !== "" ? input.ten_cap_bac : null
         }
         if (input.ma_phong_ban !== undefined) sanitizedInput.ma_phong_ban = input.ma_phong_ban
-        if (input.ma_nhom !== undefined) {
-            sanitizedInput.ma_nhom = input.ma_nhom && input.ma_nhom.trim() !== "" ? input.ma_nhom : null
-        }
-        if (input.ma_bo_phan !== undefined) {
-            sanitizedInput.ma_bo_phan = input.ma_bo_phan && input.ma_bo_phan.trim() !== "" ? input.ma_bo_phan : null
-        }
-        if (input.ma_phong !== undefined) {
-            sanitizedInput.ma_phong = input.ma_phong && input.ma_phong.trim() !== "" ? input.ma_phong : null
-        }
         if (input.ngach_luong !== undefined) {
             sanitizedInput.ngach_luong = input.ngach_luong && input.ngach_luong.trim() !== "" ? input.ngach_luong : null
         }

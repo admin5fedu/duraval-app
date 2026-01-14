@@ -11,7 +11,7 @@ export class CapBacService {
    * Validate & chuẩn hoá input tạo mới từ form/UI.
    */
   validateCreateInput(input: CreateCapBacInput): CreateCapBacInput {
-    const result = capBacSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true }).safeParse(input)
+    const result = capBacSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true }).safeParse(input)
 
     if (!result.success) {
       const message =
@@ -41,9 +41,8 @@ export class CapBacService {
       }
     }
 
-    assignIfDefined("ma_cap_bac", input.ma_cap_bac as any)
     assignIfDefined("ten_cap_bac", input.ten_cap_bac as any)
-    assignIfDefined("bac", input.bac as any)
+    assignIfDefined("cap_bac", input.cap_bac as any)
     assignIfDefined("tg_cap_nhat", input.tg_cap_nhat as any)
 
     return payload

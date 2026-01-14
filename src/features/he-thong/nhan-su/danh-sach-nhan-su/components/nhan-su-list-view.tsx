@@ -34,7 +34,7 @@ interface NhanSuListViewProps {
     onView?: (id: number) => void
 }
 
-export function NhanSuListView({ 
+export function NhanSuListView({
     initialData,
     onEdit,
     onAddNew,
@@ -65,14 +65,14 @@ export function NhanSuListView({
     // Generate filter options from data
     const phongBanOptions = React.useMemo(() => {
         const unique = Array.from(
-            new Set(nhanSuList?.map((e) => e.phong_ban).filter((d): d is string => !!d) || [])
+            new Set(nhanSuList?.map((e) => e.ma_phong).filter((d): d is string => !!d) || [])
         )
         return unique.map((d) => ({ label: d, value: d }))
     }, [nhanSuList])
 
     const chucVuOptions = React.useMemo(() => {
         const unique = Array.from(
-            new Set(nhanSuList?.map((e) => e.chuc_vu).filter((d): d is string => !!d) || [])
+            new Set(nhanSuList?.map((e) => e.ma_chuc_vu).filter((d): d is string => !!d) || [])
         )
         return unique.map((d) => ({ label: d, value: d }))
     }, [nhanSuList])
@@ -108,13 +108,13 @@ export function NhanSuListView({
                             <span className="font-semibold text-base text-foreground leading-tight truncate block">
                                 {row.ho_ten}
                             </span>
-                            {(row.chuc_vu || row.phong_ban || row.tinh_trang) && (
+                            {(row.ma_chuc_vu || row.ma_phong || row.tinh_trang) && (
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    {(row.chuc_vu || row.phong_ban) && (
+                                    {(row.ma_chuc_vu || row.ma_phong) && (
                                         <p className="text-sm text-muted-foreground leading-snug line-clamp-1">
-                                            {row.chuc_vu}
-                                            {row.chuc_vu && row.phong_ban && " · "}
-                                            {row.phong_ban}
+                                            {row.ma_chuc_vu}
+                                            {row.ma_chuc_vu && row.ma_phong && " · "}
+                                            {row.ma_phong}
                                         </p>
                                     )}
                                     {row.tinh_trang && (
@@ -198,96 +198,96 @@ export function NhanSuListView({
 
     return (
         <>
-        <GenericListView
-            columns={nhanSuColumns}
-            data={nhanSuList || []}
-            filterColumn="ho_ten"
-            initialSorting={initialSorting}
-            initialFilters={initialFilters}
-            initialSearch={initialSearch}
-            onFiltersChange={handleFiltersChange}
-            onSearchChange={handleSearchChange}
-            onSortChange={handleSortChange}
-            onRowClick={(row) => {
-                if (onView) {
-                    onView(row.ma_nhan_vien)
-                } else {
-                    navigate(`${nhanSuConfig.routePath}/${row.ma_nhan_vien}`)
-                }
-            }}
-            onAdd={() => {
-                if (onAddNew) {
-                    onAddNew()
-                } else {
-                    navigate(`${nhanSuConfig.routePath}/moi`)
-                }
-            }}
-            addHref={`${nhanSuConfig.routePath}/moi`}
-            onBack={() => {
-                navigate(nhanSuConfig.parentPath)
-            }}
-            onDeleteSelected={async (selectedRows) => {
-                const ids = selectedRows.map((row) => row.ma_nhan_vien)
-                await batchDeleteMutation.mutateAsync(ids)
-            }}
-            batchDeleteConfig={{
-                itemName: "nhân sự",
-                moduleName: nhanSuConfig.moduleTitle,
-                isLoading: batchDeleteMutation.isPending,
-                getItemLabel: (item: NhanSu) => `${item.ma_nhan_vien} - ${item.ho_ten || ""}`,
-            }}
-            filters={[
-                {
-                    columnId: "phong_ban",
-                    title: "Phòng ban",
-                    options: phongBanOptions,
-                },
-                {
-                    columnId: "chuc_vu",
-                    title: "Chức vụ",
-                    options: chucVuOptions,
-                },
-                {
-                    columnId: "ten_cap_bac",
-                    title: "Cấp bậc",
-                    options: capBacOptions,
-                },
-                {
-                    columnId: "tinh_trang",
-                    title: "Tình trạng",
-                    options: statusOptions,
-                },
-            ]}
-            searchFields={nhanSuConfig.searchFields as (keyof NhanSu)[]}
-            module={module}
-            enableSuggestions={true}
-            enableRangeSelection={true}
-            enableLongPress={true}
-            persistSelection={false}
-            renderMobileCard={renderMobileCard}
-            enableVirtualization={(nhanSuList || []).length > 100}
-            virtualRowHeight={60}
-            exportOptions={{
-                columns: nhanSuColumns,
-                totalCount: nhanSuList?.length || 0,
-                moduleName: nhanSuConfig.moduleTitle,
-                getColumnTitle,
-                getCellValue,
-            }}
-            onImport={() => setImportDialogOpen(true)}
-            isImporting={batchImportMutation.isPending}
-            onEdit={(row) => {
-                if (onEdit) {
-                    onEdit(row.ma_nhan_vien)
-                } else {
-                    navigate(`${nhanSuConfig.routePath}/${row.ma_nhan_vien}/sua`)
-                }
-            }}
-            onDelete={(row) => {
-                setRowToDelete(row)
-                setDeleteDialogOpen(true)
-            }}
-        />
+            <GenericListView
+                columns={nhanSuColumns}
+                data={nhanSuList || []}
+                filterColumn="ho_ten"
+                initialSorting={initialSorting}
+                initialFilters={initialFilters}
+                initialSearch={initialSearch}
+                onFiltersChange={handleFiltersChange}
+                onSearchChange={handleSearchChange}
+                onSortChange={handleSortChange}
+                onRowClick={(row) => {
+                    if (onView) {
+                        onView(row.ma_nhan_vien)
+                    } else {
+                        navigate(`${nhanSuConfig.routePath}/${row.ma_nhan_vien}`)
+                    }
+                }}
+                onAdd={() => {
+                    if (onAddNew) {
+                        onAddNew()
+                    } else {
+                        navigate(`${nhanSuConfig.routePath}/moi`)
+                    }
+                }}
+                addHref={`${nhanSuConfig.routePath}/moi`}
+                onBack={() => {
+                    navigate(nhanSuConfig.parentPath)
+                }}
+                onDeleteSelected={async (selectedRows) => {
+                    const ids = selectedRows.map((row) => row.ma_nhan_vien)
+                    await batchDeleteMutation.mutateAsync(ids)
+                }}
+                batchDeleteConfig={{
+                    itemName: "nhân sự",
+                    moduleName: nhanSuConfig.moduleTitle,
+                    isLoading: batchDeleteMutation.isPending,
+                    getItemLabel: (item: NhanSu) => `${item.ma_nhan_vien} - ${item.ho_ten || ""}`,
+                }}
+                filters={[
+                    {
+                        columnId: "ma_phong",
+                        title: "Phòng ban",
+                        options: phongBanOptions,
+                    },
+                    {
+                        columnId: "ma_chuc_vu",
+                        title: "Chức vụ",
+                        options: chucVuOptions,
+                    },
+                    {
+                        columnId: "ten_cap_bac",
+                        title: "Cấp bậc",
+                        options: capBacOptions,
+                    },
+                    {
+                        columnId: "tinh_trang",
+                        title: "Tình trạng",
+                        options: statusOptions,
+                    },
+                ]}
+                searchFields={nhanSuConfig.searchFields as (keyof NhanSu)[]}
+                module={module}
+                enableSuggestions={true}
+                enableRangeSelection={true}
+                enableLongPress={true}
+                persistSelection={false}
+                renderMobileCard={renderMobileCard}
+                enableVirtualization={(nhanSuList || []).length > 100}
+                virtualRowHeight={60}
+                exportOptions={{
+                    columns: nhanSuColumns,
+                    totalCount: nhanSuList?.length || 0,
+                    moduleName: nhanSuConfig.moduleTitle,
+                    getColumnTitle,
+                    getCellValue,
+                }}
+                onImport={() => setImportDialogOpen(true)}
+                isImporting={batchImportMutation.isPending}
+                onEdit={(row) => {
+                    if (onEdit) {
+                        onEdit(row.ma_nhan_vien)
+                    } else {
+                        navigate(`${nhanSuConfig.routePath}/${row.ma_nhan_vien}/sua`)
+                    }
+                }}
+                onDelete={(row) => {
+                    setRowToDelete(row)
+                    setDeleteDialogOpen(true)
+                }}
+            />
 
             {/* Import Dialog */}
             <NhanSuImportDialog

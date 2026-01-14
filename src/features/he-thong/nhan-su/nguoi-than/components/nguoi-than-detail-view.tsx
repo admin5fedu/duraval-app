@@ -23,7 +23,7 @@ export function NguoiThanDetailView({ id, initialData, onEdit, onBack }: NguoiTh
   const navigate = useNavigate()
   const query = useNguoiThanById(id, initialData)
   const viewState = useDetailViewStateFromQuery(query, initialData)
-  
+
   // Fetch employee info if ma_nhan_vien is available
   const nguoiThan = viewState.data
   const { data: nhanSu } = useNhanSuById(nguoiThan?.ma_nhan_vien || 0, undefined)
@@ -70,17 +70,17 @@ export function NguoiThanDetailView({ id, initialData, onEdit, onBack }: NguoiTh
     {
       title: "Thông Tin Nhân Viên",
       fields: [
-        { 
-          label: "Mã Nhân Viên", 
-          key: "ma_nhan_vien", 
-          value: nguoiThan.ma_nhan_vien, 
+        {
+          label: "Mã Nhân Viên",
+          key: "ma_nhan_vien",
+          value: nguoiThan.ma_nhan_vien,
           type: "url",
           link: `/he-thong/danh-sach-nhan-su/${nguoiThan.ma_nhan_vien}`
         },
         { label: "Họ và Tên", key: "ho_ten", value: nhanSu?.ho_ten || "-" },
         { label: "Email", key: "email_cong_ty", value: nhanSu?.email_cong_ty || "-", type: "email" },
-        { label: "Phòng Ban", key: "phong_ban", value: nhanSu?.phong_ban || "-" },
-        { label: "Chức Vụ", key: "chuc_vu", value: nhanSu?.chuc_vu || "-" },
+        { label: "Phòng Ban", key: "ma_phong", value: nhanSu?.ma_phong || "-" },
+        { label: "Chức Vụ", key: "ma_chuc_vu", value: nhanSu?.ma_chuc_vu || "-" },
       ]
     },
     {

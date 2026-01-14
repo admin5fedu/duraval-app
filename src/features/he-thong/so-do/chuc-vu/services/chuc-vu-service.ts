@@ -15,7 +15,7 @@ export class ChucVuService {
    * Validate & chuẩn hoá input tạo mới từ form/UI.
    */
   validateCreateInput(input: CreateChucVuInput): CreateChucVuInput {
-    const result = chucVuSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true }).safeParse(input)
+    const result = chucVuSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true }).safeParse(input)
 
     if (!result.success) {
       const message =
@@ -47,12 +47,9 @@ export class ChucVuService {
 
     assignIfDefined("ma_chuc_vu", input.ma_chuc_vu as any)
     assignIfDefined("ten_chuc_vu", input.ten_chuc_vu as any)
-    assignIfDefined("ma_cap_bac", input.ma_cap_bac as any)
+    assignIfDefined("cap_bac", input.cap_bac as any)
     assignIfDefined("ten_cap_bac", input.ten_cap_bac as any)
     assignIfDefined("ma_phong_ban", input.ma_phong_ban as any)
-    assignIfDefined("ma_nhom", input.ma_nhom as any)
-    assignIfDefined("ma_bo_phan", input.ma_bo_phan as any)
-    assignIfDefined("ma_phong", input.ma_phong as any)
     assignIfDefined("ngach_luong", input.ngach_luong as any)
     assignIfDefined("muc_dong_bao_hiem", input.muc_dong_bao_hiem as any)
     assignIfDefined("so_ngay_nghi_thu_7", input.so_ngay_nghi_thu_7 as any)

@@ -18,144 +18,144 @@ import { useNhanSu } from "@/features/he-thong/nhan-su/danh-sach-nhan-su/hooks/u
 
 // Component wrapper để watch ma_nhan_vien và cập nhật ma_phong, ma_nhom, phong_ban_id
 function EmployeeWatcher() {
-    const { data: employees } = useNhanSu()
-    const form = useFormContext()
-    const maNhanVien = form.watch("ma_nhan_vien")
-    
-    useEffect(() => {
-        if (maNhanVien && employees) {
-            const selectedEmployee = employees.find(emp => emp.ma_nhan_vien?.toString() === String(maNhanVien))
-            if (selectedEmployee) {
-                // Tự động cập nhật ma_phong, ma_nhom và phong_ban_id
-                form.setValue("ma_phong", selectedEmployee.phong_ban || null, { shouldValidate: false, shouldDirty: false })
-                form.setValue("ma_nhom", selectedEmployee.nhom || null, { shouldValidate: false, shouldDirty: false })
-                if (selectedEmployee.phong_ban_id) {
-                    form.setValue("phong_ban_id", selectedEmployee.phong_ban_id.toString(), { shouldValidate: false, shouldDirty: false })
-                } else {
-                    form.setValue("phong_ban_id", null, { shouldValidate: false, shouldDirty: false })
-                }
-            }
+  const { data: employees } = useNhanSu()
+  const form = useFormContext()
+  const maNhanVien = form.watch("ma_nhan_vien")
+
+  useEffect(() => {
+    if (maNhanVien && employees) {
+      const selectedEmployee = employees.find(emp => emp.ma_nhan_vien?.toString() === String(maNhanVien))
+      if (selectedEmployee) {
+        // Tự động cập nhật ma_phong, ma_nhom và phong_ban_id
+        form.setValue("ma_phong", selectedEmployee.ma_phong || null, { shouldValidate: false, shouldDirty: false })
+        form.setValue("ma_nhom", selectedEmployee.ma_nhom || null, { shouldValidate: false, shouldDirty: false })
+        if (selectedEmployee.phong_ban_id) {
+          form.setValue("phong_ban_id", selectedEmployee.phong_ban_id.toString(), { shouldValidate: false, shouldDirty: false })
+        } else {
+          form.setValue("phong_ban_id", null, { shouldValidate: false, shouldDirty: false })
         }
-    }, [maNhanVien, employees, form])
-    
-    return null
+      }
+    }
+  }, [maNhanVien, employees, form])
+
+  return null
 }
 
 // Component để check duplicate report
 function DuplicateReportChecker({ excludeId }: { excludeId?: number }) {
-    const form = useFormContext()
-    const maNhanVien = form.watch("ma_nhan_vien")
-    const ngayBaoCao = form.watch("ngay_bao_cao")
+  const form = useFormContext()
+  const maNhanVien = form.watch("ma_nhan_vien")
+  const ngayBaoCao = form.watch("ngay_bao_cao")
 
-    useEffect(() => {
-        const checkDuplicate = async () => {
-            // Clear previous error
-            form.clearErrors("ngay_bao_cao")
-            form.clearErrors("ma_nhan_vien")
+  useEffect(() => {
+    const checkDuplicate = async () => {
+      // Clear previous error
+      form.clearErrors("ngay_bao_cao")
+      form.clearErrors("ma_nhan_vien")
 
-            // Only check if both fields have values
-            if (!maNhanVien || !ngayBaoCao) {
-                return
-            }
+      // Only check if both fields have values
+      if (!maNhanVien || !ngayBaoCao) {
+        return
+      }
 
-            // Extract number from maNhanVien (could be string from combobox)
-            let maNV: number
-            if (typeof maNhanVien === 'string') {
-                const match = maNhanVien.match(/^(\d+)/)
-                if (match) {
-                    maNV = Number(match[1])
-                } else {
-                    return
-                }
-            } else {
-                maNV = Number(maNhanVien)
-            }
-
-            if (isNaN(maNV)) {
-                return
-            }
-
-            try {
-                const result = await ViecHangNgayAPI.checkDuplicateReport(maNV, ngayBaoCao, excludeId)
-                if (result.exists) {
-                    form.setError("ngay_bao_cao", {
-                        type: "manual",
-                        message: `Nhân viên này đã có báo cáo cho ngày ${ngayBaoCao}. Mỗi nhân viên chỉ được tạo 1 báo cáo cho 1 ngày.`
-                    })
-                    form.setError("ma_nhan_vien", {
-                        type: "manual",
-                        message: "Nhân viên này đã có báo cáo cho ngày đã chọn."
-                    })
-                }
-            } catch (error) {
-                console.error("Lỗi khi kiểm tra báo cáo trùng:", error)
-            }
+      // Extract number from maNhanVien (could be string from combobox)
+      let maNV: number
+      if (typeof maNhanVien === 'string') {
+        const match = maNhanVien.match(/^(\d+)/)
+        if (match) {
+          maNV = Number(match[1])
+        } else {
+          return
         }
+      } else {
+        maNV = Number(maNhanVien)
+      }
 
-        // Debounce check to avoid too many requests
-        const timeoutId = setTimeout(checkDuplicate, 500)
-        return () => clearTimeout(timeoutId)
-    }, [maNhanVien, ngayBaoCao, excludeId, form])
+      if (isNaN(maNV)) {
+        return
+      }
 
-    return null
+      try {
+        const result = await ViecHangNgayAPI.checkDuplicateReport(maNV, ngayBaoCao, excludeId)
+        if (result.exists) {
+          form.setError("ngay_bao_cao", {
+            type: "manual",
+            message: `Nhân viên này đã có báo cáo cho ngày ${ngayBaoCao}. Mỗi nhân viên chỉ được tạo 1 báo cáo cho 1 ngày.`
+          })
+          form.setError("ma_nhan_vien", {
+            type: "manual",
+            message: "Nhân viên này đã có báo cáo cho ngày đã chọn."
+          })
+        }
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra báo cáo trùng:", error)
+      }
+    }
+
+    // Debounce check to avoid too many requests
+    const timeoutId = setTimeout(checkDuplicate, 500)
+    return () => clearTimeout(timeoutId)
+  }, [maNhanVien, ngayBaoCao, excludeId, form])
+
+  return null
 }
 
 const getSections = (isEditMode: boolean): FormSection[] => [
-    {
-        title: "Thông Tin Cơ Bản",
-        fields: [
-            { 
-                name: "ma_nhan_vien", 
-                label: "Mã Nhân Viên", 
-                type: "custom",
-                customComponent: EmployeeComboboxField,
-                required: true, 
-                placeholder: "Tìm kiếm nhân viên..."
-            },
-            { 
-                name: "ngay_bao_cao", 
-                label: "Ngày Báo Cáo", 
-                type: "date", 
-                required: true
-            },
-            { 
-                name: "phong_ban_id", 
-                label: "Phòng Ban", 
-                type: "select",
-                placeholder: isEditMode ? "Chọn phòng ban" : "Tự động điền từ nhân viên",
-                disabled: !isEditMode
-            },
-            { 
-                name: "ma_phong", 
-                label: "Mã Phòng", 
-                type: "custom",
-                customComponent: PhongBanDisplayField,
-                placeholder: "Tự động điền từ nhân viên",
-                disabled: !isEditMode
-            },
-            { 
-                name: "ma_nhom", 
-                label: "Mã Nhóm", 
-                type: "custom",
-                customComponent: NhomDisplayField,
-                placeholder: "Tự động điền từ nhân viên",
-                disabled: !isEditMode
-            },
-        ]
-    },
-    {
-        title: "Chi Tiết Công Việc",
-        fields: [
-            { 
-                name: "chi_tiet_cong_viec", 
-                label: "Chi Tiết Công Việc", 
-                type: "custom",
-                customComponent: ChiTietCongViecEditor,
-                description: "Thêm và quản lý các công việc đã thực hiện. Mỗi công việc có kế hoạch, kết quả và tối đa 3 links.",
-                colSpan: 3
-            },
-        ]
-    },
+  {
+    title: "Thông Tin Cơ Bản",
+    fields: [
+      {
+        name: "ma_nhan_vien",
+        label: "Mã Nhân Viên",
+        type: "custom",
+        customComponent: EmployeeComboboxField,
+        required: true,
+        placeholder: "Tìm kiếm nhân viên..."
+      },
+      {
+        name: "ngay_bao_cao",
+        label: "Ngày Báo Cáo",
+        type: "date",
+        required: true
+      },
+      {
+        name: "phong_ban_id",
+        label: "Phòng Ban",
+        type: "select",
+        placeholder: isEditMode ? "Chọn phòng ban" : "Tự động điền từ nhân viên",
+        disabled: !isEditMode
+      },
+      {
+        name: "ma_phong",
+        label: "Mã Phòng",
+        type: "custom",
+        customComponent: PhongBanDisplayField,
+        placeholder: "Tự động điền từ nhân viên",
+        disabled: !isEditMode
+      },
+      {
+        name: "ma_nhom",
+        label: "Mã Nhóm",
+        type: "custom",
+        customComponent: NhomDisplayField,
+        placeholder: "Tự động điền từ nhân viên",
+        disabled: !isEditMode
+      },
+    ]
+  },
+  {
+    title: "Chi Tiết Công Việc",
+    fields: [
+      {
+        name: "chi_tiet_cong_viec",
+        label: "Chi Tiết Công Việc",
+        type: "custom",
+        customComponent: ChiTietCongViecEditor,
+        description: "Thêm và quản lý các công việc đã thực hiện. Mỗi công việc có kế hoạch, kết quả và tối đa 3 links.",
+        colSpan: 3
+      },
+    ]
+  },
 ]
 
 interface ViecHangNgayFormViewProps {
@@ -170,16 +170,16 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
   const { data: phongBans } = usePhongBan()
   const { employee: currentEmployee } = useAuthStore()
   const { data: employees } = useNhanSu()
-  
+
   // If id is provided, fetch existing data for edit mode
   const { data: existingData, isLoading } = useViecHangNgayById(id || 0, undefined)
-  
+
   const isEditMode = !!id
 
   // Create sections
   const sections = useMemo(() => {
     const baseSections = getSections(isEditMode)
-    
+
     // Update phong_ban_id field with options if in edit mode
     if (isEditMode && phongBans) {
       return baseSections.map(section => ({
@@ -201,7 +201,7 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
         })
       }))
     }
-    
+
     return baseSections
   }, [isEditMode, phongBans])
 
@@ -229,7 +229,7 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
           }
         }
         if (!Array.isArray(chiTiet)) return []
-        
+
         // Ensure each item has id field
         return chiTiet.map((item: any, index: number) => ({
           id: item.id || index + 1,
@@ -252,22 +252,22 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
     // Create mode - use current employee and today's date
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
-    
+
     const defaults: any = {
       chi_tiet_cong_viec: defaultCongViec,
       ngay_bao_cao: todayString
     }
-    
+
     if (currentEmployee && currentEmployee.ma_nhan_vien) {
       defaults.ma_nhan_vien = currentEmployee.ma_nhan_vien.toString()
-      defaults.ma_phong = currentEmployee.phong_ban || null
-      defaults.ma_nhom = currentEmployee.nhom || null
-      
+      defaults.ma_phong = currentEmployee.ma_phong || null
+      defaults.ma_nhom = currentEmployee.ma_nhom || null
+
       if (currentEmployee.phong_ban_id && phongBans) {
         defaults.phong_ban_id = currentEmployee.phong_ban_id.toString()
       }
     }
-    
+
     return defaults
   }, [isEditMode, existingData, currentEmployee, phongBans, defaultCongViec])
 
@@ -276,7 +276,7 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
     if (!data.ma_nhan_vien) {
       throw new Error("Vui lòng chọn nhân viên")
     }
-    
+
     let maNhanVienValue = data.ma_nhan_vien
     if (typeof maNhanVienValue === 'string') {
       const match = maNhanVienValue.match(/^(\d+)/)
@@ -284,7 +284,7 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
         maNhanVienValue = match[1]
       }
     }
-    
+
     const maNhanVien = Number(maNhanVienValue)
     if (isNaN(maNhanVien)) {
       throw new Error("Mã nhân viên không hợp lệ")
@@ -310,11 +310,11 @@ export function ViecHangNgayFormView({ id, onComplete, onCancel }: ViecHangNgayF
       // Create mode: tự động lấy từ nhân viên được chọn
       const selectedEmployee = employees?.find(emp => emp.ma_nhan_vien === maNhanVien)
       if (selectedEmployee) {
-        maPhong = selectedEmployee.phong_ban || null
-        maNhom = selectedEmployee.nhom || null
+        maPhong = selectedEmployee.ma_phong || null
+        maNhom = selectedEmployee.ma_nhom || null
         if (selectedEmployee.phong_ban_id !== undefined && selectedEmployee.phong_ban_id !== null) {
-          phongBanId = typeof selectedEmployee.phong_ban_id === 'number' 
-            ? selectedEmployee.phong_ban_id 
+          phongBanId = typeof selectedEmployee.phong_ban_id === 'number'
+            ? selectedEmployee.phong_ban_id
             : Number(selectedEmployee.phong_ban_id)
           if (isNaN(phongBanId)) {
             phongBanId = null

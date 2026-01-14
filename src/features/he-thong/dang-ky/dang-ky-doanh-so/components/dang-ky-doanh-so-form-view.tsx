@@ -23,9 +23,9 @@ function NhanVienSelectFormField({ value, onChange, disabled }: { value?: number
   const { formItemId } = useFormField()
   return (
     <div id={formItemId}>
-      <NhanSuSelect 
-        value={value || null} 
-        onChange={onChange} 
+      <NhanSuSelect
+        value={value || null}
+        onChange={onChange}
         disabled={disabled}
         placeholder="Chọn nhân viên..."
       />
@@ -38,9 +38,9 @@ function NhomApDoanhSoSelectFormField({ value, onChange, disabled }: { value?: n
   const { formItemId } = useFormField()
   return (
     <div id={formItemId}>
-      <NhomApDoanhSoSelect 
-        value={value || null} 
-        onChange={onChange} 
+      <NhomApDoanhSoSelect
+        value={value || null}
+        onChange={onChange}
         disabled={disabled}
         placeholder="Chọn nhóm áp doanh số..."
       />
@@ -55,13 +55,13 @@ function ThangToggleButtons({ value, onChange, disabled }: { value?: number | st
     label: `${i + 1}`,
     value: i + 1,
   }))
-  
+
   const normalizedValue = value ? (typeof value === 'string' ? parseInt(value, 10) : value) : undefined
-  
+
   const handleChange = (val: string | number) => {
     onChange(typeof val === 'number' ? val : parseInt(val, 10))
   }
-  
+
   return (
     <div id={formItemId}>
       <ToggleButtonGroup value={normalizedValue} onChange={handleChange} options={options} disabled={disabled} />
@@ -98,29 +98,29 @@ const getSections = (): FormSection[] => [
   {
     title: "Thông Tin Cơ Bản",
     fields: [
-      { 
-        name: "nhan_vien_id", 
-        label: "Nhân Viên", 
+      {
+        name: "nhan_vien_id",
+        label: "Nhân Viên",
         type: "custom",
         customComponent: NhanVienSelectFormField,
         required: true,
       },
-      { 
-        name: "nam", 
-        label: "Năm", 
+      {
+        name: "nam",
+        label: "Năm",
         type: "number",
         required: true,
       },
-      { 
-        name: "thang", 
-        label: "Tháng", 
+      {
+        name: "thang",
+        label: "Tháng",
         type: "custom",
         customComponent: ThangToggleButtons,
         required: true,
       },
-      { 
-        name: "bac_dt", 
-        label: "Bậc DT", 
+      {
+        name: "bac_dt",
+        label: "Bậc DT",
         type: "select",
         options: bacDtOptions,
         required: true,
@@ -131,16 +131,16 @@ const getSections = (): FormSection[] => [
   {
     title: "Thông Tin Doanh Thu",
     fields: [
-      { 
-        name: "doanh_thu", 
-        label: "Doanh Thu", 
+      {
+        name: "doanh_thu",
+        label: "Doanh Thu",
         type: "custom",
         customComponent: DoanhThuFormField,
         required: true,
       },
-      { 
-        name: "nhom_ap_doanh_thu_id", 
-        label: "Nhóm Áp Doanh Thu", 
+      {
+        name: "nhom_ap_doanh_thu_id",
+        label: "Nhóm Áp Doanh Thu",
         type: "custom",
         customComponent: NhomApDoanhSoSelectFormField,
         required: true,
@@ -161,20 +161,20 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
   const [searchParams] = useSearchParams()
   const createMutation = useCreateDangKyDoanhSo()
   const updateMutation = useUpdateDangKyDoanhSo()
-  
+
   // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   // để đảm bảo thứ tự hooks nhất quán giữa các lần render
-  
+
   // Fetch data for mapping
   const { data: nhanSuList } = useNhanSu()
   const { data: nhomApDoanhSoList } = useNhomApDoanhSo()
   const { data: phongBanList } = usePhongBan()
-  
+
   // Create sections
   const sections = useMemo(() => {
     return getSections()
   }, [])
-  
+
   // If id is provided, fetch existing data for edit mode
   // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
   const { data: existingData, isLoading } = useDangKyDoanhSoById(id ?? 0, undefined)
@@ -230,7 +230,7 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
   // Computed values (không phải hooks, có thể đặt sau early return)
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
-  const cancelUrl = returnTo === 'list' 
+  const cancelUrl = returnTo === 'list'
     ? dangKyDoanhSoConfig.routePath
     : (id ? `${dangKyDoanhSoConfig.routePath}/${id}` : dangKyDoanhSoConfig.routePath)
 
@@ -252,8 +252,7 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
           mapper: (nhanVienId) => {
             if (!nhanVienId || !nhanSuList) return null
             const selectedNhanSu = nhanSuList.find((ns) => ns.ma_nhan_vien === nhanVienId)
-            // Lấy phong_id từ nhanSu (có thể có trong DB nhưng chưa có trong TypeScript schema)
-            return (selectedNhanSu as any)?.phong_id ?? (selectedNhanSu as any)?.phong_ban_id ?? null
+            return selectedNhanSu?.phong_id ?? selectedNhanSu?.phong_ban_id ?? null
           }
         },
         {
@@ -261,10 +260,9 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
           mapper: (nhanVienId) => {
             if (!nhanVienId || !nhanSuList || !phongBanList) return null
             const selectedNhanSu = nhanSuList.find((ns) => ns.ma_nhan_vien === nhanVienId)
-            const phongId = (selectedNhanSu as any)?.phong_id ?? (selectedNhanSu as any)?.phong_ban_id ?? null
+            const phongId = selectedNhanSu?.phong_id ?? selectedNhanSu?.phong_ban_id ?? null
             if (!phongId) return null
             const phongBan = phongBanList.find((pb) => pb.id === phongId)
-            // Lấy ma_phong_ban từ phòng ban (có thể được map thành ma_phong trong DB)
             return phongBan?.ma_phong_ban ?? null
           }
         },
@@ -273,7 +271,7 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
           mapper: (nhanVienId) => {
             if (!nhanVienId || !nhanSuList) return null
             const selectedNhanSu = nhanSuList.find((ns) => ns.ma_nhan_vien === nhanVienId)
-            return (selectedNhanSu as any)?.nhom_id ?? null
+            return selectedNhanSu?.nhom_id ?? null
           }
         },
         {
@@ -281,9 +279,7 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
           mapper: (nhanVienId) => {
             if (!nhanVienId || !nhanSuList) return null
             const selectedNhanSu = nhanSuList.find((ns) => ns.ma_nhan_vien === nhanVienId)
-            // Nếu có sẵn ma_nhom trong nhanSu thì lấy trực tiếp, nếu không thì lấy từ nhom field (string)
-            // Có thể cần lấy từ bảng nhóm nếu có, nhưng hiện tại lấy từ field nhom (string) của nhân viên
-            return (selectedNhanSu as any)?.ma_nhom ?? selectedNhanSu?.nhom ?? null
+            return selectedNhanSu?.ma_nhom ?? null
           }
         }
       ],
@@ -337,11 +333,11 @@ export function DangKyDoanhSoFormView({ id, onComplete, onCancel }: DangKyDoanhS
     }
   }
 
-  const title = isEditMode 
-    ? `Sửa Đăng Ký Doanh Số: ${existingData?.ten_nhan_vien || ''}` 
+  const title = isEditMode
+    ? `Sửa Đăng Ký Doanh Số: ${existingData?.ten_nhan_vien || ''}`
     : "Thêm Mới Đăng Ký Doanh Số"
-  const subtitle = isEditMode 
-    ? "Cập nhật thông tin đăng ký doanh số." 
+  const subtitle = isEditMode
+    ? "Cập nhật thông tin đăng ký doanh số."
     : "Thêm đăng ký doanh số mới vào hệ thống."
 
   return (

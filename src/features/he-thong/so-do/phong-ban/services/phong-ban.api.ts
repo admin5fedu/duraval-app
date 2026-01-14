@@ -54,8 +54,7 @@ export class PhongBanAPI {
         // Sanitize input: convert empty strings to null for optional fields
         const sanitizedInput = {
             ...input,
-            tt: input.tt || null,
-            truc_thuoc_phong_ban: input.truc_thuoc_phong_ban && input.truc_thuoc_phong_ban.trim() !== "" ? input.truc_thuoc_phong_ban : null,
+            truc_thuoc_ma: input.truc_thuoc_ma && input.truc_thuoc_ma.trim() !== "" ? input.truc_thuoc_ma : null,
             truc_thuoc_id: input.truc_thuoc_id || null,
         }
 
@@ -79,12 +78,12 @@ export class PhongBanAPI {
     static async update(id: number, input: UpdatePhongBanInput): Promise<PhongBan> {
         // Sanitize input: convert empty strings to null for optional fields
         const sanitizedInput: UpdatePhongBanInput = {}
-        if (input.tt !== undefined) sanitizedInput.tt = input.tt || null
+        if (input.tt !== undefined) sanitizedInput.tt = input.tt
         if (input.ma_phong_ban !== undefined) sanitizedInput.ma_phong_ban = input.ma_phong_ban
         if (input.ten_phong_ban !== undefined) sanitizedInput.ten_phong_ban = input.ten_phong_ban
         if (input.cap_do !== undefined) sanitizedInput.cap_do = input.cap_do
-        if (input.truc_thuoc_phong_ban !== undefined) {
-            sanitizedInput.truc_thuoc_phong_ban = input.truc_thuoc_phong_ban && input.truc_thuoc_phong_ban.trim() !== "" ? input.truc_thuoc_phong_ban : null
+        if (input.truc_thuoc_ma !== undefined) {
+            sanitizedInput.truc_thuoc_ma = input.truc_thuoc_ma && input.truc_thuoc_ma.trim() !== "" ? input.truc_thuoc_ma : null
         }
         if (input.truc_thuoc_id !== undefined) {
             sanitizedInput.truc_thuoc_id = input.truc_thuoc_id || null

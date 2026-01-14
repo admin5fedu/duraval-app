@@ -13,9 +13,8 @@ const getSections = (): FormSection[] => [
   {
     title: "Thông Tin Cơ Bản",
     fields: [
-      { name: "ma_cap_bac", label: "Mã Cấp Bậc", required: true },
       { name: "ten_cap_bac", label: "Tên Cấp Bậc", required: true },
-      { name: "bac", label: "Bậc", type: "number", required: true },
+      { name: "cap_bac", label: "Cấp Bậc", type: "number", required: true },
     ]
   }
 ]
@@ -31,15 +30,15 @@ export function CapBacFormView({ id, onComplete, onCancel }: CapBacFormViewProps
   const [searchParams] = useSearchParams()
   const createMutation = useCreateCapBac()
   const updateMutation = useUpdateCapBac()
-  
+
   // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   // để đảm bảo thứ tự hooks nhất quán giữa các lần render
-  
+
   // Create sections
   const sections = useMemo(() => {
     return getSections()
   }, [])
-  
+
   // If id is provided, fetch existing data for edit mode
   // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
   const { data: existingData, isLoading } = useCapBacById(id ?? 0, undefined)
@@ -48,7 +47,7 @@ export function CapBacFormView({ id, onComplete, onCancel }: CapBacFormViewProps
   // Phải được tạo TRƯỚC early return
   const formSchema = useMemo(() => {
     return capBacSchema
-      .omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true })
+      .omit({ id: true, tg_tao: true, tg_cap_nhat: true })
   }, [])
 
   // Prepare default values
@@ -68,7 +67,7 @@ export function CapBacFormView({ id, onComplete, onCancel }: CapBacFormViewProps
   // Computed values (không phải hooks, có thể đặt sau early return)
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
-  const cancelUrl = returnTo === 'list' 
+  const cancelUrl = returnTo === 'list'
     ? capBacConfig.routePath
     : (id ? `${capBacConfig.routePath}/${id}` : capBacConfig.routePath)
 

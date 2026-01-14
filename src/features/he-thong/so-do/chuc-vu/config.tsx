@@ -9,21 +9,21 @@ export const chucVuConfig: ModuleConfig = {
   moduleName: "chuc-vu",
   moduleTitle: "Chức Vụ",
   moduleDescription: "Quản lý thông tin chức vụ",
-  
+
   // Routing
   routePath: "/he-thong/chuc-vu",
   parentPath: "/he-thong",
-  
+
   // Breadcrumb
   breadcrumb: {
     label: "Chức Vụ",
     parentLabel: "Hệ Thống",
   },
-  
+
   // Database
   tableName: "var_chuc_vu",
   primaryKey: "id",
-  
+
   // List view
   filterColumns: [
     {
@@ -32,13 +32,8 @@ export const chucVuConfig: ModuleConfig = {
       options: [], // Will be populated dynamically from data
     },
     {
-      columnId: "ma_cap_bac",
+      columnId: "cap_bac",
       title: "Cấp Bậc",
-      options: [], // Will be populated dynamically from data
-    },
-    {
-      columnId: "ma_phong",
-      title: "Phòng",
       options: [], // Will be populated dynamically from data
     },
     {
@@ -57,7 +52,7 @@ export const chucVuConfig: ModuleConfig = {
       options: [], // Will be populated dynamically from data
     },
   ],
-  searchFields: ["ma_chuc_vu", "ten_chuc_vu", "ma_cap_bac", "ten_cap_bac", "ma_phong_ban"],
+  searchFields: ["ma_chuc_vu", "ten_chuc_vu", "cap_bac", "ten_cap_bac", "ma_phong_ban"],
   defaultSorting: [{ id: "tg_tao", desc: true }],
 }
 

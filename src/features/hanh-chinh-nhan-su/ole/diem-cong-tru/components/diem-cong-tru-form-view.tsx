@@ -20,93 +20,93 @@ import { useNhomLuong } from "@/features/hanh-chinh-nhan-su/ole/nhom-luong/hooks
 
 // Component wrapper để watch nhan_vien_id và cập nhật ho_va_ten, phong_ban_id, ma_phong_id, nhom
 function NhanVienWatcher() {
-    const { data: employees } = useNhanSu()
-    const form = useFormContext()
-    const nhanVienId = form.watch("nhan_vien_id")
-    
-    useEffect(() => {
-        if (nhanVienId && employees) {
-            const selectedEmployee = employees.find(emp => emp.ma_nhan_vien === Number(nhanVienId))
-            if (selectedEmployee) {
-                // Tự động cập nhật ho_va_ten
-                form.setValue("ho_va_ten", selectedEmployee.ho_ten || "", { shouldValidate: false, shouldDirty: false })
-                
-                // Tự động cập nhật phong_ban_id từ var_nhan_su.phong_ban_id
-                if (selectedEmployee.phong_ban_id) {
-                    form.setValue("phong_ban_id", selectedEmployee.phong_ban_id, { shouldValidate: false, shouldDirty: false })
-                } else {
-                    form.setValue("phong_ban_id", null, { shouldValidate: false, shouldDirty: false })
-                }
-                
-                // Tự động cập nhật ma_phong_id từ var_nhan_su.phong_id
-                const phongId = (selectedEmployee as any).phong_id
-                if (phongId) {
-                    form.setValue("ma_phong_id", phongId, { shouldValidate: false, shouldDirty: false })
-                } else {
-                    form.setValue("ma_phong_id", null, { shouldValidate: false, shouldDirty: false })
-                }
-                
-                // Tự động cập nhật nhom từ var_nhan_su
-                form.setValue("nhom", selectedEmployee.nhom || "", { shouldValidate: false, shouldDirty: false })
-            }
+  const { data: employees } = useNhanSu()
+  const form = useFormContext()
+  const nhanVienId = form.watch("nhan_vien_id")
+
+  useEffect(() => {
+    if (nhanVienId && employees) {
+      const selectedEmployee = employees.find(emp => emp.ma_nhan_vien === Number(nhanVienId))
+      if (selectedEmployee) {
+        // Tự động cập nhật ho_va_ten
+        form.setValue("ho_va_ten", selectedEmployee.ho_ten || "", { shouldValidate: false, shouldDirty: false })
+
+        // Tự động cập nhật phong_ban_id từ var_nhan_su.phong_ban_id
+        if (selectedEmployee.phong_ban_id) {
+          form.setValue("phong_ban_id", selectedEmployee.phong_ban_id, { shouldValidate: false, shouldDirty: false })
+        } else {
+          form.setValue("phong_ban_id", null, { shouldValidate: false, shouldDirty: false })
         }
-    }, [nhanVienId, employees, form])
-    
-    return null
+
+        // Tự động cập nhật ma_phong_id từ var_nhan_su.phong_id
+        const phongId = (selectedEmployee as any).phong_id
+        if (phongId) {
+          form.setValue("ma_phong_id", phongId, { shouldValidate: false, shouldDirty: false })
+        } else {
+          form.setValue("ma_phong_id", null, { shouldValidate: false, shouldDirty: false })
+        }
+
+        // Tự động cập nhật nhom từ var_nhan_su
+        form.setValue("nhom", selectedEmployee.ma_nhom || "", { shouldValidate: false, shouldDirty: false })
+      }
+    }
+  }, [nhanVienId, employees, form])
+
+  return null
 }
 
 // Component wrapper để watch nhom_luong_id và cập nhật ten_nhom_luong
 function NhomLuongWatcher() {
-    const { data: nhomLuongList } = useNhomLuong()
-    const form = useFormContext()
-    const nhomLuongId = form.watch("nhom_luong_id")
-    
-    useEffect(() => {
-        if (nhomLuongId && nhomLuongList) {
-            const selectedNhomLuong = nhomLuongList.find(nl => nl.id === Number(nhomLuongId))
-            if (selectedNhomLuong) {
-                // Tự động cập nhật ten_nhom_luong
-                form.setValue("ten_nhom_luong", selectedNhomLuong.ten_nhom || "", { shouldValidate: false, shouldDirty: false })
-            }
-        }
-    }, [nhomLuongId, nhomLuongList, form])
-    
-    return null
+  const { data: nhomLuongList } = useNhomLuong()
+  const form = useFormContext()
+  const nhomLuongId = form.watch("nhom_luong_id")
+
+  useEffect(() => {
+    if (nhomLuongId && nhomLuongList) {
+      const selectedNhomLuong = nhomLuongList.find(nl => nl.id === Number(nhomLuongId))
+      if (selectedNhomLuong) {
+        // Tự động cập nhật ten_nhom_luong
+        form.setValue("ten_nhom_luong", selectedNhomLuong.ten_nhom || "", { shouldValidate: false, shouldDirty: false })
+      }
+    }
+  }, [nhomLuongId, nhomLuongList, form])
+
+  return null
 }
 
 const getSections = (): FormSection[] => [
   {
     title: "Thông Tin Cơ Bản",
     fields: [
-      { 
-        name: "nhan_vien_id", 
-        label: "Nhân Viên", 
+      {
+        name: "nhan_vien_id",
+        label: "Nhân Viên",
         required: true,
         type: "custom",
         customComponent: NhanVienSelectFormField,
       },
-      { 
-        name: "ngay", 
-        label: "Ngày", 
+      {
+        name: "ngay",
+        label: "Ngày",
         type: "date",
         required: true
       },
-      { 
-        name: "phong_ban_id", 
-        label: "Phòng Ban", 
+      {
+        name: "phong_ban_id",
+        label: "Phòng Ban",
         type: "custom",
         customComponent: PhongBanSelectFormField,
         disabled: true,
       },
-      { 
-        name: "loai", 
-        label: "Loại", 
+      {
+        name: "loai",
+        label: "Loại",
         type: "custom",
         customComponent: LoaiToggleFormField,
         required: true,
       },
-      { 
-        name: "nhom", 
+      {
+        name: "nhom",
         label: "Nhóm",
         disabled: true,
       },
@@ -115,41 +115,41 @@ const getSections = (): FormSection[] => [
   {
     title: "Thông Tin Điểm và Tiền",
     fields: [
-      { 
-        name: "diem", 
-        label: "Điểm", 
+      {
+        name: "diem",
+        label: "Điểm",
         type: "number",
         required: true,
       },
-      { 
-        name: "tien", 
-        label: "Tiền", 
+      {
+        name: "tien",
+        label: "Tiền",
         type: "number",
         required: true,
       },
-      { 
-        name: "nhom_luong_id", 
-        label: "Nhóm Lương", 
+      {
+        name: "nhom_luong_id",
+        label: "Nhóm Lương",
         type: "custom",
         customComponent: DiemCongTruNhomLuongSelectFormField,
       },
-      { 
-        name: "ten_nhom_luong", 
-        label: "Tên Nhóm Lương", 
+      {
+        name: "ten_nhom_luong",
+        label: "Tên Nhóm Lương",
       },
     ]
   },
   {
     title: "Thông Tin Bổ Sung",
     fields: [
-      { 
-        name: "mo_ta", 
-        label: "Mô Tả", 
+      {
+        name: "mo_ta",
+        label: "Mô Tả",
         type: "textarea",
         required: true,
       },
-      { 
-        name: "trang_thai", 
+      {
+        name: "trang_thai",
         label: "Trạng Thái",
         disabled: true,
       },
@@ -169,15 +169,15 @@ export function DiemCongTruFormView({ id, onComplete, onCancel }: DiemCongTruFor
   const createMutation = useCreateDiemCongTru()
   const updateMutation = useUpdateDiemCongTru()
   const { employee } = useAuthStore()
-  
+
   // ✅ QUAN TRỌNG: Tất cả hooks phải được gọi TRƯỚC bất kỳ early return nào
   // để đảm bảo thứ tự hooks nhất quán giữa các lần render
-  
+
   // Create sections
   const sections = useMemo(() => {
     return getSections()
   }, [])
-  
+
   // If id is provided, fetch existing data for edit mode
   // ✅ QUAN TRỌNG: Hook luôn được gọi với cùng signature để tránh "Rendered more hooks"
   const { data: existingData, isLoading } = useDiemCongTruById(id ?? 0, undefined)
@@ -194,7 +194,7 @@ export function DiemCongTruFormView({ id, onComplete, onCancel }: DiemCongTruFor
   const defaultValues = useMemo(() => {
     // Lấy ngày hôm nay theo format YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0]
-    
+
     if (id && existingData) {
       return {
         nhan_vien_id: existingData.nhan_vien_id || null,
@@ -243,7 +243,7 @@ export function DiemCongTruFormView({ id, onComplete, onCancel }: DiemCongTruFor
   // Computed values (không phải hooks, có thể đặt sau early return)
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
-  const cancelUrl = returnTo === 'list' 
+  const cancelUrl = returnTo === 'list'
     ? diemCongTruConfig.routePath
     : (id ? `${diemCongTruConfig.routePath}/${id}` : diemCongTruConfig.routePath)
 

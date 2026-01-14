@@ -53,6 +53,7 @@ export interface GenericDetailConfig {
  * Main props interface for GenericDetailView component
  */
 export interface GenericDetailViewProps<T = Record<string, any>> {
+    mode?: "page" | "popup" | "drawer"
     data: T
     id: string | number
     config: GenericDetailConfig
@@ -92,6 +93,7 @@ export interface DetailHeaderSectionProps {
  */
 export interface DetailSectionsProps {
     sections: DetailSection[]
+    mode?: "page" | "popup" | "drawer"
 }
 
 /**

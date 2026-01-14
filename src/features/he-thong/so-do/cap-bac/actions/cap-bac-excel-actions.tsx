@@ -22,35 +22,30 @@ interface BatchUpsertResult {
  */
 function mapExcelToDb(row: ExcelRow, rowIndex: number): { data: CreateCapBacInput; row: number } {
   // Extract fields
-  const maCapBac = String(row.ma_cap_bac || "").trim()
   const tenCapBac = String(row.ten_cap_bac || "").trim()
-  const bac = row.bac
+  const cap_bac = row.cap_bac
 
   // Validate required fields
-  if (!maCapBac) {
-    throw new Error(`Dòng ${rowIndex + 1}: Mã cấp bậc không được để trống`)
-  }
   if (!tenCapBac) {
     throw new Error(`Dòng ${rowIndex + 1}: Tên cấp bậc không được để trống`)
   }
-  if (!bac || isNaN(Number(bac))) {
+  if (!cap_bac || isNaN(Number(cap_bac))) {
     throw new Error(`Dòng ${rowIndex + 1}: Bậc phải là số nguyên dương`)
   }
 
-  const bacNumber = Number(bac)
-  if (bacNumber < 1 || !Number.isInteger(bacNumber)) {
+  const capBacNumber = Number(cap_bac)
+  if (capBacNumber < 1 || !Number.isInteger(capBacNumber)) {
     throw new Error(`Dòng ${rowIndex + 1}: Bậc phải là số nguyên dương`)
   }
 
   // Build data object
   const data: CreateCapBacInput = {
-    ma_cap_bac: maCapBac,
     ten_cap_bac: tenCapBac,
-    bac: bacNumber,
+    cap_bac: capBacNumber,
   }
 
   // Validate with Zod schema
-  const result = capBacSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true, nguoi_tao: true }).safeParse(data)
+  const result = capBacSchema.omit({ id: true, tg_tao: true, tg_cap_nhat: true }).safeParse(data)
   if (!result.success) {
     const errors = result.error.issues.map((e) => e.message).join(", ")
     throw new Error(`Dòng ${rowIndex + 1}: ${errors}`)
@@ -78,9 +73,9 @@ export function useBatchUpsertCapBac() {
         try {
           const { data } = mapExcelToDb(rows[i], i)
 
-          // Try to find existing record by ma_cap_bac
+          // Try to find existing record by ten_cap_bac
           const existingList = await CapBacAPI.getAll()
-          const existing = existingList.find((item) => item.ma_cap_bac === data.ma_cap_bac)
+          const existing = existingList.find((item) => item.ten_cap_bac === data.ten_cap_bac)
 
           if (existing) {
             // Update existing record

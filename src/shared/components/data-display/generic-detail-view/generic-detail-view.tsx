@@ -41,6 +41,7 @@ export function GenericDetailView<T extends Record<string, any>>({
     id,
     config,
     isLoading = false,
+    mode = "page",
 }: GenericDetailViewProps<T>) {
     // 1. Manage state and handlers
     const {
@@ -115,7 +116,7 @@ export function GenericDetailView<T extends Record<string, any>>({
                 actions={renderActions()}
             />
 
-            <DetailSections sections={sections} />
+            <DetailSections sections={sections} mode={mode} />
 
             <DetailDeleteDialog
                 open={deleteConfirmOpen}

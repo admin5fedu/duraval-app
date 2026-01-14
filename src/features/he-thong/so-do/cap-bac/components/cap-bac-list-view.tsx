@@ -32,7 +32,7 @@ interface CapBacListViewProps {
     onView?: (id: number) => void
 }
 
-export function CapBacListView({ 
+export function CapBacListView({
     initialData,
     onEdit,
     onAddNew,
@@ -61,23 +61,23 @@ export function CapBacListView({
         handleFiltersChange,
         handleSearchChange,
         handleSortChange,
-    } = useListViewFilters(module, [{ id: "bac", desc: false }])
+    } = useListViewFilters(module, [{ id: "cap_bac", desc: false }])
 
     // Generate filter options for bậc từ data
-    const bacOptions = React.useMemo(() => {
+    const capBacOptions = React.useMemo(() => {
         if (!capBacList) return []
         // Lấy danh sách các bậc unique và sắp xếp
         const uniqueBacs = Array.from(
             new Set(
                 capBacList
-                    .map((cb) => cb.bac)
-                    .filter((bac): bac is number => bac !== null && bac !== undefined)
+                    .map((cb) => cb.cap_bac)
+                    .filter((cap_bac): cap_bac is number => cap_bac !== null && cap_bac !== undefined)
             )
         ).sort((a, b) => a - b)
-        
-        return uniqueBacs.map((bac) => ({
-            label: `Bậc ${bac}`,
-            value: String(bac),
+
+        return uniqueBacs.map((cap_bac) => ({
+            label: `Bậc ${cap_bac}`,
+            value: String(cap_bac),
         }))
     }, [capBacList])
 
@@ -85,15 +85,15 @@ export function CapBacListView({
     const filters = React.useMemo(() => {
         const filterConfigs = capBacConfig.filterColumns || []
         return filterConfigs.map((filterConfig) => {
-            if (filterConfig.columnId === "bac") {
+            if (filterConfig.columnId === "cap_bac") {
                 return {
                     ...filterConfig,
-                    options: bacOptions,
+                    options: capBacOptions,
                 }
             }
             return filterConfig
         })
-    }, [bacOptions])
+    }, [capBacOptions])
 
     // Mobile card renderer
     const renderMobileCard = React.useCallback((row: CapBac) => {
@@ -112,14 +112,9 @@ export function CapBacListView({
 
                 {/* Thông tin phụ */}
                 <div className="space-y-1 text-xs text-muted-foreground">
-                    {row.ma_cap_bac && (
+                    {row.cap_bac && (
                         <p className="leading-snug">
-                            Mã: <span className="font-medium text-foreground">{row.ma_cap_bac}</span>
-                        </p>
-                    )}
-                    {row.bac && (
-                        <p className="leading-snug">
-                            Bậc: <span className="font-medium text-foreground">{row.bac}</span>
+                            Bậc: <span className="font-medium text-foreground">{row.cap_bac}</span>
                         </p>
                     )}
                 </div>
@@ -166,75 +161,75 @@ export function CapBacListView({
 
     return (
         <>
-        <GenericListView
-            columns={columns}
-            data={capBacList || []}
-            filterColumn="ma_cap_bac"
-            initialSorting={initialSorting}
-            initialFilters={initialFilters}
-            initialSearch={initialSearch}
-            onFiltersChange={handleFiltersChange}
-            onSearchChange={handleSearchChange}
-            onSortChange={handleSortChange}
-            onRowClick={(row) => {
-                if (onView) {
-                    onView(row.id!)
-                } else {
-                    navigate(`${capBacConfig.routePath}/${row.id}`)
-                }
-            }}
-            onAdd={() => {
-                if (onAddNew) {
-                    onAddNew()
-                } else {
-                    navigate(`${capBacConfig.routePath}/moi`)
-                }
-            }}
-            addHref={`${capBacConfig.routePath}/moi`}
-            onBack={() => {
-                navigate(capBacConfig.parentPath)
-            }}
-            onDeleteSelected={async (selectedRows) => {
-                const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
-                await batchDeleteMutation.mutateAsync(ids)
-            }}
-            batchDeleteConfig={{
-                itemName: "cấp bậc",
-                moduleName: capBacConfig.moduleTitle,
-                isLoading: batchDeleteMutation.isPending,
-                getItemLabel: (item: CapBac) => item.ten_cap_bac || String(item.id),
-            }}
-            filters={filters}
-            searchFields={capBacConfig.searchFields as (keyof CapBac)[]}
-            module={module}
-            enableSuggestions={true}
-            enableRangeSelection={true}
-            enableLongPress={true}
-            persistSelection={false}
-            renderMobileCard={renderMobileCard}
-            enableVirtualization={(capBacList?.length || 0) > 100}
-            virtualRowHeight={60}
-            exportOptions={{
-                columns: columns,
-                totalCount: capBacList?.length || 0,
-                moduleName: capBacConfig.moduleTitle,
-                getColumnTitle,
-                getCellValue,
-            }}
-            onImport={() => setImportDialogOpen(true)}
-            isImporting={batchImportMutation.isPending}
-            onEdit={(row) => {
-                if (onEdit) {
-                    onEdit(row.id!)
-                } else {
-                    navigate(`${capBacConfig.routePath}/${row.id}/sua`)
-                }
-            }}
-            onDelete={(row) => {
-                setRowToDelete(row)
-                setDeleteDialogOpen(true)
-            }}
-        />
+            <GenericListView
+                columns={columns}
+                data={capBacList || []}
+                filterColumn="ten_cap_bac"
+                initialSorting={initialSorting}
+                initialFilters={initialFilters}
+                initialSearch={initialSearch}
+                onFiltersChange={handleFiltersChange}
+                onSearchChange={handleSearchChange}
+                onSortChange={handleSortChange}
+                onRowClick={(row) => {
+                    if (onView) {
+                        onView(row.id!)
+                    } else {
+                        navigate(`${capBacConfig.routePath}/${row.id}`)
+                    }
+                }}
+                onAdd={() => {
+                    if (onAddNew) {
+                        onAddNew()
+                    } else {
+                        navigate(`${capBacConfig.routePath}/moi`)
+                    }
+                }}
+                addHref={`${capBacConfig.routePath}/moi`}
+                onBack={() => {
+                    navigate(capBacConfig.parentPath)
+                }}
+                onDeleteSelected={async (selectedRows) => {
+                    const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
+                    await batchDeleteMutation.mutateAsync(ids)
+                }}
+                batchDeleteConfig={{
+                    itemName: "cấp bậc",
+                    moduleName: capBacConfig.moduleTitle,
+                    isLoading: batchDeleteMutation.isPending,
+                    getItemLabel: (item: CapBac) => item.ten_cap_bac || String(item.id),
+                }}
+                filters={filters}
+                searchFields={capBacConfig.searchFields as (keyof CapBac)[]}
+                module={module}
+                enableSuggestions={true}
+                enableRangeSelection={true}
+                enableLongPress={true}
+                persistSelection={false}
+                renderMobileCard={renderMobileCard}
+                enableVirtualization={(capBacList?.length || 0) > 100}
+                virtualRowHeight={60}
+                exportOptions={{
+                    columns: columns,
+                    totalCount: capBacList?.length || 0,
+                    moduleName: capBacConfig.moduleTitle,
+                    getColumnTitle,
+                    getCellValue,
+                }}
+                onImport={() => setImportDialogOpen(true)}
+                isImporting={batchImportMutation.isPending}
+                onEdit={(row) => {
+                    if (onEdit) {
+                        onEdit(row.id!)
+                    } else {
+                        navigate(`${capBacConfig.routePath}/${row.id}/sua`)
+                    }
+                }}
+                onDelete={(row) => {
+                    setRowToDelete(row)
+                    setDeleteDialogOpen(true)
+                }}
+            />
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

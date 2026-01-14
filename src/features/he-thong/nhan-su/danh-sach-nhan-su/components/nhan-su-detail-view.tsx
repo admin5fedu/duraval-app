@@ -71,10 +71,10 @@ export function NhanSuDetailView({ id, initialData, onEdit, onBack }: NhanSuDeta
     {
       title: "Công Việc & Chức Vụ",
       fields: [
-        { label: "Phòng Ban", key: "phong_ban", value: nhanSu.phong_ban || "-" },
-        { label: "Bộ Phận", key: "bo_phan", value: nhanSu.bo_phan || "-" },
-        { label: "Nhóm", key: "nhom", value: nhanSu.nhom || "-" },
-        { label: "Chức Vụ", key: "chuc_vu", value: nhanSu.chuc_vu || "-" },
+        { label: "Phòng Ban", key: "ma_phong", value: nhanSu.ma_phong || "-" },
+        { label: "Bộ Phận", key: "ma_bo_phan", value: nhanSu.ma_bo_phan || "-" },
+        { label: "Nhóm", key: "ma_nhom", value: nhanSu.ma_nhom || "-" },
+        { label: "Chức Vụ", key: "ma_chuc_vu", value: nhanSu.ma_chuc_vu || "-" },
         { label: "Cấp Bậc", key: "ten_cap_bac", value: nhanSu.ten_cap_bac || "-" },
         { label: "Tình Trạng", key: "tinh_trang", value: nhanSu.tinh_trang, type: "status" },
       ]
@@ -120,7 +120,7 @@ export function NhanSuDetailView({ id, initialData, onEdit, onBack }: NhanSuDeta
     <>
       <GenericDetailViewSimple
         title={nhanSu.ho_ten}
-        subtitle={nhanSu.chuc_vu || undefined}
+        subtitle={nhanSu.ma_chuc_vu || undefined}
         avatarUrl={nhanSu.avatar_url}
         sections={sections}
         backUrl={onBack ? undefined : nhanSuConfig.routePath}
@@ -128,7 +128,7 @@ export function NhanSuDetailView({ id, initialData, onEdit, onBack }: NhanSuDeta
         actions={actions}
         isLoading={query.isLoading && !initialData}
       />
-      
+
       {/* Người Thân Section */}
       <div className="mt-6">
         <RelativesSection maNhanVien={nhanSu.ma_nhan_vien} />

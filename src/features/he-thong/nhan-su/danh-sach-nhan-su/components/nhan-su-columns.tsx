@@ -16,7 +16,7 @@ import { SortableHeader } from "@/shared/components"
 // Name cell component with navigation
 function NameCell({ name, avatar, maNhanVien }: { name: string; avatar?: string | null; maNhanVien: number }) {
     const navigate = useNavigate()
-    
+
     return (
         <div className="flex items-center gap-2 min-w-[180px]">
             <ZoomableAvatar
@@ -38,7 +38,7 @@ function NameCell({ name, avatar, maNhanVien }: { name: string; avatar?: string 
 // Actions cell component
 function ActionsCell({ maNhanVien, name }: { maNhanVien: number; name: string }) {
     const navigate = useNavigate()
-    
+
     return (
         <div className="flex items-center gap-2 justify-end pr-4 min-w-[100px]">
             <Button
@@ -111,7 +111,7 @@ export const nhanSuColumns: ColumnDef<NhanSu>[] = [
         },
     },
     {
-        accessorKey: "phong_ban",
+        accessorKey: "ma_phong",
         header: ({ column }) => <SortableHeader column={column} title="Phòng ban" />,
         size: 150,
         minSize: 120,
@@ -125,7 +125,7 @@ export const nhanSuColumns: ColumnDef<NhanSu>[] = [
         },
     },
     {
-        accessorKey: "chuc_vu",
+        accessorKey: "ma_chuc_vu",
         header: ({ column }) => <SortableHeader column={column} title="Chức vụ" />,
         size: 150,
         minSize: 120,
@@ -308,7 +308,7 @@ export const nhanSuColumns: ColumnDef<NhanSu>[] = [
         },
     },
     {
-        accessorKey: "bo_phan",
+        accessorKey: "ma_bo_phan",
         header: ({ column }) => <SortableHeader column={column} title="Bộ phận" />,
         size: 120,
         minSize: 100,
@@ -322,7 +322,7 @@ export const nhanSuColumns: ColumnDef<NhanSu>[] = [
         },
     },
     {
-        accessorKey: "nhom",
+        accessorKey: "ma_nhom",
         header: ({ column }) => <SortableHeader column={column} title="Nhóm" />,
         size: 100,
         minSize: 90,

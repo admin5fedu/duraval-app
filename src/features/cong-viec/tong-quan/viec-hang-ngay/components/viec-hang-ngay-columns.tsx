@@ -23,7 +23,7 @@ type NhomMap = Map<string, string> // ma_nhom -> ten_nhom
 
 // Function to create columns with employee data
 export function createColumns(
-    employees?: Array<{ ma_nhan_vien?: number; ho_ten?: string; nhom?: string | null }>,
+    employees?: Array<{ ma_nhan_vien?: number; ho_ten?: string; ma_nhom?: string | null }>,
     onEdit?: (row: ViecHangNgay) => void,
     phongBans?: Array<{ id?: number; ma_phong_ban?: string; ten_phong_ban?: string }>
 ): ColumnDef<ViecHangNgay>[] {
@@ -58,10 +58,10 @@ export function createColumns(
     const nhomMap: NhomMap = new Map()
     if (employees) {
         employees.forEach(emp => {
-            if (emp.nhom) {
+            if (emp.ma_nhom) {
                 // Map nhom value as both key and value (since ma_nhom = nhom)
                 // This allows us to display the nhom name when we have ma_nhom
-                nhomMap.set(emp.nhom, emp.nhom)
+                nhomMap.set(emp.ma_nhom, emp.ma_nhom)
             }
         })
     }
@@ -96,7 +96,7 @@ export function createColumns(
             cell: ({ row }) => {
                 const maNV = row.getValue("ma_nhan_vien") as number
                 const employee = employeeMap.get(maNV)
-                const displayText = employee 
+                const displayText = employee
                     ? `${employee.ma_nhan_vien} - ${employee.ho_ten}`
                     : String(maNV)
                 return (
@@ -162,16 +162,16 @@ export function createColumns(
                     return <div className="text-muted-foreground text-sm">Chưa có</div>
                 }
                 const items = Array.isArray(chiTiet) ? chiTiet : []
-                
+
                 // Count items with data (at least one field filled)
                 const itemsWithData = items.filter((item: any) => {
                     return !!(item.ke_hoach?.trim() || item.ket_qua?.trim() || (item.links && item.links.some((l: string) => l.trim())))
                 })
-                
+
                 if (itemsWithData.length === 0) {
                     return <div className="text-muted-foreground text-sm">Chưa có</div>
                 }
-                
+
                 // Build tooltip content
                 const tooltipContent = itemsWithData.map((item: any, idx: number) => {
                     const id = item.id || idx + 1
@@ -180,7 +180,7 @@ export function createColumns(
                     const displayText = keHoach.length > 50 ? keHoach.substring(0, 50) + '...' : keHoach
                     return `${id}. ${displayText}`
                 }).join('\n')
-                
+
                 return (
                     <TooltipProvider>
                         <Tooltip>

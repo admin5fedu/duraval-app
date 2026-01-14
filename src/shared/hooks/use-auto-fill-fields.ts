@@ -11,7 +11,7 @@ export interface AutoFillRule<TFieldValues extends FieldValues = FieldValues> {
    * Field name cần watch (source field)
    */
   watchField: FieldPath<TFieldValues>
-  
+
   /**
    * Các target fields sẽ được auto-fill
    */
@@ -20,7 +20,7 @@ export interface AutoFillRule<TFieldValues extends FieldValues = FieldValues> {
      * Tên field sẽ được auto-fill (target field)
      */
     fieldName: FieldPath<TFieldValues>
-    
+
     /**
      * Function để map giá trị từ source field sang target field
      * @param watchedValue - Giá trị của source field
@@ -28,7 +28,7 @@ export interface AutoFillRule<TFieldValues extends FieldValues = FieldValues> {
      * @returns Giá trị sẽ được set cho target field
      */
     mapper: (watchedValue: any, allFormValues?: TFieldValues) => any
-    
+
     /**
      * Optional: Condition để quyết định có auto-fill hay không
      * @param watchedValue - Giá trị của source field
@@ -36,7 +36,7 @@ export interface AutoFillRule<TFieldValues extends FieldValues = FieldValues> {
      */
     condition?: (watchedValue: any) => boolean
   }>
-  
+
   /**
    * Optional: Dependencies bên ngoài (ví dụ: data lists từ API)
    * Khi dependencies thay đổi, auto-fill sẽ được re-run
@@ -59,10 +59,10 @@ export interface AutoFillRule<TFieldValues extends FieldValues = FieldValues> {
  *     watchField: "cap_bac_id",
  *     targetFields: [
  *       {
- *         fieldName: "ma_cap_bac",
+ *         fieldName: "cap_bac",
  *         mapper: (capBacId, formValues) => {
  *           const capBac = capBacList.find(cb => cb.id === capBacId)
- *           return capBac?.ma_cap_bac || ""
+ *           return capBac?.cap_bac || null
  *         }
  *       }
  *     ],
@@ -75,22 +75,22 @@ export function useAutoFillFields<TFieldValues extends FieldValues = FieldValues
   rules: AutoFillRule<TFieldValues>[]
 ) {
   const form = useFormContext<TFieldValues>()
-  
+
   // ✅ FIX: Không được gọi Hook trong vòng lặp forEach
   // Phải gọi tất cả Hooks ở top level trước
   // Sử dụng useMemo để watch tất cả fields cùng lúc
   const watchedValues = rules.map((rule) => {
     // ✅ FIX: Gọi Hook ở top level, không trong forEach
-    return useWatch({ 
-      control: form.control, 
-      name: rule.watchField 
+    return useWatch({
+      control: form.control,
+      name: rule.watchField
     })
   })
-  
+
   // ✅ FIX: Gọi useEffect cho mỗi rule (nhưng Hook đã được gọi ở top level)
   rules.forEach((rule, index) => {
     const watchedValue = watchedValues[index]
-    
+
     // Auto-fill target fields khi source field hoặc dependencies thay đổi
     useEffect(() => {
       rule.targetFields.forEach(({ fieldName, mapper, condition }) => {
@@ -98,13 +98,13 @@ export function useAutoFillFields<TFieldValues extends FieldValues = FieldValues
         if (condition && !condition(watchedValue)) {
           return
         }
-        
+
         // Map giá trị từ source sang target
         const allFormValues = form.getValues()
         const newValue = mapper(watchedValue, allFormValues)
-        
+
         // Set giá trị cho target field
-        form.setValue(fieldName, newValue, { 
+        form.setValue(fieldName, newValue, {
           shouldValidate: false, // Không validate khi auto-fill
           shouldDirty: false,    // Không mark field là dirty khi auto-fill
         })

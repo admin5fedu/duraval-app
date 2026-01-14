@@ -15,10 +15,10 @@ const getSections = (displayName?: string): FormSection[] => [
     fields: [
       { name: "ma_nhan_vien", label: "Mã Nhân Viên", type: "number", required: true },
       { name: "ho_ten", label: "Họ và Tên", required: true },
-      { 
-        name: "avatar_url", 
-        label: "Ảnh Đại Diện", 
-        type: "image", 
+      {
+        name: "avatar_url",
+        label: "Ảnh Đại Diện",
+        type: "image",
         imageFolder: "nhan-su/avatars",
         imageMaxSize: 10,
         colSpan: 2,
@@ -36,10 +36,10 @@ const getSections = (displayName?: string): FormSection[] => [
     title: "Công Việc & Chức Vụ",
     fields: [
       { name: "email_cong_ty", label: "Email Công Ty", type: "email", required: false },
-      { name: "phong_ban", label: "Phòng Ban" },
-      { name: "bo_phan", label: "Bộ Phận" },
-      { name: "nhom", label: "Nhóm" },
-      { name: "chuc_vu", label: "Chức Vụ" },
+      { name: "ma_phong", label: "Phòng Ban" },
+      { name: "ma_bo_phan", label: "Bộ Phận" },
+      { name: "ma_nhom", label: "Nhóm" },
+      { name: "ma_chuc_vu", label: "Chức Vụ" },
       { name: "ten_cap_bac", label: "Tên Cấp Bậc" },
       {
         name: "tinh_trang",
@@ -82,10 +82,10 @@ export function NhanSuFormView({ id, onComplete, onCancel }: NhanSuFormViewProps
   const [searchParams] = useSearchParams()
   const createMutation = useCreateNhanSu()
   const updateMutation = useUpdateNhanSu()
-  
+
   // If id is provided, fetch existing data for edit mode
   const { data: existingData, isLoading } = useNhanSuById(id || 0, undefined)
-  
+
   const returnTo = searchParams.get('returnTo') || (id ? 'detail' : 'list')
   const isEditMode = !!id
 
@@ -122,14 +122,14 @@ export function NhanSuFormView({ id, onComplete, onCancel }: NhanSuFormViewProps
       onCancel()
     } else {
       // Fallback to default navigation
-      const cancelUrl = returnTo === 'list' 
+      const cancelUrl = returnTo === 'list'
         ? nhanSuConfig.routePath
         : (id ? `${nhanSuConfig.routePath}/${id}` : nhanSuConfig.routePath)
       navigate(cancelUrl)
     }
   }
 
-  const cancelUrl = returnTo === 'list' 
+  const cancelUrl = returnTo === 'list'
     ? nhanSuConfig.routePath
     : (id ? `${nhanSuConfig.routePath}/${id}` : nhanSuConfig.routePath)
 

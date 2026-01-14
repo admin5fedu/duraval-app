@@ -9,30 +9,30 @@ export const capBacConfig: ModuleConfig = {
   moduleName: "cap-bac",
   moduleTitle: "Cấp Bậc",
   moduleDescription: "Quản lý thông tin cấp bậc",
-  
+
   // Routing
   routePath: "/he-thong/cap-bac",
   parentPath: "/he-thong",
-  
+
   // Breadcrumb
   breadcrumb: {
     label: "Cấp Bậc",
     parentLabel: "Hệ Thống",
   },
-  
+
   // Database
   tableName: "var_cap_bac",
   primaryKey: "id",
-  
+
   // List view
   filterColumns: [
     {
-      columnId: "bac",
+      columnId: "cap_bac",
       title: "Bậc",
       options: [], // Will be populated dynamically from data
     },
   ],
-  searchFields: ["ma_cap_bac", "ten_cap_bac"],
-  defaultSorting: [{ id: "bac", desc: false }],
+  searchFields: ["ten_cap_bac"],
+  defaultSorting: [{ id: "cap_bac", desc: false }],
 }
 

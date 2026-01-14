@@ -9,22 +9,22 @@ export const nhanSuConfig: ModuleConfig = {
   moduleName: "danh-sach-nhan-su",
   moduleTitle: "Danh Sách Nhân Sự",
   moduleDescription: "Quản lý hồ sơ và tài khoản nhân viên",
-  
+
   // Routing
   routePath: "/he-thong/danh-sach-nhan-su",
   parentPath: "/he-thong",
   // routePattern removed - using explicit routes instead of splat pattern
-  
+
   // Breadcrumb
   breadcrumb: {
     label: "Danh Sách Nhân Sự",
     parentLabel: "Hệ Thống",
   },
-  
+
   // Database
   tableName: "var_nhan_su",
   primaryKey: "ma_nhan_vien",
-  
+
   // List view
   filterColumns: [
     {
@@ -38,8 +38,8 @@ export const nhanSuConfig: ModuleConfig = {
       ],
     },
     {
-      columnId: "phong_ban",
-      title: "Phòng Ban",
+      columnId: "ma_phong",
+      title: "Mã Phòng",
       options: [], // Will be populated dynamically
     },
   ],

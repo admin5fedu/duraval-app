@@ -37,7 +37,7 @@ interface ViecHangNgayListViewProps {
     onView?: (id: number) => void
 }
 
-export function ViecHangNgayListView({ 
+export function ViecHangNgayListView({
     initialData,
     onEdit,
     onAddNew,
@@ -62,7 +62,7 @@ export function ViecHangNgayListView({
             employees?.map(emp => ({
                 ma_nhan_vien: emp.ma_nhan_vien,
                 ho_ten: emp.ho_ten,
-                nhom: emp.nhom
+                ma_nhom: emp.ma_nhom
             })),
             (row) => {
                 if (onEdit) {
@@ -127,14 +127,14 @@ export function ViecHangNgayListView({
     const phongBanIdOptions = React.useMemo(() => {
         if (!viecHangNgayList || !phongBans) return []
         const uniqueIds = new Set<number>()
-        
+
         // Collect unique phong_ban_id from data
         for (const item of viecHangNgayList) {
             if (item.phong_ban_id) {
                 uniqueIds.add(item.phong_ban_id)
             }
         }
-        
+
         return Array.from(uniqueIds)
             .map(id => {
                 const pb = phongBans.find(p => p.id === id)
@@ -150,7 +150,7 @@ export function ViecHangNgayListView({
     const maPhongOptions = React.useMemo(() => {
         if (!viecHangNgayList || !phongBans) return []
         const uniqueValues = new Map<string, string>() // ma_phong -> ten_phong_ban
-        
+
         // Create phong ban map
         const pbMap = new Map<string, string>()
         phongBans.forEach(pb => {
@@ -158,36 +158,36 @@ export function ViecHangNgayListView({
                 pbMap.set(pb.ma_phong_ban, pb.ten_phong_ban || pb.ma_phong_ban)
             }
         })
-        
+
         for (const item of viecHangNgayList) {
             if (item.ma_phong && !uniqueValues.has(item.ma_phong)) {
                 const tenPhong = pbMap.get(item.ma_phong) || item.ma_phong
                 uniqueValues.set(item.ma_phong, tenPhong)
             }
         }
-        
+
         return Array.from(uniqueValues.entries())
             .sort((a, b) => a[1].localeCompare(b[1]))
-            .map(([maPhong, tenPhong]) => ({ 
-                label: `${maPhong} - ${tenPhong}`, 
-                value: maPhong 
+            .map(([maPhong, tenPhong]) => ({
+                label: `${maPhong} - ${tenPhong}`,
+                value: maPhong
             }))
     }, [viecHangNgayList, phongBans])
 
     const maNhomOptions = React.useMemo(() => {
         if (!viecHangNgayList || !employees) return []
         const uniqueValues = new Map<string, string>() // ma_nhom -> ten_nhom
-        
+
         // Create nhom map from employees (ma_nhom in viec_hang_ngay corresponds to nhom in nhan_su)
         const nhomMap = new Map<string, string>()
         employees.forEach(emp => {
-            if (emp.nhom) {
+            if (emp.ma_nhom) {
                 // Use nhom as both key and value for now, or we can use a different mapping
                 // Since ma_nhom in viec_hang_ngay might match nhom in nhan_su
-                nhomMap.set(emp.nhom, emp.nhom)
+                nhomMap.set(emp.ma_nhom, emp.ma_nhom)
             }
         })
-        
+
         for (const item of viecHangNgayList) {
             if (item.ma_nhom && !uniqueValues.has(item.ma_nhom)) {
                 // Try to find matching nhom from employees
@@ -195,12 +195,12 @@ export function ViecHangNgayListView({
                 uniqueValues.set(item.ma_nhom, tenNhom)
             }
         }
-        
+
         return Array.from(uniqueValues.entries())
             .sort((a, b) => a[1].localeCompare(b[1]))
-            .map(([maNhom, tenNhom]) => ({ 
-                label: `${maNhom} - ${tenNhom}`, 
-                value: maNhom 
+            .map(([maNhom, tenNhom]) => ({
+                label: `${maNhom} - ${tenNhom}`,
+                value: maNhom
             }))
     }, [viecHangNgayList, employees])
 
@@ -245,7 +245,7 @@ export function ViecHangNgayListView({
     // Mobile card renderer
     const renderMobileCard = React.useCallback((row: ViecHangNgay) => {
         const employee = employees?.find(emp => emp.ma_nhan_vien === row.ma_nhan_vien)
-        const displayText = employee 
+        const displayText = employee
             ? `${employee.ma_nhan_vien} - ${employee.ho_ten}`
             : String(row.ma_nhan_vien)
 
@@ -349,80 +349,80 @@ export function ViecHangNgayListView({
 
     return (
         <>
-        <GenericListView
-            columns={columns}
-            data={viecHangNgayList || []}
-            filterColumn="ma_nhan_vien"
-            initialSorting={initialSorting}
-            initialFilters={initialFilters}
-            initialSearch={initialSearch}
-            onFiltersChange={handleFiltersChange}
-            onSearchChange={handleSearchChange}
-            onSortChange={handleSortChange}
-            onRowClick={(row) => {
-                if (onView) {
-                    onView(row.id!)
-                } else {
-                    navigate(`${viecHangNgayConfig.routePath}/${row.id}`)
-                }
-            }}
-            onAdd={() => {
-                if (onAddNew) {
-                    onAddNew()
-                } else {
-                    navigate(`${viecHangNgayConfig.routePath}/moi`)
-                }
-            }}
-            addHref={`${viecHangNgayConfig.routePath}/moi`}
-            onBack={() => {
-                navigate(viecHangNgayConfig.parentPath)
-            }}
-            onDeleteSelected={async (selectedRows) => {
-                const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
-                await batchDeleteMutation.mutateAsync(ids)
-            }}
-            batchDeleteConfig={{
-                itemName: "việc hàng ngày",
-                moduleName: viecHangNgayConfig.moduleTitle,
-                isLoading: batchDeleteMutation.isPending,
-                getItemLabel: (item: ViecHangNgay) => {
-                    const employee = employees?.find(emp => emp.ma_nhan_vien === item.ma_nhan_vien)
-                    return employee 
-                        ? `${employee.ma_nhan_vien} - ${employee.ho_ten}`
-                        : String(item.ma_nhan_vien)
-                },
-            }}
-            filters={filters}
-            searchFields={viecHangNgayConfig.searchFields as (keyof ViecHangNgay)[]}
-            module={module}
-            enableSuggestions={true}
-            enableRangeSelection={true}
-            enableLongPress={true}
-            persistSelection={false}
-            renderMobileCard={renderMobileCard}
-            enableVirtualization={(viecHangNgayList?.length || 0) > 100}
-            virtualRowHeight={60}
-            exportOptions={{
-                columns: columns,
-                totalCount: viecHangNgayList?.length || 0,
-                moduleName: viecHangNgayConfig.moduleTitle,
-                getColumnTitle,
-                getCellValue,
-            }}
-            onEdit={(row) => {
-                if (onEdit) {
-                    onEdit(row.id!)
-                } else {
-                    navigate(`${viecHangNgayConfig.routePath}/${row.id}/sua?returnTo=list`)
-                }
-            }}
-            onDelete={(row) => {
-                setRowToDelete(row)
-                setDeleteDialogOpen(true)
-            }}
-            onImport={() => setImportDialogOpen(true)}
-            isImporting={batchImportMutation.isPending}
-        />
+            <GenericListView
+                columns={columns}
+                data={viecHangNgayList || []}
+                filterColumn="ma_nhan_vien"
+                initialSorting={initialSorting}
+                initialFilters={initialFilters}
+                initialSearch={initialSearch}
+                onFiltersChange={handleFiltersChange}
+                onSearchChange={handleSearchChange}
+                onSortChange={handleSortChange}
+                onRowClick={(row) => {
+                    if (onView) {
+                        onView(row.id!)
+                    } else {
+                        navigate(`${viecHangNgayConfig.routePath}/${row.id}`)
+                    }
+                }}
+                onAdd={() => {
+                    if (onAddNew) {
+                        onAddNew()
+                    } else {
+                        navigate(`${viecHangNgayConfig.routePath}/moi`)
+                    }
+                }}
+                addHref={`${viecHangNgayConfig.routePath}/moi`}
+                onBack={() => {
+                    navigate(viecHangNgayConfig.parentPath)
+                }}
+                onDeleteSelected={async (selectedRows) => {
+                    const ids = selectedRows.map((row) => row.id!).filter((id): id is number => id !== undefined)
+                    await batchDeleteMutation.mutateAsync(ids)
+                }}
+                batchDeleteConfig={{
+                    itemName: "việc hàng ngày",
+                    moduleName: viecHangNgayConfig.moduleTitle,
+                    isLoading: batchDeleteMutation.isPending,
+                    getItemLabel: (item: ViecHangNgay) => {
+                        const employee = employees?.find(emp => emp.ma_nhan_vien === item.ma_nhan_vien)
+                        return employee
+                            ? `${employee.ma_nhan_vien} - ${employee.ho_ten}`
+                            : String(item.ma_nhan_vien)
+                    },
+                }}
+                filters={filters}
+                searchFields={viecHangNgayConfig.searchFields as (keyof ViecHangNgay)[]}
+                module={module}
+                enableSuggestions={true}
+                enableRangeSelection={true}
+                enableLongPress={true}
+                persistSelection={false}
+                renderMobileCard={renderMobileCard}
+                enableVirtualization={(viecHangNgayList?.length || 0) > 100}
+                virtualRowHeight={60}
+                exportOptions={{
+                    columns: columns,
+                    totalCount: viecHangNgayList?.length || 0,
+                    moduleName: viecHangNgayConfig.moduleTitle,
+                    getColumnTitle,
+                    getCellValue,
+                }}
+                onEdit={(row) => {
+                    if (onEdit) {
+                        onEdit(row.id!)
+                    } else {
+                        navigate(`${viecHangNgayConfig.routePath}/${row.id}/sua?returnTo=list`)
+                    }
+                }}
+                onDelete={(row) => {
+                    setRowToDelete(row)
+                    setDeleteDialogOpen(true)
+                }}
+                onImport={() => setImportDialogOpen(true)}
+                isImporting={batchImportMutation.isPending}
+            />
 
             {/* Import Dialog */}
             <ViecHangNgayImportDialog

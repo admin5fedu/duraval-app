@@ -22,7 +22,7 @@ export function CapBacDetailView({ id, initialData, onEdit, onBack }: CapBacDeta
   const navigate = useNavigate()
   const query = useCapBacById(id, initialData)
   const viewState = useDetailViewStateFromQuery(query, initialData)
-  
+
   const capBac = viewState.data
 
   // ✅ Hiển thị loading state
@@ -58,9 +58,8 @@ export function CapBacDetailView({ id, initialData, onEdit, onBack }: CapBacDeta
     {
       title: "Thông Tin Cơ Bản",
       fields: [
-        { label: "Mã Cấp Bậc", key: "ma_cap_bac", value: capBac.ma_cap_bac },
         { label: "Tên Cấp Bậc", key: "ten_cap_bac", value: capBac.ten_cap_bac },
-        { label: "Bậc", key: "bac", value: capBac.bac?.toString() || "-" },
+        { label: "Cấp Bậc", key: "cap_bac", value: capBac.cap_bac?.toString() || "-" },
       ]
     },
     {
@@ -96,7 +95,7 @@ export function CapBacDetailView({ id, initialData, onEdit, onBack }: CapBacDeta
   return (
     <GenericDetailViewSimple
       title={capBac.ten_cap_bac}
-      subtitle={capBac.ma_cap_bac}
+      subtitle={`Cấp Bậc: ${capBac.cap_bac || 'N/A'}`}
       sections={sections}
       backUrl={onBack ? undefined : capBacConfig.routePath}
       onBack={onBack}

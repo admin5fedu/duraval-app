@@ -9,21 +9,21 @@ export const phongBanConfig: ModuleConfig = {
   moduleName: "phong-ban",
   moduleTitle: "Phòng Ban",
   moduleDescription: "Quản lý thông tin phòng ban",
-  
+
   // Routing
   routePath: "/he-thong/phong-ban",
   parentPath: "/he-thong",
-  
+
   // Breadcrumb
   breadcrumb: {
     label: "Phòng Ban",
     parentLabel: "Hệ Thống",
   },
-  
+
   // Database
   tableName: "var_phong_ban",
   primaryKey: "id",
-  
+
   // List view
   filterColumns: [
     {
@@ -41,7 +41,7 @@ export const phongBanConfig: ModuleConfig = {
       options: [], // Will be populated dynamically from data
     },
   ],
-  searchFields: ["ma_phong_ban", "ten_phong_ban", "cap_do", "truc_thuoc_phong_ban"],
+  searchFields: ["ma_phong_ban", "ten_phong_ban", "cap_do", "truc_thuoc_ma"],
   defaultSorting: [{ id: "tg_tao", desc: true }],
 }
 

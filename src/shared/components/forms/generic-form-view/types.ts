@@ -58,6 +58,7 @@ export interface FormSection {
  * Main props interface for GenericFormView component
  */
 export interface GenericFormViewProps<T extends z.ZodType<any, any>> {
+    mode?: "page" | "popup" | "drawer"
     title: string
     subtitle?: string
     schema: T

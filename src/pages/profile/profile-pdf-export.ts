@@ -54,19 +54,19 @@ export async function exportProfileToPDF(employee: NhanSu, _user: User): Promise
     if (value === null || value === undefined || value === '') return
 
     checkNewPage(8)
-    
+
     doc.setFontSize(10)
     doc.setFont('helvetica', 'bold')
     doc.text(`${label}:`, x, yPos)
-    
+
     doc.setFont('helvetica', 'normal')
     const valueStr = String(value)
     const maxWidth = contentWidth - 40
-    
+
     // Split long text into multiple lines
     const lines = doc.splitTextToSize(valueStr, maxWidth)
     doc.text(lines, x + 40, yPos)
-    
+
     yPos += lines.length * 5 + 3
   }
 
@@ -101,10 +101,10 @@ export async function exportProfileToPDF(employee: NhanSu, _user: User): Promise
   doc.line(margin, yPos, pageWidth - margin, yPos)
   yPos += 5
 
-  addField('Phòng Ban', employee.phong_ban)
-  addField('Bộ Phận', employee.bo_phan)
-  addField('Nhóm', employee.nhom)
-  addField('Chức Vụ', employee.chuc_vu)
+  addField('Phòng Ban', employee.ma_phong)
+  addField('Bộ Phận', employee.ma_bo_phan)
+  addField('Nhóm', employee.ma_nhom)
+  addField('Chức Vụ', employee.ma_chuc_vu)
   addField('Cấp Bậc', employee.ten_cap_bac)
   addField('Tình Trạng', employee.tinh_trang)
 

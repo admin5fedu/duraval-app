@@ -15,7 +15,7 @@ import { getEnumBadgeClass } from "@/shared/utils/enum-color-registry"
 // Name cell component with navigation
 function NameCell({ name, id }: { name: string; id: number }) {
     const navigate = useNavigate()
-    
+
     return (
         <button
             onClick={() => navigate(`${capBacConfig.routePath}/${id}`)}
@@ -29,7 +29,7 @@ function NameCell({ name, id }: { name: string; id: number }) {
 // Actions cell component
 function ActionsCell({ id, name }: { id: number; name: string }) {
     const navigate = useNavigate()
-    
+
     return (
         <div className="flex items-center gap-2 justify-end pr-4 min-w-[100px]">
             <Button
@@ -55,66 +55,48 @@ export const capBacColumns: ColumnDef<CapBac>[] = [
     // ⚡ Professional: Use generic select column utility
     createSelectColumn<CapBac>(),
     {
-        accessorKey: "ma_cap_bac",
-        header: ({ column }) => <SortableHeader column={column} title="Mã Cấp Bậc" />,
-        size: 150,
-        minSize: 120,
-        meta: {
-            title: "Mã Cấp Bậc",
-            order: 1,
-            stickyLeft: true,
-            stickyLeftOffset: 40, // After checkbox column
-            minWidth: 120,
-        },
-        cell: ({ row }) => {
-            const maCapBac = row.getValue("ma_cap_bac") as string
-            const id = row.original.id!
-            return (
-                <NameCell name={maCapBac} id={id} />
-            )
-        },
-    },
-    {
         accessorKey: "ten_cap_bac",
         header: ({ column }) => <SortableHeader column={column} title="Tên Cấp Bậc" />,
         size: 250,
         minSize: 200,
+        meta: {
+            title: "Tên Cấp Bậc",
+            order: 1,
+            stickyLeft: true,
+            stickyLeftOffset: 40, // After checkbox column
+            minWidth: 200,
+        },
         cell: ({ row }) => {
             const tenCapBac = row.getValue("ten_cap_bac") as string
             const id = row.original.id!
             return <NameCell name={tenCapBac} id={id} />
         },
-        meta: {
-            title: "Tên Cấp Bậc",
-            order: 2,
-            minWidth: 200,
-        },
     },
     {
-        accessorKey: "bac",
-        header: ({ column }) => <SortableHeader column={column} title="Bậc" />,
+        accessorKey: "cap_bac",
+        header: ({ column }) => <SortableHeader column={column} title="Cấp Bậc" />,
         size: 100,
         minSize: 80,
         filterFn: (row, id, value) => {
-            const bac = row.getValue(id) as number | null
-            if (!bac) {
+            const capBac = row.getValue(id) as number | null
+            if (!capBac) {
                 return value.includes("null") || value.includes("")
             }
-            return value.includes(String(bac))
+            return value.includes(String(capBac))
         },
         cell: ({ row }) => {
-            const bac = row.getValue("bac") as number | null
-            if (!bac) return <span className="text-muted-foreground">-</span>
-            const colorClass = getEnumBadgeClass("bac", bac)
+            const capBac = row.getValue("cap_bac") as number | null
+            if (!capBac) return <span className="text-muted-foreground">-</span>
+            const colorClass = getEnumBadgeClass("cap_bac", capBac)
             return (
                 <Badge variant="outline" className={`min-w-[60px] justify-center ${colorClass}`}>
-                    {bac}
+                    {capBac}
                 </Badge>
             )
         },
         meta: {
-            title: "Bậc",
-            order: 3,
+            title: "Cấp Bậc",
+            order: 2,
             minWidth: 80,
         },
     },
@@ -134,7 +116,7 @@ export const capBacColumns: ColumnDef<CapBac>[] = [
         },
         meta: {
             title: "Thời gian tạo",
-            order: 4,
+            order: 3,
             minWidth: 140,
         },
     },
